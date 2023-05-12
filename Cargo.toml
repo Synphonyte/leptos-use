@@ -1,0 +1,16 @@
+[package]
+name = "leptos-use"
+version = "0.1.0"
+edition = "2021"
+authors = ["Marc-Stefan Cassola"]
+categories = ["gui", "web-programming"]
+description = "Collection of essential Leptos utilities inspired by SolidJS USE / VueUse"
+exclude = ["examples/", "tests/"]
+keywords = ["leptos", "utilities"]
+license = "MIT OR Apache-2.0"
+# readme = "README.md"
+repository = "https://github.com/Synphonyte/leptos-use"
+
+
+[dependencies]
+leptos = "0.2"
