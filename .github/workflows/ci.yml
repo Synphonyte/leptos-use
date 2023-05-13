@@ -1,0 +1,70 @@
+on:
+  push:
+    # Pattern matched against refs/tags
+    tags:
+      - '*'           # Push events to every tag not containing /
+  workflow_dispatch:
+
+name: CI
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+          components: rustfmt
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Check formatting
+        run: cargo fmt --check
+#      - name: Check if the README is up to date.
+#        run: |
+#          cargo install cargo-rdme
+#          cargo rdme --check
+      - name: Run tests
+        run: cargo test --all-features
+      - name: Publish crate leptos-use
+        uses: katyo/publish-crates@v2
+        with:
+          registry-token: ${{ secrets.CRATES_TOKEN }}
+
+#  coverage:
+#    name: Coverage
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout sources
+#        uses: actions/checkout@v2
+#
+#      - name: Install rust
+#        uses: actions-rs/toolchain@v1
+#        with:
+#          toolchain: stable
+#          profile: minimal
+#          override: true
+#
+#      - name: Cache
+#        uses: Swatinem/rust-cache@v1
+#
+#      - name: Install cargo-tarpaulin
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: install
+#          args: cargo-tarpaulin
+#
+#      - name: Run cargo tarpaulin
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: tarpaulin
+#          args: --output-dir coverage --out Lcov
+#
+#      - name: Publish to Coveralls
+#        uses: coverallsapp/github-action@master
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
