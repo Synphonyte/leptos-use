@@ -1,17 +1,24 @@
-use leptos::ev::click;
+use leptos::ev::{click, keydown};
+use leptos::html::AnyElement;
 use leptos::*;
 use leptos_use::use_event_listener;
 use web_sys::HtmlDivElement;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
+    let _ = use_event_listener(cx, window(), keydown, |evt| {
+        log!("window keydown: '{}'", evt.key());
+    });
+
     let element = create_node_ref(cx);
 
     let _ = use_event_listener(cx, element, click, |evt| {
         log!(
-            "click from element {:?}",
-            event_target::<HtmlDivElement>(&evt)
+            "click from element '{:?}'",
+            event_target::<web_sys::HtmlElement>(&evt).inner_text()
         );
+        evt.stop_propagation();
+        evt.prevent_default();
     });
 
     let (cond, set_cond) = create_signal(cx, true);
@@ -29,9 +36,19 @@ fn Demo(cx: Scope) -> impl IntoView {
         </p>
         <Show
             when=move || cond()
-            fallback=move |cx| view! { cx, <div node_ref=element>"Condition false [click me]"</div> }
+            fallback=move |cx| view! { cx,
+                <a node_ref=element href="#">
+                    "Condition"
+                    <b>" false "</b>
+                    "[click me]"
+                </a>
+            }
         >
-            <div node_ref=element>"Condition true [click me]"</div>
+            <a node_ref=element href="#">
+                "Condition "
+                <b>"true"</b>
+                " [click me]"
+            </a>
         </Show>
     }
 }
