@@ -1,13 +1,13 @@
 use leptos::ev::click;
 use leptos::*;
-use leptos_use::use_event_listener_ref;
+use leptos_use::use_event_listener;
 use web_sys::HtmlDivElement;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let element = create_node_ref(cx);
 
-    let _ = use_event_listener_ref(cx, element, click, |evt| {
+    let _ = use_event_listener(cx, element, click, |evt| {
         log!(
             "click from element {:?}",
             event_target::<HtmlDivElement>(&evt)
