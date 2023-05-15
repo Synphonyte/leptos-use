@@ -1,0 +1,11 @@
+[book]
+authors = ["Marc-Stefan Cassola"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Leptos-Use Documentation"
+
+[output.html]
+no-section-label = true
+
+[preprocessor.cmdrun]
