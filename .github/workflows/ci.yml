@@ -38,14 +38,14 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
-      - name: Build mdbook
+      - name: Build mdbook # TODO : run mdbook tests
         run: |
           cd docs/book
           mdbook build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: .docs/book/book
+          path: ./docs/book/book
       - name: Deploy book to github pages
         id: deployment
         uses: actions/deploy-pages@v2
