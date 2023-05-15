@@ -26,3 +26,5 @@ pub struct Directions {
     pub top: bool,
     pub bottom: bool,
 }
+
+pub fn use_scroll() {}
