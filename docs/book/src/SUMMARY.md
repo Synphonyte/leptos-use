@@ -9,4 +9,4 @@
 
 # Browser
 
-- [useEventListener](browser/use_event_listener.md)
+- [use_event_listener](browser/use_event_listener.md)

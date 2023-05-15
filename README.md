@@ -5,6 +5,8 @@
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
 
+[**Guide**](https://synphonyte.github.io/leptos-use/) • [**Docs.rs**](https://docs.rs/leptos-use/) • [**Crates.io**](https://crates.io/crates/leptos-use)
+
 Collection of essential Leptos utilities inspired by SolidJS-USE / VueUse
 
 This is still very much work in progress and all contributions are welcome!
