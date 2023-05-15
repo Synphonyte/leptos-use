@@ -29,6 +29,28 @@ jobs:
 #          cargo rdme --check
       - name: Run tests
         run: cargo test --all-features
+
+#### mdbook
+      - name: Install mdbook
+        run: |
+          cargo install mdbook
+          cargo install mdbook-cmdrun
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v3
+      - name: Build mdbook
+        run: |
+          cd docs/book
+          mdbook build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: .docs/book/book
+      - name: Deploy book to github pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+##### mdbook end
+
       - name: Publish crate leptos-use
         uses: katyo/publish-crates@v2
         with:
