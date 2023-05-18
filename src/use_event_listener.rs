@@ -1,9 +1,7 @@
 use crate::core::EventTargetMaybeSignal;
 use leptos::ev::EventDescriptor;
-use leptos::html::ElementDescriptor;
 use leptos::*;
 use std::cell::RefCell;
-use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;

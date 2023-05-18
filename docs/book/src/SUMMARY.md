@@ -10,3 +10,7 @@
 # Browser
 
 - [use_event_listener](browser/use_event_listener.md)
+
+# Utilities
+
+- [use_throttle_fn](utilities/use_throttle_fn.md)
