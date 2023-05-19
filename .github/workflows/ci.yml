@@ -41,6 +41,7 @@ jobs:
           cargo install mdbook
           cargo install mdbook-cmdrun
           cargo install trunk
+          rustup target add wasm32-unknown-unknown
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
