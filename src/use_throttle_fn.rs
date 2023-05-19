@@ -8,11 +8,11 @@ pub use crate::utils::ThrottleOptions;
 /// Throttle execution of a function.
 /// Especially useful for rate limiting execution of handlers on events like resize and scroll.
 ///
-/// > Throttle is a spring that throws balls: after a ball flies out it needs some time to shrink back, so it cannot throw any more balls unless it's ready.
+/// > Throttle is a spring that throws balls: After a ball flies out it needs some time to shrink back, so it cannot throw any more balls until it's ready.
 ///
 /// ## Demo
 ///
-/// TODO
+/// [Link to Demo](https://github.com/synphonyte/leptos-use/tree/main/examples/use_throttle_fn)
 ///
 /// ## Usage
 ///

@@ -1,0 +1,15 @@
+iframe.demo {
+    transition: height 0.25s ease-out;
+}
+
+.demo-container {
+    position: relative;
+}
+
+.demo-container > a.demo-source {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-size: 80%;
+    color: rgb(96 165 250);
+}

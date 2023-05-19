@@ -16,9 +16,25 @@ def main():
                         line = line.replace("```", "```rust,ignore")
                     in_code_block = not in_code_block
 
+                line = process_line(line, name)
+
                 print(line)
             elif doc_comment_started:
                 return
+
+
+def process_line(line, name):
+    stripped = line.strip()
+    result = line
+
+    if stripped.startswith("[Link to Demo](https://"):
+        example_link = stripped.replace("[Link to Demo](", "").replace(")", "")
+        result = f'''<div class="demo-container">
+    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source</a>
+    <iframe class="demo" src="{name}/demo/index.html" width="100%" frameborder="0">
+    </iframe>
+</div>'''
+    return result
 
 
 if __name__ == '__main__':
