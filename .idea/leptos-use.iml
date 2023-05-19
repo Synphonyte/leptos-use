@@ -13,6 +13,9 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/target" />
     </content>
     <orderEntry type="inheritedJdk" />

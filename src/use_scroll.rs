@@ -1,17 +1,53 @@
 use crate::core::EventTargetMaybeSignal;
-use crate::use_event_listener;
 use leptos::*;
 
-// pub fn use_scroll<El, T, Fx, Fy>(
-//     cx: Scope,
-//     element: El,
-//     options: UseScrollOptions,
-// ) -> UseScrollReturn<Fx, Fy>
-// where
-//     (Scope, El): Into<EventTargetMaybeSignal<T>>,
-//     T: Into<web_sys::EventTarget> + Clone + 'static,
-// {
-// }
+#[allow(unused_variables)]
+pub fn use_scroll<El, T, Fx, Fy>(
+    cx: Scope,
+    element: El,
+    options: UseScrollOptions,
+) -> UseScrollReturn
+where
+    (Scope, El): Into<EventTargetMaybeSignal<T>>,
+    T: Into<web_sys::EventTarget> + Clone + 'static,
+    Fx: Fn(f64),
+    Fy: Fn(f64),
+{
+    // TODO : implement
+
+    let (x, set_x) = create_signal(cx, 0.0);
+    let (y, set_y) = create_signal(cx, 0.0);
+
+    let (is_scrolling, _) = create_signal(cx, false);
+    let (arrived_state, _) = create_signal(
+        cx,
+        Directions {
+            left: false,
+            right: false,
+            top: false,
+            bottom: false,
+        },
+    );
+    let (directions, _) = create_signal(
+        cx,
+        Directions {
+            left: false,
+            right: false,
+            top: false,
+            bottom: false,
+        },
+    );
+
+    UseScrollReturn {
+        x: x.into(),
+        set_x: Box::new(move |x| set_x.set(x)),
+        y: y.into(),
+        set_y: Box::new(move |y| set_y.set(y)),
+        is_scrolling: is_scrolling.into(),
+        arrived_state: arrived_state.into(),
+        directions: directions.into(),
+    }
+}
 
 /// Options for [`use_scroll`].
 #[derive(Default)]
@@ -47,15 +83,11 @@ pub enum ScrollBehavior {
     Smooth,
 }
 
-pub struct UseScrollReturn<Fx, Fy>
-where
-    Fx: FnMut(f64),
-    Fy: FnMut(f64),
-{
+pub struct UseScrollReturn {
     pub x: Signal<f64>,
-    pub set_x: Fx,
+    pub set_x: Box<dyn Fn(f64)>,
     pub y: Signal<f64>,
-    pub set_y: Fy,
+    pub set_y: Box<dyn Fn(f64)>,
     pub is_scrolling: Signal<bool>,
     pub arrived_state: Signal<Directions>,
     pub directions: Signal<Directions>,

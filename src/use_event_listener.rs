@@ -27,7 +27,7 @@ use wasm_bindgen::JsCast;
 /// }
 /// ```
 ///
-/// You can also pass a [`leptos::NodeRef`] as the event target, `use_event_listener` will unregister the previous event and register
+/// You can also pass a [`NodeRef`](https://docs.rs/leptos/latest/leptos/struct.NodeRef.html) as the event target, [`use_event_listener`] will unregister the previous event and register
 /// the new one when you change the target.
 ///
 /// ```
@@ -78,7 +78,8 @@ use wasm_bindgen::JsCast;
 ///
 /// Note if your components also run in SSR (Server Side Rendering), you might get errors
 /// because DOM APIs like document and window are not available outside of the browser.
-/// To avoid that you can put the logic inside a [`leptos::create_effect`] hook
+/// To avoid that you can put the logic inside a
+/// [`create_effect`](https://docs.rs/leptos/latest/leptos/fn.create_effect.html) hook
 /// which only runs client side.
 #[allow(unused_must_use)]
 pub fn use_event_listener<Ev, El, T, F>(

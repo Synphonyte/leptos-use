@@ -1,6 +1,6 @@
 use js_sys::Date;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::{set_timeout_with_handle, MaybeSignal, Scope, SignalGetUntracked};
+use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
 use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::rc::Rc;
@@ -80,7 +80,7 @@ where
         let elapsed = Date::now() - last_exec.get();
 
         let last_val = Rc::clone(&last_value);
-        let mut invoke = move || {
+        let invoke = move || {
             let return_value = _invoke();
 
             let mut val_mut = last_val.borrow_mut();

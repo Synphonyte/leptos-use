@@ -47,6 +47,7 @@ jobs:
         run: |
           cd docs/book
           mdbook build
+          python3 post_build.py
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:

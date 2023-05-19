@@ -19,7 +19,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         >
             "Smash me!"
         </button>
-        <p class="my-2"><small class="block">"Delay is set to 1000ms for this demo.."</small></p>
+        <p class="my-2"><small class="block">"Delay is set to 1000ms for this demo."</small></p>
         <p class="my-3">"Button clicked: " { click_count }</p>
         <p>"Event handler called: " { throttled_count }</p>
     }

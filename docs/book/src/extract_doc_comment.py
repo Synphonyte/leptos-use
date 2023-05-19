@@ -1,4 +1,5 @@
 import sys
+import re
 
 
 def main():
@@ -23,6 +24,9 @@ def main():
                 return
 
 
+interal_doc_link_pattern = re.compile(r"\[`([^]]+)\`](?!\()")
+
+
 def process_line(line, name):
     stripped = line.strip()
     result = line
@@ -34,6 +38,12 @@ def process_line(line, name):
     <iframe class="demo" src="{name}/demo/index.html" width="100%" frameborder="0">
     </iframe>
 </div>'''
+
+    else:
+        result = re.sub(interal_doc_link_pattern,
+                        r"[`\1`](https://docs.rs/leptos-use/latest/leptos_use/fn.\1.html)",
+                        line)
+
     return result
 
 
