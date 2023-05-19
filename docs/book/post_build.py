@@ -20,7 +20,13 @@ def build_and_copy_demo(category, md_name):
     if os.path.exists(example_dir):
         p = subprocess.Popen(["trunk", "build"], cwd=example_dir)
         p.wait()
-        shutil.copytree(os.path.join(example_dir, "dist"), os.path.join("book", category, name, "demo"),
+
+        example_output_path = os.path.join(example_dir, "dist")
+        target_path = os.path.join("book", category, name, "demo")
+
+        print(f"Copying demo from {example_output_path} to {target_path}")
+
+        shutil.copytree(example_output_path, target_path,
                         dirs_exist_ok=True)
 
 
