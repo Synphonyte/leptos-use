@@ -1,9 +1,9 @@
 <p align="center">
     <a href="https://github.com/synphonyte/leptos-use#gh-light-mode-only">
-        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-light.svg#gh-light-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities"/>
+        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-light.svg#gh-light-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
     </a>
     <a href="https://github.com/synphonyte/leptos-use#gh-dark-mode-only">
-        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-dark.svg#gh-dark-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities"/>
+        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-dark.svg#gh-dark-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
     </a>
 </p>
 
@@ -23,6 +23,5 @@
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
-
 
 This is still very much work in progress and all contributions are welcome!
