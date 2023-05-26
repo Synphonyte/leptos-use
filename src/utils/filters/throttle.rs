@@ -1,3 +1,4 @@
+use crate::utils::CloneableFnWithReturn;
 use js_sys::Date;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
@@ -5,38 +6,6 @@ use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::rc::Rc;
 use std::time::Duration;
-
-pub fn create_filter_wrapper<F, R, Filter>(
-    mut filter: Filter,
-    func: F,
-) -> impl FnMut() -> Rc<RefCell<Option<R>>>
-where
-    F: FnMut() -> R + Clone + 'static,
-    R: 'static,
-    Filter: FnMut(Box<dyn FnOnce() -> R>) -> Rc<RefCell<Option<R>>>,
-{
-    move || {
-        let wrapped_func = Box::new(func.clone());
-        filter(wrapped_func)
-    }
-}
-
-pub fn create_filter_wrapper_with_arg<F, Arg, R, Filter>(
-    mut filter: Filter,
-    func: F,
-) -> impl FnMut(Arg) -> Rc<RefCell<Option<R>>>
-where
-    F: FnMut(Arg) -> R + Clone + 'static,
-    R: 'static,
-    Arg: 'static,
-    Filter: FnMut(Box<dyn FnOnce() -> R>) -> Rc<RefCell<Option<R>>>,
-{
-    move |arg: Arg| {
-        let mut func = func.clone();
-        let wrapped_func = Box::new(move || func(arg));
-        filter(wrapped_func)
-    }
-}
 
 #[derive(Copy, Clone)]
 pub struct ThrottleOptions {
@@ -56,7 +25,7 @@ impl Default for ThrottleOptions {
 pub fn throttle_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl FnMut(Box<dyn FnOnce() -> R>) -> Rc<RefCell<Option<R>>>
+) -> impl FnMut(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>>
 where
     R: 'static,
 {
@@ -75,7 +44,7 @@ where
 
     let ms = ms.into();
 
-    move |mut _invoke: Box<dyn FnOnce() -> R>| {
+    move |mut _invoke: Box<dyn CloneableFnWithReturn<R>>| {
         let duration = ms.get_untracked();
         let elapsed = Date::now() - last_exec.get();
 

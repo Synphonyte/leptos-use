@@ -29,6 +29,32 @@ def build_and_copy_demo(category, md_name):
         shutil.copytree(example_output_path, target_path,
                         dirs_exist_ok=True)
 
+        with open(os.path.join(target_path, "index.html"), "r") as f:
+            html = f.read().replace("./demo", f"./{name}/demo")
+            head = html.split("<head>")[1].split("</head>")[0]
+            body = html.split("<body>")[1].split("</body>")[0]
+
+        book_html_path = os.path.join("book", category, f"{name}.html")
+        with open(book_html_path, "r") as f:
+            html = f.read()
+            head_split = html.split("<head>")
+            target_head = head_split[1].split("</head>")[0]
+            body_split = html.split("<body>")[1].split("</body>")
+            target_body = body_split[0]
+
+        with open(book_html_path, "w") as f:
+            f.write(
+                f"""{head_split[0]}
+<head>
+    {head}
+    {target_head}
+</head>
+<body>
+    {body}
+    {target_body}
+</body>
+{body_split[1]}""")
+
 
 if __name__ == '__main__':
     main()

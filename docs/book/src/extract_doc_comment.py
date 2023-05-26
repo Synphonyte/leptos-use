@@ -34,9 +34,8 @@ def process_line(line, name):
     if stripped.startswith("[Link to Demo](https://"):
         example_link = stripped.replace("[Link to Demo](", "").replace(")", "")
         result = f'''<div class="demo-container">
-    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source</a>
-    <iframe class="demo" src="{name}/demo/index.html" width="100%" frameborder="0">
-    </iframe>
+    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source <i class="fa fa-github"></i></a>
+    <div id="demo-anchor"></div>
 </div>'''
 
     else:

@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_use::use_throttle_fn;
+use leptos_use::utils::demo_or_body;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
@@ -15,12 +16,11 @@ fn Demo(cx: Scope) -> impl IntoView {
                 set_click_count(click_count() + 1);
                 throttled_fn();
             }
-            class="rounded bg-blue-500 hover:bg-blue-400 py-2 px-4 text-white"
         >
             "Smash me!"
         </button>
-        <p class="my-2"><small class="block">"Delay is set to 1000ms for this demo."</small></p>
-        <p class="my-3">"Button clicked: " { click_count }</p>
+        <div class="note">"Delay is set to 1000ms for this demo."</div>
+        <p>"Button clicked: " { click_count }</p>
         <p>"Event handler called: " { throttled_count }</p>
     }
 }
@@ -29,11 +29,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to_body(|cx| {
-        view! {cx,
-            <div class="p-6 bg-gray-700 text-gray-300">
-                <Demo />
-            </div>
-        }
+    mount_to(demo_or_body(), |cx| {
+        view! { cx, <Demo /> }
     })
 }

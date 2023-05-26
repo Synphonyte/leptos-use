@@ -1,0 +1,66 @@
+:root {
+    --brand-color: #EF3939;
+    --brand-color-dark: #9c2525;
+}
+
+.demo-container {
+    position: relative;
+}
+
+.demo-container > a.demo-source {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.demo-container > a.demo-source > i.fa {
+    font-size: 20px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+.demo-container {
+    border-radius: 5px;
+    padding: 1.5rem;
+    background-color: #f6f7f6;
+}
+
+.ayu .demo-container, .navy .demo-container, .coal .demo-container {
+    background-color: #1d1f21;
+}
+
+.demo-container button {
+    background-color: var(--brand-color);
+    font-family: inherit;
+    padding: 3px 15px;
+    border: none;
+    outline: none;
+    color: white;
+    margin: 1rem 0;
+    border-bottom: 2px solid var(--brand-color-dark);
+    text-shadow: 1px 1px 1px var(--brand-color-dark);
+    border-radius: 4px;
+    font-size: inherit;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.demo-container button:hover {
+    background-color: var(--brand-color-dark);
+}
+
+.demo-container button:active {
+    border-bottom: 0;
+    border-top: 2px solid var(--brand-color-dark);
+}
+
+.demo-container p {
+    margin: 1rem 0;
+}
+
+.demo-container .note {
+    opacity: 0.7;
+    font-size: 1.4rem;
+}

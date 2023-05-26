@@ -1,4 +1,6 @@
-use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, throttle_filter};
+use crate::utils::{
+    create_filter_wrapper_with_return, create_filter_wrapper_with_return_and_arg, throttle_filter,
+};
 use leptos::MaybeSignal;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -41,10 +43,9 @@ pub use crate::utils::ThrottleOptions;
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::{ThrottleOptions, use_throttle_fn_with_options};
-///
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-///  let throttled_fn = use_throttle_fn_with_options(
+/// let throttled_fn = use_throttle_fn_with_options(
 ///     || {
 ///         // do something, it will be called at most 1 time per second
 ///     },
@@ -58,7 +59,7 @@ pub use crate::utils::ThrottleOptions;
 /// # }
 /// ```
 ///
-/// If your function that you want to throttle takes an argument there are also the versions
+/// If you want to throttle a function that takes an argument there are also the versions
 /// [`use_throttle_fn_with_args`] and [`use_throttle_fn_with_args_and_options`].
 ///
 /// ## Recommended Reading
@@ -69,7 +70,7 @@ pub fn use_throttle_fn<F, R>(
     ms: impl Into<MaybeSignal<f64>>,
 ) -> impl FnMut() -> Rc<RefCell<Option<R>>>
 where
-    F: FnMut() -> R + Clone + 'static,
+    F: FnOnce() -> R + Clone + 'static,
     R: 'static,
 {
     use_throttle_fn_with_options(func, ms, Default::default())
@@ -82,10 +83,10 @@ pub fn use_throttle_fn_with_options<F, R>(
     options: ThrottleOptions,
 ) -> impl FnMut() -> Rc<RefCell<Option<R>>>
 where
-    F: FnMut() -> R + Clone + 'static,
+    F: FnOnce() -> R + Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper(throttle_filter(ms, options), func)
+    create_filter_wrapper_with_return(throttle_filter(ms, options), func)
 }
 
 /// Version of [`use_throttle_fn`] with an argument for the throttled function. See the docs for [`use_throttle_fn`] for how to use.
@@ -94,8 +95,8 @@ pub fn use_throttle_fn_with_arg<F, Arg, R>(
     ms: impl Into<MaybeSignal<f64>>,
 ) -> impl FnMut(Arg) -> Rc<RefCell<Option<R>>>
 where
-    F: FnMut(Arg) -> R + Clone + 'static,
-    Arg: 'static,
+    F: FnOnce(Arg) -> R + Clone + 'static,
+    Arg: Clone + 'static,
     R: 'static,
 {
     use_throttle_fn_with_arg_and_options(func, ms, Default::default())
@@ -108,9 +109,9 @@ pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     options: ThrottleOptions,
 ) -> impl FnMut(Arg) -> Rc<RefCell<Option<R>>>
 where
-    F: FnMut(Arg) -> R + Clone + 'static,
-    Arg: 'static,
+    F: FnOnce(Arg) -> R + Clone + 'static,
+    Arg: Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper_with_arg(throttle_filter(ms, options), func)
+    create_filter_wrapper_with_return_and_arg(throttle_filter(ms, options), func)
 }

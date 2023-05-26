@@ -7,7 +7,6 @@ title = "Leptos-Use Documentation"
 
 [output.html]
 no-section-label = true
-additional-css = ["custom.css"]
-additional-js = ["demo-iframe.js"]
+additional-css = ["src/custom.css", "src/demo.css"]
 
 [preprocessor.cmdrun]

@@ -1,0 +1,8 @@
+.light {
+    --fg: #333;
+}
+
+pre > code {
+    border-radius: 5px;
+    padding: 1.5rem;
+}

@@ -1,4 +1,4 @@
-use crate::core::EventTargetMaybeSignal;
+use crate::core::ElementMaybeSignal;
 use leptos::ev::EventDescriptor;
 use leptos::*;
 use std::cell::RefCell;
@@ -90,7 +90,7 @@ pub fn use_event_listener<Ev, El, T, F>(
 ) -> Box<dyn Fn()>
 where
     Ev: EventDescriptor + 'static,
-    (Scope, El): Into<EventTargetMaybeSignal<T>>,
+    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
 {

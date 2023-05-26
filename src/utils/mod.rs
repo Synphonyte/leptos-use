@@ -1,5 +1,7 @@
+mod clonable_fn;
+mod demo;
 mod filters;
-mod is;
 
+pub use clonable_fn::*;
+pub use demo::*;
 pub use filters::*;
-pub use is::*;
