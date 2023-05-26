@@ -13,47 +13,46 @@ use wasm_bindgen::JsCast;
 /// ## Usage
 ///
 /// ```
-/// use leptos::*;
-/// use leptos::ev::visibilitychange;
-/// use leptos_use::use_event_listener;
-///
-/// #[component]
-/// fn Demo(cx: Scope) -> impl IntoView {
-///     use_event_listener(cx, document(), visibilitychange, |evt| {
-///         log!("{:?}", evt);
-///     });
-///
-///    view! { cx, }
-/// }
+/// # use leptos::*;
+/// # use leptos::ev::visibilitychange;
+/// # use leptos_use::use_event_listener;
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// use_event_listener(cx, document(), visibilitychange, |evt| {
+///     log!("{:?}", evt);
+/// });
+/// #    view! { cx, }
+/// # }
 /// ```
 ///
 /// You can also pass a [`NodeRef`](https://docs.rs/leptos/latest/leptos/struct.NodeRef.html) as the event target, [`use_event_listener`] will unregister the previous event and register
 /// the new one when you change the target.
 ///
 /// ```
-/// use leptos::*;
-/// use leptos::ev::click;
-/// use leptos_use::use_event_listener;
+/// # use leptos::*;
+/// # use leptos::ev::click;
+/// # use leptos_use::use_event_listener;
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let element = create_node_ref(cx);
 ///
-/// #[component]
-/// fn Demo(cx: Scope) -> impl IntoView {
-///     let element = create_node_ref(cx);
+/// use_event_listener(cx, element, click, |evt| {
+///     log!("click from element {:?}", event_target::<web_sys::HtmlDivElement>(&evt));
+/// });
 ///
-///     use_event_listener(cx, element, click, |evt| {
-///         log!("click from element {:?}", event_target::<web_sys::HtmlDivElement>(&evt));
-///     });
+/// let (cond, set_cond) = create_signal(cx, true);
 ///
-///     let (cond, set_cond) = create_signal(cx, true);
-///
-///     view! { cx,
-///         <Show
-///             when=move || cond()
-///             fallback=move |cx| view! { cx, <div node_ref=element>"Condition false"</div> }
-///         >
-///             <div node_ref=element>"Condition true"</div>
-///         </Show>
-///     }
+/// view! { cx,
+///     <Show
+///         when=move || cond()
+///         fallback=move |cx| view! { cx, <div node_ref=element>"Condition false"</div> }
+///     >
+///         <div node_ref=element>"Condition true"</div>
+///     </Show>
 /// }
+/// # }
 /// ```
 ///
 /// You can also call the returned to unregister the listener.

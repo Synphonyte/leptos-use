@@ -5,17 +5,28 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Default)]
-pub struct DebounceOptions {
+pub struct DebounceOptions<W>
+where
+    W: Into<MaybeSignal<Option<f64>>>,
+{
     /// The maximum time allowed to be delayed before it's invoked.
     /// In milliseconds.
-    max_wait: MaybeSignal<Option<f64>>,
+    pub max_wait: W,
 }
 
-pub fn debounce_filter(
+impl Default for DebounceOptions<Option<f64>> {
+    fn default() -> Self {
+        Self { max_wait: None }
+    }
+}
+
+pub fn debounce_filter<W>(
     ms: impl Into<MaybeSignal<f64>>,
-    options: DebounceOptions,
-) -> impl FnMut(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>> {
+    options: DebounceOptions<W>,
+) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>>
+where
+    W: Into<MaybeSignal<Option<f64>>>,
+{
     let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
     let max_timer = Rc::new(Cell::new(None::<TimeoutHandle>));
 
@@ -27,10 +38,11 @@ pub fn debounce_filter(
     };
 
     let ms = ms.into();
+    let max_wait_signal = options.max_wait.into();
 
     move |invoke: Box<dyn CloneableFnWithReturn<()>>| {
         let duration = ms.get_untracked();
-        let max_duration = options.max_wait.get_untracked();
+        let max_duration = max_wait_signal.get_untracked();
 
         // TODO : return value like throttle_filter?
 

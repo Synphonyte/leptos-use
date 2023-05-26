@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction]()
+[Changelog](changelog.md)
 
 # Getting Started
 
@@ -13,4 +14,5 @@
 
 # Utilities
 
+- [use_debounce_fn](utilities/use_debounce_fn.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)

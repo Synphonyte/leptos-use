@@ -7,8 +7,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (click_count, set_click_count) = create_signal(cx, 0);
     let (throttled_count, set_throttled_count) = create_signal(cx, 0);
 
-    let mut throttled_fn =
-        use_throttle_fn(move || set_throttled_count(throttled_count() + 1), 1000.0);
+    let throttled_fn = use_throttle_fn(move || set_throttled_count(throttled_count() + 1), 1000.0);
 
     view! { cx,
         <button

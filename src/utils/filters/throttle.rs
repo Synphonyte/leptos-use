@@ -25,7 +25,7 @@ impl Default for ThrottleOptions {
 pub fn throttle_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl FnMut(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>>
+) -> impl Fn(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>>
 where
     R: 'static,
 {

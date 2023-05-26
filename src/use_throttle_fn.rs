@@ -19,23 +19,23 @@ pub use crate::utils::ThrottleOptions;
 /// ## Usage
 ///
 /// ```
-/// use leptos::*;
-/// use leptos_use::use_throttle_fn;
-///
-/// #[component]
-/// fn Demo(cx: Scope) -> impl IntoView {
-///     let mut throttled_fn = use_throttle_fn(
-///         || {
-///             // do something, it will be called at most 1 time per second
-///         },
-///         1000.0,
-///     );
-///     view! { cx,
-///         <button on:click=move |_| { throttled_fn(); }>
-///             "Smash me!"
-///         </button>
-///     }
+/// # use leptos::*;
+/// # use leptos_use::use_throttle_fn;
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let mut throttled_fn = use_throttle_fn(
+///     || {
+///         // do something, it will be called at most 1 time per second
+///     },
+///     1000.0,
+/// );
+/// view! { cx,
+///     <button on:click=move |_| { throttled_fn(); }>
+///         "Smash me!"
+///     </button>
 /// }
+/// # }
 /// ```
 ///
 /// You can provide options when you use [`use_throttle_fn_with_options`].
@@ -68,7 +68,7 @@ pub use crate::utils::ThrottleOptions;
 pub fn use_throttle_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-) -> impl FnMut() -> Rc<RefCell<Option<R>>>
+) -> impl Fn() -> Rc<RefCell<Option<R>>>
 where
     F: FnOnce() -> R + Clone + 'static,
     R: 'static,
@@ -81,7 +81,7 @@ pub fn use_throttle_fn_with_options<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl FnMut() -> Rc<RefCell<Option<R>>>
+) -> impl Fn() -> Rc<RefCell<Option<R>>>
 where
     F: FnOnce() -> R + Clone + 'static,
     R: 'static,
@@ -93,7 +93,7 @@ where
 pub fn use_throttle_fn_with_arg<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-) -> impl FnMut(Arg) -> Rc<RefCell<Option<R>>>
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>>
 where
     F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
@@ -107,7 +107,7 @@ pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl FnMut(Arg) -> Rc<RefCell<Option<R>>>
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>>
 where
     F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
