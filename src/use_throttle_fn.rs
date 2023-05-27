@@ -50,10 +50,9 @@ pub use crate::utils::ThrottleOptions;
 ///         // do something, it will be called at most 1 time per second
 ///     },
 ///     1000.0,
-///     ThrottleOptions {
-///         leading: true,
-///         trailing: true,
-///     }
+///     ThrottleOptions::default()
+///         .leading(true)
+///         .trailing(true),
 /// );
 /// #    view! { cx, }
 /// # }

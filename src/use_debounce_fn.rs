@@ -47,9 +47,8 @@ use leptos::MaybeSignal;
 ///         // do something
 ///     },
 ///     1000.0,
-///     DebounceOptions {
-///         max_wait: Some(5000.0),
-///     }
+///     DebounceOptions::default()
+///         .max_wait(Some(5000.0)),
 /// );
 ///
 /// window_event_listener(resize, move |_| debounced_fn());
@@ -69,18 +68,17 @@ pub fn use_debounce_fn<F>(func: F, ms: impl Into<MaybeSignal<f64>>) -> impl Fn()
 where
     F: FnOnce() + Clone + 'static,
 {
-    use_debounce_fn_with_options(func, ms, DebounceOptions::<Option<f64>>::default())
+    use_debounce_fn_with_options(func, ms, DebounceOptions::default())
 }
 
 /// Version of [`use_debounce_fn`] with debounce options. See the docs for [`use_debounce_fn`] for how to use.
-pub fn use_debounce_fn_with_options<F, W>(
+pub fn use_debounce_fn_with_options<F>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-    options: DebounceOptions<W>,
+    options: DebounceOptions,
 ) -> impl Fn()
 where
     F: FnOnce() + Clone + 'static,
-    W: Into<MaybeSignal<Option<f64>>>,
 {
     create_filter_wrapper(debounce_filter(ms, options), func)
 }
@@ -94,19 +92,18 @@ where
     F: FnOnce(Arg) + Clone + 'static,
     Arg: Clone + 'static,
 {
-    use_debounce_fn_with_arg_and_options(func, ms, DebounceOptions::<Option<f64>>::default())
+    use_debounce_fn_with_arg_and_options(func, ms, DebounceOptions::default())
 }
 
 /// Version of [`use_debounce_fn_with_arg`] with debounce options.
-pub fn use_debounce_fn_with_arg_and_options<F, Arg, W>(
+pub fn use_debounce_fn_with_arg_and_options<F, Arg>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-    options: DebounceOptions<W>,
+    options: DebounceOptions,
 ) -> impl Fn(Arg) + Clone
 where
     F: FnOnce(Arg) + Clone + 'static,
     Arg: Clone + 'static,
-    W: Into<MaybeSignal<Option<f64>>>,
 {
     create_filter_wrapper_with_arg(debounce_filter(ms, options), func)
 }

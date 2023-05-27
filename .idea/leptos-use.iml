@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_scroll/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -20,6 +21,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_scroll/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,4 +1,5 @@
 use crate::utils::CloneableFnWithReturn;
+use default_struct_builder::DefaultBuilder;
 use js_sys::Date;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
@@ -7,7 +8,7 @@ use std::cmp::max;
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, DefaultBuilder)]
 pub struct ThrottleOptions {
     pub trailing: bool,
     pub leading: bool,

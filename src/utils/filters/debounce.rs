@@ -1,32 +1,31 @@
 use crate::utils::CloneableFnWithReturn;
+use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-pub struct DebounceOptions<W>
-where
-    W: Into<MaybeSignal<Option<f64>>>,
-{
+#[derive(Clone, DefaultBuilder)]
+pub struct DebounceOptions {
     /// The maximum time allowed to be delayed before it's invoked.
     /// In milliseconds.
-    pub max_wait: W,
+    #[builder(into)]
+    pub max_wait: MaybeSignal<Option<f64>>,
 }
 
-impl Default for DebounceOptions<Option<f64>> {
+impl Default for DebounceOptions {
     fn default() -> Self {
-        Self { max_wait: None }
+        Self {
+            max_wait: Default::default(),
+        }
     }
 }
 
-pub fn debounce_filter<W>(
+pub fn debounce_filter(
     ms: impl Into<MaybeSignal<f64>>,
-    options: DebounceOptions<W>,
-) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>> + Clone
-where
-    W: Into<MaybeSignal<Option<f64>>>,
-{
+    options: DebounceOptions,
+) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>> + Clone {
     let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
     let max_timer = Rc::new(Cell::new(None::<TimeoutHandle>));
 
@@ -38,7 +37,7 @@ where
     };
 
     let ms = ms.into();
-    let max_wait_signal = options.max_wait.into();
+    let max_wait_signal = options.max_wait;
 
     move |invoke: Box<dyn CloneableFnWithReturn<()>>| {
         let duration = ms.get_untracked();

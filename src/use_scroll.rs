@@ -2,6 +2,7 @@ use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
 use crate::utils::CloneableFnWithArg;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
+use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
 use leptos::*;
 use std::borrow::Cow;
@@ -48,16 +49,24 @@ use wasm_bindgen::JsCast;
 /// # let element = create_node_ref(cx);
 /// #
 /// let UseScrollReturn {
-///     x, y, set_x, set_y, is_scrolling, arrived_state, directions, ..
-/// } = use_scroll_with_options(cx, element, UseScrollOptions {
-///     offset: ScrollOffset {
+///     x,
+///     y,
+///     set_x,
+///     set_y,
+///     is_scrolling,
+///     arrived_state,
+///     directions,
+///     ..
+/// } = use_scroll_with_options(
+///     cx,
+///     element,
+///     UseScrollOptions::default().offset(ScrollOffset {
 ///         top: 30.0,
 ///         bottom: 30.0,
 ///         right: 30.0,
 ///         left: 30.0,
-///     },
-///     ..Default::default()
-/// });
+///     }),
+/// );
 /// #
 /// #     view! { cx,
 /// #         <div node_ref=element>"..."</div>
@@ -107,10 +116,11 @@ use wasm_bindgen::JsCast;
 /// #
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
-/// } = use_scroll_with_options(cx, element, UseScrollOptions {
-///     behavior: ScrollBehavior::Smooth.into(),
-///     ..Default::default()
-/// });
+/// } = use_scroll_with_options(
+///     cx,
+///     element,
+///     UseScrollOptions::default().behavior(ScrollBehavior::Smooth),
+/// );
 /// #
 /// #     view! { cx,
 /// #         <div node_ref=element>"..."</div>
@@ -137,10 +147,11 @@ use wasm_bindgen::JsCast;
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
-/// } = use_scroll_with_options(cx, element, UseScrollOptions {
-///     behavior: behavior.into(),
-///     ..Default::default()
-/// });
+/// } = use_scroll_with_options(
+///     cx,
+///     element,
+///     UseScrollOptions::default().behavior(behavior),
+/// );
 /// #
 /// #     view! { cx,
 /// #         <div node_ref=element>"..."</div>
@@ -409,30 +420,45 @@ where
 const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 
 /// Options for [`use_scroll`].
-#[derive(Default)]
+#[derive(DefaultBuilder)]
 pub struct UseScrollOptions {
     /// Throttle time in milliseconds for the scroll events. Defaults to 0 (disabled).
-    pub throttle: f64,
+    throttle: f64,
 
     /// After scrolling ends we wait idle + throttle milliseconds before we consider scrolling to have stopped.
     /// Defaults to 200.
-    pub idle: f64,
+    idle: f64,
 
     /// Threshold in pixels when we consider a side to have arrived (`UseScrollReturn::arrived_state`).
-    pub offset: ScrollOffset,
+    offset: ScrollOffset,
 
     /// Callback when scrolling is happening.
-    pub on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event>>,
 
     /// Callback when scrolling stops (after `idle` + `throttle` milliseconds have passed).
-    pub on_stop: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_stop: Box<dyn CloneableFnWithArg<web_sys::Event>>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
-    pub event_listener_options: web_sys::AddEventListenerOptions,
+    event_listener_options: web_sys::AddEventListenerOptions,
 
     /// When changing the `x` or `y` signals this specifies the scroll behaviour.
     /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.
-    pub behavior: MaybeSignal<ScrollBehavior>,
+    #[builder(into)]
+    behavior: MaybeSignal<ScrollBehavior>,
+}
+
+impl Default for UseScrollOptions {
+    fn default() -> Self {
+        Self {
+            throttle: 0.0,
+            idle: 200.0,
+            offset: ScrollOffset::default(),
+            on_scroll: Box::new(|_| {}),
+            on_stop: Box::new(|_| {}),
+            event_listener_options: Default::default(),
+            behavior: Default::default(),
+        }
+    }
 }
 
 /// The scroll behavior.
