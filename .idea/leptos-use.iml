@@ -18,6 +18,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/target" />
     </content>
     <orderEntry type="inheritedJdk" />

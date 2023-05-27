@@ -23,7 +23,7 @@ impl Default for DebounceOptions<Option<f64>> {
 pub fn debounce_filter<W>(
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions<W>,
-) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>>
+) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>> + Clone
 where
     W: Into<MaybeSignal<Option<f64>>>,
 {

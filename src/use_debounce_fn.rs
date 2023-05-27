@@ -1,6 +1,5 @@
-use crate::utils::{
-    create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter, DebounceOptions,
-};
+pub use crate::utils::DebounceOptions;
+use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter};
 use leptos::MaybeSignal;
 
 /// Debounce execution of a function.
@@ -9,7 +8,7 @@ use leptos::MaybeSignal;
 ///
 /// ## Demo
 ///
-/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/master/examples/use_debounce_fn)
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_debounce_fn)
 ///
 /// ## Usage
 ///
@@ -87,7 +86,10 @@ where
 }
 
 /// Version of [`use_debounce_fn`] with an argument for the debounced function. See the docs for [`use_debounce_fn`] for how to use.
-pub fn use_debounce_fn_with_arg<F, Arg>(func: F, ms: impl Into<MaybeSignal<f64>>) -> impl Fn(Arg)
+pub fn use_debounce_fn_with_arg<F, Arg>(
+    func: F,
+    ms: impl Into<MaybeSignal<f64>>,
+) -> impl Fn(Arg) + Clone
 where
     F: FnOnce(Arg) + Clone + 'static,
     Arg: Clone + 'static,
@@ -95,12 +97,12 @@ where
     use_debounce_fn_with_arg_and_options(func, ms, DebounceOptions::<Option<f64>>::default())
 }
 
-/// Version of [`use_debounce_fn_with_arg`] with debounce options. See the docs for [`use_debounce_fn`] for how to use.
+/// Version of [`use_debounce_fn_with_arg`] with debounce options.
 pub fn use_debounce_fn_with_arg_and_options<F, Arg, W>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions<W>,
-) -> impl Fn(Arg)
+) -> impl Fn(Arg) + Clone
 where
     F: FnOnce(Arg) + Clone + 'static,
     Arg: Clone + 'static,

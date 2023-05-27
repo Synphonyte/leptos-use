@@ -80,12 +80,34 @@ use wasm_bindgen::JsCast;
 /// To avoid that you can put the logic inside a
 /// [`create_effect`](https://docs.rs/leptos/latest/leptos/fn.create_effect.html) hook
 /// which only runs client side.
-#[allow(unused_must_use)]
 pub fn use_event_listener<Ev, El, T, F>(
     cx: Scope,
     target: El,
     event: Ev,
     handler: F,
+) -> Box<dyn Fn()>
+where
+    Ev: EventDescriptor + 'static,
+    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    T: Into<web_sys::EventTarget> + Clone + 'static,
+    F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
+{
+    use_event_listener_with_options(
+        cx,
+        target,
+        event,
+        handler,
+        web_sys::AddEventListenerOptions::new(),
+    )
+}
+
+/// Version of [`use_event_listener`] that takes `web_sys::AddEventListenerOptions`. See the docs for [`use_event_listener`] for how to use.
+pub fn use_event_listener_with_options<Ev, El, T, F>(
+    cx: Scope,
+    target: El,
+    event: Ev,
+    handler: F,
+    options: web_sys::AddEventListenerOptions,
 ) -> Box<dyn Fn()>
 where
     Ev: EventDescriptor + 'static,
@@ -112,8 +134,11 @@ where
     let cleanup_prev_element = if let Some(element) = element {
         let element = element.into();
 
-        _ = element
-            .add_event_listener_with_callback(&event_name, closure_js.as_ref().unchecked_ref());
+        _ = element.add_event_listener_with_callback_and_add_event_listener_options(
+            &event_name,
+            closure_js.as_ref().unchecked_ref(),
+            &options,
+        );
 
         let clean = cleanup.clone();
         Rc::new(RefCell::new(Box::new(move || {
@@ -133,15 +158,18 @@ where
         if let Some(element) = element {
             let element = element.into();
 
-            _ = element
-                .add_event_listener_with_callback(&event_name, closure.as_ref().unchecked_ref());
+            _ = element.add_event_listener_with_callback_and_add_event_listener_options(
+                &event_name,
+                closure.as_ref().unchecked_ref(),
+                &options,
+            );
 
             let clean = cleanup.clone();
-            cleanup_prev_el.replace(Box::new(move || {
+            let _ = cleanup_prev_el.replace(Box::new(move || {
                 clean(&element);
             }) as Box<dyn Fn()>);
         } else {
-            cleanup_prev_el.replace(Box::new(move || {}) as Box<dyn Fn()>);
+            let _ = cleanup_prev_el.replace(Box::new(move || {}) as Box<dyn Fn()>);
         }
     });
 

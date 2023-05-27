@@ -1,11 +1,15 @@
+//! Collection of essential Leptos utilities inspired by SolidJS USE / VueUse
+
 pub mod core;
-pub mod use_debounce_fn;
-pub mod use_event_listener;
-pub mod use_scroll;
-pub mod use_throttle_fn;
+mod use_debounce_fn;
+mod use_event_listener;
+mod use_scroll;
+mod use_throttle_fn;
 pub mod utils;
 
 pub use use_debounce_fn::*;
 pub use use_event_listener::use_event_listener;
 pub use use_scroll::*;
 pub use use_throttle_fn::*;
+
+extern crate self as leptos_use;

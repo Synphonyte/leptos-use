@@ -14,7 +14,7 @@ pub use crate::utils::ThrottleOptions;
 ///
 /// ## Demo
 ///
-/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/master/examples/use_throttle_fn)
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_throttle_fn)
 ///
 /// ## Usage
 ///

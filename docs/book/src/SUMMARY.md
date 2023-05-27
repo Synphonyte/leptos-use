@@ -12,6 +12,10 @@
 
 - [use_event_listener](browser/use_event_listener.md)
 
+# Sensors
+
+- [use_scroll](sensors/use_scroll.md)
+
 # Utilities
 
 - [use_debounce_fn](utilities/use_debounce_fn.md)

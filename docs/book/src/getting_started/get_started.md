@@ -8,7 +8,7 @@ cargo add leptos-use
 
 ## Examples
 
-- [Examples Directory](https://github.com/Synphonyte/leptos-use/tree/master/examples)
+- [Examples Directory](https://github.com/Synphonyte/leptos-use/tree/main/examples)
 
 ## Usage Example
 

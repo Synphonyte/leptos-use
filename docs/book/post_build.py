@@ -24,7 +24,7 @@ def build_and_copy_demo(category, md_name):
         example_output_path = os.path.join(example_dir, "dist")
         target_path = os.path.join("book", category, name, "demo")
 
-        print(f"Copying demo from {example_output_path} to {target_path}")
+        print(f"Copying demo from {example_output_path} -> {target_path}")
 
         shutil.copytree(example_output_path, target_path,
                         dirs_exist_ok=True)
