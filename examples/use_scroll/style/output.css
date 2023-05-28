@@ -300,6 +300,56 @@ select {
   margin: auto;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
+.m-10 {
+  margin: 2.5rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.mx-10 {
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+
+.my-10 {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.mr-0 {
+  margin-right: 0px;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.ml-0 {
+  margin-left: 0px;
+}
+
 .flex {
   display: flex;
 }

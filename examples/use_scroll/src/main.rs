@@ -27,7 +27,7 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     view! { cx,
         <div class="flex">
-            <div node_ref=el class="w-[300px] h-[300px] m-auto overflow-scroll bg-gray-500/5 rounded">
+            <div node_ref=el class="w-[300px] h-[300px] m-auto my-auto overflow-scroll bg-gray-500/5 rounded">
                 <div class="w-[500px] h-[400px] relative">
                     <div class="absolute left-0 top-0 bg-gray-500/5 px-2 py-1">
                         "top_left"
@@ -48,7 +48,7 @@ fn Demo(cx: Scope) -> impl IntoView {
                 </div>
             </div>
 
-            <div class="m-auto w-280px pl-4">
+            <div class="my-10 w-280px pl-4">
                 <div class="px-6 py-4 rounded grid grid-cols-[120px_auto] gap-4 bg-gray-500/5">
                     <span class="text-right opacity-75 py-4">
                         "X Position"
