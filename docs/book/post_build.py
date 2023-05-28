@@ -30,9 +30,9 @@ def build_and_copy_demo(category, md_name):
                         dirs_exist_ok=True)
 
         with open(os.path.join(target_path, "index.html"), "r") as f:
-            html = f.read().replace("./demo", f"./{name}/demo")
-            head = html.split("<head>")[1].split("</head>")[0]
-            body = html.split("<body>")[1].split("</body>")[0]
+            html = f.read().replace("/demo", f"./{name}/demo")
+            demo_head = html.split("<head>")[1].split("</head>")[0]
+            demo_body = html.split("<body>")[1].split("</body>")[0]
 
         book_html_path = os.path.join("book", category, f"{name}.html")
         with open(book_html_path, "r") as f:
@@ -46,11 +46,11 @@ def build_and_copy_demo(category, md_name):
             f.write(
                 f"""{head_split[0]}
 <head>
-    {head}
+    {demo_head}
     {target_head}
 </head>
 <body>
-    {body}
+    {demo_body}
     {target_body}
 </body>
 {body_split[1]}""")

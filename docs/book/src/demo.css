@@ -1,8 +1,3 @@
-:root {
-    --brand-color: #EF3939;
-    --brand-color-dark: #9c2525;
-}
-
 .demo-container {
     position: relative;
 }
@@ -29,6 +24,8 @@
 
 .ayu .demo-container, .navy .demo-container, .coal .demo-container {
     background-color: #1d1f21;
+    --background-color: #1d1f21;
+    --text-color: #aaaaaa;
 }
 
 .demo-container button {
@@ -63,4 +60,17 @@
 .demo-container .note {
     opacity: 0.7;
     font-size: 1.4rem;
+}
+
+.demo-container input[type="text"], .demo-container input[type="search"], .demo-container input[type="number"] {
+    display: block;
+    font-size: 90%;
+    padding: .5em 1em .4em;
+    border: 1px solid var(--divider-light-color);
+    border-radius: 4px;
+    outline: none;
+    background: var(--background-color);
+    color: var(--text-color);
+    min-width: 20rem;
+    margin: .5rem 0;
 }

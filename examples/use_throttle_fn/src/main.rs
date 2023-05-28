@@ -1,6 +1,6 @@
 use leptos::*;
+use leptos_use::docs::demo_or_body;
 use leptos_use::use_throttle_fn;
-use leptos_use::utils::demo_or_body;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {

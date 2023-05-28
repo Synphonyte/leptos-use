@@ -235,7 +235,7 @@ where
 
     let on_stop = options.on_stop.clone();
     let on_scroll_end = move |e| {
-        if !is_scrolling.get() {
+        if !is_scrolling.get_untracked() {
             return;
         }
 
@@ -272,8 +272,8 @@ where
             let scroll_left_abs = scroll_left.abs();
 
             directions.update(|directions| {
-                directions.left = scroll_left < internal_x.get();
-                directions.right = scroll_left > internal_x.get();
+                directions.left = scroll_left < internal_x.get_untracked();
+                directions.right = scroll_left > internal_x.get_untracked();
             });
 
             let left = scroll_left_abs <= offset.left;
@@ -301,8 +301,8 @@ where
             let scroll_top_abs = scroll_top.abs();
 
             directions.update(|directions| {
-                directions.top = scroll_top < internal_y.get();
-                directions.bottom = scroll_top > internal_y.get();
+                directions.top = scroll_top < internal_y.get_untracked();
+                directions.bottom = scroll_top > internal_y.get_untracked();
             });
 
             let top = scroll_top_abs <= offset.top;
@@ -343,16 +343,19 @@ where
     });
 
     if throttle >= 0.0 {
+        let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(
+            on_scroll_handler.clone(),
+            throttle,
+            ThrottleOptions {
+                trailing: true,
+                leading: false,
+            },
+        );
+
         let handler = move |e: web_sys::Event| {
-            let _ = use_throttle_fn_with_arg_and_options(
-                on_scroll_handler.clone(),
-                throttle,
-                ThrottleOptions {
-                    trailing: true,
-                    leading: false,
-                },
-            );
+            throttled_scroll_handler.clone()(e);
         };
+
         let _ = use_event_listener_with_options::<
             _,
             Signal<Option<web_sys::EventTarget>>,

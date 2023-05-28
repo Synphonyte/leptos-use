@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: {
-        files: ["*.html", "./src/**/*.rs"],
+        files: ["*.html", "./src/**/*.rs", "../../src/docs/**/*.rs"],
     },
     theme: {
         extend: {},
@@ -9,5 +9,7 @@ module.exports = {
     corePlugins: {
         preflight: false,
     },
-    plugins: [],
+    plugins: [
+        require('@tailwindcss/forms'),
+    ],
 }

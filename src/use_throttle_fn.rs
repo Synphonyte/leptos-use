@@ -67,7 +67,7 @@ pub use crate::utils::ThrottleOptions;
 pub fn use_throttle_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-) -> impl Fn() -> Rc<RefCell<Option<R>>>
+) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce() -> R + Clone + 'static,
     R: 'static,
@@ -80,7 +80,7 @@ pub fn use_throttle_fn_with_options<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl Fn() -> Rc<RefCell<Option<R>>>
+) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce() -> R + Clone + 'static,
     R: 'static,
@@ -92,7 +92,7 @@ where
 pub fn use_throttle_fn_with_arg<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
-) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>>
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
@@ -106,7 +106,7 @@ pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>>
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,

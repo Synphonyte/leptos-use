@@ -1,5 +1,20 @@
+:root {
+    --brand-color: #EF3939;
+    --brand-color-dark: #9c2525;
+    --background-color: #ffffff;
+    --text-color: #856464;
+    --devider-light-color: #bbb;
+}
+
 .light {
     --fg: #333;
+    --links: #c42f2f;
+    --sidebar-active: var(--links);
+}
+
+.coal {
+    --links: #ee6f6f;
+    --sidebar-active: var(--links);
 }
 
 pre > code {

@@ -5,7 +5,7 @@ as well as the nightly toolchain for Rust and the wasm32-unknown-unknown target:
 
 ```bash
 cargo install trunk
-npm install -D tailwindcss
+npm install -D tailwindcss @tailwindcss/forms
 rustup toolchain install nightly
 rustup target add wasm32-unknown-unknown
 ```

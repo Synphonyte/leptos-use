@@ -7,8 +7,11 @@ mod use_scroll;
 mod use_throttle_fn;
 pub mod utils;
 
+#[cfg(feature = "docs")]
+pub mod docs;
+
 pub use use_debounce_fn::*;
-pub use use_event_listener::use_event_listener;
+pub use use_event_listener::*;
 pub use use_scroll::*;
 pub use use_throttle_fn::*;
 
