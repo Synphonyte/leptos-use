@@ -36,10 +36,12 @@ jobs:
         run: cargo test --all-features
 
 #### mdbook
-      - name: Install mdbook
+      - name: Install mdbook I
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-binstall,mdbook
+      - name: Install mdbook II
         run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall mdbook
           cargo binstall mdbook-cmdrun
           cargo binstall trunk
           rustup target add wasm32-unknown-unknown
