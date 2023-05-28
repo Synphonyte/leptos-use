@@ -38,9 +38,10 @@ jobs:
 #### mdbook
       - name: Install mdbook
         run: |
-          cargo install mdbook
-          cargo install mdbook-cmdrun
-          cargo install trunk
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall mdbook
+          cargo binstall mdbook-cmdrun
+          cargo binstall trunk
           rustup target add wasm32-unknown-unknown
       - name: Setup Pages
         id: pages
