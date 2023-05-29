@@ -16,7 +16,12 @@
 
 - [use_scroll](sensors/use_scroll.md)
 
+# Watch
+
+- [watch](watch/watch.md)
+
 # Utilities
 
 - [use_debounce_fn](utilities/use_debounce_fn.md)
+- [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)

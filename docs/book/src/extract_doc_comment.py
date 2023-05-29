@@ -1,8 +1,18 @@
 import sys
 import re
+import os
 
 
 def main():
+    category = os.path.split(os.getcwd())[-1]
+
+    print(f"""
+<div class="meta-data">
+    <div>Category</div>
+    <div>{category.title()}</div>
+</div>
+""")
+
     name = sys.argv[1]
     file_name = f"../../../../src/{name}.rs"
 
@@ -49,8 +59,11 @@ def add_source_paragraph(name):
     demo_url = f"https://github.com/Synphonyte/leptos-use/tree/main/examples/{name}"
     docs_url = f"https://docs.rs/leptos-use/latest/leptos_use/fn.{name}.html"
 
+    demo_link = " • <a href=\"{demo_url}\" target=\"_blank\">Demo</a>" if os.path.isdir(
+        os.path.join("..", "..", "..", "..", "examples", name)) else ""
+
     print(
-        f"<a href=\"{source_url}\" target=\"_blank\">Source</a> • <a href=\"{demo_url}\" target=\"_blank\">Demo</a> • <a href=\"{docs_url}\" target=\"_blank\">Docs</a>")
+        f"<a href=\"{source_url}\" target=\"_blank\">Source</a>{demo_link} • <a href=\"{docs_url}\" target=\"_blank\">Docs</a>")
 
 
 interal_doc_link_pattern = re.compile(r"\[`([^]]+)\`](?!\()")

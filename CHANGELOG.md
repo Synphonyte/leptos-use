@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4
+
+#### New Functions
+- `use_supported`
+- `use_resize_observer`
+- `watch`
+
 ## 0.1.3
 
 #### New Functions

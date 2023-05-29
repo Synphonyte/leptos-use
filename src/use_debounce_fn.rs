@@ -64,7 +64,7 @@ use leptos::MaybeSignal;
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
-pub fn use_debounce_fn<F>(func: F, ms: impl Into<MaybeSignal<f64>>) -> impl Fn()
+pub fn use_debounce_fn<F>(func: F, ms: impl Into<MaybeSignal<f64>>) -> impl Fn() + Clone
 where
     F: FnOnce() + Clone + 'static,
 {
@@ -76,7 +76,7 @@ pub fn use_debounce_fn_with_options<F>(
     func: F,
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions,
-) -> impl Fn()
+) -> impl Fn() + Clone
 where
     F: FnOnce() + Clone + 'static,
 {

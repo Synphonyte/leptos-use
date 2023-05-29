@@ -21,3 +21,16 @@ pre > code {
     border-radius: 5px;
     padding: 1.5rem;
 }
+
+.meta-data {
+    font-size: 87.5%;
+    display: grid;
+    grid-template-columns: 70px auto;
+    gap: 2rem;
+    align-items: flex-start;
+    margin: 2rem  0 4rem;
+}
+
+.meta-data > div:first-child {
+    opacity: 0.5;
+}
