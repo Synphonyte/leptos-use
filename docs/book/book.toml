@@ -8,5 +8,7 @@ title = "Leptos-Use Documentation"
 [output.html]
 no-section-label = true
 additional-css = ["src/custom.css", "src/demo.css"]
+preferred-dark-theme = "coal"
+git-repository-url = "https://github.com/synphonyte/leptos-use"
 
 [preprocessor.cmdrun]

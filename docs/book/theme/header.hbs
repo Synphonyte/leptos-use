@@ -1,0 +1,76 @@
+<div id="header-logo-container">
+    <span id="header-logo-title-placeholder">
+        <svg id="header-logo" height="28" viewBox="0 0 74 88" xmlns="http://www.w3.org/2000/svg"
+             style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+            <style>
+                path.black {
+                    fill: #1e1838;
+                }
+
+                .ayu path.black, .coal path.black, .navy path.black {
+                    fill: white;
+                }
+            </style>
+        <rect x="34.158" y="17.9" width="5.7" height="16.1" style="fill:#e1393a;fill-rule:nonzero;"/>
+            <path d="M37.058,70.7c-7.6,-0 -14.7,-4.4 -18,-11.3c-2.3,-4.8 -2.6,-10.2 -0.8,-15.3c1.8,-5 5.4,-9.1 10.2,-11.4c2.7,-1.3 5.6,-2 8.6,-2c7.6,-0 14.7,4.4 18,11.3c2.3,4.8 2.6,10.2 0.8,15.3c-1.8,5 -5.4,9.1 -10.2,11.4c-2.7,1.4 -5.6,2 -8.6,2Z"
+                  style="fill:#e1393a;fill-rule:nonzero;"/>
+            <path d="M36.958,32.8c6.9,0 13.2,4 16.2,10.2c2.1,4.3 2.4,9.2 0.8,13.7c-1.6,4.5 -4.8,8.2 -9.2,10.3c-2.5,1.2 -5.1,1.8 -7.8,1.8c-6.9,0 -13.2,-4 -16.2,-10.2c-4.3,-8.9 -0.5,-19.7 8.4,-24c2.5,-1.2 5.1,-1.8 7.8,-1.8Zm-0,-4c-3.2,0 -6.4,0.7 -9.5,2.2c-10.9,5.3 -15.5,18.4 -10.3,29.3c3.8,7.9 11.6,12.5 19.8,12.5c3.2,0 6.4,-0.7 9.5,-2.2c10.9,-5.3 15.5,-18.4 10.3,-29.3c-3.7,-8 -11.6,-12.5 -19.8,-12.5Z"
+                  style="fill:#e1393a;fill-rule:nonzero;"/>
+            <path d="M37.058,19.9c-3.4,-0 -6.6,-2 -8.1,-5.1c-2.1,-4.5 -0.3,-9.9 4.2,-12c1.2,-0.6 2.5,-0.9 3.9,-0.9c3.4,-0 6.6,2 8.1,5.1c1,2.2 1.2,4.6 0.4,6.9c-0.8,2.3 -2.4,4.1 -4.6,5.1c-1.3,0.6 -2.6,0.9 -3.9,0.9Z"
+                  style="fill:#e1393a;fill-rule:nonzero;"/>
+            <path d="M36.958,3.4c2.9,-0 5.5,1.7 6.8,4.3c1.8,3.7 0.2,8.2 -3.5,10c-1,0.5 -2.1,0.7 -3.2,0.7c-2.9,0 -5.5,-1.7 -6.8,-4.3c-1.8,-3.7 -0.2,-8.2 3.5,-10c1,-0.4 2.1,-0.7 3.2,-0.7Zm-0,-3c-1.5,0 -3.1,0.3 -4.5,1c-5.2,2.5 -7.4,8.8 -4.9,14c1.8,3.8 5.6,6 9.5,6c1.5,0 3.1,-0.3 4.5,-1c5.2,-2.5 7.4,-8.8 4.9,-14c-1.8,-3.8 -5.6,-6 -9.5,-6Z"
+                  style="fill:#e1393a;fill-rule:nonzero;"/>
+            <path class="black"
+                  d="M68.458,29.9c-0.1,-0.3 -0.4,-0.9 -0.8,-1.6c-0.1,-0.3 -0.3,-0.5 -0.4,-0.8c-1.4,-2.3 -3.2,-5.4 -3.2,-5.4l-7.1,4.1l4.3,7.4c5.3,10.1 5.9,21.2 1.5,30.2c-4.8,9.6 -14.1,15 -25.8,15c-11.6,0 -20.9,-5.4 -25.5,-14.8c-4.4,-9 -3.8,-20.1 1.4,-30.2l4.3,-7.5l-7.1,-4.1c-0,0 -1.9,3 -3.2,5.3c-0.1,0.3 -0.3,0.6 -0.5,0.9c-0.4,0.6 -0.6,1.2 -0.8,1.5c-6.4,12.6 -7,26.6 -1.3,38.2c6,12.3 17.9,19.4 32.6,19.5l0.2,0c14.7,-0.1 26.6,-7.2 32.6,-19.5c5.8,-11.6 5.2,-25.5 -1.2,-38.2Z"
+                  style="fill-rule:nonzero;"/>
+        </svg>
+        {{ book_title }}
+    </span>
+</div>
+
+<style>
+    :root {
+        --open-sidebar-width: 0px;
+    }
+
+    .sidebar-visible {
+        --open-sidebar-width: var(--sidebar-width);
+    }
+
+    #header-logo-container {
+        text-align: center;
+        position: fixed;
+        z-index: 102;
+        top: 0;
+        left: calc(113px + var(--open-sidebar-width));
+        width: calc(100% - var(--open-sidebar-width) - 113px - 65px);
+        height: var(--menu-bar-height);
+        transition: all 0.3s;
+    }
+
+    #header-logo {
+        position: absolute;
+        left: -35px;
+        top: 2px;
+    }
+
+    #header-logo-title-placeholder {
+        font-weight: 200;
+        font-size: 2.4rem;
+        line-height: var(--menu-bar-height);
+        position: relative;
+        color: rgba(0, 0, 0, 0);
+    }
+
+    @media screen and (max-width: 900px) {
+        .sidebar-visible #header-logo {
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        .sidebar-hidden #header-logo {
+            display: none;
+        }
+    }
+</style>

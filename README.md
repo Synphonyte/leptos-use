@@ -1,13 +1,10 @@
 <p align="center">
-    <a href="https://github.com/synphonyte/leptos-use#gh-light-mode-only">
-        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-light.svg#gh-light-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
-    </a>
-    <a href="https://github.com/synphonyte/leptos-use#gh-dark-mode-only">
-        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo-dark.svg#gh-dark-mode-only" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
+    <a href="https://github.com/synphonyte/leptos-use">
+        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo.svg" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
     </a>
 </p>
 
-<h1 align="center">Leptos-Use</h1>
+<h1 align="center" style="font-weight: normal">Leptos-Use</h1>
 
 <p align="center"> Collection of essential Leptos utilities inspired by SolidJS-USE / VueUse</p>
 

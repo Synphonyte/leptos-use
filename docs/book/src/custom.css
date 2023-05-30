@@ -28,9 +28,50 @@ pre > code {
     grid-template-columns: 70px auto;
     gap: 2rem;
     align-items: flex-start;
-    margin: 2rem  0 4rem;
+    margin: 2rem 0 4rem;
 }
 
 .meta-data > div:first-child {
     opacity: 0.5;
+}
+
+.sidebar .sidebar-scrollbox {
+    padding: 10px 10px 10px 20px ;
+}
+
+.chapter li.chapter-item {
+    margin: 0;
+}
+
+.chapter li.part-title {
+    margin-top: 20px;
+}
+
+li.chapter-item a {
+    padding: 0.1em 1em;
+    margin: 0.4em 0 0;
+}
+
+li.chapter-item::before {
+    content: " ";
+    border-left: 1px solid var(--fg);
+    opacity: 0.1;
+}
+
+li.chapter-item a.active {
+    border-left: 1px solid currentColor;
+    font-weight: 600;
+    margin-left: -1px;
+}
+
+li.part-title + li.chapter-item a {
+    margin-top: 0;
+}
+
+li.chapter-item.affix::before {
+    content: none;
+}
+
+li.chapter-item.affix a {
+    padding-left: 0;
 }
