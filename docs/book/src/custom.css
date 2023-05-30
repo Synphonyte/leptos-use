@@ -75,3 +75,8 @@ li.chapter-item.affix::before {
 li.chapter-item.affix a {
     padding-left: 0;
 }
+
+li.chapter-item.affix a.active {
+    border-left: 0 none;
+    margin-left: 0;
+}
