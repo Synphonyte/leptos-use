@@ -1,20 +1,67 @@
 use crate::core::ElementMaybeSignal;
-use crate::use_supported;
-use default_struct_builder::DefaultBuilder;
+use crate::{use_supported, watch};
 use leptos::*;
 use std::cell::RefCell;
 use std::rc::Rc;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::prelude::*;
 
+/// Reports changes to the dimensions of an Element's content or the border-box.
+///
+/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
+/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
+///
+/// Please refer to [ResizeObserver on MDN](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
+/// for more details.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_resize_observer)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::use_resize_observer;
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let el = create_node_ref(cx);
+/// let (text, set_text) = create_signal(cx, "");
+///
+/// use_resize_observer(
+///     cx,
+///     el,
+///     move |entries, observer| {
+///         let rect = entries[0].content_rect();
+///         set_text(format!("width: {}\nheight: {}", rect.width(), rect.height()));
+///     },
+/// );
+/// # }
+/// ```
+pub fn use_resize_observer<El, T, F>(
+    cx: Scope,
+    target: El, // TODO : multiple elements?
+    callback: F,
+) -> UseResizeReturn
+where
+    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    T: Into<web_sys::Element> + Clone + 'static,
+    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + Clone + 'static,
+{
+    use_resize_observer_with_options(cx, target, callback, web_sys::ResizeObserverOptions::new())
+}
+
+/// Version of [`use_resize_observer`] that takes a `ResizeObserverOptions`. See [`use_resize_observer`] for how to use.
 pub fn use_resize_observer_with_options<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
     callback: F,
     options: web_sys::ResizeObserverOptions,
-) where
+) -> UseResizeReturn
+where
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
+    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + Clone + 'static,
 {
     let observer: Rc<RefCell<Option<web_sys::ResizeObserver>>> = Rc::new(RefCell::new(None));
 
@@ -22,38 +69,69 @@ pub fn use_resize_observer_with_options<El, T, F>(
 
     let obs = Rc::clone(&observer);
     let cleanup = move || {
-        let observer = obs.borrow_mut();
-        if let Some(o) = *observer {
+        let mut observer = obs.borrow_mut();
+        if let Some(o) = observer.as_ref() {
             o.disconnect();
             *observer = None;
         }
     };
 
-    let target = target.into();
+    let target = (cx, target).into();
 
     let clean = cleanup.clone();
-    create_effect(cx, move |_| {
-        clean();
+    let stop_watch = watch(
+        cx,
+        move || target.get(),
+        move |target, _, _| {
+            clean();
 
-        if is_supported() {
-            let obs = web_sys::ResizeObserver::new(move |entries: &js_sys::Array, observer| {
-                callback(
-                    entries
-                        .to_vec()
-                        .into_iter()
-                        .map(|v| v.unchecked_into::<web_sys::ResizeObserver>(&options)),
-                    observer,
-                );
-            })
-            .expect("failed to create ResizeObserver");
+            if is_supported() {
+                if let Some(target) = target {
+                    let mut callback = callback.clone();
+                    let closure = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
+                        move |entries: js_sys::Array, observer| {
+                            callback(
+                                entries
+                                    .to_vec()
+                                    .into_iter()
+                                    .map(|v| v.unchecked_into::<web_sys::ResizeObserverEntry>())
+                                    .collect(),
+                                observer,
+                            );
+                        },
+                    );
+                    let obs = web_sys::ResizeObserver::new(closure.as_ref().unchecked_ref())
+                        .expect("failed to create ResizeObserver");
 
-            observer.observe(&target.get());
+                    closure.forget();
 
-            observer.replace(obs);
-        }
-    });
+                    let target: web_sys::Element = target.clone().into();
+                    obs.observe_with_options(&target, &options);
+
+                    observer.replace(Some(obs));
+                }
+            }
+        },
+        true,
+    );
 
     let stop = move || {
         cleanup();
+        stop_watch();
     };
+
+    on_cleanup(cx, stop.clone());
+
+    return UseResizeReturn {
+        is_supported,
+        stop: Box::new(stop),
+    };
+}
+
+/// The return value of [`use_resize_observer`].
+pub struct UseResizeReturn {
+    /// Whether the browser supports the ResizeObserver API
+    pub is_supported: Signal<bool>,
+    /// A function to stop and detach the ResizeObserver
+    pub stop: Box<dyn Fn()>,
 }

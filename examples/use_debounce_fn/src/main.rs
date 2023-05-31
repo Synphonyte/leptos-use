@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_use::docs::demo_or_body;
+use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{use_debounce_fn_with_options, DebounceOptions};
 
 #[component]
@@ -22,7 +22,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         >
             "Smash me!"
         </button>
-        <div class="note">"Delay is set to 1000ms and max_wait is set to 5000ms for this demo."</div>
+        <Note>"Delay is set to 1000ms and max_wait is set to 5000ms for this demo."</Note>
         <p>"Button clicked: " { click_count }</p>
         <p>"Event handler called: " { debounced_count }</p>
     }

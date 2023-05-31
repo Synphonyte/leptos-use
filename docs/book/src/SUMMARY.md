@@ -8,6 +8,10 @@
 - [Get Started](getting_started/get_started.md)
 - [Functions](getting_started/functions.md)
 
+# Elements
+
+- [use_resize_observer](elements/use_resize_observer.md)
+
 # Browser
 
 - [use_event_listener](browser/use_event_listener.md)

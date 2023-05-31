@@ -30,6 +30,7 @@ features = [
     "ResizeObserverSize",
     "ResizeObserverEntry",
     "Navigator",
+    "DomRectReadOnly",
 ]
 
 [features]

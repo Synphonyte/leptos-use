@@ -74,3 +74,8 @@
     min-width: 20rem;
     margin: .5rem 0;
 }
+
+.demo-container textarea {
+    background: var(--bg);
+    border: 1px solid var(--theme-popup-border);
+}
