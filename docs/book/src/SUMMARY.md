@@ -18,6 +18,7 @@
 
 # Sensors
 
+- [use_mouse](sensors/use_mouse.md)
 - [use_scroll](sensors/use_scroll.md)
 
 # Watch

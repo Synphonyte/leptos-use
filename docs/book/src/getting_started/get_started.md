@@ -15,15 +15,15 @@ cargo add leptos-use
 Simply import the functions you need from `leptos-use`
 
 ```rust,noplayground
-# use leptos::*;
-use leptos_use::use_mouse::*;
+use leptos::*;
+use leptos_use::{use_mouse, UseMouseReturn};
 
 #[component]
-pub fn Demo(cx: Scope) -> into ImplView {
+fn Demo(cx: Scope) -> impl IntoView {
     let UseMouseReturn { x, y, .. } = use_mouse(cx);
     
     view! { cx,
-        {x} "x" {y}
+        {x} " x " {y}
     }
 }
 ```

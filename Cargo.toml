@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -16,21 +16,25 @@ repository = "https://github.com/Synphonyte/leptos-use"
 leptos = "0.3.0"
 wasm-bindgen = "0.2.86"
 js-sys = "0.3.63"
-default-struct-builder = "0.1.0"
+default-struct-builder = "0.2.0"
 
 [dependencies.web-sys]
 version = "0.3.63"
 features = [
-    "ScrollToOptions",
-    "ScrollBehavior",
     "CssStyleDeclaration",
-    "ResizeObserver",
-    "ResizeObserverOptions",
-    "ResizeObserverBoxOptions",
-    "ResizeObserverSize",
-    "ResizeObserverEntry",
-    "Navigator",
     "DomRectReadOnly",
+    "MouseEvent",
+    "Navigator",
+    "ResizeObserver",
+    "ResizeObserverBoxOptions",
+    "ResizeObserverEntry",
+    "ResizeObserverOptions",
+    "ResizeObserverSize",
+    "ScrollBehavior",
+    "ScrollToOptions",
+    "Touch",
+    "TouchEvent",
+    "TouchList",
 ]
 
 [features]

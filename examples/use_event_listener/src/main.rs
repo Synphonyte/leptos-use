@@ -1,8 +1,6 @@
 use leptos::ev::{click, keydown};
-use leptos::html::AnyElement;
 use leptos::*;
 use leptos_use::use_event_listener;
-use web_sys::HtmlDivElement;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {

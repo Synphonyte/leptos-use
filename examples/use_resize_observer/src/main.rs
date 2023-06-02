@@ -1,13 +1,13 @@
 use leptos::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay, Note};
-use leptos_use::{use_resize_observer, UseResizeReturn};
+use leptos_use::docs::{demo_or_body, Note};
+use leptos_use::use_resize_observer;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let el = create_node_ref(cx);
     let (text, set_text) = create_signal(cx, "".to_string());
 
-    use_resize_observer(cx, el, move |entries, observer| {
+    use_resize_observer(cx, el, move |entries, _| {
         let rect = entries[0].content_rect();
         set_text(format!(
             "width: {:.0}\nheight: {:.0}",

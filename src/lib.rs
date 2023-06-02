@@ -5,6 +5,7 @@ pub mod core;
 pub mod docs;
 mod use_debounce_fn;
 mod use_event_listener;
+mod use_mouse;
 #[cfg(web_sys_unstable_apis)]
 mod use_resize_observer;
 mod use_scroll;
@@ -15,6 +16,7 @@ mod watch;
 
 pub use use_debounce_fn::*;
 pub use use_event_listener::*;
+pub use use_mouse::*;
 #[cfg(web_sys_unstable_apis)]
 pub use use_resize_observer::*;
 pub use use_scroll::*;

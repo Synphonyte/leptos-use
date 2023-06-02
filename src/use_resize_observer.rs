@@ -42,7 +42,7 @@ pub fn use_resize_observer<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
     callback: F,
-) -> UseResizeReturn
+) -> UseResizeObserverReturn
 where
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
@@ -57,7 +57,7 @@ pub fn use_resize_observer_with_options<El, T, F>(
     target: El, // TODO : multiple elements?
     callback: F,
     options: web_sys::ResizeObserverOptions,
-) -> UseResizeReturn
+) -> UseResizeObserverReturn
 where
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
@@ -122,14 +122,14 @@ where
 
     on_cleanup(cx, stop.clone());
 
-    return UseResizeReturn {
+    UseResizeObserverReturn {
         is_supported,
         stop: Box::new(stop),
-    };
+    }
 }
 
 /// The return value of [`use_resize_observer`].
-pub struct UseResizeReturn {
+pub struct UseResizeObserverReturn {
     /// Whether the browser supports the ResizeObserver API
     pub is_supported: Signal<bool>,
     /// A function to stop and detach the ResizeObserver
