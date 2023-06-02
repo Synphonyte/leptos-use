@@ -37,7 +37,7 @@ use wasm_bindgen::JsCast;
 /// ### With Offsets
 ///
 /// You can provide offsets when you use [`use_scroll_with_options`].
-/// These offsets are threshold in pixels when we a side is considered to have arrived. This is reflected in the return field `arrived_state`.
+/// These offsets are thresholds in pixels when a side is considered to have arrived. This is reflected in the return field `arrived_state`.
 ///
 /// ```
 /// # use leptos::*;

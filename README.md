@@ -9,7 +9,7 @@
 <p align="center"> Collection of essential Leptos utilities inspired by SolidJS-USE / VueUse</p>
 
 <p align="center">
-    <a href="https://github.com/synphonyte/leptos-use"><b>Guide</b></a> • 
+    <a href="https://leptos-use.rs"><b>Guide</b></a> • 
     <a href="https://docs.rs/leptos-use"><b>Docs.rs</b></a> •
     <a href="https://crates.io/crates/leptos-use"><b>Crates.io</b></a>
 </p>
