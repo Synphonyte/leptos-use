@@ -1,12 +1,9 @@
 # Summary
 
 [Introduction]()
+[Get Started](get_started.md)
+[Functions](functions.md)
 [Changelog](changelog.md)
-
-# Getting Started
-
-- [Get Started](getting_started/get_started.md)
-- [Functions](getting_started/functions.md)
 
 # Elements
 

@@ -10,7 +10,7 @@ def main():
 def generate_function_overview_for_category(category):
     print(f"## {category.title()}")
 
-    listdir = os.listdir(os.path.join(os.getcwd(), "..", category))
+    listdir = os.listdir(os.path.join(os.getcwd(), category))
     listdir.sort()
 
     for name in listdir:
@@ -19,7 +19,7 @@ def generate_function_overview_for_category(category):
 
 
 def generate_function_overview(category, name):
-    file_name = f"../../../../src/{name}.rs"
+    file_name = f"../../../src/{name}.rs"
     with open(file_name) as f:
         in_code_block = False
         for line in f.readlines():
