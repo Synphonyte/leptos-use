@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+- Fixed documentation so all feature are documented
+
 ## 0.1.5
 
 #### New Functions
