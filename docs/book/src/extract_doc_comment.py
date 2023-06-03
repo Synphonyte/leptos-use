@@ -42,12 +42,19 @@ def main():
         initial_doc_finished = False
 
         for line in f.readlines():
+            stripped_line = line.strip()
+
             if initial_doc_finished:
                 process_further_line(line, types, module)
 
-            elif line.startswith("///"):
+            elif stripped_line.startswith("///") or stripped_line.startswith("#[doc ="):
                 doc_comment_started = True
-                line = line.strip().replace("/// ", "").replace("///", "")
+
+                if line.startswith("#[doc"):
+                    line = stripped_line.replace("#[doc = \" ", "").replace("#[doc = \"", "")[:-2]
+                else:
+                    line = stripped_line.replace("/// ", "").replace("///", "")
+
                 if "```" in line:
                     if not in_code_block:
                         line = line.replace("```", "```rust,ignore")
@@ -59,6 +66,9 @@ def main():
 
             elif doc_comment_started:
                 initial_doc_finished = True
+
+    if feature is not None:
+        append_feature_paragraph(feature)
 
     add_types_paragraph(types)
     add_source_paragraph(name, module)
@@ -117,6 +127,11 @@ def process_further_line(line, types, module=None):
         append_type(line, "enum", types, module)
     elif line.startswith("pub struct"):
         append_type(line, "struct", types, module)
+
+
+def append_feature_paragraph(feature):
+    print(f"""## Feature
+> This function is only available if the crate feature **`{feature}`** is enabled""")
 
 
 def append_type(line, ty, types, module=None):

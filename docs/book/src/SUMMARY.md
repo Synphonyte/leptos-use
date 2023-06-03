@@ -28,6 +28,8 @@
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 
-# Math
+# @Math
 
 - [use_floor](math/use_floor.md)
+- [use_max](math/use_max.md)
+- [use_min](math/use_min.md)

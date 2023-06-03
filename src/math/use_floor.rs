@@ -7,7 +7,7 @@ use num::Float;
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_floor)
 ///
-/// ### Usage
+/// ## Usage
 ///
 /// ```
 /// # use leptos::*;
@@ -17,9 +17,12 @@ use num::Float;
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// let (value, set_value) = create_signal(cx, 45.95);
 /// let result: Signal<f64> = use_floor(cx, value); // 45
+/// #
+/// # assert_eq!(result.get(), 45.0);
 /// # view! { cx, }
 /// # }
 /// ```
+#[doc(cfg(feature = "math"))]
 pub fn use_floor<S, N>(cx: Scope, x: S) -> Signal<N>
 where
     S: Into<MaybeSignal<N>>,

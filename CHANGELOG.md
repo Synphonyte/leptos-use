@@ -4,6 +4,8 @@
 
 #### New Functions
 - `use_floor`
+- `use_max`
+- `use_min`
 
 #### Other Changes
 - New feature: `math` that has to be activated in order to use the math functions.
