@@ -3,11 +3,14 @@ import sys
 
 
 def main():
-    for entry in sys.argv[1:]:
-        generate_function_overview_for_category(entry)
+    entry = sys.argv[1]
+
+    module = sys.argv[2] if len(sys.argv) > 2 else None
+
+    generate_function_overview_for_category(entry, None)
 
 
-def generate_function_overview_for_category(category):
+def generate_function_overview_for_category(category, module):
     print(f"## {category.title()}")
 
     listdir = os.listdir(os.path.join(os.getcwd(), category))
@@ -15,13 +18,14 @@ def generate_function_overview_for_category(category):
 
     for name in listdir:
         if name.endswith(".md"):
-            generate_function_overview(category, name[:-3])
+            generate_function_overview(category, name[:-3], module)
 
 
-def generate_function_overview(category, name):
-    file_name = f"../../../src/{name}.rs"
+def generate_function_overview(category, name, module):
+    module = f"/{module}" if module is not None else ""
+
+    file_name = f"../../../src{module}/{name}.rs"
     with open(file_name) as f:
-        in_code_block = False
         for line in f.readlines():
             if line.startswith("///"):
                 line = line.strip().replace("/// ", "")

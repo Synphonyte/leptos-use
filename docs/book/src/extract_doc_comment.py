@@ -6,15 +6,33 @@ import os
 def main():
     category = os.path.split(os.getcwd())[-1]
 
+    name = sys.argv[1]
+    file_name = f"../../../../src/{name}.rs"
+
+    module = None
+    if "/" in name:
+        module, name = name.split("/")
+
+    if module is not None:
+        module_display = f"leptos_use::{module}"
+    else:
+        module_display = "leptos_use"
+
+    feature = sys.argv[2] if len(sys.argv) > 2 else None
+
+    feature_display = ""
+    if feature is not None:
+        feature_display = f"<div>Feature</div><div>{feature}</div>"
+
     print(f"""
 <div class="meta-data">
     <div>Category</div>
     <div>{category.title()}</div>
+    <div>Module</div>
+    <div><code>{module_display}</code></div>
+    {feature_display}
 </div>
-""")
-
-    name = sys.argv[1]
-    file_name = f"../../../../src/{name}.rs"
+    """)
 
     types = [];
 
@@ -25,7 +43,7 @@ def main():
 
         for line in f.readlines():
             if initial_doc_finished:
-                process_further_line(line, name, types)
+                process_further_line(line, types, module)
 
             elif line.startswith("///"):
                 doc_comment_started = True
@@ -35,7 +53,7 @@ def main():
                         line = line.replace("```", "```rust,ignore")
                     in_code_block = not in_code_block
 
-                line = process_line(line, name)
+                line = process_line(line, name, module)
 
                 print(line)
 
@@ -43,7 +61,7 @@ def main():
                 initial_doc_finished = True
 
     add_types_paragraph(types)
-    add_source_paragraph(name)
+    add_source_paragraph(name, module)
 
 
 def add_types_paragraph(types):
@@ -52,12 +70,15 @@ def add_types_paragraph(types):
         print("\n".join(types))
 
 
-def add_source_paragraph(name):
+def add_source_paragraph(name, module):
     print("\n## Source\n")
 
-    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/src/{name}.rs"
+    if module is not None:
+        module = f"/{module}"
+
+    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/src{module}/{name}.rs"
     demo_url = f"https://github.com/Synphonyte/leptos-use/tree/main/examples/{name}"
-    docs_url = f"https://docs.rs/leptos-use/latest/leptos_use/fn.{name}.html"
+    docs_url = f"https://docs.rs/leptos-use/latest/leptos_use{module}/fn.{name}.html"
 
     demo_link = " • <a href=\"{demo_url}\" target=\"_blank\">Demo</a>" if os.path.isdir(
         os.path.join("..", "..", "..", "..", "examples", name)) else ""
@@ -66,11 +87,11 @@ def add_source_paragraph(name):
         f"<a href=\"{source_url}\" target=\"_blank\">Source</a>{demo_link} • <a href=\"{docs_url}\" target=\"_blank\">Docs</a>")
 
 
-interal_doc_link_pattern = re.compile(r"\[`([^]]+)\`](?!\()")
+internal_doc_link_pattern = re.compile(r"\[`([^]]+)\`](?!\()")
 ident_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\b")
 
 
-def process_line(line, name):
+def process_line(line, name, module):
     stripped = line.strip()
     result = line
 
@@ -81,26 +102,35 @@ def process_line(line, name):
     <div id="demo-anchor"></div>
 </div>'''
     else:
-        result = re.sub(interal_doc_link_pattern,
-                        r"[`\1`](https://docs.rs/leptos-use/latest/leptos_use/fn.\1.html)",
+        if module is not None:
+            module = f"/{module}"
+
+        result = re.sub(internal_doc_link_pattern,
+                        rf"[`\1`](https://docs.rs/leptos-use/latest/leptos_use{module}/fn.\1.html)",
                         line)
 
     return result
 
 
-def process_further_line(line, name, types):
+def process_further_line(line, types, module=None):
     if line.startswith("pub enum"):
-        append_type(line, "enum", types)
+        append_type(line, "enum", types, module)
     elif line.startswith("pub struct"):
-        append_type(line, "struct", types)
+        append_type(line, "struct", types, module)
 
 
-def append_type(line, ty, types):
+def append_type(line, ty, types, module=None):
     start_index = len(f"pub {ty} ")
     m = re.search(ident_pattern, line[start_index:])
     if m is not None:
         ident = m.group(0)
-        types.append(f"- [`{ty} {ident}`](https://docs.rs/leptos-use/latest/leptos_use/{ty}.{ident}.html)")
+
+        if module is not None:
+            module = f"/{module}"
+        else:
+            module = ""
+
+        types.append(f"- [`{ty} {ident}`](https://docs.rs/leptos-use/latest/leptos_use{module}/{ty}.{ident}.html)")
 
 
 if __name__ == '__main__':

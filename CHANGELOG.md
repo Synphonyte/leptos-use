@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+
+#### New Functions
+- `use_floor`
+
+#### Other Changes
+- New feature: `math` that has to be activated in order to use the math functions.
+
 ## 0.1.4
 
 #### New Functions

@@ -3,6 +3,8 @@
 pub mod core;
 #[cfg(feature = "docs")]
 pub mod docs;
+#[cfg(feature = "math")]
+pub mod math;
 mod use_debounce_fn;
 mod use_event_listener;
 mod use_mouse;

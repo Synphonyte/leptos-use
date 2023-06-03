@@ -9,3 +9,5 @@
 <!-- cmdrun python3 generate_function_overview.py watch -->
 
 <!-- cmdrun python3 generate_function_overview.py utilities -->
+
+<!-- cmdrun python3 generate_function_overview.py math math -->

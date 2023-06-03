@@ -79,3 +79,7 @@
     background: var(--bg);
     border: 1px solid var(--theme-popup-border);
 }
+
+.demo-container input[type=range] {
+    accent-color: var(--brand-color);
+}
