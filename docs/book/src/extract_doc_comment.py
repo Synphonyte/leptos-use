@@ -84,13 +84,15 @@ def add_source_paragraph(name, module):
     print("\n## Source\n")
 
     if module is not None:
-        module = f"/{module}"
+        mod = f"/{module}"
+    else:
+        mod = ""
 
-    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/src{module}/{name}.rs"
+    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/src{mod}/{name}.rs"
     demo_url = f"https://github.com/Synphonyte/leptos-use/tree/main/examples/{name}"
-    docs_url = f"https://docs.rs/leptos-use/latest/leptos_use{module}/fn.{name}.html"
+    docs_url = f"https://docs.rs/leptos-use/latest/leptos_use{mod}/fn.{name}.html"
 
-    demo_link = " • <a href=\"{demo_url}\" target=\"_blank\">Demo</a>" if os.path.isdir(
+    demo_link = f" • <a href=\"{demo_url}\" target=\"_blank\">Demo</a>" if os.path.isdir(
         os.path.join("..", "..", "..", "..", "examples", name)) else ""
 
     print(
@@ -113,10 +115,12 @@ def process_line(line, name, module):
 </div>'''
     else:
         if module is not None:
-            module = f"/{module}"
+            mod = f"/{module}"
+        else:
+            mod = ""
 
         result = re.sub(internal_doc_link_pattern,
-                        rf"[`\1`](https://docs.rs/leptos-use/latest/leptos_use{module}/fn.\1.html)",
+                        rf"[`\1`](https://docs.rs/leptos-use/latest/leptos_use{mod}/fn.\1.html)",
                         line)
 
     return result
@@ -141,11 +145,11 @@ def append_type(line, ty, types, module=None):
         ident = m.group(0)
 
         if module is not None:
-            module = f"/{module}"
+            mod = f"/{module}"
         else:
-            module = ""
+            mod = ""
 
-        types.append(f"- [`{ty} {ident}`](https://docs.rs/leptos-use/latest/leptos_use{module}/{ty}.{ident}.html)")
+        types.append(f"- [`{ty} {ident}`](https://docs.rs/leptos-use/latest/leptos_use{mod}/{ty}.{ident}.html)")
 
 
 if __name__ == '__main__':
