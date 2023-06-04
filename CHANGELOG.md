@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7
+
+#### New Function
+- `use_element_size`
+
 ## 0.1.6
 
 - Fixed documentation so all feature are documented

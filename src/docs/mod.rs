@@ -1,3 +1,6 @@
+#![doc(cfg(feature = "docs"))]
+//! Collection of documentation related utilities. Used extensively in the examples.
+
 mod boolean_display;
 mod demo;
 mod note;

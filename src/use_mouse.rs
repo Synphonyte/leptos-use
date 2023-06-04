@@ -198,6 +198,7 @@ where
 }
 
 #[derive(DefaultBuilder)]
+/// Options for [`use_mouse_with_options`].
 pub struct UseMouseOptions<El, T, Ex>
 where
     El: Clone,

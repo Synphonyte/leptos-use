@@ -1,20 +1,14 @@
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::use_resize_observer;
+use leptos_use::{use_element_size, UseElementSizeReturn};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let el = create_node_ref(cx);
-    let (text, set_text) = create_signal(cx, "".to_string());
 
-    use_resize_observer(cx, el, move |entries, _| {
-        let rect = entries[0].content_rect();
-        set_text(format!(
-            "width: {:.0}\nheight: {:.0}",
-            rect.width(),
-            rect.height()
-        ));
-    });
+    let UseElementSizeReturn { width, height } = use_element_size(cx, el);
+
+    let text = move || format!("width: {}\nheight: {}", width.get(), height.get());
 
     view! { cx,
         <Note class="mb-2">"Resize the box to see changes"</Note>

@@ -424,6 +424,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 
 /// Options for [`use_scroll`].
 #[derive(DefaultBuilder)]
+/// Options for [`use_scroll_with_options`].
 pub struct UseScrollOptions {
     /// Throttle time in milliseconds for the scroll events. Defaults to 0 (disabled).
     throttle: f64,

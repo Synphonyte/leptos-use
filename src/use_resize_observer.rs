@@ -1,5 +1,6 @@
 use crate::core::ElementMaybeSignal;
 use crate::{use_supported, watch};
+use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -36,8 +37,13 @@ use wasm_bindgen::prelude::*;
 ///         set_text(format!("width: {}\nheight: {}", rect.width(), rect.height()));
 ///     },
 /// );
+/// #
+/// # view! { cx, }
 /// # }
 /// ```
+/// ## See also
+///
+/// - [`use_element_size`]
 pub fn use_resize_observer<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
@@ -48,15 +54,15 @@ where
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + Clone + 'static,
 {
-    use_resize_observer_with_options(cx, target, callback, web_sys::ResizeObserverOptions::new())
+    use_resize_observer_with_options(cx, target, callback, UseResizeObserverOptions::default())
 }
 
-/// Version of [`use_resize_observer`] that takes a `ResizeObserverOptions`. See [`use_resize_observer`] for how to use.
+/// Version of [`use_resize_observer`] that takes a `web_sys::ResizeObserverOptions`. See [`use_resize_observer`] for how to use.
 pub fn use_resize_observer_with_options<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
     callback: F,
-    options: web_sys::ResizeObserverOptions,
+    options: UseResizeObserverOptions,
 ) -> UseResizeObserverReturn
 where
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
@@ -106,7 +112,7 @@ where
                     closure.forget();
 
                     let target: web_sys::Element = target.clone().into();
-                    obs.observe_with_options(&target, &options);
+                    obs.observe_with_options(&target, &options.clone().into());
 
                     observer.replace(Some(obs));
                 }
@@ -125,6 +131,29 @@ where
     UseResizeObserverReturn {
         is_supported,
         stop: Box::new(stop),
+    }
+}
+
+#[derive(DefaultBuilder, Clone)]
+/// Options for [`use_resize_observer_with_options`].
+pub struct UseResizeObserverOptions {
+    /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
+    pub box_: web_sys::ResizeObserverBoxOptions,
+}
+
+impl Default for UseResizeObserverOptions {
+    fn default() -> Self {
+        Self {
+            box_: web_sys::ResizeObserverBoxOptions::ContentBox,
+        }
+    }
+}
+
+impl Into<web_sys::ResizeObserverOptions> for UseResizeObserverOptions {
+    fn into(self) -> web_sys::ResizeObserverOptions {
+        let mut options = web_sys::ResizeObserverOptions::new();
+        options.box_(self.box_);
+        options
     }
 }
 

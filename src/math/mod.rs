@@ -1,3 +1,6 @@
+#![doc(cfg(feature = "math"))]
+//! Collection of reactive math functions
+
 mod shared;
 mod use_floor;
 mod use_max;

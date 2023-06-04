@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -10,6 +10,7 @@ keywords = ["leptos", "utilities"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/Synphonyte/leptos-use"
+homepage = "https://leptos-use.rs"
 
 
 [dependencies]
@@ -24,6 +25,7 @@ version = "0.3.63"
 features = [
     "CssStyleDeclaration",
     "DomRectReadOnly",
+    "Element",
     "MouseEvent",
     "Navigator",
     "ResizeObserver",

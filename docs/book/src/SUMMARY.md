@@ -7,6 +7,7 @@
 
 # Elements
 
+- [use_element_size](elements/use_element_size.md)
 - [use_resize_observer](elements/use_resize_observer.md)
 
 # Browser

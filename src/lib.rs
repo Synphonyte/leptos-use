@@ -7,6 +7,8 @@ pub mod docs;
 #[cfg(feature = "math")]
 pub mod math;
 mod use_debounce_fn;
+#[cfg(web_sys_unstable_apis)]
+mod use_element_size;
 mod use_event_listener;
 mod use_mouse;
 #[cfg(web_sys_unstable_apis)]
@@ -18,6 +20,8 @@ pub mod utils;
 mod watch;
 
 pub use use_debounce_fn::*;
+#[cfg(web_sys_unstable_apis)]
+pub use use_element_size::*;
 pub use use_event_listener::*;
 pub use use_mouse::*;
 #[cfg(web_sys_unstable_apis)]
