@@ -13,6 +13,14 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
       - name: Install mdbook I
         uses: taiki-e/install-action@v2
         with:
