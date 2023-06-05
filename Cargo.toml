@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -47,3 +47,4 @@ math = ["num"]
 [package.metadata."docs.rs"]
 all-features = true
 rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
