@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+
+- Fixed documentation and doc tests running for functions behind `#[cfg(web_sys_unstable_apis)]`
+
 ## 0.1.7
 
 #### New Function

@@ -27,7 +27,7 @@ use wasm_bindgen::prelude::*;
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// let el = create_node_ref(cx);
-/// let (text, set_text) = create_signal(cx, "");
+/// let (text, set_text) = create_signal(cx, "".to_string());
 ///
 /// use_resize_observer(
 ///     cx,
@@ -37,8 +37,10 @@ use wasm_bindgen::prelude::*;
 ///         set_text(format!("width: {}\nheight: {}", rect.width(), rect.height()));
 ///     },
 /// );
-/// #
-/// # view! { cx, }
+///
+/// view! { cx,
+///     <div node_ref=el>{ text }</div>
+/// }
 /// # }
 /// ```
 /// ## See also
