@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/synphonyte/leptos-use">
-        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo.svg" alt="Leptos-Use – Collection of essential Leptos utilities" width="130"/>
+        <img src="https://raw.githubusercontent.com/synphonyte/leptos-use/main/docs/logo.svg" alt="Leptos-Use – Collection of essential Leptos utilities" width="150"/>
     </a>
 </p>
 
