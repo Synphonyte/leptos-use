@@ -20,6 +20,6 @@
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
 
-We only have just begun implementing the first dozen functions but they are already very usable and ergonomic.
+We have only just begun implementing the first dozen functions but they are already very usable and ergonomic.
 
 Missing a function? Open a ticket or PR!
