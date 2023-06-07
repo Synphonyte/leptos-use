@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+
 :root {
     --brand-color: #EF3939;
     --brand-color-dark: #9c2525;
@@ -36,7 +38,7 @@ pre > code {
 }
 
 .sidebar .sidebar-scrollbox {
-    padding: 10px 10px 10px 20px ;
+    padding: 10px 10px 10px 20px;
 }
 
 .chapter li.chapter-item {
@@ -79,4 +81,21 @@ li.chapter-item.affix a {
 li.chapter-item.affix a.active {
     border-left: 0 none;
     margin-left: 0;
+}
+
+#header-logo-container, h1.menu-title {
+    font-family: 'Quicksand', sans-serif;
+    letter-spacing: -0.7px;
+}
+
+h1, h2, h3, h4, h5, h6, li.part-title {
+    font-family: 'Quicksand', sans-serif;
+}
+
+h1 {
+    font-weight: 700;
+}
+
+h2, h3, h4 {
+    font-weight: 600;
 }

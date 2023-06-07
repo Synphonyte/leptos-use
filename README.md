@@ -4,9 +4,8 @@
     </a>
 </p>
 
-<h1 align="center" style="font-weight: normal">Leptos-Use</h1>
-
-<p align="center"> Collection of essential Leptos utilities inspired by SolidJS-USE / VueUse</p>
+<h4 align="center">Collection of essential Leptos utilities</h4>
+<p align="center">Inspired by React-Use / VueUse / SolidJS-USE</p>
 
 <p align="center">
     <a href="https://leptos-use.rs"><b>Guide</b></a> • 
@@ -21,4 +20,6 @@
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
 
-This is still very much work in progress and all contributions are welcome!
+We only have just begun implementing the first dozen functions but they are already very usable and ergonomic.
+
+Missing a function? Open a ticket or PR!
