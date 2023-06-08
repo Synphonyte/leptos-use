@@ -33,7 +33,7 @@ where
     let last_exec = Rc::new(Cell::new(0_f64));
     let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
     let is_leading = Rc::new(Cell::new(true));
-    let last_value: Rc<RefCell<Option<R>>> = Rc::new(RefCell::new(None));
+    let last_return_value: Rc<RefCell<Option<R>>> = Rc::new(RefCell::new(None));
 
     let t = Rc::clone(&timer);
     let clear = move || {
@@ -49,11 +49,11 @@ where
         let duration = ms.get_untracked();
         let elapsed = Date::now() - last_exec.get();
 
-        let last_val = Rc::clone(&last_value);
+        let last_return_val = Rc::clone(&last_return_value);
         let invoke = move || {
             let return_value = _invoke();
 
-            let mut val_mut = last_val.borrow_mut();
+            let mut val_mut = last_return_val.borrow_mut();
             *val_mut = Some(return_value);
         };
 
@@ -63,7 +63,7 @@ where
         if duration <= 0.0 {
             last_exec.set(Date::now());
             invoke();
-            return Rc::clone(&last_value);
+            return Rc::clone(&last_return_value);
         }
 
         if elapsed > duration && (options.leading || !is_leading.get()) {
@@ -101,6 +101,6 @@ where
 
         is_leading.set(false);
 
-        Rc::clone(&last_value)
+        Rc::clone(&last_return_value)
     }
 }

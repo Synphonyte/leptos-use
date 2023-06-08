@@ -120,7 +120,6 @@ where
                 }
             }
         },
-        true,
     );
 
     let stop = move || {

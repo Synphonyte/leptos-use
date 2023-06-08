@@ -1,6 +1,4 @@
-use crate::utils::{
-    create_filter_wrapper_with_return, create_filter_wrapper_with_return_and_arg, throttle_filter,
-};
+use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, throttle_filter};
 use leptos::MaybeSignal;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -66,7 +64,7 @@ pub use crate::utils::ThrottleOptions;
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
 pub fn use_throttle_fn<F, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce() -> R + Clone + 'static,
@@ -78,20 +76,20 @@ where
 /// Version of [`use_throttle_fn`] with throttle options. See the docs for [`use_throttle_fn`] for how to use.
 pub fn use_throttle_fn_with_options<F, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
     options: ThrottleOptions,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce() -> R + Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper_with_return(throttle_filter(ms, options), func)
+    create_filter_wrapper(Box::new(throttle_filter(ms, options)), func)
 }
 
 /// Version of [`use_throttle_fn`] with an argument for the throttled function. See the docs for [`use_throttle_fn`] for how to use.
 pub fn use_throttle_fn_with_arg<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
     F: FnOnce(Arg) -> R + Clone + 'static,
@@ -104,7 +102,7 @@ where
 /// Version of [`use_throttle_fn_with_arg`] with throttle options. See the docs for [`use_throttle_fn`] for how to use.
 pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
     options: ThrottleOptions,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
@@ -112,5 +110,5 @@ where
     Arg: Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper_with_return_and_arg(throttle_filter(ms, options), func)
+    create_filter_wrapper_with_arg(Box::new(throttle_filter(ms, options)), func)
 }

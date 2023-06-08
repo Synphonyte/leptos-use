@@ -1,10 +1,12 @@
+use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, FilterOptions};
+use crate::{filter_builder_methods, DebounceOptions, ThrottleOptions};
+use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 /// A version of `create_effect` that listens to any dependency that is accessed inside `deps`.
 /// Also a stop handler is returned.
-/// If `immediate` is false, the `callback` will not run immediately but only after
-/// the first change is detected of any signal that is accessed in `deps`.
 /// The return value of `deps` is passed into `callback` as an argument together with the previous value
 /// and the previous value that the `callback` itself returned last time.
 ///
@@ -24,8 +26,7 @@ use std::cell::RefCell;
 ///     move |num, _, _| {
 ///         log!("number {}", num);
 ///     },
-///     true,
-/// );
+/// ); // > "number 0"
 ///
 /// set_num(1); // > "number 1"
 ///
@@ -37,22 +38,123 @@ use std::cell::RefCell;
 /// #    view! { cx, }
 /// # }
 /// ```
-pub fn watch<W, T, DFn, CFn>(
+///
+/// ## Immediate
+///
+/// If `immediate` is false, the `callback` will not run immediately but only after
+/// the first change is detected of any signal that is accessed in `deps`.
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{watch_with_options, WatchOptions};
+/// #
+/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// let (num, set_num) = create_signal(cx, 0);
+///
+/// watch_with_options(
+///     cx,
+///     num,
+///     move |num, _, _| {
+///         log!("number {}", num);
+///     },
+///     WatchOptions::default().immediate(false),
+/// ); // nothing happens
+///
+/// set_num(1); // > "number 1"
+/// #    view! { cx, }
+/// # }
+/// ```
+///
+/// ## Filters
+///
+/// The callback can be throttled or debounced. Please see [`watch_throttled`] and [`watch_debounced`] for details.
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{watch_with_options, WatchOptions};
+/// #
+/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// # let (num, set_num) = create_signal(cx, 0);
+/// #
+/// watch_with_options(
+///     cx,
+///     num,
+///     move |num, _, _| {
+///         log!("number {}", num);
+///     },
+///     WatchOptions::default().throttle(100.0), // there's also `throttle_with_options`
+/// );
+/// #    view! { cx, }
+/// # }
+/// ```
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{watch_with_options, WatchOptions};
+/// #
+/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// # let (num, set_num) = create_signal(cx, 0);
+/// #
+/// watch_with_options(
+///     cx,
+///     num,
+///     move |num, _, _| {
+///         log!("number {}", num);
+///     },
+///     WatchOptions::default().debounce(100.0), // there's also `debounce_with_options`
+/// );
+/// #    view! { cx, }
+/// # }
+/// ```
+///
+/// ## See also
+///
+/// * [`watch_throttled`]
+/// * [`watch_debounced`]
+pub fn watch<W, T, DFn, CFn>(cx: Scope, deps: DFn, callback: CFn) -> impl Fn() + Clone
+where
+    DFn: Fn() -> W + 'static,
+    CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
+    W: Clone + 'static,
+    T: Clone + 'static,
+{
+    watch_with_options(cx, deps, callback, WatchOptions::default())
+}
+
+/// Version of `watch` that accepts `WatchOptions`. See [`watch`] for how to use.
+pub fn watch_with_options<W, T, DFn, CFn>(
     cx: Scope,
     deps: DFn,
     callback: CFn,
-    immediate: bool,
+    options: WatchOptions,
 ) -> impl Fn() + Clone
 where
     DFn: Fn() -> W + 'static,
-    CFn: Fn(&W, Option<&W>, Option<T>) -> T + 'static,
-    W: 'static,
-    T: 'static,
+    CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
+    W: Clone + 'static,
+    T: Clone + 'static,
 {
     let (is_active, set_active) = create_signal(cx, true);
 
-    let prev_deps_value: RefCell<Option<W>> = RefCell::new(None);
-    let prev_callback_value: RefCell<Option<T>> = RefCell::new(None);
+    let cur_deps_value: Rc<RefCell<Option<W>>> = Rc::new(RefCell::new(None));
+    let prev_deps_value: Rc<RefCell<Option<W>>> = Rc::new(RefCell::new(None));
+    let prev_callback_value: Rc<RefCell<Option<T>>> = Rc::new(RefCell::new(None));
+
+    let cur_val = Rc::clone(&cur_deps_value);
+    let prev_val = Rc::clone(&prev_deps_value);
+    let prev_cb_val = Rc::clone(&prev_callback_value);
+    let wrapped_callback = move || {
+        callback(
+            cur_val
+                .borrow()
+                .as_ref()
+                .expect("this will not be called before there is deps value"),
+            prev_val.borrow().as_ref(),
+            prev_cb_val.take(),
+        )
+    };
+
+    let filtered_callback = create_filter_wrapper(options.filter.filter_fn(), wrapped_callback);
 
     create_effect(cx, move |did_run_before| {
         if !is_active() {
@@ -61,17 +163,16 @@ where
 
         let deps_value = deps();
 
-        if !immediate && did_run_before.is_none() {
+        if !options.immediate && did_run_before.is_none() {
             prev_deps_value.replace(Some(deps_value));
             return ();
         }
 
-        let callback_value = callback(
-            &deps_value,
-            prev_deps_value.borrow().as_ref(),
-            prev_callback_value.take(),
-        );
-        prev_callback_value.replace(Some(callback_value));
+        cur_deps_value.replace(Some(deps_value.clone()));
+
+        let callback_value = filtered_callback().take();
+
+        prev_callback_value.replace(callback_value);
 
         prev_deps_value.replace(Some(deps_value));
 
@@ -81,4 +182,32 @@ where
     move || {
         set_active(false);
     }
+}
+
+/// Options for `watch_with_options`
+#[derive(DefaultBuilder)]
+pub struct WatchOptions {
+    /// If `immediate` is false, the `callback` will not run immediately but only after
+    /// the first change is detected of any signal that is accessed in `deps`.
+    /// Defaults to `true`.
+    immediate: bool,
+
+    #[builder(skip)]
+    filter: FilterOptions,
+}
+
+impl Default for WatchOptions {
+    fn default() -> Self {
+        Self {
+            immediate: true,
+            filter: Default::default(),
+        }
+    }
+}
+
+impl WatchOptions {
+    filter_builder_methods!(
+        /// the watch callback
+        filter
+    );
 }

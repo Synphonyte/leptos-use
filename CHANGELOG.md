@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.10
+
+#### New Functions
+- `use_local_storage`
+
+#### Changed Functions
+- `watch` has now variant `watch_with_options` which allows for debouncing and throttling
+
 ## 0.1.8/9
 
 - Fixed documentation and doc tests running for functions behind `#[cfg(web_sys_unstable_apis)]`

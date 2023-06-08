@@ -3,6 +3,7 @@ use crate::watch;
 use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
+use leptos_use::{watch_with_options, WatchOptions};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 
@@ -139,7 +140,7 @@ where
         options.into(),
     );
 
-    let _ = watch(
+    let _ = watch_with_options(
         cx,
         move || targ.get(),
         move |ele, _, _| {
@@ -151,7 +152,7 @@ where
                 set_height(0.0);
             }
         },
-        false,
+        WatchOptions::default().immediate(false),
     );
 
     UseElementSizeReturn {

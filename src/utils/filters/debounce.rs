@@ -6,7 +6,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Clone, DefaultBuilder)]
+#[derive(Copy, Clone, DefaultBuilder)]
 pub struct DebounceOptions {
     /// The maximum time allowed to be delayed before it's invoked.
     /// In milliseconds.
@@ -22,12 +22,16 @@ impl Default for DebounceOptions {
     }
 }
 
-pub fn debounce_filter(
+pub fn debounce_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions,
-) -> impl Fn(Box<dyn CloneableFnWithReturn<()>>) -> Rc<RefCell<Option<()>>> + Clone {
+) -> impl Fn(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>> + Clone
+where
+    R: 'static,
+{
     let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
     let max_timer = Rc::new(Cell::new(None::<TimeoutHandle>));
+    let last_return_value: Rc<RefCell<Option<R>>> = Rc::new(RefCell::new(None));
 
     let clear_timeout = move |timer: &Rc<Cell<Option<TimeoutHandle>>>| {
         if let Some(handle) = timer.get() {
@@ -39,11 +43,17 @@ pub fn debounce_filter(
     let ms = ms.into();
     let max_wait_signal = options.max_wait;
 
-    move |invoke: Box<dyn CloneableFnWithReturn<()>>| {
+    move |_invoke: Box<dyn CloneableFnWithReturn<R>>| {
         let duration = ms.get_untracked();
         let max_duration = max_wait_signal.get_untracked();
 
-        // TODO : return value like throttle_filter?
+        let last_return_val = Rc::clone(&last_return_value);
+        let invoke = move || {
+            let return_value = _invoke();
+
+            let mut val_mut = last_return_val.borrow_mut();
+            *val_mut = Some(return_value);
+        };
 
         clear_timeout(&timer);
 
@@ -51,7 +61,7 @@ pub fn debounce_filter(
             clear_timeout(&max_timer);
 
             invoke();
-            return Rc::new(RefCell::new(None));
+            return Rc::clone(&last_return_value);
         }
 
         // Create the max_timer. Clears the regular timer on invoke
@@ -86,6 +96,6 @@ pub fn debounce_filter(
             .ok(),
         );
 
-        Rc::new(RefCell::new(None))
+        Rc::clone(&last_return_value)
     }
 }

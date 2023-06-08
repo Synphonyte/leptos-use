@@ -1,6 +1,8 @@
 pub use crate::utils::DebounceOptions;
 use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter};
 use leptos::MaybeSignal;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Debounce execution of a function.
 ///
@@ -26,7 +28,7 @@ use leptos::MaybeSignal;
 ///     1000.0,
 /// );
 ///
-/// window_event_listener(resize, move |_| debounced_fn());
+/// window_event_listener(resize, move |_| { debounced_fn(); });
 /// #    view! { cx, }
 /// # }
 /// ```
@@ -51,7 +53,7 @@ use leptos::MaybeSignal;
 ///         .max_wait(Some(5000.0)),
 /// );
 ///
-/// window_event_listener(resize, move |_| debounced_fn());
+/// window_event_listener(resize, move |_| { debounced_fn(); });
 /// #    view! { cx, }
 /// # }
 /// ```
@@ -64,46 +66,53 @@ use leptos::MaybeSignal;
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
-pub fn use_debounce_fn<F>(func: F, ms: impl Into<MaybeSignal<f64>>) -> impl Fn() + Clone
+pub fn use_debounce_fn<F, R>(
+    func: F,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
+) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce() + Clone + 'static,
+    F: FnOnce() -> R + Clone + 'static,
+    R: 'static,
 {
     use_debounce_fn_with_options(func, ms, DebounceOptions::default())
 }
 
 /// Version of [`use_debounce_fn`] with debounce options. See the docs for [`use_debounce_fn`] for how to use.
-pub fn use_debounce_fn_with_options<F>(
+pub fn use_debounce_fn_with_options<F, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
     options: DebounceOptions,
-) -> impl Fn() + Clone
+) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce() + Clone + 'static,
+    F: FnOnce() -> R + Clone + 'static,
+    R: 'static,
 {
-    create_filter_wrapper(debounce_filter(ms, options), func)
+    create_filter_wrapper(Box::new(debounce_filter(ms, options)), func)
 }
 
 /// Version of [`use_debounce_fn`] with an argument for the debounced function. See the docs for [`use_debounce_fn`] for how to use.
-pub fn use_debounce_fn_with_arg<F, Arg>(
+pub fn use_debounce_fn_with_arg<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
-) -> impl Fn(Arg) + Clone
+    ms: impl Into<MaybeSignal<f64>> + 'static,
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce(Arg) + Clone + 'static,
+    F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
+    R: 'static,
 {
     use_debounce_fn_with_arg_and_options(func, ms, DebounceOptions::default())
 }
 
 /// Version of [`use_debounce_fn_with_arg`] with debounce options.
-pub fn use_debounce_fn_with_arg_and_options<F, Arg>(
+pub fn use_debounce_fn_with_arg_and_options<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<MaybeSignal<f64>> + 'static,
     options: DebounceOptions,
-) -> impl Fn(Arg) + Clone
+) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce(Arg) + Clone + 'static,
+    F: FnOnce(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
+    R: 'static,
 {
-    create_filter_wrapper_with_arg(debounce_filter(ms, options), func)
+    create_filter_wrapper_with_arg(Box::new(debounce_filter(ms, options)), func)
 }
