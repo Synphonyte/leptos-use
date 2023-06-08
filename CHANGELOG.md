@@ -2,11 +2,18 @@
 
 ## 0.1.10
 
+#### Braking Changes
+- `watch` doesn't accept `immediate` as an argument anymore. This is only provided by the option variant.
+
 #### New Functions
 - `use_local_storage`
+- `watch_debounced`
+- `watch_throttled`
+- `watch_pausable`
 
-#### Changed Functions
-- `watch` has now variant `watch_with_options` which allows for debouncing and throttling
+#### Other Changes
+
+- `watch` has now variant `watch_with_options` which allows for debouncing and throttling.
 
 ## 0.1.8/9
 

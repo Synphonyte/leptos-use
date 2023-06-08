@@ -2,6 +2,7 @@
 
 :root {
     --brand-color: #EF3939;
+    --brand-color-outline: rgba(239, 57, 57, 0.1);
     --brand-color-dark: #9c2525;
     --background-color: #ffffff;
     --text-color: #856464;

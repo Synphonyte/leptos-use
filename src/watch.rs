@@ -1,4 +1,4 @@
-use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, FilterOptions};
+use crate::utils::{create_filter_wrapper, FilterOptions};
 use crate::{filter_builder_methods, DebounceOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -10,7 +10,7 @@ use std::rc::Rc;
 /// The return value of `deps` is passed into `callback` as an argument together with the previous value
 /// and the previous value that the `callback` itself returned last time.
 ///
-/// # Usage
+/// ## Usage
 ///
 /// ```
 /// # use std::time::Duration;
@@ -26,7 +26,7 @@ use std::rc::Rc;
 ///     move |num, _, _| {
 ///         log!("number {}", num);
 ///     },
-/// ); // > "number 0"
+/// );
 ///
 /// set_num(1); // > "number 1"
 ///
@@ -41,7 +41,8 @@ use std::rc::Rc;
 ///
 /// ## Immediate
 ///
-/// If `immediate` is false, the `callback` will not run immediately but only after
+/// If `immediate` is true, the `callback` will run immediately.
+/// If it's `false, the `callback` will run only after
 /// the first change is detected of any signal that is accessed in `deps`.
 ///
 /// ```
@@ -57,8 +58,8 @@ use std::rc::Rc;
 ///     move |num, _, _| {
 ///         log!("number {}", num);
 ///     },
-///     WatchOptions::default().immediate(false),
-/// ); // nothing happens
+///     WatchOptions::default().immediate(true),
+/// ); // > "number 0"
 ///
 /// set_num(1); // > "number 1"
 /// #    view! { cx, }
@@ -154,7 +155,8 @@ where
         )
     };
 
-    let filtered_callback = create_filter_wrapper(options.filter.filter_fn(), wrapped_callback);
+    let filtered_callback =
+        create_filter_wrapper(options.filter.filter_fn(), wrapped_callback.clone());
 
     create_effect(cx, move |did_run_before| {
         if !is_active() {
@@ -170,7 +172,11 @@ where
 
         cur_deps_value.replace(Some(deps_value.clone()));
 
-        let callback_value = filtered_callback().take();
+        let callback_value = if options.immediate && did_run_before.is_none() {
+            Some(wrapped_callback())
+        } else {
+            filtered_callback().take()
+        };
 
         prev_callback_value.replace(callback_value);
 
@@ -185,24 +191,15 @@ where
 }
 
 /// Options for `watch_with_options`
-#[derive(DefaultBuilder)]
+#[derive(DefaultBuilder, Default)]
 pub struct WatchOptions {
-    /// If `immediate` is false, the `callback` will not run immediately but only after
+    /// If `immediate` is true, the `callback` will run immediately.
+    /// If it's `false, the `callback` will run only after
     /// the first change is detected of any signal that is accessed in `deps`.
-    /// Defaults to `true`.
     immediate: bool,
 
     #[builder(skip)]
     filter: FilterOptions,
-}
-
-impl Default for WatchOptions {
-    fn default() -> Self {
-        Self {
-            immediate: true,
-            filter: Default::default(),
-        }
-    }
 }
 
 impl WatchOptions {

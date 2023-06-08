@@ -17,6 +17,8 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_mouse/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_floor/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_element_size/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/watch_debounced/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/watch_throttled/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -30,6 +32,8 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_mouse/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_floor/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_element_size/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/watch_debounced/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/watch_throttled/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

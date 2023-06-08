@@ -10,7 +10,9 @@ use std::time::Duration;
 
 #[derive(Copy, Clone, DefaultBuilder)]
 pub struct ThrottleOptions {
+    /// Invoke on the trailing edge of the timeout. Defaults to `true`.
     pub trailing: bool,
+    /// Invoke on the leading edge of the timeout. Defaults to `true`.
     pub leading: bool,
 }
 

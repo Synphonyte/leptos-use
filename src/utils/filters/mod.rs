@@ -1,9 +1,7 @@
 mod debounce;
-mod pausable;
 mod throttle;
 
 pub use debounce::*;
-pub use pausable::*;
 pub use throttle::*;
 
 use crate::utils::{CloneableFnWithArgAndReturn, CloneableFnWithReturn};
@@ -11,26 +9,14 @@ use leptos::MaybeSignal;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub trait FilterFn<R>:
-    CloneableFnWithArgAndReturn<Box<dyn CloneableFnWithReturn<R>>, Rc<RefCell<Option<R>>>>
-{
-}
-
-impl<R, F> FilterFn<R> for F
-where
-    F: Fn(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>> + Clone + 'static,
-    R: 'static,
-{
-}
-
-impl<R> Clone for Box<dyn FilterFn<R>> {
-    fn clone(&self) -> Self {
-        (*self).clone()
+macro_rules! BoxFilterFn {
+    ($R:ident) => {
+        Box<dyn CloneableFnWithArgAndReturn<Box<dyn CloneableFnWithReturn<$R>>, Rc<RefCell<Option<$R>>>>>
     }
 }
 
 pub fn create_filter_wrapper<F, R>(
-    filter: Box<dyn FilterFn<R>>,
+    filter: BoxFilterFn!(R),
     func: F,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
@@ -41,7 +27,7 @@ where
 }
 
 pub fn create_filter_wrapper_with_arg<F, Arg, R>(
-    filter: Box<dyn FilterFn<R>>,
+    filter: BoxFilterFn!(R),
     func: F,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
@@ -55,6 +41,7 @@ where
     }
 }
 
+/// Specify a debounce or throttle filter with their respective options or no filter
 #[derive(Default)]
 pub enum FilterOptions {
     #[default]
@@ -70,7 +57,7 @@ pub enum FilterOptions {
 }
 
 impl FilterOptions {
-    pub fn filter_fn<R>(&self) -> Box<dyn FilterFn<R>>
+    pub fn filter_fn<R>(&self) -> BoxFilterFn!(R)
     where
         R: 'static,
     {
@@ -88,6 +75,7 @@ impl FilterOptions {
     }
 }
 
+/// Defines builder methods to define filter options without having to use nested methods
 #[macro_export]
 macro_rules! filter_builder_methods {
     (

@@ -62,17 +62,20 @@
     font-size: 1.4rem;
 }
 
-.demo-container input[type="text"], .demo-container input[type="search"], .demo-container input[type="number"] {
+.demo-container input[type="text"],
+.demo-container input[type="search"],
+.demo-container input[type="number"] {
     display: block;
     font-size: 90%;
     padding: .5em 1em .4em;
-    border: 1px solid var(--divider-light-color);
+    border: 1px solid var(--theme-popup-border);
     border-radius: 4px;
     outline: none;
     background: var(--background-color);
     color: var(--text-color);
     min-width: 20rem;
     margin: .5rem 0;
+    appearance: none;
 }
 
 .demo-container textarea {
@@ -80,6 +83,24 @@
     border: 1px solid var(--theme-popup-border);
 }
 
-.demo-container input[type=range] {
+.demo-container input[type=range],
+.demo-container input[type=checkbox]{
     accent-color: var(--brand-color);
+}
+
+.demo-container input[type="text"]:focus,
+.demo-container input[type="search"]:focus,
+.demo-container input[type="number"]:focus,
+.demo-container textarea:focus {
+    border-color: var(--brand-color);
+    outline: 4px solid var(--brand-color-outline);
+    outline-offset: 0;
+    box-shadow: none;
+}
+
+.demo-container input[type="text"]::placeholder,
+.demo-container input[type="search"]::placeholder,
+.demo-container input[type="number"]::placeholder,
+.demo-container textarea::placeholder {
+    opacity: 0.7;
 }

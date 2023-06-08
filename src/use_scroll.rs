@@ -9,6 +9,7 @@ use std::borrow::Cow;
 use wasm_bindgen::JsCast;
 
 /// Reactive scroll position and state.
+///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_scroll)

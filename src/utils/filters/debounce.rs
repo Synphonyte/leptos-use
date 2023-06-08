@@ -6,20 +6,12 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Copy, Clone, DefaultBuilder)]
+#[derive(Copy, Clone, DefaultBuilder, Default)]
 pub struct DebounceOptions {
     /// The maximum time allowed to be delayed before it's invoked.
     /// In milliseconds.
     #[builder(into)]
     pub max_wait: MaybeSignal<Option<f64>>,
-}
-
-impl Default for DebounceOptions {
-    fn default() -> Self {
-        Self {
-            max_wait: Default::default(),
-        }
-    }
 }
 
 pub fn debounce_filter<R>(

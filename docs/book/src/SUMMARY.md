@@ -22,6 +22,8 @@
 # Watch
 
 - [watch](watch/watch.md)
+- [watch_debounced](watch/watch_debounced.md)
+- [watch_throttled](watch/watch_throttled.md)
 
 # Utilities
 
