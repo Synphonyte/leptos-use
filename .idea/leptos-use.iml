@@ -20,6 +20,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/watch_debounced/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/watch_pausable/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/watch_throttled/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_storage/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -36,6 +37,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_debounced/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_pausable/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_throttled/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_storage/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,5 +1,3 @@
-use paste::paste;
-
 macro_rules! use_partial_cmp {
     ($(#[$outer:meta])*
     $fn_name:ident,
