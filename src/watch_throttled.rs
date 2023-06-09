@@ -11,7 +11,6 @@ use leptos_use::{watch_with_options, ThrottleOptions, WatchOptions};
 /// ## Usage
 ///
 /// ```
-/// # use std::time::Duration;
 /// # use leptos::*;
 /// # use leptos_use::watch_throttled;
 /// #
@@ -36,7 +35,6 @@ use leptos_use::{watch_with_options, ThrottleOptions, WatchOptions};
 /// There's also `watch_throttled_with_options` where you can specify the other watch options (except `filter`).
 ///
 /// ```
-/// # use std::time::Duration;
 /// # use leptos::*;
 /// # use leptos_use::{watch_throttled_with_options, WatchThrottledOptions};
 /// #
@@ -56,6 +54,11 @@ use leptos_use::{watch_with_options, ThrottleOptions, WatchOptions};
 /// #    view! { cx, }
 /// # }
 /// ```
+///
+/// ## Recommended Reading
+///
+/// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
+/// - [Debouncing and Throttling Explained Through Examples](https://css-tricks.com/debouncing-throttling-explained-examples/)
 ///
 /// ## See also
 ///

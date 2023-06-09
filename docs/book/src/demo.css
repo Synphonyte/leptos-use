@@ -44,13 +44,22 @@
     vertical-align: middle;
 }
 
-.demo-container button:hover {
+.demo-container button:hover:not(:disabled) {
     background-color: var(--brand-color-dark);
 }
 
-.demo-container button:active {
+.demo-container button:active:not(:disabled) {
     border-bottom: 0;
     border-top: 2px solid var(--brand-color-dark);
+}
+
+.demo-container button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.demo-container button ~ button {
+    margin-left: 0.8rem;
 }
 
 .demo-container p {

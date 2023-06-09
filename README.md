@@ -23,3 +23,32 @@
 We have only just begun implementing the first dozen functions but they are already very usable and ergonomic.
 
 Missing a function? Open a ticket or PR!
+
+## Development
+
+To run all tests run
+
+```shell
+cargo test --all-features
+```
+
+## Book
+
+First you need to install
+
+```shell
+cargo install mdbook-cmdrun trunk
+```
+
+To build the book go in your terminal into the docs/book folder
+and run
+
+```shell
+mdbook serve
+```
+This builds the html version of the book and runs a local dev server.
+To also add in the examples open another shell and run
+
+```shell
+python3 post_build.py
+```

@@ -66,6 +66,7 @@ use std::rc::Rc;
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
+/// - [Debouncing and Throttling Explained Through Examples](https://css-tricks.com/debouncing-throttling-explained-examples/)
 pub fn use_debounce_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,

@@ -1,5 +1,4 @@
 use crate::core::{ElementMaybeSignal, Size};
-use crate::watch;
 use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;

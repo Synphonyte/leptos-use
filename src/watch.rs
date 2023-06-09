@@ -24,16 +24,16 @@ use std::rc::Rc;
 ///     cx,
 ///     num,
 ///     move |num, _, _| {
-///         log!("number {}", num);
+///         log!("Number {}", num);
 ///     },
 /// );
 ///
-/// set_num(1); // > "number 1"
+/// set_num(1); // > "Number 1"
 ///
 /// set_timeout_with_handle(move || {
 ///     stop(); // stop watching
 ///
-///     set_num(2); // nothing happens
+///     set_num(2); // (nothing happens)
 /// }, Duration::from_millis(1000));
 /// #    view! { cx, }
 /// # }
@@ -56,12 +56,12 @@ use std::rc::Rc;
 ///     cx,
 ///     num,
 ///     move |num, _, _| {
-///         log!("number {}", num);
+///         log!("Number {}", num);
 ///     },
 ///     WatchOptions::default().immediate(true),
-/// ); // > "number 0"
+/// ); // > "Number 0"
 ///
-/// set_num(1); // > "number 1"
+/// set_num(1); // > "Number 1"
 /// #    view! { cx, }
 /// # }
 /// ```
@@ -81,7 +81,7 @@ use std::rc::Rc;
 ///     cx,
 ///     num,
 ///     move |num, _, _| {
-///         log!("number {}", num);
+///         log!("Number {}", num);
 ///     },
 ///     WatchOptions::default().throttle(100.0), // there's also `throttle_with_options`
 /// );
@@ -198,7 +198,6 @@ pub struct WatchOptions {
     /// the first change is detected of any signal that is accessed in `deps`.
     immediate: bool,
 
-    #[builder(skip)]
     filter: FilterOptions,
 }
 

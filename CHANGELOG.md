@@ -1,12 +1,12 @@
 # Changelog
 
-## 0.1.10
+## 0.2.0
 
 #### Braking Changes
 - `watch` doesn't accept `immediate` as an argument anymore. This is only provided by the option variant.
 
 #### New Functions
-- `use_local_storage`
+- `use_storage`
 - `watch_debounced`
 - `watch_throttled`
 - `watch_pausable`

@@ -5,6 +5,10 @@
 [Functions](functions.md)
 [Changelog](changelog.md)
 
+# @Storage
+
+- [use_storage](storage/use_storage.md)
+
 # Elements
 
 - [use_element_size](elements/use_element_size.md)
@@ -23,6 +27,7 @@
 
 - [watch](watch/watch.md)
 - [watch_debounced](watch/watch_debounced.md)
+- [watch_pausable](watch/watch_pausable.md)
 - [watch_throttled](watch/watch_throttled.md)
 
 # Utilities

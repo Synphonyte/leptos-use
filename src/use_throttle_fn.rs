@@ -62,6 +62,7 @@ pub use crate::utils::ThrottleOptions;
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
+/// - [Debouncing and Throttling Explained Through Examples](https://css-tricks.com/debouncing-throttling-explained-examples/)
 pub fn use_throttle_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,
