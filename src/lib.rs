@@ -22,7 +22,6 @@ mod use_throttle_fn;
 pub mod utils;
 mod watch;
 mod watch_debounced;
-mod watch_pausable;
 mod watch_throttled;
 
 pub use use_debounce_fn::*;
@@ -38,7 +37,6 @@ pub use use_supported::*;
 pub use use_throttle_fn::*;
 pub use watch::*;
 pub use watch_debounced::*;
-pub use watch_pausable::*;
 pub use watch_throttled::*;
 
 extern crate self as leptos_use;
