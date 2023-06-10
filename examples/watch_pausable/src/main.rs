@@ -9,10 +9,10 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (source, set_source) = create_signal(cx, "".to_string());
 
     let WatchPausableReturn {
-        stop,
         pause,
         resume,
         is_active,
+        ..
     } = watch_pausable(cx, source, move |v, _, _| {
         set_log.update(|log| *log = format!("{log}Changed to \"{v}\"\n"));
     });

@@ -3,13 +3,18 @@
 ## 0.2.0
 
 #### Braking Changes
-- `watch` doesn't accept `immediate` as an argument anymore. This is only provided by the option variant.
+- `watch` doesn't accept `immediate` as a direct argument anymore. This is only provided by the option variant.
 
 #### New Functions
 - `use_storage`
+- `use_local_storage`
+- `use_session_storage`
 - `watch_debounced`
 - `watch_throttled`
 - `watch_pausable`
+- `use_ceil`
+- `use_round`
+- `use_media_query`
 
 #### Other Changes
 

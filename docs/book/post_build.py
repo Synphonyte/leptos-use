@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
         category_dir = os.path.join(src_dir, dir)
         if os.path.isdir(category_dir):
             for file in os.listdir(category_dir):
-                if file.endswith(".md"):
+                if file.endswith(".md") and (len(sys.argv) == 1 or (sys.argv[1] in file)):
                     build_and_copy_demo(category, file)
 
 

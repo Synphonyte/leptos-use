@@ -13,7 +13,7 @@ use wasm_bindgen::{JsCast, JsValue};
 
 const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 
-/// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) / [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
+/// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) / [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
 ///
 /// ## Demo
 ///

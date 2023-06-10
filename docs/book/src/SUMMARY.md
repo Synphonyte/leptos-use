@@ -19,6 +19,7 @@
 # Browser
 
 - [use_event_listener](browser/use_event_listener.md)
+- [use_media_query](browser/use_media_query.md)
 
 # Sensors
 

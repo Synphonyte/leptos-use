@@ -46,9 +46,16 @@ and run
 ```shell
 mdbook serve
 ```
+
 This builds the html version of the book and runs a local dev server.
 To also add in the examples open another shell and run
 
 ```shell
 python3 post_build.py
+```
+
+If you only want to add the example for one function you can run for example
+
+```shell
+python3 post_build.py use_media_query
 ```
