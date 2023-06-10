@@ -150,10 +150,10 @@ impl Default for UseResizeObserverOptions {
     }
 }
 
-impl Into<web_sys::ResizeObserverOptions> for UseResizeObserverOptions {
-    fn into(self) -> web_sys::ResizeObserverOptions {
+impl From<UseResizeObserverOptions> for web_sys::ResizeObserverOptions {
+    fn from(val: UseResizeObserverOptions) -> Self {
         let mut options = web_sys::ResizeObserverOptions::new();
-        options.box_(self.box_);
+        options.box_(val.box_);
         options
     }
 }

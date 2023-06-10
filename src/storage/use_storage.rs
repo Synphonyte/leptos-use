@@ -200,7 +200,7 @@ where
                     Ok(ref serialized) => match store.get_item(&k) {
                         Ok(old_value) => {
                             if old_value.as_ref() != Some(serialized) {
-                                if let Err(e) = store.set_item(&k, &serialized) {
+                                if let Err(e) = store.set_item(&k, serialized) {
                                     on_err(UseStorageError::StorageAccessError(e));
                                 } else {
                                     let mut event_init = web_sys::CustomEventInit::new();

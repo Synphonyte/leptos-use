@@ -23,17 +23,17 @@ jobs:
           toolchain: nightly
           profile: minimal
           override: true
-          components: rustfmt
+          components: rustfmt, clippy
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Check function count badge
         run: python3 docs/generate_count_badge.py --check
       - name: Check formatting
         run: cargo fmt --check
-#      - name: Check if the README is up to date.
-#        run: |
-#          cargo install cargo-rdme
-#          cargo rdme --check
+      - name: Clippy check
+        uses: auguwu/clippy-action@1.1.2
+        with:
+          args: --all-features --tests -- -D warnings
       - name: Run tests
         run: cargo test --all-features
 

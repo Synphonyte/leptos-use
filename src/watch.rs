@@ -160,14 +160,14 @@ where
 
     create_effect(cx, move |did_run_before| {
         if !is_active() {
-            return ();
+            return;
         }
 
         let deps_value = deps();
 
         if !options.immediate && did_run_before.is_none() {
             prev_deps_value.replace(Some(deps_value));
-            return ();
+            return;
         }
 
         cur_deps_value.replace(Some(deps_value.clone()));
@@ -181,8 +181,6 @@ where
         prev_callback_value.replace(callback_value);
 
         prev_deps_value.replace(Some(deps_value));
-
-        ()
     });
 
     move || {

@@ -149,7 +149,7 @@ where
     };
 
     let cleanup_prev_el = Rc::clone(&cleanup_prev_element);
-    let closure = closure_js.clone();
+    let closure = closure_js;
     create_effect(cx, move |_| {
         cleanup_prev_el.borrow()();
 

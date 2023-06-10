@@ -62,12 +62,8 @@ impl FilterOptions {
         R: 'static,
     {
         match self {
-            FilterOptions::Debounce { ms, options } => {
-                Box::new(debounce_filter(ms.clone(), *options))
-            }
-            FilterOptions::Throttle { ms, options } => {
-                Box::new(throttle_filter(ms.clone(), *options))
-            }
+            FilterOptions::Debounce { ms, options } => Box::new(debounce_filter(*ms, *options)),
+            FilterOptions::Throttle { ms, options } => Box::new(throttle_filter(*ms, *options)),
             FilterOptions::None => Box::new(|invoke: Box<dyn CloneableFnWithReturn<R>>| {
                 Rc::new(RefCell::new(Some(invoke())))
             }),

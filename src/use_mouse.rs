@@ -174,7 +174,7 @@ where
             cx,
             target.clone(),
             touchmove,
-            touch_handler.clone(),
+            touch_handler,
             event_listener_options.clone(),
         );
         if options.reset_on_touch_ends {

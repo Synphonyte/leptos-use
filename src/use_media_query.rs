@@ -38,7 +38,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
     let (matches, set_matches) = create_signal(cx, false);
 
     let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));
-    let remove_listener: Rc<RefCell<Option<Box<dyn Fn()>>>> = Rc::new(RefCell::new(None));
+    let remove_listener: RemoveListener = Rc::new(RefCell::new(None));
 
     let rem_listener = Rc::clone(&remove_listener);
 
@@ -88,3 +88,5 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
 
     matches.into()
 }
+
+type RemoveListener = Rc<RefCell<Option<Box<dyn Fn()>>>>;

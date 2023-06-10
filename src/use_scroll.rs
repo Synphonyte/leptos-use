@@ -210,8 +210,7 @@ where
     let scroll = scroll_to.clone();
     let set_x = Box::new(move |x| scroll(Some(x), None));
 
-    let scroll = scroll_to.clone();
-    let set_y = Box::new(move |y| scroll(None, Some(y)));
+    let set_y = Box::new(move |y| scroll_to(None, Some(y)));
 
     let (is_scrolling, set_is_scrolling) = create_signal(cx, false);
 
@@ -475,9 +474,9 @@ pub enum ScrollBehavior {
     Smooth,
 }
 
-impl Into<web_sys::ScrollBehavior> for ScrollBehavior {
-    fn into(self) -> web_sys::ScrollBehavior {
-        match self {
+impl From<ScrollBehavior> for web_sys::ScrollBehavior {
+    fn from(val: ScrollBehavior) -> Self {
+        match val {
             ScrollBehavior::Auto => web_sys::ScrollBehavior::Auto,
             ScrollBehavior::Smooth => web_sys::ScrollBehavior::Smooth,
         }
