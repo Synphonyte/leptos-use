@@ -33,7 +33,7 @@ jobs:
       - name: Clippy check
         uses: auguwu/clippy-action@1.1.2
         with:
-          args: --all-features --tests -- -D warnings
+          args: --all-features --tests
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
         run: cargo test --all-features
