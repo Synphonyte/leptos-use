@@ -1,8 +1,8 @@
 use crate::core::{ElementMaybeSignal, Size};
 use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
+use crate::{watch_with_options, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use leptos_use::{watch_with_options, WatchOptions};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 

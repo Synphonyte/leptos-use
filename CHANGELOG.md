@@ -19,6 +19,7 @@
 - `use_preferred_dark`
 - `use_preferred_contrast`
 - `use_favicon`
+- `use_breakpoints`
 
 #### Other Changes
 

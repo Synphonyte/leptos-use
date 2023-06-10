@@ -21,7 +21,7 @@ default-struct-builder = { path = "../default-struct-builder" }
 num = { version = "0.4.0", optional = true }
 serde = { version = "1.0.163", optional = true }
 serde_json = { version = "1.0.96", optional = true }
-paste = { version = "1.0.12", optional = true }
+paste = "1.0.12"
 
 [dependencies.web-sys]
 version = "0.3.63"
@@ -51,7 +51,7 @@ features = [
 
 [features]
 docs = []
-math = ["num", "paste"]
+math = ["num"]
 storage = ["serde", "serde_json", "web-sys/Storage", "web-sys/StorageEvent"]
 
 [package.metadata."docs.rs"]

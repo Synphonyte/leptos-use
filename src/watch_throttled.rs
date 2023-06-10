@@ -1,6 +1,6 @@
+use crate::{watch_with_options, ThrottleOptions, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use leptos_use::{watch_with_options, ThrottleOptions, WatchOptions};
 
 /// A throttled version of [`watch`].
 ///

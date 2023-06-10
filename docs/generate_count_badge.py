@@ -15,11 +15,8 @@ def main():
 
     with open("README.md", "r") as f:
         original_text = f.read()
-        text = re.sub(
-            r'<img src="https://img.shields.io/badge/-\d+%20functions-%23EF3939" alt="\d+ Functions"',
-            f'<img src="https://img.shields.io/badge/-{count}%20functions-%23EF3939" alt="{count} Functions"',
-            original_text
-        )
+
+        text = replace_functions_shield(count, original_text)
 
         if len(sys.argv) > 1 and sys.argv[1] == "--check":
             if original_text != text:
@@ -32,6 +29,21 @@ def main():
 
     with open("README.md", "w") as f:
         f.write(text)
+
+    with open("docs/book/src/introduction.md", "r") as f:
+        text = replace_functions_shield(count, f.read())
+
+    with open("docs/book/src/introduction.md", "w") as f:
+        f.write(text)
+
+def replace_functions_shield(count, original_text):
+    text = re.sub(
+        r'<img src="https://img.shields.io/badge/-\d+%20functions-%23EF3939" alt="\d+ Functions"',
+        f'<img src="https://img.shields.io/badge/-{count}%20functions-%23EF3939" alt="{count} Functions"',
+        original_text
+    )
+    return text
+
 
 if __name__ == '__main__':
     main()

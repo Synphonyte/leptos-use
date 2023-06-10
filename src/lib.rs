@@ -8,6 +8,9 @@ pub mod docs;
 pub mod math;
 #[cfg(feature = "storage")]
 pub mod storage;
+pub mod utils;
+
+mod use_breakpoints;
 mod use_debounce_fn;
 #[cfg(web_sys_unstable_apis)]
 mod use_element_size;
@@ -22,12 +25,12 @@ mod use_resize_observer;
 mod use_scroll;
 mod use_supported;
 mod use_throttle_fn;
-pub mod utils;
 mod watch;
 mod watch_debounced;
 mod watch_pausable;
 mod watch_throttled;
 
+pub use use_breakpoints::*;
 pub use use_debounce_fn::*;
 #[cfg(web_sys_unstable_apis)]
 pub use use_element_size::*;
@@ -46,5 +49,3 @@ pub use watch::*;
 pub use watch_debounced::*;
 pub use watch_pausable::*;
 pub use watch_throttled::*;
-
-extern crate self as leptos_use;

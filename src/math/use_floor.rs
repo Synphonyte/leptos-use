@@ -1,5 +1,5 @@
+use crate::math::shared::use_simple_math;
 use leptos::*;
-use leptos_use::math::shared::use_simple_math;
 use num::Float;
 use paste::paste;
 

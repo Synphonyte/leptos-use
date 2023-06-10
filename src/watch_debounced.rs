@@ -1,6 +1,6 @@
+use crate::{watch_with_options, DebounceOptions, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use leptos_use::{watch_with_options, DebounceOptions, WatchOptions};
 
 /// A debounced version of [`watch`].
 ///
