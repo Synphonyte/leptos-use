@@ -21,7 +21,7 @@ def main():
             original_text
         )
 
-        if sys.argv[1] == "--check":
+        if len(sys.argv) > 1 and sys.argv[1] == "--check":
             if original_text != text:
                 print("[Failed] README.md doesn't have the correct function count badge", file=sys.stderr)
                 print("  * Run `python3 docs/generate_count_badge.py` to fix", file=sys.stderr)

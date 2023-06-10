@@ -4,6 +4,7 @@
 
 #### Braking Changes
 - `watch` doesn't accept `immediate` as a direct argument anymore. This is only provided by the option variant.
+- `watch` has now variant `watch_with_options` which allows for debouncing and throttling.
 
 #### New Functions
 - `use_storage`
@@ -17,10 +18,11 @@
 - `use_media_query`
 - `use_preferred_dark`
 - `use_preferred_contrast`
+- `use_favicon`
 
 #### Other Changes
 
-- `watch` has now variant `watch_with_options` which allows for debouncing and throttling.
+- Function count badge in readme
 
 ## 0.1.8/9
 
