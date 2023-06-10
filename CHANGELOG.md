@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+### New Functions
+
+- `use_intersection_observer`
+- `use_element_visibility`
+
 ## 0.2.0
 
 #### Braking Changes

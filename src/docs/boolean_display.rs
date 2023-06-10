@@ -4,12 +4,12 @@ use leptos::*;
 pub fn BooleanDisplay(
     cx: Scope,
     #[prop(into)] value: MaybeSignal<bool>,
-    #[prop(optional)] class: String,
+    #[prop(optional, into)] class: String,
+    #[prop(default = "true")] true_str: &'static str,
+    #[prop(default = "false")] false_str: &'static str,
 ) -> impl IntoView {
     let true_class = "text-green-600 dark:text-green-500";
     let false_class = "text-[--brand-color]";
-    let true_str = "true";
-    let false_str = "false";
 
     let class = move || {
         format!(

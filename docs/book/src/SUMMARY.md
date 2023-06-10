@@ -14,6 +14,8 @@
 # Elements
 
 - [use_element_size](elements/use_element_size.md)
+- [use_element_visibility](elements/use_element_visibility.md)
+- [use_intersection_observer](elements/use_intersection_observer.md)
 - [use_resize_observer](elements/use_resize_observer.md)
 
 # Browser

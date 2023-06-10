@@ -24,6 +24,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_media_query/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_storage/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_breakpoints/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -44,6 +45,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_media_query/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_storage/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_breakpoints/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
