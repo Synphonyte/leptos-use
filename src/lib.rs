@@ -14,6 +14,8 @@ mod use_element_size;
 mod use_event_listener;
 mod use_media_query;
 mod use_mouse;
+mod use_preferred_contrast;
+mod use_preferred_dark;
 #[cfg(web_sys_unstable_apis)]
 mod use_resize_observer;
 mod use_scroll;
@@ -31,6 +33,8 @@ pub use use_element_size::*;
 pub use use_event_listener::*;
 pub use use_media_query::*;
 pub use use_mouse::*;
+pub use use_preferred_contrast::*;
+pub use use_preferred_dark::*;
 #[cfg(web_sys_unstable_apis)]
 pub use use_resize_observer::*;
 pub use use_scroll::*;

@@ -28,6 +28,10 @@ use std::rc::Rc;
 /// # }
 /// ```
 ///
+/// ## See also
+///
+/// * [`use_preferred_dark`]
+/// * [`use_preferred_contrast`]
 pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
     let query = query.into();
 

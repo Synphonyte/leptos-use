@@ -15,6 +15,8 @@
 - `use_ceil`
 - `use_round`
 - `use_media_query`
+- `use_preferred_dark`
+- `use_preferred_contrast`
 
 #### Other Changes
 
