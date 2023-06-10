@@ -23,6 +23,8 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// It returns a triplet `(read_signal, write_signal, delete_from_storage_func)` of type `(ReadSignal<T>, WriteSignal<T>, Fn())`.
 ///
+/// Values are (de-)serialized to/from JSON using [`serde`](https://serde.rs/).
+///
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::storage::{StorageType, use_storage, use_storage_with_options, UseStorageOptions};
@@ -138,10 +140,9 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// ## Filter Storage Write
 ///
-/// You can specify `debounce` and `throttle` filter options for writing to storage.
+/// You can specify `debounce` or `throttle` options for limiting writes to storage.
 ///
 /// ## See also
-///
 ///
 /// * [`use_local_storage`]
 /// * [`use_session_storage`]
@@ -442,19 +443,19 @@ pub enum UseStorageError<E = ()> {
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T> {
     /// Type of storage. Can be `Local` (default), `Session` or `Custom(web_sys::Storage)`
-    storage_type: StorageType,
+    pub(crate) storage_type: StorageType,
     /// Listen to changes to this storage key from somewhere else. Defaults to true.
-    listen_to_storage_changes: bool,
+    pub(crate) listen_to_storage_changes: bool,
     /// If no value for the give key is found in the storage, write it. Defaults to true.
-    write_defaults: bool,
+    pub(crate) write_defaults: bool,
     /// Takes the serialized (json) stored value and the default value and returns a merged version.
     /// Defaults to simply returning the stored value.
-    merge_defaults: fn(&str, &T) -> String,
+    pub(crate) merge_defaults: fn(&str, &T) -> String,
     /// Optional callback whenever an error occurs. The callback takes an argument of type [`UseStorageError`].
-    on_error: Box<dyn CloneableFnWithArg<UseStorageError>>,
+    pub(crate) on_error: Box<dyn CloneableFnWithArg<UseStorageError>>,
 
     /// Debounce or throttle the writing to storage whenever the value changes.
-    filter: FilterOptions,
+    pub(crate) filter: FilterOptions,
 }
 
 impl<T> Default for UseStorageOptions<T> {
