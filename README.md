@@ -8,14 +8,17 @@
 <p align="center">Inspired by React-Use / VueUse / SolidJS-USE</p>
 
 <p align="center">
-    <a href="https://leptos-use.rs"><b>Guide</b></a> • 
-    <a href="https://docs.rs/leptos-use"><b>Docs.rs</b></a> •
-    <a href="https://crates.io/crates/leptos-use"><b>Crates.io</b></a>
+    <a href="https://crates.io/crates/leptos-use"><img src="https://img.shields.io/crates/v/leptos-use.svg?label=&color=%232C1275" alt="Crates.io"/></a>
+    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-docs%20%26%20demos-%239A233F" alt="Docs & Demos"></a> 
+    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-23%20functions-%23EF3939" alt="23 Functions" /></a>
 </p>
+
+<br/>
+<br/>
+<br/>
 
 -----
 
-[![Crates.io](https://img.shields.io/crates/v/leptos-use.svg)](https://crates.io/crates/leptos-use)
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
