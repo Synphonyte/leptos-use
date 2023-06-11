@@ -37,6 +37,7 @@ mod watch;
 mod watch_debounced;
 mod watch_pausable;
 mod watch_throttled;
+mod whenever;
 
 pub use use_breakpoints::*;
 pub use use_debounce_fn::*;
@@ -55,3 +56,4 @@ pub use watch::*;
 pub use watch_debounced::*;
 pub use watch_pausable::*;
 pub use watch_throttled::*;
+pub use whenever::*;

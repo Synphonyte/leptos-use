@@ -196,6 +196,7 @@ pub struct WatchOptions {
     /// the first change is detected of any signal that is accessed in `deps`.
     immediate: bool,
 
+    /// Allows to debounce or throttle the callback
     filter: FilterOptions,
 }
 

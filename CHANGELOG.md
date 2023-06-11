@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2
+
+### New Functions
+
+- `whenever`
+
 ## 0.2.1
 
 ### New Functions

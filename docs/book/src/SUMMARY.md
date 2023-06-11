@@ -38,6 +38,7 @@
 - [watch_debounced](watch/watch_debounced.md)
 - [watch_pausable](watch/watch_pausable.md)
 - [watch_throttled](watch/watch_throttled.md)
+- [whenever](watch/whenever.md)
 
 # Utilities
 
