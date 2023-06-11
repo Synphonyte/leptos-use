@@ -24,8 +24,10 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_media_query/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_storage/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_breakpoints/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_ceil/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_element_visibility/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_round/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -45,6 +47,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_favicon/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_media_query/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_storage/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_breakpoints/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_element_visibility/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/target" />

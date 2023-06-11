@@ -1,0 +1,23 @@
+[workspace]
+
+members = [
+    "use_breakpoints",
+    "use_ceil",
+    "use_debounce_fn",
+    "use_element_size",
+    "use_element_visibility",
+    "use_event_listener",
+    "use_favicon",
+    "use_floor",
+    "use_intersection_observer",
+    "use_media_query",
+    "use_mouse",
+    "use_resize_observer",
+    "use_round",
+    "use_scroll",
+    "use_storage",
+    "use_throttle_fn",
+    "watch_debounced",
+    "watch_pausable",
+    "watch_throttled",
+]
