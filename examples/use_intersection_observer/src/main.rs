@@ -67,10 +67,10 @@ fn Demo(cx: Scope) -> impl IntoView {
 
 .notice {
   text-align: center;
-  padding: 2em 0;
+  padding: 3em 0;
   margin-bottom: 300px;
   font-style: italic;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   opacity: 0.8;
 }
 

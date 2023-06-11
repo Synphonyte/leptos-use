@@ -93,7 +93,7 @@
 }
 
 .demo-container input[type=range],
-.demo-container input[type=checkbox]{
+.demo-container input[type=checkbox] {
     accent-color: var(--brand-color);
 }
 
@@ -112,4 +112,20 @@
 .demo-container input[type="number"]::placeholder,
 .demo-container textarea::placeholder {
     opacity: 0.7;
+}
+
+.demo-container .float {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    border: 1px solid var(--theme-popup-border);
+    background: var(--bg);
+    z-index: 100;
+    min-width: 100px;
+}
+
+.demo-container .area {
+    border-width: 2px;
+    border-style: dashed;
+    padding: 1.5rem;
 }

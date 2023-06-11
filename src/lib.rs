@@ -22,6 +22,7 @@ pub use use_resize_observer::*;
 
 mod use_breakpoints;
 mod use_debounce_fn;
+mod use_element_visibility;
 mod use_event_listener;
 mod use_favicon;
 mod use_intersection_observer;
@@ -39,6 +40,7 @@ mod watch_throttled;
 
 pub use use_breakpoints::*;
 pub use use_debounce_fn::*;
+pub use use_element_visibility::*;
 pub use use_event_listener::*;
 pub use use_favicon::*;
 pub use use_intersection_observer::*;
