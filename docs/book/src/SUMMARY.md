@@ -48,6 +48,7 @@
 
 # @Math
 
+- [use_abs](math/use_abs.md)
 - [use_ceil](math/use_ceil.md)
 - [use_floor](math/use_floor.md)
 - [use_max](math/use_max.md)

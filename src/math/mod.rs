@@ -2,12 +2,14 @@
 //! Collection of reactive math functions
 
 mod shared;
+mod use_abs;
 mod use_ceil;
 mod use_floor;
 mod use_max;
 mod use_min;
 mod use_round;
 
+pub use use_abs::*;
 pub use use_ceil::*;
 pub use use_floor::*;
 pub use use_max::*;
