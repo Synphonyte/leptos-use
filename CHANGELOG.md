@@ -1,25 +1,44 @@
 # Changelog
 
-## v0.2.2
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### New Functions
+## [Unreleased]
+
+### Braking Changes 🛠
+- `use_event_listener` no longer returns a `Box<dyn Fn()>` but a `impl Fn() + Clone`
+
+### Changes 🔥
+
+- You can now specify a `&str` or `Signal<String>` with CSS selectors wherever a node ref is accepted
+- Callbacks of the following functions no longer require `Clone`
+  - `use_resize_observer`
+  - `use_intersection_observer`
+- These functions now also accept multiple target elements in addition to a single one:
+  - `use_resize_observer`
+  - `use_intersection_observer`
+
+### New Functions 🚀
 
 - `whenever`
+- `use_mutation_observer`
 
-## 0.2.1
+## [0.2.1] - 2023-06-11
 
 ### New Functions
 
 - `use_intersection_observer`
 - `use_element_visibility`
 
-## 0.2.0
+## [0.2.0] - 2023-06-11
 
-#### Braking Changes
+### Braking Changes
+
 - `watch` doesn't accept `immediate` as a direct argument anymore. This is only provided by the option variant.
 - `watch` has now variant `watch_with_options` which allows for debouncing and throttling.
 
-#### New Functions
+### New Functions
+
 - `use_storage`
 - `use_local_storage`
 - `use_session_storage`
@@ -34,49 +53,58 @@
 - `use_favicon`
 - `use_breakpoints`
 
-#### Other Changes
+### Other Changes
 
 - Function count badge in readme
 
-## 0.1.8/9
+## [0.1.8/9] - 2023-06-05
 
 - Fixed documentation and doc tests running for functions behind `#[cfg(web_sys_unstable_apis)]`
 
-## 0.1.7
+## [0.1.7] - 2023-06-05
 
-#### New Function
+### New Function
+
 - `use_element_size`
 
-## 0.1.6
+## [0.1.6] - 2023-06-03
+
+### Changes
 
 - Fixed documentation so all feature are documented
 
-## 0.1.5
+## [0.1.5] - 2023-06-03
 
-#### New Functions
+### New Functions
+
 - `use_floor`
 - `use_max`
 - `use_min`
 
-#### Other Changes
+### Changes
+
 - New feature: `math` that has to be activated in order to use the math functions.
 
-## 0.1.4
+## [0.1.4] - 2023-06-02
 
-#### New Functions
+### New Functions
+
 - `use_supported`
 - `use_resize_observer`
 - `watch`
 - `use_mouse`
 
-#### Other Changes
+### Changes
+
 - Use the crate `default-struct-builder` to provide ergonimic function options.
 
-## 0.1.3
+## [0.1.3] - 2023-05-28
 
-#### New Functions
+### New Functions
+
 - `use_scroll`
 - `use_debounce_fn`
 
-#### Other Changes
+### Other Changes
+
 - Better and more beautiful demo integration into the guide.

@@ -1,4 +1,5 @@
 use crate::core::ElementMaybeSignal;
+use crate::{watch_with_options, WatchOptions};
 use leptos::ev::EventDescriptor;
 use leptos::*;
 use std::cell::RefCell;
@@ -85,7 +86,7 @@ pub fn use_event_listener<Ev, El, T, F>(
     target: El,
     event: Ev,
     handler: F,
-) -> Box<dyn Fn()>
+) -> impl Fn() + Clone
 where
     Ev: EventDescriptor + 'static,
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
@@ -108,7 +109,7 @@ pub fn use_event_listener_with_options<Ev, El, T, F>(
     event: Ev,
     handler: F,
     options: web_sys::AddEventListenerOptions,
-) -> Box<dyn Fn()>
+) -> impl Fn() + Clone
 where
     Ev: EventDescriptor + 'static,
     (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
@@ -123,58 +124,48 @@ where
         let _ = element
             .remove_event_listener_with_callback(&event_name, closure.as_ref().unchecked_ref());
     };
-    let cleanup = cleanup_fn.clone();
 
     let event_name = event.name();
 
     let signal = (cx, target).into();
 
-    let element = signal.get_untracked();
+    let prev_element: Rc<RefCell<Option<web_sys::EventTarget>>> =
+        Rc::new(RefCell::new(signal.get_untracked().map(|e| e.into())));
 
-    let cleanup_prev_element = if let Some(element) = element {
-        let element = element.into();
-
-        _ = element.add_event_listener_with_callback_and_add_event_listener_options(
-            &event_name,
-            closure_js.as_ref().unchecked_ref(),
-            &options,
-        );
-
-        let clean = cleanup.clone();
-        Rc::new(RefCell::new(Box::new(move || {
-            clean(&element);
-        }) as Box<dyn Fn()>))
-    } else {
-        Rc::new(RefCell::new(Box::new(move || {}) as Box<dyn Fn()>))
+    let prev_el = prev_element.clone();
+    let cleanup_prev_element = move || {
+        if let Some(element) = prev_el.take() {
+            cleanup_fn(&element);
+        }
     };
 
-    let cleanup_prev_el = Rc::clone(&cleanup_prev_element);
+    let cleanup_prev_el = cleanup_prev_element.clone();
     let closure = closure_js;
-    create_effect(cx, move |_| {
-        cleanup_prev_el.borrow()();
 
-        let element = signal.get();
+    let stop_watch = watch_with_options(
+        cx,
+        move || signal.get().map(|e| e.into()),
+        move |element, _, _| {
+            cleanup_prev_el();
+            prev_element.replace(element.clone());
 
-        if let Some(element) = element {
-            let element = element.into();
+            if let Some(element) = element {
+                _ = element.add_event_listener_with_callback_and_add_event_listener_options(
+                    &event_name,
+                    closure.as_ref().unchecked_ref(),
+                    &options,
+                );
+            }
+        },
+        WatchOptions::default().immediate(true),
+    );
 
-            _ = element.add_event_listener_with_callback_and_add_event_listener_options(
-                &event_name,
-                closure.as_ref().unchecked_ref(),
-                &options,
-            );
+    let stop = move || {
+        stop_watch();
+        cleanup_prev_element();
+    };
 
-            let clean = cleanup.clone();
-            let _ = cleanup_prev_el.replace(Box::new(move || {
-                clean(&element);
-            }) as Box<dyn Fn()>);
-        } else {
-            let _ = cleanup_prev_el.replace(Box::new(move || {}) as Box<dyn Fn()>);
-        }
-    });
+    on_cleanup(cx, stop.clone());
 
-    let cleanup_fn = move || cleanup_prev_element.borrow()();
-    on_cleanup(cx, cleanup_fn.clone());
-
-    Box::new(cleanup_fn)
+    stop
 }

@@ -61,7 +61,7 @@ where
 
     use_intersection_observer_with_options(
         cx,
-        target,
+        (cx, target).into(),
         move |entries, _| {
             set_visible(entries[0].is_intersecting());
         },

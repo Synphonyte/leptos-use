@@ -66,7 +66,7 @@ where
     let box_ = options.box_;
     let initial_size = options.initial_size;
 
-    let targ = (cx, target.clone()).into();
+    let targ = (cx, target).into();
 
     let t = targ.clone();
     let is_svg = move || {
@@ -85,9 +85,9 @@ where
     let (height, set_height) = create_signal(cx, options.initial_size.height);
 
     let t = targ.clone();
-    let _ = use_resize_observer_with_options(
+    let _ = use_resize_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, _, _>(
         cx,
-        target,
+        targ.clone(),
         move |entries, _| {
             let entry = &entries[0];
 

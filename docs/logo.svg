@@ -5,12 +5,12 @@
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css2?family=Quicksand&amp;display=swap');
 
-        path.black {
+        path.black, text {
             fill: #1e1838;
         }
 
         @media (prefers-color-scheme: dark) {
-            path.black {
+            path.black, text {
                 fill: #f3f3f3;
             }
         }

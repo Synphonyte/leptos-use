@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use crate::{watch_with_options, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -51,11 +51,9 @@ pub fn use_intersection_observer<El, T, F>(
     callback: F,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver)
-        + Clone
-        + 'static,
+    F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
 {
     use_intersection_observer_with_options::<El, T, web_sys::Element, web_sys::Element, F>(
         cx,
@@ -69,17 +67,15 @@ where
 pub fn use_intersection_observer_with_options<El, T, RootEl, RootT, F>(
     cx: Scope,
     target: El,
-    callback: F,
+    mut callback: F,
     options: UseIntersectionObserverOptions<RootEl, RootT>,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     (Scope, RootEl): Into<ElementMaybeSignal<RootT, web_sys::Element>>,
     RootT: Into<web_sys::Element> + Clone + 'static,
-    F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver)
-        + Clone
-        + 'static,
+    F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
 {
     let UseIntersectionObserverOptions {
         immediate,
@@ -88,6 +84,20 @@ where
         thresholds,
         ..
     } = options;
+
+    let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
+        move |entries: js_sys::Array, observer| {
+            callback(
+                entries
+                    .to_vec()
+                    .into_iter()
+                    .map(|v| v.unchecked_into::<web_sys::IntersectionObserverEntry>())
+                    .collect(),
+                observer,
+            );
+        },
+    )
+    .into_js_value();
 
     let (is_active, set_active) = create_signal(cx, immediate);
 
@@ -100,7 +110,7 @@ where
         }
     };
 
-    let target = (cx, target).into();
+    let targets = (cx, target).into();
     let root = root.map(|root| (cx, root).into());
     let clean = cleanup.clone();
 
@@ -108,13 +118,13 @@ where
         cx,
         move || {
             (
-                target.get(),
+                targets.get(),
                 root.as_ref().map(|root| root.get()),
                 is_active.get(),
             )
         },
         move |values, _, _| {
-            let (target, root, is_active) = values;
+            let (targets, root, is_active) = values;
 
             clean();
 
@@ -122,51 +132,32 @@ where
                 return;
             }
 
-            if let Some(target) = target {
-                let mut callback = callback.clone();
-                let closure =
-                    Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
-                        move |entries: js_sys::Array, observer| {
-                            callback(
-                                entries
-                                    .to_vec()
-                                    .into_iter()
-                                    .map(|v| {
-                                        v.unchecked_into::<web_sys::IntersectionObserverEntry>()
-                                    })
-                                    .collect(),
-                                observer,
-                            );
-                        },
-                    );
+            let mut options = web_sys::IntersectionObserverInit::new();
+            options.root_margin(&root_margin).threshold(
+                &thresholds
+                    .iter()
+                    .copied()
+                    .map(JsValue::from)
+                    .collect::<js_sys::Array>(),
+            );
 
-                let mut options = web_sys::IntersectionObserverInit::new();
-                options.root_margin(&root_margin).threshold(
-                    &thresholds
-                        .iter()
-                        .copied()
-                        .map(JsValue::from)
-                        .collect::<js_sys::Array>(),
-                );
+            if let Some(Some(root)) = root {
+                let root: web_sys::Element = root.clone().into();
+                options.root(Some(&root));
+            }
 
-                if let Some(Some(root)) = root {
-                    let root: web_sys::Element = root.clone().into();
-                    options.root(Some(&root));
-                }
+            let obs = web_sys::IntersectionObserver::new_with_options(
+                closure_js.clone().as_ref().unchecked_ref(),
+                &options,
+            )
+            .expect("failed to create IntersectionObserver");
 
-                let obs = web_sys::IntersectionObserver::new_with_options(
-                    closure.as_ref().unchecked_ref(),
-                    &options,
-                )
-                .expect("failed to create IntersectionObserver");
-
-                closure.forget();
-
+            for target in targets.iter().flatten() {
                 let target: web_sys::Element = target.clone().into();
                 obs.observe(&target);
-
-                observer.replace(Some(obs));
             }
+
+            observer.replace(Some(obs));
         },
         WatchOptions::default().immediate(immediate),
     );

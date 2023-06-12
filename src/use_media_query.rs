@@ -63,7 +63,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
         if let Some(media_query) = media_query.as_ref() {
             set_matches(media_query.matches());
 
-            remove_listener.replace(Some(use_event_listener(
+            remove_listener.replace(Some(Box::new(use_event_listener(
                 cx,
                 media_query.clone(),
                 change,
@@ -71,7 +71,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
                     .get()
                     .expect("cell should be initialized by now")
                     .clone(),
-            )));
+            ))));
         } else {
             set_matches(false);
         }

@@ -1,7 +1,9 @@
-mod event_target_maybe_signal;
+mod element_maybe_signal;
+mod elements_maybe_signal;
 mod position;
 mod size;
 
-pub use event_target_maybe_signal::*;
+pub use element_maybe_signal::*;
+pub use elements_maybe_signal::*;
 pub use position::*;
 pub use size::*;

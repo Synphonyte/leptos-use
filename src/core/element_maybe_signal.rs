@@ -125,6 +125,8 @@ where
     }
 }
 
+// From static element //////////////////////////////////////////////////////////////
+
 impl<T, E> From<(Scope, T)> for ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
@@ -143,6 +145,35 @@ where
     }
 }
 
+// From string (selector) ///////////////////////////////////////////////////////////////
+
+impl<'a, E> From<(Scope, &'a str)> for ElementMaybeSignal<web_sys::Element, E>
+where
+    E: From<web_sys::Element> + 'static,
+{
+    fn from(target: (Scope, &'a str)) -> Self {
+        Self::Static(document().query_selector(target.1).unwrap_or_default())
+    }
+}
+
+impl<E> From<(Scope, Signal<String>)> for ElementMaybeSignal<web_sys::Element, E>
+where
+    E: From<web_sys::Element> + 'static,
+{
+    fn from(target: (Scope, Signal<String>)) -> Self {
+        let (cx, signal) = target;
+
+        Self::Dynamic(
+            create_memo(cx, move |_| {
+                document().query_selector(&signal.get()).unwrap_or_default()
+            })
+            .into(),
+        )
+    }
+}
+
+// From signal ///////////////////////////////////////////////////////////////
+
 macro_rules! impl_from_signal_option {
     ($ty:ty) => {
         impl<T, E> From<(Scope, $ty)> for ElementMaybeSignal<T, E>
@@ -150,7 +181,7 @@ macro_rules! impl_from_signal_option {
             T: Into<E> + Clone + 'static,
         {
             fn from(target: (Scope, $ty)) -> Self {
-                ElementMaybeSignal::Dynamic(target.1.into())
+                Self::Dynamic(target.1.into())
             }
         }
     };
@@ -170,7 +201,7 @@ macro_rules! impl_from_signal {
             fn from(target: (Scope, $ty)) -> Self {
                 let (cx, signal) = target;
 
-                ElementMaybeSignal::Dynamic(Signal::derive(cx, move || Some(signal.get())))
+                Self::Dynamic(Signal::derive(cx, move || Some(signal.get())))
             }
         }
     };
@@ -181,6 +212,8 @@ impl_from_signal!(ReadSignal<T>);
 impl_from_signal!(RwSignal<T>);
 impl_from_signal!(Memo<T>);
 
+// From NodeRef //////////////////////////////////////////////////////////////
+
 macro_rules! impl_from_node_ref {
     ($ty:ty) => {
         impl<R> From<(Scope, NodeRef<R>)> for ElementMaybeSignal<$ty, $ty>
@@ -190,7 +223,7 @@ macro_rules! impl_from_node_ref {
             fn from(target: (Scope, NodeRef<R>)) -> Self {
                 let (cx, node_ref) = target;
 
-                ElementMaybeSignal::Dynamic(Signal::derive(cx, move || {
+                Self::Dynamic(Signal::derive(cx, move || {
                     node_ref.get().map(move |el| {
                         let el = el.into_any();
                         let el: $ty = el.deref().clone().into();

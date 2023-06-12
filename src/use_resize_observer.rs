@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::ElementsMaybeSignal;
 use crate::{use_supported, watch};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -50,11 +50,11 @@ pub fn use_resize_observer<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
     callback: F,
-) -> UseResizeObserverReturn
+) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + Clone + 'static,
+    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
     use_resize_observer_with_options(cx, target, callback, UseResizeObserverOptions::default())
 }
@@ -63,14 +63,28 @@ where
 pub fn use_resize_observer_with_options<El, T, F>(
     cx: Scope,
     target: El, // TODO : multiple elements?
-    callback: F,
+    mut callback: F,
     options: UseResizeObserverOptions,
-) -> UseResizeObserverReturn
+) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + Clone + 'static,
+    F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
+    let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
+        move |entries: js_sys::Array, observer| {
+            callback(
+                entries
+                    .to_vec()
+                    .into_iter()
+                    .map(|v| v.unchecked_into::<web_sys::ResizeObserverEntry>())
+                    .collect(),
+                observer,
+            );
+        },
+    )
+    .into_js_value();
+
     let observer: Rc<RefCell<Option<web_sys::ResizeObserver>>> = Rc::new(RefCell::new(None));
 
     let is_supported = use_supported(cx, || JsValue::from("ResizeObserver").js_in(&window()));
@@ -84,40 +98,25 @@ where
         }
     };
 
-    let target = (cx, target).into();
+    let targets = (cx, target).into();
 
     let clean = cleanup.clone();
     let stop_watch = watch(
         cx,
-        move || target.get(),
-        move |target, _, _| {
+        move || targets.get(),
+        move |targets, _, _| {
             clean();
 
-            if is_supported() {
-                if let Some(target) = target {
-                    let mut callback = callback.clone();
-                    let closure = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
-                        move |entries: js_sys::Array, observer| {
-                            callback(
-                                entries
-                                    .to_vec()
-                                    .into_iter()
-                                    .map(|v| v.unchecked_into::<web_sys::ResizeObserverEntry>())
-                                    .collect(),
-                                observer,
-                            );
-                        },
-                    );
-                    let obs = web_sys::ResizeObserver::new(closure.as_ref().unchecked_ref())
-                        .expect("failed to create ResizeObserver");
+            if is_supported() && !targets.is_empty() {
+                let obs = web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
+                    .expect("failed to create ResizeObserver");
 
-                    closure.forget();
-
+                for target in targets.iter().flatten() {
                     let target: web_sys::Element = target.clone().into();
                     obs.observe_with_options(&target, &options.clone().into());
-
-                    observer.replace(Some(obs));
                 }
+
+                observer.replace(Some(obs));
             }
         },
     );
@@ -129,14 +128,11 @@ where
 
     on_cleanup(cx, stop.clone());
 
-    UseResizeObserverReturn {
-        is_supported,
-        stop: Box::new(stop),
-    }
+    UseResizeObserverReturn { is_supported, stop }
 }
 
-#[derive(DefaultBuilder, Clone)]
 /// Options for [`use_resize_observer_with_options`].
+#[derive(DefaultBuilder, Clone)]
 pub struct UseResizeObserverOptions {
     /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
     pub box_: web_sys::ResizeObserverBoxOptions,
@@ -159,9 +155,9 @@ impl From<UseResizeObserverOptions> for web_sys::ResizeObserverOptions {
 }
 
 /// The return value of [`use_resize_observer`].
-pub struct UseResizeObserverReturn {
+pub struct UseResizeObserverReturn<F: Fn() + Clone> {
     /// Whether the browser supports the ResizeObserver API
     pub is_supported: Signal<bool>,
     /// A function to stop and detach the ResizeObserver
-    pub stop: Box<dyn Fn()>,
+    pub stop: F,
 }
