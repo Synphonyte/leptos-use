@@ -7,10 +7,7 @@ on:
 
 name: CI
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: write-all
 
 jobs:
   publish:
