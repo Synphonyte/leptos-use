@@ -91,7 +91,7 @@ where
 
     let cleanup = {
         let observer = Rc::clone(&observer);
-        
+
         move || {
             let mut observer = observer.borrow_mut();
             if let Some(o) = observer.as_ref() {
@@ -105,7 +105,7 @@ where
 
     let stop_watch = {
         let cleanup = cleanup.clone();
-        
+
         watch(
             cx,
             move || targets.get(),
@@ -113,8 +113,9 @@ where
                 cleanup();
 
                 if is_supported() && !targets.is_empty() {
-                    let obs = web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
-                        .expect("failed to create ResizeObserver");
+                    let obs =
+                        web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
+                            .expect("failed to create ResizeObserver");
 
                     for target in targets.iter().flatten() {
                         let target: web_sys::Element = target.clone().into();

@@ -126,7 +126,7 @@ where
 
     let touch_handler = {
         let coord_type = options.coord_type.clone();
-        
+
         move |event: web_sys::TouchEvent| {
             let touches = event.touches();
             if touches.length() > 0 {

@@ -349,7 +349,7 @@ where
 
     let target = {
         let signal = signal.clone();
-        
+
         Signal::derive(cx, move || {
             let element = signal.get();
             element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
