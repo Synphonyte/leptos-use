@@ -89,37 +89,43 @@ where
 
     let is_supported = use_supported(cx, || JsValue::from("ResizeObserver").js_in(&window()));
 
-    let obs = Rc::clone(&observer);
-    let cleanup = move || {
-        let mut observer = obs.borrow_mut();
-        if let Some(o) = observer.as_ref() {
-            o.disconnect();
-            *observer = None;
+    let cleanup = {
+        let observer = Rc::clone(&observer);
+        
+        move || {
+            let mut observer = observer.borrow_mut();
+            if let Some(o) = observer.as_ref() {
+                o.disconnect();
+                *observer = None;
+            }
         }
     };
 
     let targets = (cx, target).into();
 
-    let clean = cleanup.clone();
-    let stop_watch = watch(
-        cx,
-        move || targets.get(),
-        move |targets, _, _| {
-            clean();
+    let stop_watch = {
+        let cleanup = cleanup.clone();
+        
+        watch(
+            cx,
+            move || targets.get(),
+            move |targets, _, _| {
+                cleanup();
 
-            if is_supported() && !targets.is_empty() {
-                let obs = web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
-                    .expect("failed to create ResizeObserver");
+                if is_supported() && !targets.is_empty() {
+                    let obs = web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
+                        .expect("failed to create ResizeObserver");
 
-                for target in targets.iter().flatten() {
-                    let target: web_sys::Element = target.clone().into();
-                    obs.observe_with_options(&target, &options.clone().into());
+                    for target in targets.iter().flatten() {
+                        let target: web_sys::Element = target.clone().into();
+                        obs.observe_with_options(&target, &options.clone().into());
+                    }
+
+                    observer.replace(Some(obs));
                 }
-
-                observer.replace(Some(obs));
-            }
-        },
-    );
+            },
+        )
+    };
 
     let stop = move || {
         cleanup();

@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2023-06-13
 
 ### Braking Changes 🛠
 - `use_event_listener` no longer returns a `Box<dyn Fn()>` but a `impl Fn() + Clone`
@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `whenever`
 - `use_mutation_observer`
+- `use_abs`
+- `on_click_outside`
 
 ## [0.2.1] - 2023-06-11
 

@@ -103,82 +103,94 @@ where
 
     let observer: Rc<RefCell<Option<web_sys::IntersectionObserver>>> = Rc::new(RefCell::new(None));
 
-    let obs = Rc::clone(&observer);
-    let cleanup = move || {
-        if let Some(o) = obs.take() {
-            o.disconnect();
+    let cleanup = {
+        let obsserver = Rc::clone(&observer);
+
+        move || {
+            if let Some(o) = obsserver.take() {
+                o.disconnect();
+            }
         }
     };
 
     let targets = (cx, target).into();
     let root = root.map(|root| (cx, root).into());
-    let clean = cleanup.clone();
 
-    let stop_watch = watch_with_options(
-        cx,
+    let stop_watch = {
+        let cleanup = cleanup.clone();
+
+        watch_with_options(
+            cx,
+            move || {
+                (
+                    targets.get(),
+                    root.as_ref().map(|root| root.get()),
+                    is_active.get(),
+                )
+            },
+            move |values, _, _| {
+                let (targets, root, is_active) = values;
+
+                cleanup();
+
+                if !is_active {
+                    return;
+                }
+
+                let mut options = web_sys::IntersectionObserverInit::new();
+                options.root_margin(&root_margin).threshold(
+                    &thresholds
+                        .iter()
+                        .copied()
+                        .map(JsValue::from)
+                        .collect::<js_sys::Array>(),
+                );
+
+                if let Some(Some(root)) = root {
+                    let root: web_sys::Element = root.clone().into();
+                    options.root(Some(&root));
+                }
+
+                let obs = web_sys::IntersectionObserver::new_with_options(
+                    closure_js.clone().as_ref().unchecked_ref(),
+                    &options,
+                )
+                .expect("failed to create IntersectionObserver");
+
+                for target in targets.iter().flatten() {
+                    let target: web_sys::Element = target.clone().into();
+                    obs.observe(&target);
+                }
+
+                observer.replace(Some(obs));
+            },
+            WatchOptions::default().immediate(immediate),
+        )
+    };
+
+    let stop = {
+        let cleanup = cleanup.clone();
+
         move || {
-            (
-                targets.get(),
-                root.as_ref().map(|root| root.get()),
-                is_active.get(),
-            )
-        },
-        move |values, _, _| {
-            let (targets, root, is_active) = values;
-
-            clean();
-
-            if !is_active {
-                return;
-            }
-
-            let mut options = web_sys::IntersectionObserverInit::new();
-            options.root_margin(&root_margin).threshold(
-                &thresholds
-                    .iter()
-                    .copied()
-                    .map(JsValue::from)
-                    .collect::<js_sys::Array>(),
-            );
-
-            if let Some(Some(root)) = root {
-                let root: web_sys::Element = root.clone().into();
-                options.root(Some(&root));
-            }
-
-            let obs = web_sys::IntersectionObserver::new_with_options(
-                closure_js.clone().as_ref().unchecked_ref(),
-                &options,
-            )
-            .expect("failed to create IntersectionObserver");
-
-            for target in targets.iter().flatten() {
-                let target: web_sys::Element = target.clone().into();
-                obs.observe(&target);
-            }
-
-            observer.replace(Some(obs));
-        },
-        WatchOptions::default().immediate(immediate),
-    );
-
-    let clean = cleanup.clone();
-
-    let stop = move || {
-        clean();
-        stop_watch();
+            cleanup();
+            stop_watch();
+        }
     };
 
     on_cleanup(cx, stop.clone());
 
-    let clean = cleanup.clone();
+    let pause = {
+        let cleanup = cleanup.clone();
+
+        move || {
+            cleanup();
+            set_active(false);
+        }
+    };
 
     UseIntersectionObserverReturn {
         is_active: is_active.into(),
-        pause: move || {
-            clean();
-            set_active(false);
-        },
+        pause,
         resume: move || {
             cleanup();
             set_active(true);

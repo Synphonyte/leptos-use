@@ -141,18 +141,21 @@ where
     let prev_deps_value: Rc<RefCell<Option<W>>> = Rc::new(RefCell::new(None));
     let prev_callback_value: Rc<RefCell<Option<T>>> = Rc::new(RefCell::new(None));
 
-    let cur_val = Rc::clone(&cur_deps_value);
-    let prev_val = Rc::clone(&prev_deps_value);
-    let prev_cb_val = Rc::clone(&prev_callback_value);
-    let wrapped_callback = move || {
-        callback(
-            cur_val
-                .borrow()
-                .as_ref()
-                .expect("this will not be called before there is deps value"),
-            prev_val.borrow().as_ref(),
-            prev_cb_val.take(),
-        )
+    let wrapped_callback = {
+        let cur_deps_value = Rc::clone(&cur_deps_value);
+        let prev_deps_value = Rc::clone(&prev_deps_value);
+        let prev_cb_val = Rc::clone(&prev_callback_value);
+
+        move || {
+            callback(
+                cur_deps_value
+                    .borrow()
+                    .as_ref()
+                    .expect("this will not be called before there is deps value"),
+                prev_deps_value.borrow().as_ref(),
+                prev_cb_val.take(),
+            )
+        }
     };
 
     let filtered_callback =

@@ -40,47 +40,53 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
     let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));
     let remove_listener: RemoveListener = Rc::new(RefCell::new(None));
 
-    let rem_listener = Rc::clone(&remove_listener);
-
     let listener: Rc<OnceCell<Box<dyn CloneableFnMutWithArg<web_sys::Event>>>> =
         Rc::new(OnceCell::new());
 
-    let cleanup = move || {
-        if let Some(remove_listener) = rem_listener.take().as_ref() {
-            remove_listener();
+    let cleanup = {
+        let remove_listener = Rc::clone(&remove_listener);
+
+        move || {
+            if let Some(remove_listener) = remove_listener.take().as_ref() {
+                remove_listener();
+            }
         }
     };
 
-    let clean = cleanup.clone();
-    let listen = Rc::clone(&listener);
+    let update = {
+        let cleanup = cleanup.clone();
+        let listener = Rc::clone(&listener);
 
-    let update = move || {
-        clean();
+        move || {
+            cleanup();
 
-        let mut media_query = media_query.borrow_mut();
-        *media_query = window().match_media(&query.get()).unwrap_or(None);
+            let mut media_query = media_query.borrow_mut();
+            *media_query = window().match_media(&query.get()).unwrap_or(None);
 
-        if let Some(media_query) = media_query.as_ref() {
-            set_matches(media_query.matches());
+            if let Some(media_query) = media_query.as_ref() {
+                set_matches(media_query.matches());
 
-            remove_listener.replace(Some(Box::new(use_event_listener(
-                cx,
-                media_query.clone(),
-                change,
-                listen
-                    .get()
-                    .expect("cell should be initialized by now")
-                    .clone(),
-            ))));
-        } else {
-            set_matches(false);
+                remove_listener.replace(Some(Box::new(use_event_listener(
+                    cx,
+                    media_query.clone(),
+                    change,
+                    listener
+                        .get()
+                        .expect("cell should be initialized by now")
+                        .clone(),
+                ))));
+            } else {
+                set_matches(false);
+            }
         }
     };
 
-    let upd = update.clone();
-    listener
-        .set(Box::new(move |_| upd()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>)
-        .expect("cell is empty");
+    {
+        let update = update.clone();
+        listener
+            .set(Box::new(move |_| update()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>)
+            .expect("cell is empty");
+    }
 
     create_effect(cx, move |_| update());
 

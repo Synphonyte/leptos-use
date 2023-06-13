@@ -66,82 +66,88 @@ where
     let box_ = options.box_;
     let initial_size = options.initial_size;
 
-    let targ = (cx, target).into();
+    let target = (cx, target).into();
 
-    let t = targ.clone();
-    let is_svg = move || {
-        if let Some(target) = t.get_untracked() {
-            target
-                .into()
-                .namespace_uri()
-                .map(|ns| ns.contains("svg"))
-                .unwrap_or(false)
-        } else {
-            false
+    let is_svg = {
+        let target = target.clone();
+
+        move || {
+            if let Some(target) = target.get_untracked() {
+                target
+                    .into()
+                    .namespace_uri()
+                    .map(|ns| ns.contains("svg"))
+                    .unwrap_or(false)
+            } else {
+                false
+            }
         }
     };
 
     let (width, set_width) = create_signal(cx, options.initial_size.width);
     let (height, set_height) = create_signal(cx, options.initial_size.height);
 
-    let t = targ.clone();
-    let _ = use_resize_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, _, _>(
-        cx,
-        targ.clone(),
-        move |entries, _| {
-            let entry = &entries[0];
+    {
+        let target = target.clone();
 
-            let box_size = match box_ {
-                web_sys::ResizeObserverBoxOptions::ContentBox => entry.content_box_size(),
-                web_sys::ResizeObserverBoxOptions::BorderBox => entry.border_box_size(),
-                web_sys::ResizeObserverBoxOptions::DevicePixelContentBox => {
-                    entry.device_pixel_content_box_size()
-                }
-                _ => unreachable!(),
-            };
+        let _ = use_resize_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, _, _>(
+            cx,
+            target.clone(),
+            move |entries, _| {
+                let entry = &entries[0];
 
-            if is_svg() {
-                if let Some(target) = t.get() {
-                    if let Ok(Some(styles)) = window.get_computed_style(&target.into()) {
-                        set_height(
-                            styles
-                                .get_property_value("height")
-                                .map(|v| v.parse().unwrap_or_default())
-                                .unwrap_or_default(),
-                        );
-                        set_width(
-                            styles
-                                .get_property_value("width")
-                                .map(|v| v.parse().unwrap_or_default())
-                                .unwrap_or_default(),
-                        );
+                let box_size = match box_ {
+                    web_sys::ResizeObserverBoxOptions::ContentBox => entry.content_box_size(),
+                    web_sys::ResizeObserverBoxOptions::BorderBox => entry.border_box_size(),
+                    web_sys::ResizeObserverBoxOptions::DevicePixelContentBox => {
+                        entry.device_pixel_content_box_size()
                     }
-                }
-            } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
-                let format_box_size = if box_size.is_array() {
-                    box_size.to_vec()
-                } else {
-                    vec![box_size.into()]
+                    _ => unreachable!(),
                 };
 
-                set_width(format_box_size.iter().fold(0.0, |acc, v| {
-                    acc + v.as_ref().clone().unchecked_into::<BoxSize>().inline_size()
-                }));
-                set_height(format_box_size.iter().fold(0.0, |acc, v| {
-                    acc + v.as_ref().clone().unchecked_into::<BoxSize>().block_size()
-                }))
-            } else {
-                // fallback
-                set_width(entry.content_rect().width());
-                set_height(entry.content_rect().height())
-            }
-        },
-        options.into(),
-    );
+                if is_svg() {
+                    if let Some(target) = target.get() {
+                        if let Ok(Some(styles)) = window.get_computed_style(&target.into()) {
+                            set_height(
+                                styles
+                                    .get_property_value("height")
+                                    .map(|v| v.parse().unwrap_or_default())
+                                    .unwrap_or_default(),
+                            );
+                            set_width(
+                                styles
+                                    .get_property_value("width")
+                                    .map(|v| v.parse().unwrap_or_default())
+                                    .unwrap_or_default(),
+                            );
+                        }
+                    }
+                } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
+                    let format_box_size = if box_size.is_array() {
+                        box_size.to_vec()
+                    } else {
+                        vec![box_size.into()]
+                    };
+
+                    set_width(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v.as_ref().clone().unchecked_into::<BoxSize>().inline_size()
+                    }));
+                    set_height(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v.as_ref().clone().unchecked_into::<BoxSize>().block_size()
+                    }))
+                } else {
+                    // fallback
+                    set_width(entry.content_rect().width());
+                    set_height(entry.content_rect().height())
+                }
+            },
+            options.into(),
+        );
+    }
 
     let _ = watch_with_options(
         cx,
-        move || targ.get(),
+        move || target.get(),
         move |ele, _, _| {
             if ele.is_some() {
                 set_width(initial_size.width);

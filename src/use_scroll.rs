@@ -186,29 +186,34 @@ where
     let signal = (cx, element).into();
     let behavior = options.behavior;
 
-    let sig = signal.clone();
-    let scroll_to = move |x: Option<f64>, y: Option<f64>| {
-        let element = sig.get_untracked();
+    let scroll_to = {
+        let signal = signal.clone();
 
-        if let Some(element) = element {
-            let element = element.into();
+        move |x: Option<f64>, y: Option<f64>| {
+            let element = signal.get_untracked();
 
-            let mut scroll_options = web_sys::ScrollToOptions::new();
-            scroll_options.behavior(behavior.get_untracked().into());
+            if let Some(element) = element {
+                let element = element.into();
 
-            if let Some(x) = x {
-                scroll_options.left(x);
+                let mut scroll_options = web_sys::ScrollToOptions::new();
+                scroll_options.behavior(behavior.get_untracked().into());
+
+                if let Some(x) = x {
+                    scroll_options.left(x);
+                }
+                if let Some(y) = y {
+                    scroll_options.top(y);
+                }
+
+                element.scroll_to_with_scroll_to_options(&scroll_options);
             }
-            if let Some(y) = y {
-                scroll_options.top(y);
-            }
-
-            element.scroll_to_with_scroll_to_options(&scroll_options);
         }
     };
 
-    let scroll = scroll_to.clone();
-    let set_x = Box::new(move |x| scroll(Some(x), None));
+    let set_x = {
+        let scroll_to = scroll_to.clone();
+        Box::new(move |x| scroll_to(Some(x), None))
+    };
 
     let set_y = Box::new(move |y| scroll_to(None, Some(y)));
 
@@ -233,21 +238,25 @@ where
         },
     );
 
-    let on_stop = options.on_stop.clone();
-    let on_scroll_end = move |e| {
-        if !is_scrolling.get_untracked() {
-            return;
-        }
+    let on_scroll_end = {
+        let on_stop = options.on_stop.clone();
 
-        set_is_scrolling(false);
-        directions.update(|directions| {
-            directions.left = false;
-            directions.right = false;
-            directions.top = false;
-            directions.bottom = false;
-            on_stop.clone()(e);
-        });
+        move |e| {
+            if !is_scrolling.get_untracked() {
+                return;
+            }
+
+            set_is_scrolling(false);
+            directions.update(|directions| {
+                directions.left = false;
+                directions.right = false;
+                directions.top = false;
+                directions.bottom = false;
+                on_stop.clone()(e);
+            });
+        }
     };
+
     let throttle = options.throttle;
 
     let on_scroll_end_debounced =
@@ -325,22 +334,27 @@ where
         }
     };
 
-    let on_scroll = options.on_scroll.clone();
+    let on_scroll_handler = {
+        let on_scroll = options.on_scroll.clone();
 
-    let on_scroll_handler = move |e: web_sys::Event| {
-        let target: web_sys::Element = event_target(&e);
+        move |e: web_sys::Event| {
+            let target: web_sys::Element = event_target(&e);
 
-        set_arrived_state(target);
-        set_is_scrolling(true);
-        on_scroll_end_debounced.clone()(e.clone());
-        on_scroll.clone()(e);
+            set_arrived_state(target);
+            set_is_scrolling(true);
+            on_scroll_end_debounced.clone()(e.clone());
+            on_scroll.clone()(e);
+        }
     };
 
-    let sig = signal.clone();
-    let target = Signal::derive(cx, move || {
-        let element = sig.get();
-        element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
-    });
+    let target = {
+        let signal = signal.clone();
+        
+        Signal::derive(cx, move || {
+            let element = signal.get();
+            element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
+        })
+    };
 
     if throttle >= 0.0 {
         let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(

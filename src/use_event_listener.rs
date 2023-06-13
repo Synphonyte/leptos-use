@@ -119,10 +119,15 @@ where
     let event_name = event.name();
     let closure_js = Closure::wrap(Box::new(handler) as Box<dyn FnMut(_)>).into_js_value();
 
-    let closure = closure_js.clone();
-    let cleanup_fn = move |element: &web_sys::EventTarget| {
-        let _ = element
-            .remove_event_listener_with_callback(&event_name, closure.as_ref().unchecked_ref());
+    let cleanup_fn = {
+        let closure_js = closure_js.clone();
+
+        move |element: &web_sys::EventTarget| {
+            let _ = element.remove_event_listener_with_callback(
+                &event_name,
+                closure_js.as_ref().unchecked_ref(),
+            );
+        }
     };
 
     let event_name = event.name();
@@ -132,33 +137,37 @@ where
     let prev_element: Rc<RefCell<Option<web_sys::EventTarget>>> =
         Rc::new(RefCell::new(signal.get_untracked().map(|e| e.into())));
 
-    let prev_el = prev_element.clone();
-    let cleanup_prev_element = move || {
-        if let Some(element) = prev_el.take() {
-            cleanup_fn(&element);
+    let cleanup_prev_element = {
+        let prev_element = prev_element.clone();
+
+        move || {
+            if let Some(element) = prev_element.take() {
+                cleanup_fn(&element);
+            }
         }
     };
 
-    let cleanup_prev_el = cleanup_prev_element.clone();
-    let closure = closure_js;
+    let stop_watch = {
+        let cleanup_prev_element = cleanup_prev_element.clone();
 
-    let stop_watch = watch_with_options(
-        cx,
-        move || signal.get().map(|e| e.into()),
-        move |element, _, _| {
-            cleanup_prev_el();
-            prev_element.replace(element.clone());
+        watch_with_options(
+            cx,
+            move || signal.get().map(|e| e.into()),
+            move |element, _, _| {
+                cleanup_prev_element();
+                prev_element.replace(element.clone());
 
-            if let Some(element) = element {
-                _ = element.add_event_listener_with_callback_and_add_event_listener_options(
-                    &event_name,
-                    closure.as_ref().unchecked_ref(),
-                    &options,
-                );
-            }
-        },
-        WatchOptions::default().immediate(true),
-    );
+                if let Some(element) = element {
+                    _ = element.add_event_listener_with_callback_and_add_event_listener_options(
+                        &event_name,
+                        closure_js.as_ref().unchecked_ref(),
+                        &options,
+                    );
+                }
+            },
+            WatchOptions::default().immediate(true),
+        )
+    };
 
     let stop = move || {
         stop_watch();

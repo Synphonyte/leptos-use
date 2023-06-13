@@ -44,6 +44,11 @@
     vertical-align: middle;
 }
 
+.demo-container button.small {
+    border-bottom-width: 1px;
+    padding: 1px 10px;
+}
+
 .demo-container button:hover:not(:disabled) {
     background-color: var(--brand-color-dark);
 }

@@ -20,6 +20,7 @@ pub use use_element_size::*;
 #[cfg(web_sys_unstable_apis)]
 pub use use_resize_observer::*;
 
+mod on_click_outside;
 mod use_breakpoints;
 mod use_debounce_fn;
 mod use_element_visibility;
@@ -40,6 +41,7 @@ mod watch_pausable;
 mod watch_throttled;
 mod whenever;
 
+pub use on_click_outside::*;
 pub use use_breakpoints::*;
 pub use use_debounce_fn::*;
 pub use use_element_visibility::*;

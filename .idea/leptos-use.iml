@@ -29,6 +29,8 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_round/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_mutation_observer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/on_click_outside/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_abs/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

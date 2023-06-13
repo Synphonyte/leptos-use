@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "on_click_outside",
     "use_abs",
     "use_breakpoints",
     "use_ceil",

@@ -101,37 +101,46 @@ where
     let (y, set_y) = create_signal(cx, options.initial_value.y);
     let (source_type, set_source_type) = create_signal(cx, UseMouseSourceType::Unset);
 
-    let coord_type = options.coord_type.clone();
-    let mouse_handler = move |event: web_sys::MouseEvent| {
-        let result = coord_type.extract_mouse_coords(&event);
+    let mouse_handler = {
+        let coord_type = options.coord_type.clone();
 
-        if let Some((x, y)) = result {
-            set_x(x);
-            set_y(y);
-            set_source_type(UseMouseSourceType::Mouse);
-        }
-    };
-
-    let handler = mouse_handler.clone();
-    let drag_handler = move |event: web_sys::DragEvent| {
-        let js_value: &JsValue = event.as_ref();
-        handler(js_value.clone().unchecked_into::<web_sys::MouseEvent>());
-    };
-
-    let coord_type = options.coord_type.clone();
-    let touch_handler = move |event: web_sys::TouchEvent| {
-        let touches = event.touches();
-        if touches.length() > 0 {
-            let result = coord_type.extract_touch_coords(
-                &touches
-                    .get(0)
-                    .expect("Just checked that there's at least on touch"),
-            );
+        move |event: web_sys::MouseEvent| {
+            let result = coord_type.extract_mouse_coords(&event);
 
             if let Some((x, y)) = result {
                 set_x(x);
                 set_y(y);
-                set_source_type(UseMouseSourceType::Touch);
+                set_source_type(UseMouseSourceType::Mouse);
+            }
+        }
+    };
+
+    let drag_handler = {
+        let mouse_handler = mouse_handler.clone();
+
+        move |event: web_sys::DragEvent| {
+            let js_value: &JsValue = event.as_ref();
+            mouse_handler(js_value.clone().unchecked_into::<web_sys::MouseEvent>());
+        }
+    };
+
+    let touch_handler = {
+        let coord_type = options.coord_type.clone();
+        
+        move |event: web_sys::TouchEvent| {
+            let touches = event.touches();
+            if touches.length() > 0 {
+                let result = coord_type.extract_touch_coords(
+                    &touches
+                        .get(0)
+                        .expect("Just checked that there's at least on touch"),
+                );
+
+                if let Some((x, y)) = result {
+                    set_x(x);
+                    set_y(y);
+                    set_source_type(UseMouseSourceType::Touch);
+                }
             }
         }
     };
