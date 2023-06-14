@@ -197,9 +197,10 @@ pub struct WatchOptions {
     /// If `immediate` is true, the `callback` will run immediately.
     /// If it's `false, the `callback` will run only after
     /// the first change is detected of any signal that is accessed in `deps`.
+    /// Defaults to `false`.
     immediate: bool,
 
-    /// Allows to debounce or throttle the callback
+    /// Allows to debounce or throttle the callback. Defaults to no filter.
     filter: FilterOptions,
 }
 

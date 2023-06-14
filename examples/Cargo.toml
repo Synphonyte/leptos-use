@@ -12,6 +12,7 @@ members = [
     "use_favicon",
     "use_floor",
     "use_intersection_observer",
+    "use_interval_fn",
     "use_media_query",
     "use_mouse",
     "use_mutation_observer",

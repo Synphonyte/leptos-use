@@ -41,7 +41,7 @@ static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 /// ```
 ///
 /// > This function uses [Event.composedPath()](https://developer.mozilla.org/en-US/docs/Web/API/Event/composedPath)
-/// which is NOT supported by IE 11, Edge 18 and below.
+/// which is **not** supported by IE 11, Edge 18 and below.
 /// If you are targeting these browsers, we recommend you to include
 /// [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
 pub fn on_click_outside<El, T, F>(cx: Scope, target: El, handler: F) -> impl FnOnce() + Clone

@@ -34,6 +34,10 @@
 - [use_mouse](sensors/use_mouse.md)
 - [use_scroll](sensors/use_scroll.md)
 
+# Animation
+
+- [use_interval_fn](animation/use_interval_fn.md)
+
 # Watch
 
 - [watch](watch/watch.md)
