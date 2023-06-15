@@ -452,6 +452,7 @@ pub struct UseStorageOptions<T> {
     /// Defaults to simply returning the stored value.
     pub(crate) merge_defaults: fn(&str, &T) -> String,
     /// Optional callback whenever an error occurs. The callback takes an argument of type [`UseStorageError`].
+    #[builder(into)]
     pub(crate) on_error: Box<dyn CloneableFnWithArg<UseStorageError>>,
 
     /// Debounce or throttle the writing to storage whenever the value changes.
