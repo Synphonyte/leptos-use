@@ -36,6 +36,7 @@
 
 # Animation
 
+- [use_interval](animation/use_interval.md)
 - [use_interval_fn](animation/use_interval_fn.md)
 
 # Watch

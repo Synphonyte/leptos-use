@@ -131,10 +131,10 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseIntervalFnOptions {
     /// Start the timer immediately. Defaults to `true`.
-    immediate: bool,
+    pub immediate: bool,
 
     /// Execute the callback immediate after calling this function. Defaults to `false`
-    immediate_callback: bool,
+    pub immediate_callback: bool,
 }
 
 impl Default for UseIntervalFnOptions {

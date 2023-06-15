@@ -1,4 +1,5 @@
-use leptos::Signal;
+use std::cell::Cell;
+use leptos::{ReadSignal, Signal};
 
 /// Pausable effect
 pub struct Pausable<PauseFn, ResumeFn>
