@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New Functions 🚀
 
 - `use_interval_fn`
+- `use_interval`
 
 ## [0.3.0] - 2023-06-13
 
