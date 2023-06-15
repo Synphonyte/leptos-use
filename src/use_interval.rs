@@ -1,12 +1,8 @@
-use crate::utils::{CloneableFn, CloneableFnWithArg, Pausable};
-use crate::{use_interval_fn, use_interval_fn_with_options, watch, UseIntervalFnOptions};
+use crate::utils::{CloneableFnWithArg, Pausable};
+use crate::{use_interval_fn_with_options, UseIntervalFnOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::leptos_dom::helpers::IntervalHandle;
+
 use leptos::*;
-use std::cell::Cell;
-use std::marker::PhantomData;
-use std::rc::Rc;
-use std::time::Duration;
 
 /// Reactive counter increases on every interval.
 ///
@@ -103,7 +99,7 @@ pub struct UseIntervalOptions {
 impl Default for UseIntervalOptions {
     fn default() -> Self {
         Self {
-            immediate: false,
+            immediate: true,
             callback: Box::new(|_: u64| {}),
         }
     }

@@ -4,19 +4,11 @@ use leptos_use::{use_interval, UseIntervalReturn};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let UseIntervalReturn {
-        counter,
-        reset,
-        is_active,
-        pause,
-        resume
-    } = use_interval(cx, 200);
-
-    let (counter_read, _) = create_signal(cx, move || counter());
+    let UseIntervalReturn { counter, .. } = use_interval(cx, 200);
 
     view! { cx,
         <div>
-            <p>"Interval fired: " { counter_read() }</p>
+            <p>"Interval fired: " { counter }</p>
         </div>
     }
 }
