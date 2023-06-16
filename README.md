@@ -79,3 +79,7 @@ If you only want to add the example for one function you can run for example
 ```shell
 python3 post_build.py use_mequery
 ```
+
+### New Function Template
+
+To scaffold a new function quickly you can run `template/createfn.sh`. It requires that [`ffizer`](https://ffizer.github.io/) is installed.
