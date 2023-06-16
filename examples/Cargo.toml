@@ -5,6 +5,7 @@ members = [
     "use_abs",
     "use_breakpoints",
     "use_ceil",
+    "use_css_var",
     "use_debounce_fn",
     "use_element_size",
     "use_element_visibility",

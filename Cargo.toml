@@ -32,6 +32,7 @@ features = [
     "CustomEventInit",
     "DomRectReadOnly",
     "Element",
+    "HtmlElement",
     "HtmlLinkElement",
     "IntersectionObserver",
     "IntersectionObserverInit",

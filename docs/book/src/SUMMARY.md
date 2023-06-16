@@ -22,6 +22,7 @@
 # Browser
 
 - [use_breakpoints](browser/use_breakpoints.md)
+- [use_css_var](browser/use_css_var.md)
 - [use_event_listener](browser/use_event_listener.md)
 - [use_favicon](browser/use_favicon.md)
 - [use_media_query](browser/use_media_query.md)

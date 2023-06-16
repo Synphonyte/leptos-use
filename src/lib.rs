@@ -42,6 +42,7 @@ mod watch_debounced;
 mod watch_pausable;
 mod watch_throttled;
 mod whenever;
+mod use_css_var;
 
 pub use on_click_outside::*;
 pub use use_breakpoints::*;
@@ -65,3 +66,4 @@ pub use watch_debounced::*;
 pub use watch_pausable::*;
 pub use watch_throttled::*;
 pub use whenever::*;
+pub use use_css_var::*;
