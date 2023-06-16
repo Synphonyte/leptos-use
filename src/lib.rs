@@ -22,6 +22,7 @@ pub use use_resize_observer::*;
 
 mod on_click_outside;
 mod use_breakpoints;
+mod use_css_var;
 mod use_debounce_fn;
 mod use_element_visibility;
 mod use_event_listener;
@@ -42,10 +43,10 @@ mod watch_debounced;
 mod watch_pausable;
 mod watch_throttled;
 mod whenever;
-mod use_css_var;
 
 pub use on_click_outside::*;
 pub use use_breakpoints::*;
+pub use use_css_var::*;
 pub use use_debounce_fn::*;
 pub use use_element_visibility::*;
 pub use use_event_listener::*;
@@ -66,4 +67,3 @@ pub use watch_debounced::*;
 pub use watch_pausable::*;
 pub use watch_throttled::*;
 pub use whenever::*;
-pub use use_css_var::*;

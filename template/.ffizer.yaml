@@ -1,0 +1,17 @@
+variables:
+  - name: function_name
+    ask: Name of the function
+  - name: category
+    ask: Documentation category (lower case)
+  - name: module
+    default_value: ""
+    ask: Module [optional]
+  - name: feature
+    default_value: ""
+    ask: cfg feature [optional]
+
+ignores:
+  - modify_files.py
+
+scripts:
+  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}}{{#if feature}} --feature {{ feature }}{{/if}}
