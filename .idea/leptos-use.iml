@@ -35,6 +35,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_interval/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_css_var/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_test_fn/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_active_element/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_element_hover/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />

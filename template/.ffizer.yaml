@@ -12,6 +12,7 @@ variables:
 
 ignores:
   - modify_files.py
+  - createfn.sh
 
 scripts:
   - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}}{{#if feature}} --feature {{ feature }}{{/if}}
