@@ -27,7 +27,7 @@ pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
 
 /// Version of [`{{ function_name }}`] that takes a `{{ to_pascal_case function_name }}Options`. See [`{{ function_name }}`] for how to use.
 {{#if feature}}#[doc(cfg(feature = "{{feature}}"))]{{/if}}
-pub fn {{ function_name }}_with_options(options: {{ to_pascal_case function_name }}Return) -> {{ to_pascal_case function_name }}Return {
+pub fn {{ function_name }}_with_options(options: {{ to_pascal_case function_name }}Options) -> {{ to_pascal_case function_name }}Return {
     {{ to_pascal_case function_name }}Return {}
 }
 
