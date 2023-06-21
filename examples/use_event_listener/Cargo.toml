@@ -8,7 +8,7 @@ leptos = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../.." }
+leptos-use = { path = "../..", features=["stable"] }
 web-sys = "0.3"
 
 [dev-dependencies]
