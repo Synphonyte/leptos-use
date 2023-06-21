@@ -1,5 +1,0 @@
-{
-    "rust-analyzer.linkedProjects": [
-        "./examples/use_element_size/Cargo.toml"
-    ]
-}
