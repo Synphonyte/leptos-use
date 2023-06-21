@@ -8,10 +8,10 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (color, set_color) =
         use_css_var_with_options(cx, "--color", UseCssVarOptions::default().target(el));
     let switch_color = move |_| {
-        if color() == "#df8543" {
-            set_color("#7fa998".to_string());
+        if color.get() == "#df8543" {
+            set_color.set("#7fa998".to_string());
         } else {
-            set_color("#df8543".to_string());
+            set_color.set("#df8543".to_string());
         }
     };
 
@@ -19,16 +19,16 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (key, set_key) = create_signal(cx, "--color".to_string());
     let (color_val, _) = use_css_var_with_options(cx, key, UseCssVarOptions::default().target(elv));
     let change_var = move |_| {
-        if key() == "--color" {
-            set_key("--color-one".to_string());
+        if key.get() == "--color" {
+            set_key.set("--color-one".to_string());
         } else {
-            set_key("--color".to_string());
+            set_key.set("--color".to_string());
         }
     };
     let style = move || {
         format!(
             "--color: #7fa998; --color-one: #df8543; color: {}",
-            color_val()
+            color_val.get()
         )
     };
 

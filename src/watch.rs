@@ -22,18 +22,18 @@ use std::rc::Rc;
 ///
 /// let stop = watch(
 ///     cx,
-///     num,
+///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("Number {}", num);
 ///     },
 /// );
 ///
-/// set_num(1); // > "Number 1"
+/// set_num.set(1); // > "Number 1"
 ///
 /// set_timeout_with_handle(move || {
 ///     stop(); // stop watching
 ///
-///     set_num(2); // (nothing happens)
+///     set_num.set(2); // (nothing happens)
 /// }, Duration::from_millis(1000));
 /// #    view! { cx, }
 /// # }
@@ -54,14 +54,14 @@ use std::rc::Rc;
 ///
 /// watch_with_options(
 ///     cx,
-///     num,
+///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("Number {}", num);
 ///     },
 ///     WatchOptions::default().immediate(true),
 /// ); // > "Number 0"
 ///
-/// set_num(1); // > "Number 1"
+/// set_num.set(1); // > "Number 1"
 /// #    view! { cx, }
 /// # }
 /// ```
@@ -79,7 +79,7 @@ use std::rc::Rc;
 /// #
 /// watch_with_options(
 ///     cx,
-///     num,
+///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("Number {}", num);
 ///     },
@@ -98,7 +98,7 @@ use std::rc::Rc;
 /// #
 /// watch_with_options(
 ///     cx,
-///     num,
+///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("number {}", num);
 ///     },
@@ -162,7 +162,7 @@ where
         create_filter_wrapper(options.filter.filter_fn(), wrapped_callback.clone());
 
     create_effect(cx, move |did_run_before| {
-        if !is_active() {
+        if !is_active.get() {
             return;
         }
 
@@ -187,7 +187,7 @@ where
     });
 
     move || {
-        set_active(false);
+        set_active.set(false);
     }
 }
 

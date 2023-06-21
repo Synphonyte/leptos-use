@@ -34,12 +34,12 @@ use wasm_bindgen::prelude::*;
 ///     el,
 ///     move |entries, observer| {
 ///         let rect = entries[0].content_rect();
-///         set_text(format!("width: {}\nheight: {}", rect.width(), rect.height()));
+///         set_text.set(format!("width: {}\nheight: {}", rect.width(), rect.height()));
 ///     },
 /// );
 ///
 /// view! { cx,
-///     <div node_ref=el>{ text }</div>
+///     <div node_ref=el>{ move || text.get() }</div>
 /// }
 /// # }
 /// ```
@@ -112,7 +112,7 @@ where
             move |targets, _, _| {
                 cleanup();
 
-                if is_supported() && !targets.is_empty() {
+                if is_supported.get() && !targets.is_empty() {
                     let obs =
                         web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
                             .expect("failed to create ResizeObserver");

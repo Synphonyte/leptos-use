@@ -8,7 +8,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (debounced_count, set_debounced_count) = create_signal(cx, 0);
 
     let debounced_fn = use_debounce_fn_with_options(
-        move || set_debounced_count(debounced_count() + 1),
+        move || set_debounced_count.set(debounced_count.get_untracked() + 1),
         1000.0,
         DebounceOptions::default().max_wait(Some(5000.0)),
     );
@@ -16,7 +16,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     view! { cx,
         <button
             on:click=move |_| {
-                set_click_count(click_count() + 1);
+                set_click_count.set(click_count.get_untracked() + 1);
                 debounced_fn();
             }
         >

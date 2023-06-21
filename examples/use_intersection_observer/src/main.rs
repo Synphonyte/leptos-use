@@ -20,7 +20,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         cx,
         target,
         move |entries, _| {
-            set_visible(entries[0].is_intersecting());
+            set_visible.set(entries[0].is_intersecting());
         },
         UseIntersectionObserverOptions::default().root(Some(root)),
     );
@@ -30,7 +30,7 @@ fn Demo(cx: Scope) -> impl IntoView {
             <label class="checkbox">
                 <input
                     type="checkbox"
-                    prop:checked=is_active
+                    prop:checked=move || is_active.get()
                     name="enabled"
                     on:input=move |e| {
                         if event_target_checked(&e) {

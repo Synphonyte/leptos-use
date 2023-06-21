@@ -110,7 +110,7 @@ where
             move |targets, _, _| {
                 cleanup();
 
-                if is_supported() && !targets.is_empty() {
+                if is_supported.get() && !targets.is_empty() {
                     let obs = web_sys::MutationObserver::new(closure_js.as_ref().unchecked_ref())
                         .expect("failed to create MutationObserver");
 

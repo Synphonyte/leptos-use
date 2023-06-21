@@ -25,7 +25,7 @@ use web_sys::AddEventListenerOptions;
 /// let is_hovered = use_element_hover(cx, el);
 ///
 /// view! { cx,
-///     <button node_ref=el>{ move || format!("{:?}", is_hovered()) }</button>
+///     <button node_ref=el>{ move || format!("{:?}", is_hovered.get()) }</button>
 /// }
 /// # }
 /// ```
@@ -69,12 +69,12 @@ where
 
         if delay > 0 {
             timer = set_timeout_with_handle(
-                move || set_hovered(entering),
+                move || set_hovered.set(entering),
                 Duration::from_millis(delay),
             )
             .ok();
         } else {
-            set_hovered(entering);
+            set_hovered.set(entering);
         }
     };
 

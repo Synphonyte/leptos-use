@@ -13,11 +13,11 @@ fn Demo(cx: Scope) -> impl IntoView {
         resume,
         is_active,
         ..
-    } = watch_pausable(cx, source, move |v, _, _| {
+    } = watch_pausable(cx, move || source.get(), move |v, _, _| {
         set_log.update(|log| *log = format!("{log}Changed to \"{v}\"\n"));
     });
 
-    let clear = move |_| set_log("".to_string());
+    let clear = move |_| set_log.set("".to_string());
 
     let pause = move |_| {
         set_log.update(|log| *log = format!("{log}Paused\n"));
@@ -34,13 +34,13 @@ fn Demo(cx: Scope) -> impl IntoView {
         <input
             node_ref=input
             class="block"
-            prop:value=source
-            on:input=move |e| set_source(event_target_value(&e))
+            prop:value=move || source.get()
+            on:input=move |e| set_source.set(event_target_value(&e))
             type="text"
         />
         <p>"Value: " {source}</p>
-        <button prop:disabled=move || !is_active() class="orange" on:click=pause>"Pause"</button>
-        <button prop:disabled=is_active on:click=resume>"Resume"</button>
+        <button prop:disabled=move || !is_active.get() class="orange" on:click=pause>"Pause"</button>
+        <button prop:disabled=move || is_active.get() on:click=resume>"Resume"</button>
         <button on:click=clear>"Clear Log"</button>
         <br />
         <br />

@@ -108,9 +108,9 @@ where
             let result = coord_type.extract_mouse_coords(&event);
 
             if let Some((x, y)) = result {
-                set_x(x);
-                set_y(y);
-                set_source_type(UseMouseSourceType::Mouse);
+                set_x.set(x);
+                set_y.set(y);
+                set_source_type.set(UseMouseSourceType::Mouse);
             }
         }
     };
@@ -137,9 +137,9 @@ where
                 );
 
                 if let Some((x, y)) = result {
-                    set_x(x);
-                    set_y(y);
-                    set_source_type(UseMouseSourceType::Touch);
+                    set_x.set(x);
+                    set_y.set(y);
+                    set_source_type.set(UseMouseSourceType::Touch);
                 }
             }
         }
@@ -147,8 +147,8 @@ where
 
     let initial_value = options.initial_value;
     let reset = move || {
-        set_x(initial_value.x);
-        set_y(initial_value.y);
+        set_x.set(initial_value.x);
+        set_y.set(initial_value.y);
     };
 
     // TODO : event filters?

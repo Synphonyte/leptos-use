@@ -63,7 +63,7 @@ where
         cx,
         (cx, target).into(),
         move |entries, _| {
-            set_visible(entries[0].is_intersecting());
+            set_visible.set(entries[0].is_intersecting());
         },
         UseIntersectionObserverOptions::default().root(options.viewport),
     );

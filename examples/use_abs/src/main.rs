@@ -11,15 +11,15 @@ fn Demo(cx: Scope) -> impl IntoView {
     view! { cx,
         <input
             class="block"
-            prop:value=value
-            on:input=move |e| set_value(event_target_value(&e).parse().unwrap())
+            prop:value=move || value.get()
+            on:input=move |e| set_value.set(event_target_value(&e).parse().unwrap())
             type="range"
             min="-30"
             max="10"
             step="0.1"
         />
-        <p>"Value: " {value}</p>
-        <p>"Absolute: " {result}</p>
+        <p>"Value: " {move || value.get()}</p>
+        <p>"Absolute: " {move || result.get()}</p>
     }
 }
 

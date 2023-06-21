@@ -21,7 +21,7 @@ pub fn BooleanDisplay(
 
     view! { cx,
         <span class=class>
-            { move || if value() { true_str} else { false_str } }
+            { move || if value.get() { true_str} else { false_str } }
         </span>
     }
 }

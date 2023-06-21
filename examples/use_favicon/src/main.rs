@@ -17,35 +17,35 @@ fn Demo(cx: Scope) -> impl IntoView {
         <p class="flex gap-2">
             <a class=classes.clone() href="#" on:click=move |e| {
                 e.prevent_default();
-                set_icon(Some("favicon-leptos.ico".into()));
+                set_icon.set(Some("favicon-leptos.ico".into()));
             }>
                 <img class=img_classes.clone() width="32" src="use_favicon/demo/img/favicon-leptos.ico" alt="favicon-red" />
             </a>
 
             <a class=classes.clone() href="#" on:click=move |e| {
                 e.prevent_default();
-                set_icon(Some("favicon-red.svg".into()));
+                set_icon.set(Some("favicon-red.svg".into()));
             }>
                 <img class=img_classes.clone() width="32" src="use_favicon/demo/img/favicon-red.svg" alt="favicon-red" />
             </a>
 
             <a class=classes.clone() href="#" on:click=move |e| {
                 e.prevent_default();
-                set_icon(Some("favicon-green.svg".into()));
+                set_icon.set(Some("favicon-green.svg".into()));
             }>
                 <img class=img_classes.clone() width="32" src="use_favicon/demo/img/favicon-green.svg" alt="favicon-green" />
             </a>
 
             <a class=classes.clone() href="#" on:click=move |e| {
                 e.prevent_default();
-                set_icon(Some("favicon-blue.svg".into()));
+                set_icon.set(Some("favicon-blue.svg".into()));
             }>
                 <img class=img_classes.clone() width="32" src="use_favicon/demo/img/favicon-blue.svg" alt="favicon-blue" />
             </a>
 
             <a class=classes.clone() href="#" on:click=move |e| {
                 e.prevent_default();
-                set_icon(Some("favicon-orange.svg".into()));
+                set_icon.set(Some("favicon-orange.svg".into()));
             }>
                 <img class=img_classes width="32" src="use_favicon/demo/img/favicon-orange.svg" alt="favicon-orange" />
             </a>

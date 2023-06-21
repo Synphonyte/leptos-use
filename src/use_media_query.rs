@@ -64,7 +64,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
             *media_query = window().match_media(&query.get()).unwrap_or(None);
 
             if let Some(media_query) = media_query.as_ref() {
-                set_matches(media_query.matches());
+                set_matches.set(media_query.matches());
 
                 remove_listener.replace(Some(Box::new(use_event_listener(
                     cx,
@@ -76,7 +76,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
                         .clone(),
                 ))));
             } else {
-                set_matches(false);
+                set_matches.set(false);
             }
         }
     };

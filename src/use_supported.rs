@@ -15,7 +15,7 @@ use leptos::*;
 ///     || JsValue::from("getBattery").js_in(&window().navigator())
 /// );
 ///
-/// if is_supported() {
+/// if is_supported.get() {
 ///     // do something
 /// }
 /// #    view! { cx, }

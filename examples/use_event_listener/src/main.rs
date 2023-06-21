@@ -26,14 +26,14 @@ fn Demo(cx: Scope) -> impl IntoView {
         <p>
             <label>
                 <input
-                    type="checkbox" on:change=move |evt| set_cond(event_target_checked(&evt))
-                    prop:checked=cond
+                    type="checkbox" on:change=move |evt| set_cond.set(event_target_checked(&evt))
+                    prop:checked=move || cond.get()
                 />
                 "Condition enabled"
             </label>
         </p>
         <Show
-            when=move || cond()
+            when=move || cond.get()
             fallback=move |cx| view! { cx,
                 <a node_ref=element href="#">
                     "Condition"

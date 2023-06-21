@@ -7,12 +7,12 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (click_count, set_click_count) = create_signal(cx, 0);
     let (throttled_count, set_throttled_count) = create_signal(cx, 0);
 
-    let throttled_fn = use_throttle_fn(move || set_throttled_count(throttled_count() + 1), 1000.0);
+    let throttled_fn = use_throttle_fn(move || set_throttled_count.set(throttled_count.get_untracked() + 1), 1000.0);
 
     view! { cx,
         <button
             on:click=move |_| {
-                set_click_count(click_count() + 1);
+                set_click_count.set(click_count.get_untracked() + 1);
                 throttled_fn();
             }
         >

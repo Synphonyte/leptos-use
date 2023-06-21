@@ -7,7 +7,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     let el = create_node_ref(cx);
     let (smooth, set_smooth) = create_signal(cx, false);
     let behavior = Signal::derive(cx, move || {
-        if smooth() {
+        if smooth.get() {
             ScrollBehavior::Smooth
         } else {
             ScrollBehavior::Auto
@@ -56,7 +56,7 @@ fn Demo(cx: Scope) -> impl IntoView {
                     <div class="text-primary">
                         <div>
                             <input
-                                prop:value=move || format!("{:.1}", x())
+                                prop:value=move || format!("{:.1}", x.get())
                                 on:input=move |e| {
                                     if let Ok(num) = event_target_value(&e).parse::<f64>() {
                                         set_x(num);
@@ -75,7 +75,7 @@ fn Demo(cx: Scope) -> impl IntoView {
                     <div class="text-primary">
                         <div>
                             <input
-                                prop:value=move || format!("{:.1}", y())
+                                prop:value=move || format!("{:.1}", y.get())
                                 on:input=move |e| {
                                     if let Ok(num) = event_target_value(&e).parse::<f64>() {
                                         set_y(num);
@@ -94,8 +94,8 @@ fn Demo(cx: Scope) -> impl IntoView {
                     <span>
                         <input
                             id="smooth-scrolling-option"
-                            prop:checked=smooth
-                            on:input=move |e| set_smooth(event_target_checked(&e))
+                            prop:checked=move || smooth.get()
+                            on:input=move |e| set_smooth.set(event_target_checked(&e))
                             type="checkbox"
                         />
                     </span>
@@ -106,35 +106,35 @@ fn Demo(cx: Scope) -> impl IntoView {
                     <div class="text-right opacity-75">
                         "Top Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state().top) />
+                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().top) />
                     <div class="text-right opacity-75">
                         "Right Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state().right) />
+                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().right) />
                     <div class="text-right opacity-75">
                         "Bottom Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state().bottom) />
+                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().bottom) />
                     <div class="text-right opacity-75">
                         "Left Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state().left) />
+                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().left) />
                     <div class="text-right opacity-75">
                         "Scrolling Up"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions().top) />
+                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().top) />
                     <div class="text-right opacity-75">
                         "Scrolling Right"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions().right) />
+                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().right) />
                     <div class="text-right opacity-75">
                         "Scrolling Down"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions().bottom) />
+                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().bottom) />
                     <div class="text-right opacity-75">
                         "Scrolling Left"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions().left) />
+                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().left) />
                 </div>
             </div>
         </div>

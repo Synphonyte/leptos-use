@@ -19,7 +19,7 @@ use leptos::*;
 /// #
 /// watch_throttled(
 ///     cx,
-///     source,
+///     move || source.get(),
 ///     move |_, _, _| {
 ///         log!("changed!");
 ///     },
@@ -43,7 +43,7 @@ use leptos::*;
 /// #
 /// watch_throttled_with_options(
 ///     cx,
-///     source,
+///     move || source.get(),
 ///     move |_, _, _| {
 ///         log!("changed!");
 ///     },

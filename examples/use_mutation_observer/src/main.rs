@@ -28,14 +28,14 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let _ = set_timeout_with_handle(
         move || {
-            set_class_name("test test2".to_string());
+            set_class_name.set("test test2".to_string());
         },
         Duration::from_millis(1000),
     );
 
     let _ = set_timeout_with_handle(
         move || {
-            set_style("color: red;".to_string());
+            set_style.set("color: red;".to_string());
         },
         Duration::from_millis(1550),
     );
@@ -45,9 +45,9 @@ fn Demo(cx: Scope) -> impl IntoView {
     });
 
     view! { cx,
-        <div node_ref=el class=class_name style=style>
+        <div node_ref=el class=move || class_name.get() style=move || style.get()>
             <For
-                each=enum_msgs
+                each=move || enum_msgs.get()
                 key=|message| message.0 // list only grows so this is fine here
                 view=|cx, message| view! { cx, <div>"Mutation Attribute: " <code>{message.1}</code></div> }
             />

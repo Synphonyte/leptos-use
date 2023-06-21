@@ -78,7 +78,7 @@ where
         let clean = clean.clone();
 
         move || {
-            set_active(false);
+            set_active.set(false);
             clean();
         }
     };
@@ -91,7 +91,7 @@ where
             return;
         }
 
-        set_active(true);
+        set_active.set(true);
 
         if immediate_callback {
             callback.clone()();
@@ -110,7 +110,7 @@ where
     if matches!(interval, MaybeSignal::Dynamic(_)) {
         let resume = resume.clone();
 
-        let stop_watch = watch(cx, interval, move |_, _, _| {
+        let stop_watch = watch(cx, move || interval.get(), move |_, _, _| {
             if is_active.get() {
                 resume();
             }

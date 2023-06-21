@@ -29,25 +29,25 @@ fn Demo(cx: Scope) -> impl IntoView {
     } = use_interval_fn(
         cx,
         move || {
-            set_index((index.get() + 1) % greetings.len());
-            set_word(greetings[index.get()]);
+            set_index.set((index.get() + 1) % greetings.len());
+            set_word.set(greetings[index.get()]);
         },
         interval,
     );
 
     view! { cx,
-        <p>{word}</p>
+        <p>{move || word.get()}</p>
         <p>
             "Interval:"
             <input
-                prop:value=interval
-                on:input=move |e| set_interval(event_target_value(&e).parse().unwrap())
+                prop:value=move || interval.get()
+                on:input=move |e| set_interval.set(event_target_value(&e).parse().unwrap())
                 type="number"
                 placeholder="interval"
             />
         </p>
         <Show
-            when=is_active
+            when=move || is_active.get()
             fallback=move |cx| {
                 let resume = resume.clone();
                 view! {cx,

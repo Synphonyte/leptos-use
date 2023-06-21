@@ -12,7 +12,7 @@ use leptos::*;
 /// # pub fn Demo(cx: Scope) -> impl IntoView {
 /// let (is_ready, set_ready) = create_signal(cx, false);
 ///
-/// whenever(cx, is_ready, |v, _, _| log!("{}", v));
+/// whenever(cx, move || is_ready.get(), |v, _, _| log!("{}", v));
 /// #
 /// #     view! { cx, }
 /// # }
@@ -28,7 +28,7 @@ use leptos::*;
 /// #
 /// # pub fn Demo(cx: Scope) -> impl IntoView {
 /// # let (is_ready, set_ready) = create_signal(cx, false);
-/// whenever(cx, is_ready, |value, prev_value, _| {
+/// whenever(cx, move || is_ready.get(), |value, prev_value, _| {
 ///     log!("before: {prev_value:?}; now: {value}");
 /// });
 /// #
@@ -48,7 +48,7 @@ use leptos::*;
 /// # let (counter, set_counter) = create_signal(cx, 0);
 /// whenever(
 ///     cx,
-///     move || counter() == 7,
+///     move || counter.get() == 7,
 ///     |_, _, _| log!("counter is 7 now!"),
 /// );
 /// #
@@ -68,7 +68,7 @@ use leptos::*;
 /// # let (counter, set_counter) = create_signal(cx, 0);
 /// whenever_with_options(
 ///     cx,
-///     move || counter() == 7,
+///     move || counter.get() == 7,
 ///     |_, _, _| log!("counter is 7 now!"),
 ///     WatchOptions::default().immediate(true),
 /// );

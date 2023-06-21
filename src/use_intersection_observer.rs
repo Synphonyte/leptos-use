@@ -30,7 +30,7 @@ use wasm_bindgen::prelude::*;
 ///     cx,
 ///     el,
 ///     move |entries, _| {
-///         set_visible(entries[0].is_intersecting());
+///         set_visible.set(entries[0].is_intersecting());
 ///     },
 /// );
 ///
@@ -184,7 +184,7 @@ where
 
         move || {
             cleanup();
-            set_active(false);
+            set_active.set(false);
         }
     };
 
@@ -193,7 +193,7 @@ where
         pause,
         resume: move || {
             cleanup();
-            set_active(true);
+            set_active.set(true);
         },
         stop,
     }

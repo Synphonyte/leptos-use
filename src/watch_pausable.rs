@@ -23,21 +23,21 @@ use leptos::*;
 ///     ..
 /// } = watch_pausable(
 ///     cx,
-///     source,
+///     move || source.get(),
 ///     |v, _, _| {
 ///         log!("Changed to {}", v);
 ///     },
 /// );
 ///
-/// set_source("bar".to_string()); // > "Changed to bar"
+/// set_source.set("bar".to_string()); // > "Changed to bar"
 ///
 /// pause();
 ///
-/// set_source("foobar".to_string()); // (nothing happens)
+/// set_source.set("foobar".to_string()); // (nothing happens)
 ///
 /// resume();
 ///
-/// set_source("hello".to_string()); // > "Changed to hello"
+/// set_source.set("hello".to_string()); // > "Changed to hello"
 /// #    view! { cx, }
 /// # }
 /// ```
@@ -87,11 +87,11 @@ where
     let stop = watch_with_options(cx, deps, pausable_callback, options);
 
     let pause = move || {
-        set_active(false);
+        set_active.set(false);
     };
 
     let resume = move || {
-        set_active(true);
+        set_active.set(true);
     };
 
     WatchPausableReturn {

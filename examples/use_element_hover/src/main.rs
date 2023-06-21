@@ -15,7 +15,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     );
 
     view! { cx,
-        <button node_ref=el>{ move || if is_hovered() { "Thank you!" } else { "Hover me" } }</button>
+        <button node_ref=el>{ move || if is_hovered.get() { "Thank you!" } else { "Hover me" } }</button>
     }
 }
 

@@ -108,13 +108,13 @@ where
                 if is_svg() {
                     if let Some(target) = target.get() {
                         if let Ok(Some(styles)) = window.get_computed_style(&target.into()) {
-                            set_height(
+                            set_height.set(
                                 styles
                                     .get_property_value("height")
                                     .map(|v| v.parse().unwrap_or_default())
                                     .unwrap_or_default(),
                             );
-                            set_width(
+                            set_width.set(
                                 styles
                                     .get_property_value("width")
                                     .map(|v| v.parse().unwrap_or_default())
@@ -129,16 +129,16 @@ where
                         vec![box_size.into()]
                     };
 
-                    set_width(format_box_size.iter().fold(0.0, |acc, v| {
+                    set_width.set(format_box_size.iter().fold(0.0, |acc, v| {
                         acc + v.as_ref().clone().unchecked_into::<BoxSize>().inline_size()
                     }));
-                    set_height(format_box_size.iter().fold(0.0, |acc, v| {
+                    set_height.set(format_box_size.iter().fold(0.0, |acc, v| {
                         acc + v.as_ref().clone().unchecked_into::<BoxSize>().block_size()
                     }))
                 } else {
                     // fallback
-                    set_width(entry.content_rect().width());
-                    set_height(entry.content_rect().height())
+                    set_width.set(entry.content_rect().width());
+                    set_height.set(entry.content_rect().height())
                 }
             },
             options.into(),
@@ -150,11 +150,11 @@ where
         move || target.get(),
         move |ele, _, _| {
             if ele.is_some() {
-                set_width(initial_size.width);
-                set_height(initial_size.height);
+                set_width.set(initial_size.width);
+                set_height.set(initial_size.height);
             } else {
-                set_width(0.0);
-                set_height(0.0);
+                set_width.set(0.0);
+                set_height.set(0.0);
             }
         },
         WatchOptions::default().immediate(false),

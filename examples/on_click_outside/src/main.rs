@@ -7,15 +7,15 @@ fn Demo(cx: Scope) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(cx, false);
     let modal_ref = create_node_ref(cx);
 
-    let _ = on_click_outside(cx, modal_ref, move |_| set_show_modal(false));
+    let _ = on_click_outside(cx, modal_ref, move |_| set_show_modal.set(false));
 
     view! { cx,
-        <button on:click=move |_| set_show_modal(true)>"Open Modal"</button>
+        <button on:click=move |_| set_show_modal.set(true)>"Open Modal"</button>
 
-        <Show when=show_modal fallback=|_| view! { cx, }>
+        <Show when=move || show_modal.get() fallback=|_| ()>
             <div node_ref=modal_ref class="modal">
                 <div class="inner">
-                    <button class="button small" title="Close" on:click=move |_| set_show_modal(false)>"𝖷"</button>
+                    <button class="button small" title="Close" on:click=move |_| set_show_modal.set(false)>"𝖷"</button>
                     <p class="heading">"Demo Modal"</p>
                     <p>"Click outside this modal to close it."</p>
                 </div>

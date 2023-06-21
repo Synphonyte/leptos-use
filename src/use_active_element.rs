@@ -21,7 +21,7 @@ use web_sys::AddEventListenerOptions;
 /// let active_element = use_active_element(cx);
 ///
 /// create_effect(cx, move |_| {
-///     log!("focus changed to {:?}", active_element());
+///     log!("focus changed to {:?}", active_element.get());
 /// });
 /// #
 /// # view! { cx, }

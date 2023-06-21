@@ -27,26 +27,26 @@ fn Demo(cx: Scope) -> impl IntoView {
     view! { cx,
         <input
             class="block"
-            prop:value=move || state().name
+            prop:value=move || state.get().name
             on:input=move |e| set_state.update(|s| s.name = event_target_value(&e))
             type="text"
         />
         <input
             class="block"
-            prop:value=move || state().color
+            prop:value=move || state.get().color
             on:input=move |e| set_state.update(|s| s.color = event_target_value(&e))
             type="text"
         />
         <input
             class="block"
-            prop:value=move || state().size
+            prop:value=move || state.get().size
             on:input=move |e| set_state.update(|s| s.size = event_target_value(&e))
             type="text"
         />
         <input
             class="block"
-            prop:value=move || state().count
-            value=move || state().count
+            prop:value=move || state.get().count
+            value=move || state.get().count
             on:input=move |e| set_state.update(|s| s.count = event_target_value(&e).parse::<f64>().unwrap() as u32)
             type="number"
             min="0"
@@ -57,7 +57,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         <p>"Second "<b><code>"use_storage"</code></b>":"</p>
 
         <pre>
-            { move || format!("{:#?}", state2()) }
+            { move || format!("{:#?}", state2.get()) }
         </pre>
 
         <Note>"The values are persistant. When you reload the page the values will be the same."</Note>

@@ -1,4 +1,4 @@
-#![feature(doc_cfg)]
+//#![feature(doc_cfg)]
 //! Collection of essential Leptos utilities inspired by SolidJS USE / VueUse
 
 pub mod core;

@@ -55,11 +55,11 @@ where
     let (counter, set_counter) = create_signal(cx, 0u64);
 
     let update = move || set_counter.update(|count| *count += 1);
-    let reset = move || set_counter(0);
+    let reset = move || set_counter.set(0);
 
     let cb = move || {
         update();
-        callback.clone()(counter());
+        callback.clone()(counter.get());
     };
 
     let Pausable {

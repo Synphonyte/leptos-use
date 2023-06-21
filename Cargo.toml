@@ -12,9 +12,8 @@ readme = "README.md"
 repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
-
 [dependencies]
-leptos = "0.3.0"
+leptos = { version = "0.3", features = ["stable"] }
 wasm-bindgen = "0.2.86"
 js-sys = "0.3.63"
 default-struct-builder = "0.2.1"

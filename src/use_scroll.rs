@@ -94,8 +94,8 @@ use wasm_bindgen::JsCast;
 ///
 /// view! { cx,
 ///     <div node_ref=element>"..."</div>
-///     <button on:click=move |_| set_x(x() + 10.0)>"Scroll right 10px"</button>
-///     <button on:click=move |_| set_y(y() + 10.0)>"Scroll down 10px"</button>
+///     <button on:click=move |_| set_x(x.get_untracked() + 10.0)>"Scroll right 10px"</button>
+///     <button on:click=move |_| set_y(y.get_untracked() + 10.0)>"Scroll down 10px"</button>
 /// }
 /// # }
 /// ```
@@ -140,10 +140,10 @@ use wasm_bindgen::JsCast;
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// # let element = create_node_ref(cx);
 /// #
-/// let (smooth, set_smoot) = create_signal(cx, false);
+/// let (smooth, set_smooth) = create_signal(cx, false);
 ///
 /// let behavior = Signal::derive(cx, move || {
-///     if smooth() { ScrollBehavior::Smooth } else { ScrollBehavior::Auto }
+///     if smooth.get() { ScrollBehavior::Smooth } else { ScrollBehavior::Auto }
 /// });
 ///
 /// let UseScrollReturn {
@@ -246,7 +246,7 @@ where
                 return;
             }
 
-            set_is_scrolling(false);
+            set_is_scrolling.set(false);
             directions.update(|directions| {
                 directions.left = false;
                 directions.right = false;
@@ -298,7 +298,7 @@ where
                     arrived_state.right = right;
                 }
             });
-            set_internal_x(scroll_left);
+            set_internal_x.set(scroll_left);
 
             let mut scroll_top = target.scroll_top() as f64;
 
@@ -330,7 +330,7 @@ where
                 }
             });
 
-            set_internal_y(scroll_top);
+            set_internal_y.set(scroll_top);
         }
     };
 
@@ -341,7 +341,7 @@ where
             let target: web_sys::Element = event_target(&e);
 
             set_arrived_state(target);
-            set_is_scrolling(true);
+            set_is_scrolling.set(true);
             on_scroll_end_debounced.clone()(e.clone());
             on_scroll.clone()(e);
         }

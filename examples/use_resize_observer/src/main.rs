@@ -9,7 +9,7 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     use_resize_observer(cx, el, move |entries, _| {
         let rect = entries[0].content_rect();
-        set_text(format!(
+        set_text.set(format!(
             "width: {:.0}\nheight: {:.0}",
             rect.width(),
             rect.height()
@@ -22,7 +22,7 @@ fn Demo(cx: Scope) -> impl IntoView {
             node_ref=el
             readonly
             class="resize rounded-md p-4 w-[200px] h-[100px] text-2xl leading-10"
-            prop:value=text
+            prop:value=move || text.get()
         />
     }
 }

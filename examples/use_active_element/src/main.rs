@@ -8,7 +8,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     let key = move || {
         format!(
             "{:?}",
-            active_element()
+            active_element.get()
                 .map(|el| el.dataset().get("id"))
                 .unwrap_or_default()
         )

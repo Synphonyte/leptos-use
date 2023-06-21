@@ -47,7 +47,7 @@ use wasm_bindgen::JsCast;
 ///
 /// view! { cx,
 ///     <Show
-///         when=move || cond()
+///         when=move || cond.get()
 ///         fallback=move |cx| view! { cx, <div node_ref=element>"Condition false"</div> }
 ///     >
 ///         <div node_ref=element>"Condition true"</div>

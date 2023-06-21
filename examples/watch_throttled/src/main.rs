@@ -9,7 +9,7 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let _ = watch_throttled(
         cx,
-        input,
+        move || input.get(),
         move |_, _, _| {
             set_updated.update(|x| *x += 1);
         },
@@ -19,8 +19,8 @@ fn Demo(cx: Scope) -> impl IntoView {
     view! { cx,
         <input
             class="block"
-            prop:value=input
-            on:input=move |e| set_input(event_target_value(&e))
+            prop:value=move || input.get()
+            on:input=move |e| set_input.set(event_target_value(&e))
             placeholder="Try to type anything..."
             type="text"
         />

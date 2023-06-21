@@ -20,7 +20,7 @@ use wasm_bindgen::JsCast;
 /// #
 /// let (icon, set_icon) = use_favicon(cx);
 ///
-/// set_icon(Some("dark.png".to_string())); // change current icon
+/// set_icon.set(Some("dark.png".to_string())); // change current icon
 /// #
 /// #    view! { cx, }
 /// # }
@@ -44,7 +44,7 @@ use wasm_bindgen::JsCast;
 ///     cx,
 ///     UseFaviconOptions::default().new_icon(
 ///         Signal::derive(cx, move || {
-///             Some((if is_dark() { "dark.png" } else { "light.png" }).to_string())
+///             Some((if is_dark.get() { "dark.png" } else { "light.png" }).to_string())
 ///         }),
 ///     )
 /// );
@@ -73,7 +73,7 @@ pub fn use_favicon_with_options(
     let (favicon, set_favicon) = create_signal(cx, new_icon.get_untracked());
 
     if matches!(&new_icon, MaybeSignal::Dynamic(_)) {
-        create_effect(cx, move |_| set_favicon(new_icon.get()));
+        create_effect(cx, move |_| set_favicon.set(new_icon.get()));
     }
 
     let apply_icon = move |icon: &String| {
@@ -90,7 +90,7 @@ pub fn use_favicon_with_options(
         }
     };
 
-    let _ = watch(cx, favicon, move |new_icon, prev_icon, _| {
+    let _ = watch(cx, move || favicon.get(), move |new_icon, prev_icon, _| {
         if Some(new_icon) != prev_icon {
             if let Some(new_icon) = new_icon {
                 apply_icon(new_icon);

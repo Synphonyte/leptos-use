@@ -15,7 +15,6 @@ use_specific_storage!(
     ///
     /// * [`use_storage`]
     /// * [`use_session_storage`]
-    #[doc(cfg(feature = "storage"))]
     local
     /// [`use_local_storage`]
 );

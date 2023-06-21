@@ -146,7 +146,6 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// * [`use_local_storage`]
 /// * [`use_session_storage`]
-#[doc(cfg(feature = "storage"))]
 pub fn use_storage<T, D>(
     cx: Scope,
     key: &str,
@@ -161,7 +160,6 @@ where
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`]. See [`use_storage`] for how to use.
-#[doc(cfg(feature = "storage"))]
 pub fn use_storage_with_options<T, D>(
     cx: Scope,
     key: &str,
@@ -295,7 +293,7 @@ where
                 ..
             } = watch_pausable_with_options(
                 cx,
-                data,
+                move || data.get(),
                 move |data, _, _| write.clone()(data),
                 WatchOptions::default().filter(filter),
             );
@@ -311,7 +309,7 @@ where
 
                     match &event_detail.key {
                         None => {
-                            set_data(defaults.get_untracked());
+                            set_data.set(defaults.get_untracked());
                             return;
                         }
                         Some(event_key) => {
@@ -325,7 +323,7 @@ where
                 pause_watch();
 
                 if let Some(value) = read(event_detail.clone()) {
-                    set_data(value);
+                    set_data.set(value);
                 }
 
                 if event_detail.is_some() {
@@ -429,7 +427,6 @@ fn get_optional_string(v: &JsValue, key: &str) -> Option<String> {
 }
 
 /// Error type for use_storage_with_options
-#[doc(cfg(feature = "storage"))]
 pub enum UseStorageError<E = ()> {
     NoStorage(JsValue),
     StorageAccessError(JsValue),
@@ -439,7 +436,6 @@ pub enum UseStorageError<E = ()> {
 }
 
 /// Options for [`use_storage_with_options`].
-#[doc(cfg(feature = "storage"))]
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T> {
     /// Type of storage. Can be `Local` (default), `Session` or `Custom(web_sys::Storage)`
@@ -480,7 +476,6 @@ impl<T> UseStorageOptions<T> {
 }
 
 /// Local or session storage or a custom store that is a `web_sys::Storage`.
-#[doc(cfg(feature = "storage"))]
 #[derive(Default)]
 pub enum StorageType {
     #[default]
