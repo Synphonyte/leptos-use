@@ -49,6 +49,7 @@ macro_rules! use_specific_storage {
 pub(crate) use use_specific_storage;
 
 /// Options for [`use_local_storage_with_options`].
+// #[doc(cfg(feature = "storage"))]
 #[derive(DefaultBuilder)]
 pub struct UseSpecificStorageOptions<T> {
     /// Listen to changes to this storage key from somewhere else. Defaults to true.

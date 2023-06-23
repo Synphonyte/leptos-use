@@ -146,6 +146,7 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// * [`use_local_storage`]
 /// * [`use_session_storage`]
+// #[doc(cfg(feature = "storage"))]
 pub fn use_storage<T, D>(
     cx: Scope,
     key: &str,
@@ -160,6 +161,7 @@ where
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`]. See [`use_storage`] for how to use.
+// #[doc(cfg(feature = "storage"))]
 pub fn use_storage_with_options<T, D>(
     cx: Scope,
     key: &str,
@@ -427,6 +429,7 @@ fn get_optional_string(v: &JsValue, key: &str) -> Option<String> {
 }
 
 /// Error type for use_storage_with_options
+// #[doc(cfg(feature = "storage"))]
 pub enum UseStorageError<E = ()> {
     NoStorage(JsValue),
     StorageAccessError(JsValue),
@@ -436,6 +439,7 @@ pub enum UseStorageError<E = ()> {
 }
 
 /// Options for [`use_storage_with_options`].
+// #[doc(cfg(feature = "storage"))]
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T> {
     /// Type of storage. Can be `Local` (default), `Session` or `Custom(web_sys::Storage)`

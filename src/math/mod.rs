@@ -1,3 +1,4 @@
+// #![doc(cfg(feature = "math"))]
 //! Collection of reactive math functions
 
 mod shared;
