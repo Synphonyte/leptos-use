@@ -1,0 +1,456 @@
+use crate::core::ElementMaybeSignal;
+#[cfg(feature = "storage")]
+use crate::storage::{use_storage_with_options, UseStorageOptions};
+#[cfg(feature = "storage")]
+use serde::{Deserialize, Serialize};
+
+use crate::core::StorageType;
+use crate::use_preferred_dark;
+use crate::utils::CloneableFnWithArg;
+use default_struct_builder::DefaultBuilder;
+use leptos::*;
+use std::marker::PhantomData;
+use wasm_bindgen::JsCast;
+
+/// Reactive color mode (dark / light / customs) with auto data persistence.
+///
+/// > Data persistence is only enabled when the crate feature **`storage`** is enabled. You
+/// can use the function without it but the mode won't be persisted.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_color_mode)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::*;
+/// use leptos_use::{use_color_mode, UseColorModeReturn};
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let UseColorModeReturn {
+///     mode, // Signal<ColorMode::dark | ColorMode::light>
+///     set_mode,
+///     ..
+/// } = use_color_mode(cx);
+/// #
+/// # view! { cx, }
+/// # }
+/// ```
+///
+/// By default, it will match with users' browser preference using [`use_preferred_dark`] (a.k.a. `ColorMode::Auto`).
+/// When reading the signal, it will by default return the current color mode (`ColorMode::Dark`, `ColorMode::Light` or
+/// your custom modes `ColorMode::Custom("some-custom")`). The `ColorMode::Auto` variant can
+/// be included in the returned modes by enabling the `emit_auto` option and using [`use_color_mode_with_options`].
+/// When writing to the signal (`set_mode`), it will trigger DOM updates and persist the color mode to local
+/// storage (or your custom storage). You can pass `ColorMode::Auto` to set back to auto mode.
+///
+/// ```
+/// # use leptos::*;
+/// use leptos_use::{ColorMode, use_color_mode, UseColorModeReturn};
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # let UseColorModeReturn { mode, set_mode, .. } = use_color_mode(cx);
+/// #
+/// mode(); // ColorMode::Dark or ColorMode::Light
+///
+/// set_mode(ColorMode::Dark); // change to dark mode and persist (with feature `storage`)
+///
+/// set_mode(ColorMode::Auto); // change to auto mode
+/// #
+/// # view! { cx, }
+/// # }
+/// ```
+///
+/// ## Options
+///
+/// ```
+/// # use leptos::*;
+/// use leptos_use::{use_color_mode_with_options, UseColorModeOptions, UseColorModeReturn};
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let UseColorModeReturn { mode, set_mode, .. } = use_color_mode_with_options(
+///     cx,
+///     UseColorModeOptions::default()
+///         .attribute("theme") // instead of writing to `class`
+///         .custom_modes(vec![
+///             // custom colors in addition to light/dark
+///             "dim".to_string(),
+///             "cafe".to_string(),
+///         ]),
+/// ); // Signal<ColorMode::Dark | ColorMode::Light | ColorMode::Custom("dim") | ColorMode::Custom("cafe")>
+/// #
+/// # view! { cx, }
+/// # }
+/// ```
+///
+/// ## See also
+///
+/// * [`use_dark`]
+/// * [`use_preferred_dark`]
+/// * [`use_storage`]
+pub fn use_color_mode(cx: Scope) -> UseColorModeReturn {
+    use_color_mode_with_options(cx, UseColorModeOptions::default())
+}
+
+/// Version of [`use_color_mode`] that takes a `UseColorModeOptions`. See [`use_color_mode`] for how to use.
+pub fn use_color_mode_with_options<El, T>(
+    cx: Scope,
+    options: UseColorModeOptions<El, T>,
+) -> UseColorModeReturn
+where
+    El: Clone,
+    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    T: Into<web_sys::Element> + Clone + 'static,
+{
+    let UseColorModeOptions {
+        target,
+        attribute,
+        initial_value,
+        on_changed,
+        storage_signal,
+        custom_modes,
+        storage_key,
+        storage,
+        storage_enabled,
+        emit_auto,
+        transition_enabled,
+        listen_to_storage_changes,
+        _marker,
+    } = options;
+
+    let modes: Vec<String> = custom_modes
+        .into_iter()
+        .chain(vec![ColorMode::Dark.to_string(), ColorMode::Light.to_string()].into_iter())
+        .collect();
+
+    let preferred_dark = use_preferred_dark(cx);
+
+    let system = Signal::derive(cx, move || {
+        if preferred_dark.get() {
+            ColorMode::Dark
+        } else {
+            ColorMode::Light
+        }
+    });
+
+    let (store, set_store) = get_store_signal(
+        cx,
+        initial_value,
+        storage_signal,
+        &storage_key,
+        storage_enabled,
+        storage,
+        listen_to_storage_changes,
+    );
+
+    let state = Signal::derive(cx, move || {
+        let value = store.get();
+        if value == ColorMode::Auto {
+            system.get()
+        } else {
+            value
+        }
+    });
+
+    let target = (cx, target).into();
+
+    let update_html_attrs = {
+        move |target: ElementMaybeSignal<T, web_sys::Element>,
+              attribute: String,
+              value: ColorMode| {
+            let el = target.get_untracked();
+
+            if let Some(el) = el {
+                let el = el.into();
+
+                let mut style: Option<web_sys::HtmlStyleElement> = None;
+                if !transition_enabled {
+                    if let Ok(styl) = document().create_element("style") {
+                        if let Some(head) = document().head() {
+                            let styl: web_sys::HtmlStyleElement = styl.unchecked_into();
+                            let style_string = "*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
+                            styl.set_text_content(Some(style_string));
+                            let _ = head.append_child(&styl);
+                            style = Some(styl);
+                        }
+                    }
+                }
+
+                if attribute == "class" {
+                    for mode in &modes {
+                        if value == ColorMode::from_string(mode) {
+                            let _ = el.class_list().add_1(mode);
+                        } else {
+                            let _ = el.class_list().remove_1(mode);
+                        }
+                    }
+                } else {
+                    let _ = el.set_attribute(&attribute, &value.to_string());
+                }
+
+                if !transition_enabled {
+                    if let Some(style) = style {
+                        if let Some(head) = document().head() {
+                            // Calling getComputedStyle forces the browser to redraw
+                            if let Ok(Some(style)) = window().get_computed_style(&style) {
+                                let _ = style.get_property_value("opacity");
+                            }
+
+                            let _ = head.remove_child(&style);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    let default_on_changed = move |mode: ColorMode| {
+        update_html_attrs(target.clone(), attribute.clone(), mode);
+    };
+
+    let on_changed = move |mode: ColorMode| {
+        on_changed(UseColorModeOnChangeArgs {
+            mode,
+            default_handler: Box::new(default_on_changed.clone()),
+        });
+    };
+
+    create_effect(cx, {
+        let on_changed = on_changed.clone();
+
+        move |_| {
+            on_changed.clone()(state.get());
+        }
+    });
+
+    on_cleanup(cx, move || {
+        on_changed(state.get());
+    });
+
+    let mode = Signal::derive(cx, move || if emit_auto { store.get() } else { state() });
+
+    UseColorModeReturn {
+        mode,
+        set_mode: set_store,
+        store: store.into(),
+        set_store,
+        system,
+        state,
+    }
+}
+
+#[cfg(not(feature = "storage"))]
+/// Color modes
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
+pub enum ColorMode {
+    #[default]
+    Auto,
+    Light,
+    Dark,
+    Custom(String),
+}
+
+#[cfg(not(feature = "storage"))]
+fn get_store_signal(
+    cx: Scope,
+    initial_value: MaybeSignal<ColorMode>,
+    storage_signal: Option<RwSignal<ColorMode>>,
+    storage_key: &String,
+    storage_enabled: bool,
+    storage: StorageType,
+    listen_to_storage_changes: bool,
+) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+    if let Some(storage_signal) = storage_signal {
+        storage_signal.split()
+    } else {
+        create_signal(cx, initial_value.get_untracked())
+    }
+}
+
+#[cfg(feature = "storage")]
+/// Color modes
+#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum ColorMode {
+    #[default]
+    Auto,
+    Light,
+    Dark,
+    Custom(String),
+}
+
+#[cfg(feature = "storage")]
+fn get_store_signal(
+    cx: Scope,
+    initial_value: MaybeSignal<ColorMode>,
+    storage_signal: Option<RwSignal<ColorMode>>,
+    storage_key: &str,
+    storage_enabled: bool,
+    storage: StorageType,
+    listen_to_storage_changes: bool,
+) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+    if let Some(storage_signal) = storage_signal {
+        storage_signal.split()
+    } else if storage_enabled {
+        let (store, set_store, _) = use_storage_with_options(
+            cx,
+            storage_key,
+            initial_value.get_untracked(),
+            UseStorageOptions::default()
+                .listen_to_storage_changes(listen_to_storage_changes)
+                .storage_type(storage),
+        );
+
+        (store, set_store)
+    } else {
+        create_signal(cx, initial_value.get_untracked())
+    }
+}
+
+impl ToString for ColorMode {
+    fn to_string(&self) -> String {
+        use ColorMode::*;
+
+        match self {
+            Auto => "".to_string(),
+            Light => "light".to_string(),
+            Dark => "dark".to_string(),
+            Custom(v) => v.clone(),
+        }
+    }
+}
+
+impl ColorMode {
+    pub fn from_string(s: &str) -> ColorMode {
+        match s {
+            "auto" => ColorMode::Auto,
+            "" => ColorMode::Auto,
+            "light" => ColorMode::Light,
+            "dark" => ColorMode::Dark,
+            _ => ColorMode::Custom(s.to_string()),
+        }
+    }
+}
+
+/// Arguments to [`UseColorModeOptions::on_changed`]
+#[derive(Clone)]
+pub struct UseColorModeOnChangeArgs {
+    /// The color mode to change to.
+    pub mode: ColorMode,
+
+    /// The default handler that would have been called if the `on_changed` handler had not been specified.
+    pub default_handler: Box<dyn CloneableFnWithArg<ColorMode>>,
+}
+
+#[derive(DefaultBuilder)]
+pub struct UseColorModeOptions<El, T>
+where
+    El: Clone,
+    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    T: Into<web_sys::Element> + Clone + 'static,
+{
+    /// Element that the color mode will be applied to. Defaults to `"html"`.
+    target: El,
+
+    /// HTML attribute applied to the target element. Defaults to `"class"`.
+    #[builder(into)]
+    attribute: String,
+
+    /// Initial value of the color mode. Defaults to `"Auto"`.
+    #[builder(into)]
+    initial_value: MaybeSignal<ColorMode>,
+
+    /// Custom modes that you plan to use as `ColorMode::Custom(x)`. Defaults to `vec![]`.
+    custom_modes: Vec<String>,
+
+    /// Custom handler that is called on updates.
+    /// If specified this will override the default behavior.
+    /// To get the default behaviour back you can call the provided `default_handler` function.
+    #[builder(into)]
+    on_changed: Box<dyn CloneableFnWithArg<UseColorModeOnChangeArgs>>,
+
+    /// When provided, `useStorage` will be skipped.
+    /// Storage requires the *create feature* **`storage`** to be enabled.
+    /// Defaults to `None`.
+    #[builder(into)]
+    storage_signal: Option<RwSignal<ColorMode>>,
+
+    /// Key to persist the data into localStorage/sessionStorage.
+    /// Storage requires the *create feature* **`storage`** to be enabled.
+    /// Defaults to `"leptos-use-color-scheme"`.
+    #[builder(into)]
+    storage_key: String,
+
+    /// Storage type, can be `Local` or `Session` or custom.
+    /// Storage requires the *create feature* **`storage`** to be enabled.
+    /// Defaults to `Local`.
+    storage: StorageType,
+
+    /// If the color mode should be persisted. If `true` this required the
+    /// *create feature* **`storage`** to be enabled.
+    /// Defaults to `true` and is forced to `false` if the feature **`storage`** is not enabled.
+    storage_enabled: bool,
+
+    /// Emit `auto` mode from state
+    ///
+    /// When set to `true`, preferred mode won't be translated into `light` or `dark`.
+    /// This is useful when the fact that `auto` mode was selected needs to be known.
+    ///
+    /// Defaults to `false`.
+    emit_auto: bool,
+
+    /// If transitions on color mode change are enabled. Defaults to `false`.
+    transition_enabled: bool,
+
+    /// Listen to changes to this storage key from somewhere else.
+    /// Storage requires the *create feature* **`storage`** to be enabled.
+    /// Defaults to true.
+    listen_to_storage_changes: bool,
+
+    #[builder(skip)]
+    _marker: PhantomData<T>,
+}
+
+impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
+    fn default() -> Self {
+        Self {
+            target: "html",
+            attribute: "class".into(),
+            initial_value: ColorMode::Auto.into(),
+            custom_modes: vec![],
+            on_changed: Box::new(move |args: UseColorModeOnChangeArgs| {
+                (args.default_handler)(args.mode)
+            }),
+            storage_signal: None,
+            storage_key: "leptos-use-color-scheme".into(),
+            storage: StorageType::default(),
+            storage_enabled: true,
+            emit_auto: false,
+            transition_enabled: false,
+            listen_to_storage_changes: true,
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Return type of [`use_color_mode`]
+pub struct UseColorModeReturn {
+    /// Main value signal of the color mode
+    pub mode: Signal<ColorMode>,
+    /// Main value setter signal of the color mode
+    pub set_mode: WriteSignal<ColorMode>,
+
+    /// Direct access to the returned signal of [`use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    pub store: Signal<ColorMode>,
+    /// Direct write access to the returned signal of [`use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    pub set_store: WriteSignal<ColorMode>,
+
+    /// Signal of the system's preferred color mode that you would get from a media query
+    pub system: Signal<ColorMode>,
+
+    /// When [`UseColorModeOptions::emit_auto`] is `false` this is the same as `mode`. This will never report `ColorMode::Auto` but always on of the other modes.
+    pub state: Signal<ColorMode>,
+}

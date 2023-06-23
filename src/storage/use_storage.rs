@@ -11,6 +11,8 @@ use serde_json::Error;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
 
+pub use crate::core::StorageType;
+
 const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) / [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
@@ -477,23 +479,4 @@ impl<T> UseStorageOptions<T> {
         /// the serializing and storing into storage
         filter
     );
-}
-
-/// Local or session storage or a custom store that is a `web_sys::Storage`.
-#[derive(Default)]
-pub enum StorageType {
-    #[default]
-    Local,
-    Session,
-    Custom(web_sys::Storage),
-}
-
-impl StorageType {
-    pub fn into_storage(self) -> Result<Option<web_sys::Storage>, JsValue> {
-        match self {
-            StorageType::Local => window().local_storage(),
-            StorageType::Session => window().session_storage(),
-            StorageType::Custom(storage) => Ok(Some(storage)),
-        }
-    }
 }

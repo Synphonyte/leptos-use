@@ -23,6 +23,7 @@
 # Browser
 
 - [use_breakpoints](browser/use_breakpoints.md)
+- [use_color_mode](browser/use_color_mode.md)
 - [use_css_var](browser/use_css_var.md)
 - [use_event_listener](browser/use_event_listener.md)
 - [use_favicon](browser/use_favicon.md)
@@ -52,6 +53,7 @@
 
 # Utilities
 
+- [use_cycle_list](utilities/use_cycle_list.md)
 - [use_debounce_fn](utilities/use_debounce_fn.md)
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)

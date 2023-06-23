@@ -1,6 +1,11 @@
 variables:
   - name: function_name
     ask: Name of the function
+  - name: scope
+    ask: "Is the first parameter `cx: Scope`?"
+    select_in_values:
+      - "cx"
+      - ""
   - name: category
     ask: Documentation category (lower case)
   - name: module

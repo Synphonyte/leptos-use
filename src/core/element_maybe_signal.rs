@@ -156,6 +156,24 @@ where
     }
 }
 
+impl<'a, E> From<&'a str> for ElementMaybeSignal<web_sys::Element, E>
+where
+    E: From<web_sys::Element> + 'static,
+{
+    fn from(target: &'a str) -> Self {
+        Self::Static(document().query_selector(target).unwrap_or_default())
+    }
+}
+
+impl<E> From<String> for ElementMaybeSignal<web_sys::Element, E>
+where
+    E: From<web_sys::Element> + 'static,
+{
+    fn from(target: String) -> Self {
+        Self::Static(document().query_selector(&target).unwrap_or_default())
+    }
+}
+
 impl<E> From<(Scope, Signal<String>)> for ElementMaybeSignal<web_sys::Element, E>
 where
     E: From<web_sys::Element> + 'static,

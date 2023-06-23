@@ -37,6 +37,8 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_test_fn/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_active_element/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_element_hover/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_color_mode/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_cycle_list/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

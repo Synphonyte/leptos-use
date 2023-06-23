@@ -5,7 +5,7 @@ use leptos_use{{#if module}}::{{ module }}{{/if}}::{{ function_name }};
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
 
-    {{ function_name }}();
+    {{ function_name }}({{#if scope }}cx{{/if}});
 
     view! { cx,
     }
