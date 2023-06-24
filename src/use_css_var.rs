@@ -152,13 +152,17 @@ where
         );
     }
 
-    let _ = watch(cx, move || variable.get(), move |val, _, _| {
-        if let Some(el) = el_signal.get() {
-            let el = el.into().unchecked_into::<web_sys::HtmlElement>();
-            let style = el.style();
-            let _ = style.set_property(&prop.get_untracked(), val);
-        }
-    });
+    let _ = watch(
+        cx,
+        move || variable.get(),
+        move |val, _, _| {
+            if let Some(el) = el_signal.get() {
+                let el = el.into().unchecked_into::<web_sys::HtmlElement>();
+                let style = el.style();
+                let _ = style.set_property(&prop.get_untracked(), val);
+            }
+        },
+    );
 
     (variable, set_variable)
 }

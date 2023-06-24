@@ -90,13 +90,17 @@ pub fn use_favicon_with_options(
         }
     };
 
-    let _ = watch(cx, move || favicon.get(), move |new_icon, prev_icon, _| {
-        if Some(new_icon) != prev_icon {
-            if let Some(new_icon) = new_icon {
-                apply_icon(new_icon);
+    let _ = watch(
+        cx,
+        move || favicon.get(),
+        move |new_icon, prev_icon, _| {
+            if Some(new_icon) != prev_icon {
+                if let Some(new_icon) = new_icon {
+                    apply_icon(new_icon);
+                }
             }
-        }
-    });
+        },
+    );
 
     (favicon, set_favicon)
 }

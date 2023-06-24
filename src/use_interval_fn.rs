@@ -110,11 +110,15 @@ where
     if matches!(interval, MaybeSignal::Dynamic(_)) {
         let resume = resume.clone();
 
-        let stop_watch = watch(cx, move || interval.get(), move |_, _, _| {
-            if is_active.get() {
-                resume();
-            }
-        });
+        let stop_watch = watch(
+            cx,
+            move || interval.get(),
+            move |_, _, _| {
+                if is_active.get() {
+                    resume();
+                }
+            },
+        );
         on_cleanup(cx, stop_watch);
     }
 

@@ -21,11 +21,11 @@ pub use use_element_size::*;
 pub use use_resize_observer::*;
 
 mod on_click_outside;
-mod use_cycle_list;
-mod use_color_mode;
 mod use_active_element;
 mod use_breakpoints;
+mod use_color_mode;
 mod use_css_var;
+mod use_cycle_list;
 mod use_debounce_fn;
 mod use_element_hover;
 mod use_element_visibility;
@@ -49,11 +49,11 @@ mod watch_throttled;
 mod whenever;
 
 pub use on_click_outside::*;
-pub use use_cycle_list::*;
-pub use use_color_mode::*;
 pub use use_active_element::*;
 pub use use_breakpoints::*;
+pub use use_color_mode::*;
 pub use use_css_var::*;
+pub use use_cycle_list::*;
 pub use use_debounce_fn::*;
 pub use use_element_hover::*;
 pub use use_element_visibility::*;
