@@ -264,8 +264,8 @@ select {
   --tw-backdrop-sepia:  ;
 }
 
-.block {
-  display: block;
+.static {
+  position: static;
 }
 
 .text-\[--brand-color\] {

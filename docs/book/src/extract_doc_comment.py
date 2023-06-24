@@ -64,6 +64,9 @@ def main():
 
                 print(line)
 
+            elif re.match(r"^//\s?#\[doc\(cfg\(.+?\)\)]", stripped_line):
+                pass
+
             elif doc_comment_started:
                 initial_doc_finished = True
 

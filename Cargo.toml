@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -16,7 +16,7 @@ homepage = "https://leptos-use.rs"
 leptos = { version = "0.3", default-features = false }
 wasm-bindgen = "0.2"
 js-sys = "0.3"
-default-struct-builder = { path = "../default-struct-builder" }
+default-struct-builder = "0.3"
 num = { version = "0.4", optional = true }
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
@@ -64,7 +64,10 @@ math = ["num"]
 storage = ["serde", "serde_json", "web-sys/StorageEvent"]
 stable = ["leptos/stable"]
 
-[package.metadata."docs.rs"]
+[package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg=web_sys_unstable_apis"]
 rustc-args = ["--cfg=web_sys_unstable_apis"]
+
+[dev-dependencies]
+leptos = "0.3"

@@ -3,6 +3,7 @@ use crate::core::ElementMaybeSignal;
 use crate::storage::{use_storage_with_options, UseStorageOptions};
 #[cfg(feature = "storage")]
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
 use crate::core::StorageType;
 use crate::use_preferred_dark;
@@ -54,11 +55,11 @@ use wasm_bindgen::JsCast;
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// # let UseColorModeReturn { mode, set_mode, .. } = use_color_mode(cx);
 /// #
-/// mode(); // ColorMode::Dark or ColorMode::Light
+/// mode.get(); // ColorMode::Dark or ColorMode::Light
 ///
-/// set_mode(ColorMode::Dark); // change to dark mode and persist (with feature `storage`)
+/// set_mode.set(ColorMode::Dark); // change to dark mode and persist (with feature `storage`)
 ///
-/// set_mode(ColorMode::Auto); // change to auto mode
+/// set_mode.set(ColorMode::Auto); // change to auto mode
 /// #
 /// # view! { cx, }
 /// # }
@@ -182,7 +183,7 @@ where
 
                 if attribute == "class" {
                     for mode in &modes {
-                        if value == ColorMode::from_string(mode) {
+                        if &value.to_string() == mode {
                             let _ = el.class_list().add_1(mode);
                         } else {
                             let _ = el.class_list().remove_1(mode);
@@ -231,7 +232,10 @@ where
         on_changed(state.get());
     });
 
-    let mode = Signal::derive(cx, move || if emit_auto { store.get() } else { state() });
+    let mode = Signal::derive(
+        cx,
+        move || if emit_auto { store.get() } else { state.get() },
+    );
 
     UseColorModeReturn {
         mode,
@@ -259,10 +263,10 @@ fn get_store_signal(
     cx: Scope,
     initial_value: MaybeSignal<ColorMode>,
     storage_signal: Option<RwSignal<ColorMode>>,
-    storage_key: &String,
-    storage_enabled: bool,
-    storage: StorageType,
-    listen_to_storage_changes: bool,
+    _storage_key: &String,
+    _storage_enabled: bool,
+    _storage: StorageType,
+    _listen_to_storage_changes: bool,
 ) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
     if let Some(storage_signal) = storage_signal {
         storage_signal.split()
@@ -273,7 +277,7 @@ fn get_store_signal(
 
 #[cfg(feature = "storage")]
 /// Color modes
-#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub enum ColorMode {
     #[default]
     Auto,
@@ -310,21 +314,21 @@ fn get_store_signal(
     }
 }
 
-impl ToString for ColorMode {
-    fn to_string(&self) -> String {
+impl Display for ColorMode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         use ColorMode::*;
 
         match self {
-            Auto => "".to_string(),
-            Light => "light".to_string(),
-            Dark => "dark".to_string(),
-            Custom(v) => v.clone(),
+            Auto => write!(f, "auto"),
+            Light => write!(f, "light"),
+            Dark => write!(f, "dark"),
+            Custom(v) => write!(f, "{}", v),
         }
     }
 }
 
-impl ColorMode {
-    pub fn from_string(s: &str) -> ColorMode {
+impl From<&str> for ColorMode {
+    fn from(s: &str) -> Self {
         match s {
             "auto" => ColorMode::Auto,
             "" => ColorMode::Auto,
@@ -332,6 +336,12 @@ impl ColorMode {
             "dark" => ColorMode::Dark,
             _ => ColorMode::Custom(s.to_string()),
         }
+    }
+}
+
+impl From<String> for ColorMode {
+    fn from(s: String) -> Self {
+        ColorMode::from(s.as_str())
     }
 }
 

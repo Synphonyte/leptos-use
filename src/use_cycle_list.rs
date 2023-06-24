@@ -1,3 +1,4 @@
+use crate::core::MaybeRwSignal;
 use crate::watch;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -21,11 +22,11 @@ use leptos::*;
 ///     vec!["Dog", "Cat", "Lizard", "Shark", "Whale", "Dolphin", "Octopus", "Seal"]
 /// );
 ///
-/// log!("{}", state()); // "Dog"
+/// log!("{}", state.get()); // "Dog"
 ///
 /// prev();
 ///
-/// log!("{}", state()); // "Seal"
+/// log!("{}", state.get()); // "Seal"
 /// #
 /// # view! { cx, }
 /// # }
@@ -77,14 +78,14 @@ where
 
         move || {
             if let Some(initial_value) = initial_value {
-                initial_value.get()
+                initial_value
             } else {
-                first.expect("The provided list shouldn't be empty")
+                MaybeRwSignal::from(first.expect("The provided list shouldn't be empty"))
             }
         }
     };
 
-    let (state, set_state) = create_signal(cx, get_initial_value());
+    let (state, set_state) = get_initial_value().to_signal(cx);
 
     let index = {
         let list = list.clone();
@@ -162,7 +163,7 @@ where
     };
 
     UseCycleListReturn {
-        state: state.into(),
+        state,
         set_state,
         index: index.into(),
         set_index: set,
@@ -181,7 +182,7 @@ where
     /// The initial value of the state. Can be a Signal. If none is provided the first entry
     /// of the list will be used.
     #[builder(keep_type)]
-    initial_value: Option<MaybeSignal<T>>,
+    initial_value: Option<MaybeRwSignal<T>>,
 
     /// The default index when the current value is not found in the list.
     /// For example when `get_index_of` returns `None`.

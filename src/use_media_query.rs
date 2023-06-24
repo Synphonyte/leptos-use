@@ -2,7 +2,7 @@ use crate::use_event_listener;
 use crate::utils::CloneableFnMutWithArg;
 use leptos::ev::change;
 use leptos::*;
-use std::cell::{OnceCell, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Reactive [Media Query](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Testing_media_queries).
@@ -40,8 +40,8 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
     let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));
     let remove_listener: RemoveListener = Rc::new(RefCell::new(None));
 
-    let listener: Rc<OnceCell<Box<dyn CloneableFnMutWithArg<web_sys::Event>>>> =
-        Rc::new(OnceCell::new());
+    let listener: Rc<RefCell<Box<dyn CloneableFnMutWithArg<web_sys::Event>>>> =
+        Rc::new(RefCell::new(Box::new(|_| {})));
 
     let cleanup = {
         let remove_listener = Rc::clone(&remove_listener);
@@ -70,10 +70,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
                     cx,
                     media_query.clone(),
                     change,
-                    listener
-                        .get()
-                        .expect("cell should be initialized by now")
-                        .clone(),
+                    listener.borrow().clone(),
                 ))));
             } else {
                 set_matches.set(false);
@@ -84,8 +81,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
     {
         let update = update.clone();
         listener
-            .set(Box::new(move |_| update()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>)
-            .expect("cell is empty");
+            .replace(Box::new(move |_| update()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>);
     }
 
     create_effect(cx, move |_| update());
