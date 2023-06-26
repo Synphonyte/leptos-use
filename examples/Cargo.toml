@@ -32,3 +32,19 @@ members = [
     "watch_pausable",
     "watch_throttled",
 ]
+
+[package]
+name = "leptos-use-examples"
+version = "0.3.3"
+edition = "2021"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[lib]
+
+[package.metadata.leptos]
+lib-profile-release = "wasm-release"

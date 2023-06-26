@@ -19,7 +19,7 @@ def build_and_copy_demo(category, md_name):
     name = md_name[:-3]
     example_dir = f"../../examples/{name}"
     if os.path.exists(example_dir):
-        p = subprocess.Popen(["trunk", "build"], cwd=example_dir)
+        p = subprocess.Popen(["trunk", "build", "--release"], cwd=example_dir)
         p.wait()
 
         example_output_path = os.path.join(example_dir, "dist")
