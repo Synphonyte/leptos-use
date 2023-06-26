@@ -20,7 +20,7 @@ jobs:
           toolchain: nightly
           profile: minimal
           override: true
-          components: rustfmt, clippy
+          components: rustfmt, clippy, rust-src
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Check function count badge

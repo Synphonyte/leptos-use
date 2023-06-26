@@ -19,6 +19,7 @@ jobs:
           toolchain: nightly
           profile: minimal
           override: true
+          components: rust-src
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Install mdbook I
