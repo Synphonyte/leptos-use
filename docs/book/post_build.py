@@ -20,7 +20,10 @@ def build_and_copy_demo(category, md_name):
     example_dir = f"../../examples/{name}"
     if os.path.exists(example_dir):
         p = subprocess.Popen(["trunk", "build", "--release"], cwd=example_dir)
-        p.wait()
+        code = p.wait()
+
+        if code != 0:
+            sys.exit(code, f"failed to build example '{name}'")
 
         example_output_path = os.path.join(example_dir, "dist")
         target_path = os.path.join("book", category, name, "demo")

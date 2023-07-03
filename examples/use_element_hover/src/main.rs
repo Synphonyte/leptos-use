@@ -1,10 +1,11 @@
+use leptos::html::Button;
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_element_hover_with_options, UseElementHoverOptions};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref(cx);
+    let el = create_node_ref::<Button>(cx);
 
     let is_hovered = use_element_hover_with_options(
         cx,

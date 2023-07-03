@@ -1,10 +1,11 @@
+use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref(cx);
+    let el = create_node_ref::<Div>(cx);
     let (color, set_color) =
         use_css_var_with_options(cx, "--color", UseCssVarOptions::default().target(el));
     let switch_color = move |_| {
@@ -15,7 +16,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         }
     };
 
-    let elv = create_node_ref(cx);
+    let elv = create_node_ref::<Div>(cx);
     let (key, set_key) = create_signal(cx, "--color".to_string());
     let (color_val, _) = use_css_var_with_options(cx, key, UseCssVarOptions::default().target(elv));
     let change_var = move |_| {

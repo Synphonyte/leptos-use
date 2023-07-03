@@ -1,3 +1,4 @@
+use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{
@@ -22,7 +23,7 @@ impl UseMouseEventExtractor for Extractor {
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref(cx);
+    let el = create_node_ref::<Div>(cx);
 
     let mouse_default = use_mouse(cx);
 

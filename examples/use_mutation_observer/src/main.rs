@@ -1,3 +1,4 @@
+use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_mutation_observer_with_options;
@@ -5,7 +6,7 @@ use std::time::Duration;
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref(cx);
+    let el = create_node_ref::<Div>(cx);
     let (messages, set_messages) = create_signal(cx, vec![]);
     let (class_name, set_class_name) = create_signal(cx, String::new());
     let (style, set_style) = create_signal(cx, String::new());

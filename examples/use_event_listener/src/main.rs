@@ -1,4 +1,5 @@
 use leptos::ev::{click, keydown};
+use leptos::html::A;
 use leptos::*;
 use leptos_use::use_event_listener;
 
@@ -8,7 +9,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         log!("window keydown: '{}'", evt.key());
     });
 
-    let element = create_node_ref(cx);
+    let element = create_node_ref::<A>(cx);
 
     let _ = use_event_listener(cx, element, click, |evt| {
         log!(

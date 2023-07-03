@@ -1,10 +1,11 @@
+use leptos::html::Input;
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{watch_pausable, WatchPausableReturn};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let input = create_node_ref(cx);
+    let input = create_node_ref::<Input>(cx);
     let (log, set_log) = create_signal(cx, "".to_string());
     let (source, set_source) = create_signal(cx, "".to_string());
 
@@ -13,9 +14,13 @@ fn Demo(cx: Scope) -> impl IntoView {
         resume,
         is_active,
         ..
-    } = watch_pausable(cx, move || source.get(), move |v, _, _| {
-        set_log.update(|log| *log = format!("{log}Changed to \"{v}\"\n"));
-    });
+    } = watch_pausable(
+        cx,
+        move || source.get(),
+        move |v, _, _| {
+            set_log.update(|log| *log = format!("{log}Changed to \"{v}\"\n"));
+        },
+    );
 
     let clear = move |_| set_log.set("".to_string());
 

@@ -1,3 +1,4 @@
+use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::on_click_outside;
@@ -5,7 +6,7 @@ use leptos_use::on_click_outside;
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(cx, false);
-    let modal_ref = create_node_ref(cx);
+    let modal_ref = create_node_ref::<Div>(cx);
 
     let _ = on_click_outside(cx, modal_ref, move |_| set_show_modal.set(false));
 

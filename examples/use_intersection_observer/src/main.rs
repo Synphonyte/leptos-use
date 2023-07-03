@@ -1,3 +1,4 @@
+use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{
@@ -7,8 +8,8 @@ use leptos_use::{
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let root = create_node_ref(cx);
-    let target = create_node_ref(cx);
+    let root = create_node_ref::<Div>(cx);
+    let target = create_node_ref::<Div>(cx);
     let (is_visible, set_visible) = create_signal(cx, false);
 
     let UseIntersectionObserverReturn {

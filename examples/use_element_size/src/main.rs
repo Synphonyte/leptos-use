@@ -1,10 +1,11 @@
+use leptos::html::Textarea;
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{use_element_size, UseElementSizeReturn};
 
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref(cx);
+    let el = create_node_ref::<Textarea>(cx);
 
     let UseElementSizeReturn { width, height } = use_element_size(cx, el);
 
