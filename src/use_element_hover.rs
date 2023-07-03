@@ -17,11 +17,12 @@ use web_sys::AddEventListenerOptions;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos_use::use_element_hover;
+/// # use leptos::html::Button;
+/// # use leptos_use::use_element_hover;
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
+/// let el = create_node_ref::<Button>(cx);
 /// let is_hovered = use_element_hover(cx, el);
 ///
 /// view! { cx,

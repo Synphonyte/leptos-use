@@ -19,11 +19,12 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::resize;
+/// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let element = create_node_ref(cx);
+/// let element = create_node_ref::<Div>(cx);
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, is_scrolling, arrived_state, directions, ..
@@ -42,12 +43,13 @@ use wasm_bindgen::JsCast;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Div;
 /// # use leptos::ev::resize;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollOffset};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref(cx);
+/// # let element = create_node_ref::<Div>(cx);
 /// #
 /// let UseScrollReturn {
 ///     x,
@@ -81,12 +83,13 @@ use wasm_bindgen::JsCast;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Div;
 /// # use leptos::ev::resize;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let element = create_node_ref(cx);
+/// let element = create_node_ref::<Div>(cx);
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
@@ -109,11 +112,12 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::resize;
+/// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref(cx);
+/// # let element = create_node_ref::<Div>(cx);
 /// #
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
@@ -123,9 +127,9 @@ use wasm_bindgen::JsCast;
 ///     UseScrollOptions::default().behavior(ScrollBehavior::Smooth),
 /// );
 /// #
-/// #     view! { cx,
-/// #         <div node_ref=element>"..."</div>
-/// #     }
+/// # view! { cx,
+/// #     <div node_ref=element>"..."</div>
+/// # }
 /// # }
 /// ```
 ///
@@ -134,11 +138,12 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::resize;
+/// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref(cx);
+/// # let element = create_node_ref::<Div>(cx);
 /// #
 /// let (smooth, set_smooth) = create_signal(cx, false);
 ///
@@ -154,9 +159,9 @@ use wasm_bindgen::JsCast;
 ///     UseScrollOptions::default().behavior(behavior),
 /// );
 /// #
-/// #     view! { cx,
-/// #         <div node_ref=element>"..."</div>
-/// #     }
+/// # view! { cx,
+/// #     <div node_ref=element>"..."</div>
+/// # }
 /// # }
 /// ```
 pub fn use_scroll<El, T>(cx: Scope, element: El) -> UseScrollReturn

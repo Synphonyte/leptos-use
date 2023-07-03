@@ -18,11 +18,12 @@ use web_sys::MutationObserverInit;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Pre;
 /// # use leptos_use::use_mutation_observer_with_options;
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
+/// let el = create_node_ref::<Pre>(cx);
 /// let (text, set_text) = create_signal(cx, "".to_string());
 ///
 /// let mut init = web_sys::MutationObserverInit::new();

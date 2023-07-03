@@ -48,11 +48,12 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Div;
 /// # use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
+/// let el = create_node_ref::<Div>(cx);
 ///
 /// let (color, set_color) = use_css_var_with_options(
 ///     cx,

@@ -25,11 +25,12 @@ static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::resize;
+/// # use leptos::html::Div;
 /// # use leptos_use::on_click_outside;
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let target = create_node_ref(cx);
+/// let target = create_node_ref::<Div>(cx);
 ///
 /// on_click_outside(cx, target, move |event| { log!("{:?}", event); });
 ///

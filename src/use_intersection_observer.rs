@@ -19,11 +19,12 @@ use wasm_bindgen::prelude::*;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Div;
 /// # use leptos_use::use_intersection_observer;
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
+/// let el = create_node_ref::<Div>(cx);
 /// let (is_visible, set_visible) = create_signal(cx, false);
 ///
 /// use_intersection_observer(

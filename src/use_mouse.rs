@@ -53,6 +53,7 @@ use web_sys::AddEventListenerOptions;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::html::Div;
 /// use web_sys::MouseEvent;
 /// use leptos_use::{use_mouse_with_options, UseMouseOptions, UseMouseReturn, UseMouseEventExtractor, UseMouseCoordType};
 ///
@@ -69,7 +70,7 @@ use web_sys::AddEventListenerOptions;
 ///
 /// #[component]
 /// fn Demo(cx: Scope) -> impl IntoView {
-///     let element = create_node_ref(cx);
+///     let element = create_node_ref::<Div>(cx);
 ///
 ///     let UseMouseReturn {
 ///         x, y, source_type, ..
