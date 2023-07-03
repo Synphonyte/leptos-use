@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0]- 2023-07-03
+
+### Braking Changes 🛠
+- Required `leptos` version is now 0.4
+- Following the changes in `leptos` there is no longer a `stable` crate feature required in order to use this library with a stable toolchain.
+  If you want to use it with a nightly toolchain you have to enable the `nightly` feature only on `leptos` directly.
+  No change is required for `leptos-use` itself.
+
 ## [0.3.3] - 2023-06-24
 
 ### New Functions 🚀

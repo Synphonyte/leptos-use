@@ -8,7 +8,7 @@ use std::rc::Rc;
 /// A version of `create_effect` that listens to any dependency that is accessed inside `deps`.
 /// Also a stop handler is returned.
 /// The return value of `deps` is passed into `callback` as an argument together with the previous value
-/// and the previous value that the `callback` itself returned last time.
+/// and the previous value that the `callback` itself returned the last time it ran.
 ///
 /// ## Usage
 ///
@@ -42,7 +42,7 @@ use std::rc::Rc;
 /// ## Immediate
 ///
 /// If `immediate` is true, the `callback` will run immediately.
-/// If it's `false, the `callback` will run only after
+/// If it's `false`, the `callback` will run only after
 /// the first change is detected of any signal that is accessed in `deps`.
 ///
 /// ```
@@ -144,7 +144,7 @@ where
     let wrapped_callback = {
         let cur_deps_value = Rc::clone(&cur_deps_value);
         let prev_deps_value = Rc::clone(&prev_deps_value);
-        let prev_cb_val = Rc::clone(&prev_callback_value);
+        let prev_callback_val = Rc::clone(&prev_callback_value);
 
         move || {
             callback(
@@ -153,7 +153,7 @@ where
                     .as_ref()
                     .expect("this will not be called before there is deps value"),
                 prev_deps_value.borrow().as_ref(),
-                prev_cb_val.take(),
+                prev_callback_val.take(),
             )
         }
     };
