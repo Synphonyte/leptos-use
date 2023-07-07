@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New Functions 🚀
 
 - `use_window_focus`
+- `use_window_scroll`
 
 ## [0.4.0] - 2023-07-03
 
