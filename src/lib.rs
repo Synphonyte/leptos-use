@@ -21,6 +21,7 @@ pub use use_element_size::*;
 pub use use_resize_observer::*;
 
 mod on_click_outside;
+mod use_window_focus;
 mod use_active_element;
 mod use_breakpoints;
 mod use_color_mode;
@@ -49,6 +50,7 @@ mod watch_throttled;
 mod whenever;
 
 pub use on_click_outside::*;
+pub use use_window_focus::*;
 pub use use_active_element::*;
 pub use use_breakpoints::*;
 pub use use_color_mode::*;

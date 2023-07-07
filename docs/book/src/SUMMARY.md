@@ -19,6 +19,7 @@
 - [use_intersection_observer](elements/use_intersection_observer.md)
 - [use_mutation_observer](elements/use_mutation_observer.md)
 - [use_resize_observer](elements/use_resize_observer.md)
+- [use_window_focus](elements/use_window_focus.md)
 
 # Browser
 
