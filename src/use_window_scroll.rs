@@ -13,7 +13,7 @@ use web_sys::AddEventListenerOptions;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos_use::use_window_scroll;
+/// # use leptos_use::use_window_scroll;
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {

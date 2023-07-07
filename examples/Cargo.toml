@@ -11,6 +11,7 @@ members = [
     "use_css_var",
     "use_cycle_list",
     "use_debounce_fn",
+    "use_document_visibility",
     "use_element_hover",
     "use_element_size",
     "use_element_visibility",

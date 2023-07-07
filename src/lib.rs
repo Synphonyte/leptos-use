@@ -21,6 +21,7 @@ pub use use_element_size::*;
 pub use use_resize_observer::*;
 
 mod on_click_outside;
+mod use_document_visibility;
 mod use_window_scroll;
 mod use_window_focus;
 mod use_active_element;
@@ -51,6 +52,7 @@ mod watch_throttled;
 mod whenever;
 
 pub use on_click_outside::*;
+pub use use_document_visibility::*;
 pub use use_window_scroll::*;
 pub use use_window_focus::*;
 pub use use_active_element::*;
