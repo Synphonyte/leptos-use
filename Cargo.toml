@@ -27,6 +27,7 @@ lazy_static = "1"
 version = "0.3"
 features = [
     "CssStyleDeclaration",
+    "CloseEvent",
     "CustomEvent",
     "CustomEventInit",
     "DomRectReadOnly",
@@ -62,6 +63,7 @@ features = [
 docs = []
 math = ["num"]
 storage = ["serde", "serde_json", "web-sys/StorageEvent"]
+websocket = ["web-sys/BinaryType", "web-sys/WebSocket"]
 
 [package.metadata.docs.rs]
 all-features = true

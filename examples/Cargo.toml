@@ -28,6 +28,7 @@ members = [
     "use_scroll",
     "use_storage",
     "use_throttle_fn",
+    "use_websocket",
     "watch_debounced",
     "watch_pausable",
     "watch_throttled",
