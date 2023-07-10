@@ -14,11 +14,14 @@
 # Elements
 
 - [use_active_element](elements/use_active_element.md)
+- [use_document_visibility](elements/use_document_visibility.md)
 - [use_element_size](elements/use_element_size.md)
 - [use_element_visibility](elements/use_element_visibility.md)
 - [use_intersection_observer](elements/use_intersection_observer.md)
 - [use_mutation_observer](elements/use_mutation_observer.md)
 - [use_resize_observer](elements/use_resize_observer.md)
+- [use_window_focus](elements/use_window_focus.md)
+- [use_window_scroll](elements/use_window_scroll.md)
 
 # Browser
 

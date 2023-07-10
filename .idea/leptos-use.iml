@@ -40,6 +40,9 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_color_mode/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_cycle_list/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_document_visibility/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_window_focus/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_window_scroll/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
