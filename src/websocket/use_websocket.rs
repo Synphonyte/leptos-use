@@ -2,7 +2,7 @@ use leptos::{leptos_dom::helpers::TimeoutHandle, *};
 
 use core::fmt;
 use std::rc::Rc;
-use std::{cell::RefCell, time::Duration};
+use std::time::Duration;
 
 use js_sys::Array;
 use wasm_bindgen::{prelude::*, JsCast, JsValue};
@@ -89,7 +89,7 @@ where
     /// Latest binary message received from `WebSocket`.
     pub message_bytes: ReadSignal<Option<Vec<u8>>>,
     /// The `WebSocket` instance.
-    pub ws: Rc<RefCell<Option<WebSocket>>>,
+    pub ws: Option<WebSocket>,
 
     pub open: OpenFn,
     pub close: CloseFn,
@@ -124,70 +124,59 @@ pub fn use_websocket_with_options(
     let (ready_state, set_ready_state) = create_signal(cx, UseWebSocketReadyState::Closed);
     let (message, set_message) = create_signal(cx, None);
     let (message_bytes, set_message_bytes) = create_signal(cx, None);
-    let ws: Rc<RefCell<Option<WebSocket>>> = Rc::new(RefCell::new(None));
+    let ws_ref: StoredValue<Option<WebSocket>> = store_value(cx, None);
 
-    let onopen = Rc::new(RefCell::new(options.onopen));
-    let onmessage = Rc::new(RefCell::new(options.onmessage));
-    let onmessage_bytes = Rc::new(RefCell::new(options.onmessage_bytes));
-    let onerror = Rc::new(RefCell::new(options.onerror));
-    let onclose = Rc::new(RefCell::new(options.onclose));
+    let onopen_ref = store_value(cx, options.onopen);
+    let onmessage_ref = store_value(cx, options.onmessage);
+    let onmessage_bytes_ref = store_value(cx, options.onmessage_bytes);
+    let onerror_ref = store_value(cx, options.onerror);
+    let onclose_ref = store_value(cx, options.onclose);
 
     let reconnect_limit = options.reconnect_limit.unwrap_or(3);
     let reconnect_interval = options.reconnect_interval.unwrap_or(3 * 1000);
 
-    let reconnect_timer: Rc<RefCell<Option<TimeoutHandle>>> = Rc::new(RefCell::new(None));
+    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(cx, None);
     let manual = options.manual;
     let protocols = options.protocols;
 
-    let reconnect_times: Rc<RefCell<u64>> = Rc::new(RefCell::new(0));
-    let unmounted = Rc::new(RefCell::new(false));
+    let reconnect_times_ref: StoredValue<u64> = store_value(cx, 0);
+    let unmounted_ref = store_value(cx, false);
 
-    let connect: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
+    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(cx, None);
 
-    let reconnect: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
-    *reconnect.borrow_mut() = {
-        let ws = Rc::clone(&ws);
-        let reconnect_times = Rc::clone(&reconnect_times);
-        let connect = connect.clone();
+    let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(cx, None);
+    reconnect_ref.set_value({
+        let ws = ws_ref.get_value();
         Some(Rc::new(move || {
-            if *reconnect_times.borrow() < reconnect_limit
+            if reconnect_times_ref.get_value() < reconnect_limit
                 && ws
-                    .borrow()
-                    .as_ref()
-                    .map_or(false, |ws: &WebSocket| ws.ready_state() != WebSocket::OPEN)
+                    .clone()
+                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
             {
-                let reconnect_times = Rc::clone(&reconnect_times);
-                let connect = Rc::clone(&connect);
-
-                *reconnect_timer.borrow_mut() = set_timeout_with_handle(
-                    move || {
-                        let connect = &mut *connect.borrow_mut();
-                        if let Some(connect) = connect {
-                            connect();
-                            *reconnect_times.borrow_mut() += 1;
-                        }
-                    },
-                    Duration::from_millis(reconnect_interval),
-                )
-                .ok()
+                reconnect_timer_ref.set_value(
+                    set_timeout_with_handle(
+                        move || {
+                            if let Some(connect) = connect_ref.get_value() {
+                                connect();
+                                reconnect_times_ref.update_value(|current| *current += 1);
+                            }
+                        },
+                        Duration::from_millis(reconnect_interval),
+                    )
+                    .ok(),
+                );
             }
         }))
-    };
+    });
 
-    *connect.borrow_mut() = {
-        let ws = Rc::clone(&ws);
+    connect_ref.set_value({
+        let ws = ws_ref.get_value();
         let url = url.clone();
-        let unmounted = Rc::clone(&unmounted);
-        let onopen = Rc::clone(&onopen);
-        let onmessage = Rc::clone(&onmessage);
-        let onerror = Rc::clone(&onerror);
-        let onclose = Rc::clone(&onclose);
-        let reconnect = Rc::clone(&reconnect);
 
         Some(Rc::new(move || {
+            reconnect_timer_ref.set_value(None);
             {
-                let web_socket: &mut Option<WebSocket> = &mut ws.borrow_mut();
-                if let Some(web_socket) = web_socket {
+                if let Some(web_socket) = &ws {
                     let _ = web_socket.close();
                 }
             }
@@ -210,15 +199,12 @@ pub fn use_websocket_with_options(
 
             // onopen handler
             {
-                let unmounted = Rc::clone(&unmounted);
-                let onopen = Rc::clone(&onopen);
                 let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
-                    if *unmounted.borrow() {
+                    if unmounted_ref.get_value() {
                         return;
                     }
 
-                    let onopen = &mut *onopen.borrow_mut();
-                    if let Some(onopen) = onopen {
+                    if let Some(onopen) = onopen_ref.get_value().as_mut() {
                         onopen(e);
                     }
                     set_ready_state.set(UseWebSocketReadyState::Open);
@@ -230,11 +216,8 @@ pub fn use_websocket_with_options(
 
             // onmessage handler
             {
-                let unmounted = Rc::clone(&unmounted);
-                let onmessage = Rc::clone(&onmessage);
-                let onmessage_bytes = onmessage_bytes.clone();
                 let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
-                    if *unmounted.borrow() {
+                    if unmounted_ref.get_value() {
                         return;
                     }
 
@@ -246,10 +229,8 @@ pub fn use_websocket_with_options(
                                 },
                                 |txt| {
                                     let txt = String::from(&txt);
-                                    let onmessage = &mut *onmessage.borrow_mut();
-                                    if let Some(onmessage) = onmessage {
-                                        let txt = txt.clone();
-                                        onmessage(txt);
+                                    if let Some(onmessage) = onmessage_ref.get_value().as_mut() {
+                                        onmessage(txt.clone());
                                     }
                                     set_message.set(Some(txt.clone()));
                                 },
@@ -258,8 +239,8 @@ pub fn use_websocket_with_options(
                         |array_buffer| {
                             let array = js_sys::Uint8Array::new(&array_buffer);
                             let array = array.to_vec();
-                            let onmessage_bytes = &mut *onmessage_bytes.borrow_mut();
-                            if let Some(onmessage_bytes) = onmessage_bytes {
+                            if let Some(onmessage_bytes) = onmessage_bytes_ref.get_value().as_mut()
+                            {
                                 let array = array.clone();
                                 onmessage_bytes(array);
                             }
@@ -273,19 +254,17 @@ pub fn use_websocket_with_options(
             }
             // onerror handler
             {
-                let unmounted = Rc::clone(&unmounted);
-                let onerror = Rc::clone(&onerror);
-                let reconnect = Rc::clone(&reconnect);
+                // let reconnect = reconnect.clone();
                 let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
-                    if *unmounted.borrow() {
+                    if unmounted_ref.get_value() {
                         return;
                     }
 
-                    let reconnect: Rc<dyn Fn()> = { reconnect.borrow().as_ref().unwrap().clone() };
-                    reconnect();
+                    if let Some(reconnect) = &reconnect_ref.get_value() {
+                        reconnect();
+                    }
 
-                    let onerror = &mut *onerror.borrow_mut();
-                    if let Some(onerror) = onerror {
+                    if let Some(onerror) = onerror_ref.get_value().as_mut() {
                         onerror(e);
                     }
                     set_ready_state.set(UseWebSocketReadyState::Closed);
@@ -295,20 +274,16 @@ pub fn use_websocket_with_options(
             }
             // onclose handler
             {
-                let unmounted = Rc::clone(&unmounted);
-                let onclose = Rc::clone(&onclose);
-
-                let reconnect = Rc::clone(&reconnect);
                 let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
-                    if *unmounted.borrow() {
+                    if unmounted_ref.get_value() {
                         return;
                     }
 
-                    let reconnect: Rc<dyn Fn()> = { reconnect.borrow().as_ref().unwrap().clone() };
-                    reconnect();
+                    if let Some(reconnect) = &reconnect_ref.get_value() {
+                        reconnect();
+                    }
 
-                    let onclose = &mut *onclose.borrow_mut();
-                    if let Some(onclose) = onclose {
+                    if let Some(onclose) = onclose_ref.get_value().as_mut() {
                         onclose(e);
                     }
                     set_ready_state.set(UseWebSocketReadyState::Closed);
@@ -318,16 +293,15 @@ pub fn use_websocket_with_options(
                 onclose_closure.forget();
             }
 
-            *ws.borrow_mut() = Some(web_socket);
+            ws_ref.set_value(Some(web_socket));
         }))
-    };
+    });
 
     // Send text (String)
     let send = {
-        let ws = Rc::clone(&ws);
         Box::new(move |data: String| {
             if ready_state.get() == UseWebSocketReadyState::Open {
-                if let Some(web_socket) = ws.borrow_mut().as_ref() {
+                if let Some(web_socket) = ws_ref.get_value() {
                     let _ = web_socket.send_with_str(&data);
                 }
             }
@@ -336,11 +310,9 @@ pub fn use_websocket_with_options(
 
     // Send bytes
     let send_bytes = {
-        let ws = Rc::clone(&ws);
         move |data: Vec<u8>| {
             if ready_state.get() == UseWebSocketReadyState::Open {
-                let web_socket: &mut Option<WebSocket> = &mut ws.borrow_mut();
-                if let Some(web_socket) = web_socket {
+                if let Some(web_socket) = ws_ref.get_value() {
                     let _ = web_socket.send_with_u8_array(&data);
                 }
             }
@@ -349,24 +321,20 @@ pub fn use_websocket_with_options(
 
     // Open connection
     let open = {
-        let reconnect_times_ref = Rc::clone(&reconnect_times);
-        // let connect = Rc::clone(&connect);
         move || {
-            let connect = connect.clone();
-            *reconnect_times_ref.borrow_mut() = 0;
-            let connect: Rc<dyn Fn()> = { connect.borrow().as_ref().unwrap().clone() };
-            connect();
+            reconnect_times_ref.set_value(0);
+            if let Some(connect) = connect_ref.get_value() {
+                connect();
+            }
         }
     };
 
     // Close connection
     let close = {
-        let ws = Rc::clone(&ws);
-        let reconnect_times = Rc::clone(&reconnect_times);
+        reconnect_timer_ref.set_value(None);
         move || {
-            *reconnect_times.as_ref().borrow_mut() = reconnect_limit;
-            let web_socket: &mut Option<WebSocket> = &mut ws.borrow_mut();
-            if let Some(web_socket) = web_socket {
+            reconnect_times_ref.set_value(reconnect_limit);
+            if let Some(web_socket) = ws_ref.get_value() {
                 let _ = web_socket.close();
             }
         }
@@ -388,7 +356,7 @@ pub fn use_websocket_with_options(
     {
         let close = close.clone();
         on_cleanup(cx, move || {
-            *unmounted.borrow_mut() = true;
+            unmounted_ref.set_value(true);
             close();
         });
     }
@@ -397,7 +365,7 @@ pub fn use_websocket_with_options(
         ready_state,
         message,
         message_bytes,
-        ws,
+        ws: ws_ref.get_value(),
         open,
         close,
         send,
