@@ -77,34 +77,32 @@ fn Demo(cx: Scope) -> impl IntoView {
     } = use_websocket_with_options(
         cx,
         "wss://echo.websocket.events/".to_string(),
-        UseWebSocketOptions {
-            manual: true,
-            onopen: Some(Box::new(move |e| {
+        UseWebSocketOptions::default()
+            .manual(true)
+            .onopen(Some(Box::new(move |e| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onopen]: event {:?}", e.type_()})
                 });
-            })),
-            onclose: Some(Box::new(move |e| {
+            })))
+            .onclose(Some(Box::new(move |e| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onclose]: event {:?}", e.type_()})
                 });
-            })),
-            onerror: Some(Box::new(move |e| {
+            })))
+            .onerror(Some(Box::new(move |e| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onerror]: event {:?}", e.type_()})
                 });
-            })),
-            onmessage: Some(Box::new(move |m| {
+            })))
+            .onmessage(Some(Box::new(move |m| {
                 set_history2
                     .update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
-            })),
-            onmessage_bytes: Some(Box::new(move |m| {
+            })))
+            .onmessage_bytes(Some(Box::new(move |m| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onmessage_bytes]: {:?}", m})
                 });
-            })),
-            ..Default::default()
-        },
+            }))),
     );
 
     let open_connection2 = move |_| {

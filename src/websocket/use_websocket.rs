@@ -4,6 +4,7 @@ use core::fmt;
 use std::rc::Rc;
 use std::time::Duration;
 
+use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
 use wasm_bindgen::{prelude::*, JsCast, JsValue};
 use web_sys::{BinaryType, Event, MessageEvent, WebSocket};
@@ -12,91 +13,67 @@ pub use web_sys::CloseEvent;
 
 use crate::utils::CloneableFnMutWithArg;
 
-/// The current state of the `WebSocket` connection.
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum UseWebSocketReadyState {
-    Connecting,
-    Open,
-    Closing,
-    Closed,
-}
-
-impl fmt::Display for UseWebSocketReadyState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            UseWebSocketReadyState::Connecting => write!(f, "Connecting"),
-            UseWebSocketReadyState::Open => write!(f, "Open"),
-            UseWebSocketReadyState::Closing => write!(f, "Closing"),
-            UseWebSocketReadyState::Closed => write!(f, "Closed"),
-        }
-    }
-}
-
-/// Options for `WebSocket`.
-// #[derive(DefaultBuilder)]
-#[derive(Clone)]
-pub struct UseWebSocketOptions {
-    /// `WebSocket` connect callback.
-    pub onopen: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
-    /// `WebSocket` message callback for text.
-    pub onmessage: Option<Box<dyn CloneableFnMutWithArg<String>>>,
-    /// `WebSocket` message callback for binary.
-    pub onmessage_bytes: Option<Box<dyn CloneableFnMutWithArg<Vec<u8>>>>,
-    /// `WebSocket` error callback.
-    pub onerror: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
-    /// `WebSocket` close callback.
-    pub onclose: Option<Box<dyn CloneableFnMutWithArg<CloseEvent>>>,
-
-    /// Retry times.
-    pub reconnect_limit: Option<u64>,
-    /// Retry interval(ms).
-    pub reconnect_interval: Option<u64>,
-    /// Manually starts connection
-    pub manual: bool,
-    /// Sub protocols
-    pub protocols: Option<Vec<String>>,
-}
-
-impl Default for UseWebSocketOptions {
-    fn default() -> Self {
-        Self {
-            onopen: None,
-            onmessage: None,
-            onmessage_bytes: None,
-            onerror: None,
-            onclose: None,
-            reconnect_limit: Some(3),
-            reconnect_interval: Some(3 * 1000),
-            manual: false,
-            protocols: Default::default(),
-        }
-    }
-}
-
-/// Return type of [`use_websocket`].
-#[derive(Clone)]
-pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
-where
-    OpenFn: Fn() + Clone + 'static,
-    CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(String) + Clone + 'static,
-    SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
-{
-    /// The current state of the `WebSocket` connection.
-    pub ready_state: ReadSignal<UseWebSocketReadyState>,
-    /// Latest text message received from `WebSocket`.
-    pub message: ReadSignal<Option<String>>,
-    /// Latest binary message received from `WebSocket`.
-    pub message_bytes: ReadSignal<Option<Vec<u8>>>,
-    /// The `WebSocket` instance.
-    pub ws: Option<WebSocket>,
-
-    pub open: OpenFn,
-    pub close: CloseFn,
-    pub send: SendFn,
-    pub send_bytes: SendBytesFn,
-}
-
+/// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_websocket)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::websocket::*;
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let UseWebsocketReturn {
+///   ready_state,
+///   message,
+///   message_bytes,
+///   send,
+///   send_bytes,
+///   open,
+///   close,
+///   ..
+///   } = use_websocket(cx, "wss://echo.websocket.events/".to_string());
+///
+/// let send_message = move |_| {
+///   let m = "Hello, world!".to_string();
+///   send(m.clone());
+/// };
+///
+/// let send_byte_message = move |_| {
+///   let m = b"Hello, world!\r\n".to_vec();
+///   send_bytes(m.clone());
+/// };
+///
+/// let status = move || ready_state().to_string();
+///
+/// let connected = move || ready_state.get() == UseWebSocketReadyState::Open;
+///
+/// let open_connection = move |_| {
+///   open();
+/// };
+///
+/// let close_connection = move |_| {
+///   close();
+/// };
+///
+/// view! { cx,
+/// <div>
+///   <p>"status: " {status}</p>
+///   button on:click=send_message disabled=move || !connected()>"Send"</button>
+///   <button on:click=send_byte_message disabled=move || !connected()>"Send bytes"</button>
+///   <button on:click=open_connection disabled=connected>"Open"</button>
+///   <button on:click=close_connection disabled=move || !connected()>"Close"</button>
+///   <p>"Receive message: " {format! {"{:?}", message}}</p>
+///   <p>"Receive byte message: " {format! {"{:?}", message_bytes}}</p>
+///   </div>
+/// }
+/// # }
+/// ```
+// #[doc(cfg(feature = "websocket"))]
 pub fn use_websocket(
     cx: Scope,
     url: String,
@@ -110,7 +87,7 @@ pub fn use_websocket(
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
-
+// #[doc(cfg(feature = "websocket"))]
 pub fn use_websocket_with_options(
     cx: Scope,
     url: String,
@@ -254,7 +231,6 @@ pub fn use_websocket_with_options(
             }
             // onerror handler
             {
-                // let reconnect = reconnect.clone();
                 let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
                     if unmounted_ref.get_value() {
                         return;
@@ -371,4 +347,93 @@ pub fn use_websocket_with_options(
         send,
         send_bytes,
     }
+}
+
+/// The current state of the `WebSocket` connection.
+// #[doc(cfg(feature = "websocket"))]
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum UseWebSocketReadyState {
+    Connecting,
+    Open,
+    Closing,
+    Closed,
+}
+
+impl fmt::Display for UseWebSocketReadyState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            UseWebSocketReadyState::Connecting => write!(f, "Connecting"),
+            UseWebSocketReadyState::Open => write!(f, "Open"),
+            UseWebSocketReadyState::Closing => write!(f, "Closing"),
+            UseWebSocketReadyState::Closed => write!(f, "Closed"),
+        }
+    }
+}
+
+/// Options for [`use_websocket_with_options`].
+// #[doc(cfg(feature = "websocket"))]
+#[derive(DefaultBuilder, Clone)]
+pub struct UseWebSocketOptions {
+    /// `WebSocket` connect callback.
+    onopen: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
+    /// `WebSocket` message callback for text.
+    onmessage: Option<Box<dyn CloneableFnMutWithArg<String>>>,
+    /// `WebSocket` message callback for binary.
+    onmessage_bytes: Option<Box<dyn CloneableFnMutWithArg<Vec<u8>>>>,
+    /// `WebSocket` error callback.
+    onerror: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
+    /// `WebSocket` close callback.
+    onclose: Option<Box<dyn CloneableFnMutWithArg<CloseEvent>>>,
+    /// Retry times.
+    reconnect_limit: Option<u64>,
+    /// Retry interval(ms).
+    reconnect_interval: Option<u64>,
+    /// Manually starts connection
+    manual: bool,
+    /// Sub protocols
+    protocols: Option<Vec<String>>,
+}
+
+impl Default for UseWebSocketOptions {
+    fn default() -> Self {
+        Self {
+            onopen: None,
+            onmessage: None,
+            onmessage_bytes: None,
+            onerror: None,
+            onclose: None,
+            reconnect_limit: Some(3),
+            reconnect_interval: Some(3 * 1000),
+            manual: false,
+            protocols: Default::default(),
+        }
+    }
+}
+
+/// Return type of [`use_websocket`].
+// #[doc(cfg(feature = "websocket"))]
+#[derive(Clone)]
+pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
+where
+    OpenFn: Fn() + Clone + 'static,
+    CloseFn: Fn() + Clone + 'static,
+    SendFn: Fn(String) + Clone + 'static,
+    SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
+{
+    /// The current state of the `WebSocket` connection.
+    pub ready_state: ReadSignal<UseWebSocketReadyState>,
+    /// Latest text message received from `WebSocket`.
+    pub message: ReadSignal<Option<String>>,
+    /// Latest binary message received from `WebSocket`.
+    pub message_bytes: ReadSignal<Option<Vec<u8>>>,
+    /// The `WebSocket` instance.
+    pub ws: Option<WebSocket>,
+    /// Opens the `WebSocket` connection
+    pub open: OpenFn,
+    /// Closes the `WebSocket` connection
+    pub close: CloseFn,
+    /// Sends `text` (string) based data
+    pub send: SendFn,
+    /// Sends binary data
+    pub send_bytes: SendBytesFn,
 }
