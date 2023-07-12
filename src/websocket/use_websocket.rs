@@ -7,9 +7,7 @@ use std::time::Duration;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
 use wasm_bindgen::{prelude::*, JsCast, JsValue};
-use web_sys::{BinaryType, Event, MessageEvent, WebSocket};
-
-pub use web_sys::CloseEvent;
+use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 
 use crate::utils::CloneableFnMutWithArg;
 
@@ -181,9 +179,9 @@ pub fn use_websocket_with_options(
                         return;
                     }
 
-                    if let Some(onopen) = onopen_ref.get_value().as_mut() {
-                        onopen(e);
-                    }
+                    let mut onopen = onopen_ref.get_value();
+                    onopen(e);
+
                     set_ready_state.set(UseWebSocketReadyState::Open);
                 }) as Box<dyn FnMut(Event)>);
                 web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
@@ -206,9 +204,9 @@ pub fn use_websocket_with_options(
                                 },
                                 |txt| {
                                     let txt = String::from(&txt);
-                                    if let Some(onmessage) = onmessage_ref.get_value().as_mut() {
-                                        onmessage(txt.clone());
-                                    }
+                                    let mut onmessage = onmessage_ref.get_value();
+                                    onmessage(txt.clone());
+
                                     set_message.set(Some(txt.clone()));
                                 },
                             );
@@ -216,11 +214,9 @@ pub fn use_websocket_with_options(
                         |array_buffer| {
                             let array = js_sys::Uint8Array::new(&array_buffer);
                             let array = array.to_vec();
-                            if let Some(onmessage_bytes) = onmessage_bytes_ref.get_value().as_mut()
-                            {
-                                let array = array.clone();
-                                onmessage_bytes(array);
-                            }
+                            let mut onmessage_bytes = onmessage_bytes_ref.get_value();
+                            onmessage_bytes(array.clone());
+
                             set_message_bytes.set(Some(array));
                         },
                     );
@@ -240,9 +236,9 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    if let Some(onerror) = onerror_ref.get_value().as_mut() {
-                        onerror(e);
-                    }
+                    let mut onerror = onerror_ref.get_value();
+                    onerror(e);
+
                     set_ready_state.set(UseWebSocketReadyState::Closed);
                 }) as Box<dyn FnMut(Event)>);
                 web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
@@ -259,9 +255,9 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    if let Some(onclose) = onclose_ref.get_value().as_mut() {
-                        onclose(e);
-                    }
+                    let mut onclose = onclose_ref.get_value();
+                    onclose(e);
+
                     set_ready_state.set(UseWebSocketReadyState::Closed);
                 })
                     as Box<dyn FnMut(CloseEvent)>);
@@ -372,18 +368,23 @@ impl fmt::Display for UseWebSocketReadyState {
 
 /// Options for [`use_websocket_with_options`].
 // #[doc(cfg(feature = "websocket"))]
-#[derive(DefaultBuilder, Clone)]
+#[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    onopen: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
+    #[builder(into)]
+    onopen: Box<dyn CloneableFnMutWithArg<Event>>,
     /// `WebSocket` message callback for text.
-    onmessage: Option<Box<dyn CloneableFnMutWithArg<String>>>,
+    #[builder(into)]
+    onmessage: Box<dyn CloneableFnMutWithArg<String>>,
     /// `WebSocket` message callback for binary.
-    onmessage_bytes: Option<Box<dyn CloneableFnMutWithArg<Vec<u8>>>>,
+    #[builder(into)]
+    onmessage_bytes: Box<dyn CloneableFnMutWithArg<Vec<u8>>>,
     /// `WebSocket` error callback.
-    onerror: Option<Box<dyn CloneableFnMutWithArg<Event>>>,
+    #[builder(into)]
+    onerror: Box<dyn CloneableFnMutWithArg<Event>>,
     /// `WebSocket` close callback.
-    onclose: Option<Box<dyn CloneableFnMutWithArg<CloseEvent>>>,
+    #[builder(into)]
+    onclose: Box<dyn CloneableFnMutWithArg<CloseEvent>>,
     /// Retry times.
     reconnect_limit: Option<u64>,
     /// Retry interval(ms).
@@ -397,11 +398,11 @@ pub struct UseWebSocketOptions {
 impl Default for UseWebSocketOptions {
     fn default() -> Self {
         Self {
-            onopen: None,
-            onmessage: None,
-            onmessage_bytes: None,
-            onerror: None,
-            onclose: None,
+            onopen: Box::new(|_| {}),
+            onmessage: Box::new(|_| {}),
+            onmessage_bytes: Box::new(|_| {}),
+            onerror: Box::new(|_| {}),
+            onclose: Box::new(|_| {}),
             reconnect_limit: Some(3),
             reconnect_interval: Some(3 * 1000),
             manual: false,

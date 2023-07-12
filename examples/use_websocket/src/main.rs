@@ -2,6 +2,8 @@ use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::websocket::*;
 
+use web_sys::{CloseEvent, Event};
+
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let (history, set_history) = create_signal(cx, vec![]);
@@ -79,30 +81,30 @@ fn Demo(cx: Scope) -> impl IntoView {
         "wss://echo.websocket.events/".to_string(),
         UseWebSocketOptions::default()
             .manual(true)
-            .onopen(Some(Box::new(move |e| {
+            .onopen(move |e: Event| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onopen]: event {:?}", e.type_()})
                 });
-            })))
-            .onclose(Some(Box::new(move |e| {
+            })
+            .onclose(move |e: CloseEvent| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onclose]: event {:?}", e.type_()})
                 });
-            })))
-            .onerror(Some(Box::new(move |e| {
+            })
+            .onerror(move |e: Event| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onerror]: event {:?}", e.type_()})
                 });
-            })))
-            .onmessage(Some(Box::new(move |m| {
+            })
+            .onmessage(move |m: String| {
                 set_history2
                     .update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
-            })))
-            .onmessage_bytes(Some(Box::new(move |m| {
+            })
+            .onmessage_bytes(move |m: Vec<u8>| {
                 set_history2.update(|history: &mut Vec<_>| {
                     history.push(format! {"[onmessage_bytes]: {:?}", m})
                 });
-            }))),
+            }),
     );
 
     let open_connection2 = move |_| {
