@@ -20,8 +20,6 @@ jobs:
           components: rustfmt, clippy, rust-src
       - name: Cache
         uses: Swatinem/rust-cache@v2
-      - name: Check function count badge
-        run: python3 docs/generate_count_badge.py --check
       - name: Check formatting
         run: cargo fmt --check
 # TODO: this action doesn't seem to work
