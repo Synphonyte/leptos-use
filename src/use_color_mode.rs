@@ -379,7 +379,6 @@ where
     /// Custom handler that is called on updates.
     /// If specified this will override the default behavior.
     /// To get the default behaviour back you can call the provided `default_handler` function.
-    #[builder(into)]
     on_changed: Box<dyn CloneableFnWithArg<UseColorModeOnChangeArgs>>,
 
     /// When provided, `useStorage` will be skipped.

@@ -92,7 +92,6 @@ pub struct UseIntervalOptions {
     immediate: bool,
 
     /// Callback on every interval.
-    #[builder(into)]
     callback: Box<dyn CloneableFnWithArg<u64>>,
 }
 
