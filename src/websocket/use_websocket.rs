@@ -9,7 +9,7 @@ use js_sys::Array;
 use wasm_bindgen::{prelude::*, JsCast, JsValue};
 use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 
-use crate::utils::CloneableFnMutWithArg;
+use crate::utils::CloneableFnWithArg;
 
 /// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
 ///
@@ -179,7 +179,7 @@ pub fn use_websocket_with_options(
                         return;
                     }
 
-                    let mut onopen = onopen_ref.get_value();
+                    let onopen = onopen_ref.get_value();
                     onopen(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Open);
@@ -204,7 +204,7 @@ pub fn use_websocket_with_options(
                                 },
                                 |txt| {
                                     let txt = String::from(&txt);
-                                    let mut onmessage = onmessage_ref.get_value();
+                                    let onmessage = onmessage_ref.get_value();
                                     onmessage(txt.clone());
 
                                     set_message.set(Some(txt.clone()));
@@ -214,7 +214,7 @@ pub fn use_websocket_with_options(
                         |array_buffer| {
                             let array = js_sys::Uint8Array::new(&array_buffer);
                             let array = array.to_vec();
-                            let mut onmessage_bytes = onmessage_bytes_ref.get_value();
+                            let onmessage_bytes = onmessage_bytes_ref.get_value();
                             onmessage_bytes(array.clone());
 
                             set_message_bytes.set(Some(array));
@@ -236,7 +236,7 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    let mut onerror = onerror_ref.get_value();
+                    let onerror = onerror_ref.get_value();
                     onerror(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Closed);
@@ -255,7 +255,7 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    let mut onclose = onclose_ref.get_value();
+                    let onclose = onclose_ref.get_value();
                     onclose(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Closed);
@@ -371,15 +371,15 @@ impl fmt::Display for UseWebSocketReadyState {
 #[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    onopen: Box<dyn CloneableFnMutWithArg<Event> + 'static>,
+    onopen: Box<dyn CloneableFnWithArg<Event> + 'static>,
     /// `WebSocket` message callback for text.
-    onmessage: Box<dyn CloneableFnMutWithArg<String> + 'static>,
+    onmessage: Box<dyn CloneableFnWithArg<String> + 'static>,
     /// `WebSocket` message callback for binary.
-    onmessage_bytes: Box<dyn CloneableFnMutWithArg<Vec<u8>> + 'static>,
+    onmessage_bytes: Box<dyn CloneableFnWithArg<Vec<u8>> + 'static>,
     /// `WebSocket` error callback.
-    onerror: Box<dyn CloneableFnMutWithArg<Event> + 'static>,
+    onerror: Box<dyn CloneableFnWithArg<Event> + 'static>,
     /// `WebSocket` close callback.
-    onclose: Box<dyn CloneableFnMutWithArg<CloseEvent> + 'static>,
+    onclose: Box<dyn CloneableFnWithArg<CloseEvent> + 'static>,
     /// Retry times.
     reconnect_limit: Option<u64>,
     /// Retry interval(ms).

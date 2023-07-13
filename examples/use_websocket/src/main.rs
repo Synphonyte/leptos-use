@@ -67,6 +67,33 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let (history2, set_history2) = create_signal(cx, vec![]);
 
+    let onopen = move |e: Event| {
+        set_history2.update(|history: &mut Vec<_>| {
+            history.push(format! {"[onopen]: event {:?}", e.type_()})
+        });
+    };
+
+    let onclose = move |e: CloseEvent| {
+        set_history2.update(|history: &mut Vec<_>| {
+            history.push(format! {"[onclose]: event {:?}", e.type_()})
+        });
+    };
+
+    let onerror = move |e: Event| {
+        set_history2.update(|history: &mut Vec<_>| {
+            history.push(format! {"[onerror]: event {:?}", e.type_()})
+        });
+    };
+
+    let onmessage = move |m: String| {
+        set_history2.update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
+    };
+
+    let onmessage_bytes = move |m: Vec<u8>| {
+        set_history2
+            .update(|history: &mut Vec<_>| history.push(format! {"[onmessage_bytes]: {:?}", m}));
+    };
+
     let UseWebsocketReturn {
         ready_state: ready_state2,
         send: send2,
@@ -81,30 +108,11 @@ fn Demo(cx: Scope) -> impl IntoView {
         "wss://echo.websocket.events/".to_string(),
         UseWebSocketOptions::default()
             .manual(true)
-            .onopen(move |e: Event| {
-                set_history2.update(|history: &mut Vec<_>| {
-                    history.push(format! {"[onopen]: event {:?}", e.type_()})
-                });
-            })
-            .onclose(move |e: CloseEvent| {
-                set_history2.update(|history: &mut Vec<_>| {
-                    history.push(format! {"[onclose]: event {:?}", e.type_()})
-                });
-            })
-            .onerror(move |e: Event| {
-                set_history2.update(|history: &mut Vec<_>| {
-                    history.push(format! {"[onerror]: event {:?}", e.type_()})
-                });
-            })
-            .onmessage(move |m: String| {
-                set_history2
-                    .update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
-            })
-            .onmessage_bytes(move |m: Vec<u8>| {
-                set_history2.update(|history: &mut Vec<_>| {
-                    history.push(format! {"[onmessage_bytes]: {:?}", m})
-                });
-            }),
+            .onopen(onopen.clone())
+            .onclose(onclose.clone())
+            .onerror(onerror.clone())
+            .onmessage(onmessage.clone())
+            .onmessage_bytes(onmessage_bytes.clone()),
     );
 
     let open_connection2 = move |_| {
