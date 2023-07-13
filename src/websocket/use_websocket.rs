@@ -26,48 +26,50 @@ use crate::utils::CloneableFnWithArg;
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// let UseWebsocketReturn {
-///   ready_state,
-///   message,
-///   message_bytes,
-///   send,
-///   send_bytes,
-///   open,
-///   close,
-///   ..
-///   } = use_websocket(cx, "wss://echo.websocket.events/".to_string());
+///     ready_state,
+///     message,
+///     message_bytes,
+///     send,
+///     send_bytes,
+///     open,
+///     close,
+///     ..
+/// } = use_websocket(cx, "wss://echo.websocket.events/".to_string());
 ///
 /// let send_message = move |_| {
-///   let m = "Hello, world!".to_string();
-///   send(m.clone());
+///     let m = "Hello, world!".to_string();
+///     send(m.clone());
 /// };
 ///
 /// let send_byte_message = move |_| {
-///   let m = b"Hello, world!\r\n".to_vec();
-///   send_bytes(m.clone());
+///     let m = b"Hello, world!\r\n".to_vec();
+///     send_bytes(m.clone());
 /// };
 ///
-/// let status = move || ready_state().to_string();
+/// let status = move || ready_state.get().to_string();
 ///
 /// let connected = move || ready_state.get() == UseWebSocketReadyState::Open;
 ///
 /// let open_connection = move |_| {
-///   open();
+///     open();
 /// };
 ///
 /// let close_connection = move |_| {
-///   close();
+///     close();
 /// };
 ///
 /// view! { cx,
-/// <div>
-///   <p>"status: " {status}</p>
-///   button on:click=send_message disabled=move || !connected()>"Send"</button>
-///   <button on:click=send_byte_message disabled=move || !connected()>"Send bytes"</button>
-///   <button on:click=open_connection disabled=connected>"Open"</button>
-///   <button on:click=close_connection disabled=move || !connected()>"Close"</button>
-///   <p>"Receive message: " {format! {"{:?}", message}}</p>
-///   <p>"Receive byte message: " {format! {"{:?}", message_bytes}}</p>
-///   </div>
+///     <div>
+///         <p>"status: " {status}</p>
+///
+///         <button on:click=send_message disabled=move || !connected()>"Send"</button>
+///         <button on:click=send_byte_message disabled=move || !connected()>"Send bytes"</button>
+///         <button on:click=open_connection disabled=connected>"Open"</button>
+///         <button on:click=close_connection disabled=move || !connected()>"Close"</button>
+///
+///         <p>"Receive message: " {format! {"{:?}", message}}</p>
+///         <p>"Receive byte message: " {format! {"{:?}", message_bytes}}</p>
+///     </div>
 /// }
 /// # }
 /// ```
@@ -371,15 +373,15 @@ impl fmt::Display for UseWebSocketReadyState {
 #[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    on_open: Box<dyn CloneableFnWithArg<Event> + 'static>,
+    on_open: Box<dyn CloneableFnWithArg<Event>>,
     /// `WebSocket` message callback for text.
-    on_message: Box<dyn CloneableFnWithArg<String> + 'static>,
+    on_message: Box<dyn CloneableFnWithArg<String>>,
     /// `WebSocket` message callback for binary.
-    on_message_bytes: Box<dyn CloneableFnWithArg<Vec<u8>> + 'static>,
+    on_message_bytes: Box<dyn CloneableFnWithArg<Vec<u8>>>,
     /// `WebSocket` error callback.
-    on_error: Box<dyn CloneableFnWithArg<Event> + 'static>,
+    on_error: Box<dyn CloneableFnWithArg<Event>>,
     /// `WebSocket` close callback.
-    on_close: Box<dyn CloneableFnWithArg<CloseEvent> + 'static>,
+    on_close: Box<dyn CloneableFnWithArg<CloseEvent>>,
     /// Retry times.
     reconnect_limit: Option<u64>,
     /// Retry interval(ms).
