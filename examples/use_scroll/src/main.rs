@@ -17,6 +17,14 @@ fn Demo(cx: Scope) -> impl IntoView {
         }
     });
 
+    let on_stop = |_: Event| {
+        log!("scrolling stopped");
+    };
+
+    let on_scroll = |_: Event| {
+        log!("scrolling");
+    };
+
     let UseScrollReturn {
         x,
         y,
@@ -31,12 +39,8 @@ fn Demo(cx: Scope) -> impl IntoView {
         el,
         UseScrollOptions::default()
             .behavior(behavior)
-            .on_stop(move |_: Event| {
-                log!("scrolling stopped");
-            })
-            .on_scroll(move |_: Event| {
-                log!("scrolling");
-            }),
+            .on_stop(on_stop.clone())
+            .on_scroll(on_scroll.clone()),
     );
 
     view! { cx,
