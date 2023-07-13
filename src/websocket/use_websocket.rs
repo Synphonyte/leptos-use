@@ -371,20 +371,15 @@ impl fmt::Display for UseWebSocketReadyState {
 #[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    #[builder(into)]
-    onopen: Box<dyn CloneableFnMutWithArg<Event>>,
+    onopen: Box<dyn CloneableFnMutWithArg<Event> + 'static>,
     /// `WebSocket` message callback for text.
-    #[builder(into)]
-    onmessage: Box<dyn CloneableFnMutWithArg<String>>,
+    onmessage: Box<dyn CloneableFnMutWithArg<String> + 'static>,
     /// `WebSocket` message callback for binary.
-    #[builder(into)]
-    onmessage_bytes: Box<dyn CloneableFnMutWithArg<Vec<u8>>>,
+    onmessage_bytes: Box<dyn CloneableFnMutWithArg<Vec<u8>> + 'static>,
     /// `WebSocket` error callback.
-    #[builder(into)]
-    onerror: Box<dyn CloneableFnMutWithArg<Event>>,
+    onerror: Box<dyn CloneableFnMutWithArg<Event> + 'static>,
     /// `WebSocket` close callback.
-    #[builder(into)]
-    onclose: Box<dyn CloneableFnMutWithArg<CloseEvent>>,
+    onclose: Box<dyn CloneableFnMutWithArg<CloseEvent> + 'static>,
     /// Retry times.
     reconnect_limit: Option<u64>,
     /// Retry interval(ms).
