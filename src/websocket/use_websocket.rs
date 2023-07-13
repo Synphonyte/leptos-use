@@ -101,11 +101,11 @@ pub fn use_websocket_with_options(
     let (message_bytes, set_message_bytes) = create_signal(cx, None);
     let ws_ref: StoredValue<Option<WebSocket>> = store_value(cx, None);
 
-    let onopen_ref = store_value(cx, options.onopen);
-    let onmessage_ref = store_value(cx, options.onmessage);
-    let onmessage_bytes_ref = store_value(cx, options.onmessage_bytes);
-    let onerror_ref = store_value(cx, options.onerror);
-    let onclose_ref = store_value(cx, options.onclose);
+    let on_open_ref = store_value(cx, options.on_open);
+    let on_message_ref = store_value(cx, options.on_message);
+    let on_message_bytes_ref = store_value(cx, options.on_message_bytes);
+    let on_error_ref = store_value(cx, options.on_error);
+    let on_close_ref = store_value(cx, options.on_close);
 
     let reconnect_limit = options.reconnect_limit.unwrap_or(3);
     let reconnect_interval = options.reconnect_interval.unwrap_or(3 * 1000);
@@ -179,8 +179,8 @@ pub fn use_websocket_with_options(
                         return;
                     }
 
-                    let onopen = onopen_ref.get_value();
-                    onopen(e);
+                    let callback = on_open_ref.get_value();
+                    callback(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Open);
                 }) as Box<dyn FnMut(Event)>);
@@ -204,8 +204,8 @@ pub fn use_websocket_with_options(
                                 },
                                 |txt| {
                                     let txt = String::from(&txt);
-                                    let onmessage = onmessage_ref.get_value();
-                                    onmessage(txt.clone());
+                                    let callback = on_message_ref.get_value();
+                                    callback(txt.clone());
 
                                     set_message.set(Some(txt.clone()));
                                 },
@@ -214,8 +214,8 @@ pub fn use_websocket_with_options(
                         |array_buffer| {
                             let array = js_sys::Uint8Array::new(&array_buffer);
                             let array = array.to_vec();
-                            let onmessage_bytes = onmessage_bytes_ref.get_value();
-                            onmessage_bytes(array.clone());
+                            let callback = on_message_bytes_ref.get_value();
+                            callback(array.clone());
 
                             set_message_bytes.set(Some(array));
                         },
@@ -236,8 +236,8 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    let onerror = onerror_ref.get_value();
-                    onerror(e);
+                    let callback = on_error_ref.get_value();
+                    callback(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Closed);
                 }) as Box<dyn FnMut(Event)>);
@@ -255,8 +255,8 @@ pub fn use_websocket_with_options(
                         reconnect();
                     }
 
-                    let onclose = onclose_ref.get_value();
-                    onclose(e);
+                    let callback = on_close_ref.get_value();
+                    callback(e);
 
                     set_ready_state.set(UseWebSocketReadyState::Closed);
                 })
@@ -371,15 +371,15 @@ impl fmt::Display for UseWebSocketReadyState {
 #[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    onopen: Box<dyn CloneableFnWithArg<Event> + 'static>,
+    on_open: Box<dyn CloneableFnWithArg<Event> + 'static>,
     /// `WebSocket` message callback for text.
-    onmessage: Box<dyn CloneableFnWithArg<String> + 'static>,
+    on_message: Box<dyn CloneableFnWithArg<String> + 'static>,
     /// `WebSocket` message callback for binary.
-    onmessage_bytes: Box<dyn CloneableFnWithArg<Vec<u8>> + 'static>,
+    on_message_bytes: Box<dyn CloneableFnWithArg<Vec<u8>> + 'static>,
     /// `WebSocket` error callback.
-    onerror: Box<dyn CloneableFnWithArg<Event> + 'static>,
+    on_error: Box<dyn CloneableFnWithArg<Event> + 'static>,
     /// `WebSocket` close callback.
-    onclose: Box<dyn CloneableFnWithArg<CloseEvent> + 'static>,
+    on_close: Box<dyn CloneableFnWithArg<CloseEvent> + 'static>,
     /// Retry times.
     reconnect_limit: Option<u64>,
     /// Retry interval(ms).
@@ -393,11 +393,11 @@ pub struct UseWebSocketOptions {
 impl Default for UseWebSocketOptions {
     fn default() -> Self {
         Self {
-            onopen: Box::new(|_| {}),
-            onmessage: Box::new(|_| {}),
-            onmessage_bytes: Box::new(|_| {}),
-            onerror: Box::new(|_| {}),
-            onclose: Box::new(|_| {}),
+            on_open: Box::new(|_| {}),
+            on_message: Box::new(|_| {}),
+            on_message_bytes: Box::new(|_| {}),
+            on_error: Box::new(|_| {}),
+            on_close: Box::new(|_| {}),
             reconnect_limit: Some(3),
             reconnect_interval: Some(3 * 1000),
             manual: false,

@@ -67,29 +67,29 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let (history2, set_history2) = create_signal(cx, vec![]);
 
-    let onopen = move |e: Event| {
+    let on_open_callback = move |e: Event| {
         set_history2.update(|history: &mut Vec<_>| {
             history.push(format! {"[onopen]: event {:?}", e.type_()})
         });
     };
 
-    let onclose = move |e: CloseEvent| {
+    let on_close_callback = move |e: CloseEvent| {
         set_history2.update(|history: &mut Vec<_>| {
             history.push(format! {"[onclose]: event {:?}", e.type_()})
         });
     };
 
-    let onerror = move |e: Event| {
+    let on_error_callback = move |e: Event| {
         set_history2.update(|history: &mut Vec<_>| {
             history.push(format! {"[onerror]: event {:?}", e.type_()})
         });
     };
 
-    let onmessage = move |m: String| {
+    let on_message_callback = move |m: String| {
         set_history2.update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
     };
 
-    let onmessage_bytes = move |m: Vec<u8>| {
+    let on_message_bytes_callback = move |m: Vec<u8>| {
         set_history2
             .update(|history: &mut Vec<_>| history.push(format! {"[onmessage_bytes]: {:?}", m}));
     };
@@ -108,11 +108,11 @@ fn Demo(cx: Scope) -> impl IntoView {
         "wss://echo.websocket.events/".to_string(),
         UseWebSocketOptions::default()
             .manual(true)
-            .onopen(onopen.clone())
-            .onclose(onclose.clone())
-            .onerror(onerror.clone())
-            .onmessage(onmessage.clone())
-            .onmessage_bytes(onmessage_bytes.clone()),
+            .on_open(on_open_callback.clone())
+            .on_close(on_close_callback.clone())
+            .on_error(on_error_callback.clone())
+            .on_message(on_message_callback.clone())
+            .on_message_bytes(on_message_bytes_callback.clone()),
     );
 
     let open_connection2 = move |_| {
