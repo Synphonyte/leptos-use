@@ -148,7 +148,7 @@ pub fn use_websocket_with_options(
 
     connect_ref.set_value({
         let ws = ws_ref.get_value();
-        let url = url.clone();
+        let url = url;
 
         Some(Rc::new(move || {
             reconnect_timer_ref.set_value(None);
@@ -209,7 +209,7 @@ pub fn use_websocket_with_options(
                                     let callback = on_message_ref.get_value();
                                     callback(txt.clone());
 
-                                    set_message.set(Some(txt.clone()));
+                                    set_message.set(Some(txt));
                                 },
                             );
                         },
@@ -315,25 +315,19 @@ pub fn use_websocket_with_options(
     };
 
     // Open connection (not called if option `manual` is true)
-    {
-        let open = open.clone();
-        create_effect(cx, move |_| {
-            if !manual {
-                open();
-            }
+    create_effect(cx, move |_| {
+        if !manual {
+            open();
+        }
 
-            || ()
-        });
-    }
+        || ()
+    });
 
     // clean up (unmount)
-    {
-        let close = close.clone();
-        on_cleanup(cx, move || {
-            unmounted_ref.set_value(true);
-            close();
-        });
-    }
+    on_cleanup(cx, move || {
+        unmounted_ref.set_value(true);
+        close();
+    });
 
     UseWebsocketReturn {
         ready_state,
