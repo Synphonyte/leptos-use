@@ -1,6 +1,6 @@
 use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
-use crate::utils::CloneableFnWithArg;
+use crate::utils::CloneableFnMutWithArg;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
@@ -456,12 +456,10 @@ pub struct UseScrollOptions {
     offset: ScrollOffset,
 
     /// Callback when scrolling is happening.
-    #[builder(into)]
-    on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_scroll: Box<dyn CloneableFnMutWithArg<web_sys::Event> + 'static>,
 
     /// Callback when scrolling stops (after `idle` + `throttle` milliseconds have passed).
-    #[builder(into)]
-    on_stop: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_stop: Box<dyn CloneableFnMutWithArg<web_sys::Event> + 'static>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
     event_listener_options: web_sys::AddEventListenerOptions,

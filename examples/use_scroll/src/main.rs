@@ -3,6 +3,8 @@ use leptos::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseScrollReturn};
 
+use web_sys::Event;
+
 #[component]
 fn Demo(cx: Scope) -> impl IntoView {
     let el = create_node_ref::<Div>(cx);
@@ -24,7 +26,18 @@ fn Demo(cx: Scope) -> impl IntoView {
         arrived_state,
         directions,
         ..
-    } = use_scroll_with_options(cx, el, UseScrollOptions::default().behavior(behavior));
+    } = use_scroll_with_options(
+        cx,
+        el,
+        UseScrollOptions::default()
+            .behavior(behavior)
+            .on_stop(move |_: Event| {
+                log!("scrolling stopped");
+            })
+            .on_scroll(move |_: Event| {
+                log!("scrolling");
+            }),
+    );
 
     view! { cx,
         <div class="flex">
