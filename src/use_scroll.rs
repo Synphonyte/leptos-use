@@ -456,10 +456,10 @@ pub struct UseScrollOptions {
     offset: ScrollOffset,
 
     /// Callback when scrolling is happening.
-    on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event> + 'static>,
+    on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event>>,
 
     /// Callback when scrolling stops (after `idle` + `throttle` milliseconds have passed).
-    on_stop: Box<dyn CloneableFnWithArg<web_sys::Event> + 'static>,
+    on_stop: Box<dyn CloneableFnWithArg<web_sys::Event>>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
     event_listener_options: web_sys::AddEventListenerOptions,
