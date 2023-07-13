@@ -27,12 +27,8 @@ jobs:
         run: python3 docs/generate_count_badge.py --check
       - name: Check formatting
         run: cargo fmt --check
-# TODO: this action doesn't seem to work
-#      - name: Clippy check
-#        uses: auguwu/clippy-action@1.1.2
-#        with:
-#          args: --all-features --tests
-#          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clippy
+        run: cargo clippy --all-features --tests -- -D warnings
       - name: Run tests
         run: cargo test --all-features
 
