@@ -9,6 +9,8 @@ pub mod math;
 #[cfg(feature = "storage")]
 pub mod storage;
 pub mod utils;
+#[cfg(feature = "websocket")]
+pub mod websocket;
 
 #[cfg(web_sys_unstable_apis)]
 mod use_element_size;

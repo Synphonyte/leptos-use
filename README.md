@@ -57,7 +57,7 @@ cargo test --all-features
 First you need to install
 
 ```shell
-cargo install mdbook-cmdrun trunk
+cargo install mdbook mdbook-cmdrun trunk
 ```
 
 To build the book go in your terminal into the docs/book folder
