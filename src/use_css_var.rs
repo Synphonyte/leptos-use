@@ -1,5 +1,8 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::core::ElementMaybeSignal;
 use crate::{use_mutation_observer_with_options, watch, watch_with_options, WatchOptions};
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
@@ -69,7 +72,10 @@ use wasm_bindgen::{JsCast, JsValue};
 /// }
 /// # }
 /// ```
-
+///
+/// ## Server-Side Rendering
+///
+/// On the server this simply returns `create_signal(cx, options.initial_value)`.
 pub fn use_css_var(
     cx: Scope,
     prop: impl Into<MaybeSignal<String>>,
@@ -98,72 +104,74 @@ where
 
     let (variable, set_variable) = create_signal(cx, initial_value.clone());
 
-    let el_signal = (cx, target).into();
-    let prop = prop.into();
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let el_signal = (cx, target).into();
+        let prop = prop.into();
 
-    let update_css_var = {
-        let prop = prop.clone();
-        let el_signal = el_signal.clone();
+        let update_css_var = {
+            let prop = prop.clone();
+            let el_signal = el_signal.clone();
 
-        move || {
-            let key = prop.get_untracked();
+            move || {
+                let key = prop.get_untracked();
 
-            if let Some(el) = el_signal.get_untracked() {
-                if let Ok(Some(style)) = window().get_computed_style(&el.into()) {
-                    if let Ok(value) = style.get_property_value(&key) {
-                        set_variable.update(|var| *var = value.trim().to_string());
-                        return;
+                if let Some(el) = el_signal.get_untracked() {
+                    if let Ok(Some(style)) = window().get_computed_style(&el.into()) {
+                        if let Ok(value) = style.get_property_value(&key) {
+                            set_variable.update(|var| *var = value.trim().to_string());
+                            return;
+                        }
                     }
+
+                    let initial_value = initial_value.clone();
+                    set_variable.update(|var| *var = initial_value);
                 }
-
-                let initial_value = initial_value.clone();
-                set_variable.update(|var| *var = initial_value);
             }
+        };
+
+        if observe {
+            let mut init = web_sys::MutationObserverInit::new();
+            let update_css_var = update_css_var.clone();
+            let el_signal = el_signal.clone();
+
+            init.attribute_filter(&js_sys::Array::from_iter(
+                vec![JsValue::from_str("style")].into_iter(),
+            ));
+            use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
+                cx,
+                el_signal,
+                move |_, _| update_css_var(),
+                init,
+            );
         }
-    };
 
-    if observe {
-        let mut init = web_sys::MutationObserverInit::new();
-        let update_css_var = update_css_var.clone();
-        let el_signal = el_signal.clone();
+        // To get around style attributes on node_refs that are not applied after the first render
+        set_timeout(update_css_var.clone(), Duration::ZERO);
 
-        init.attribute_filter(&js_sys::Array::from_iter(
-            vec![JsValue::from_str("style")].into_iter(),
-        ));
-        use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
+        {
+            let el_signal = el_signal.clone();
+            let prop = prop.clone();
+
+            let _ = watch_with_options(
+                cx,
+                move || (el_signal.get(), prop.get()),
+                move |_, _, _| update_css_var(),
+                WatchOptions::default().immediate(true),
+            );
+        }
+
+        let _ = watch(
             cx,
-            el_signal,
-            move |_, _| update_css_var(),
-            init,
+            move || variable.get(),
+            move |val, _, _| {
+                if let Some(el) = el_signal.get() {
+                    let el = el.into().unchecked_into::<web_sys::HtmlElement>();
+                    let style = el.style();
+                    let _ = style.set_property(&prop.get_untracked(), val);
+                }
+            },
         );
-    }
-
-    // To get around style attributes on node_refs that are not applied after the first render
-    set_timeout(update_css_var.clone(), Duration::ZERO);
-
-    {
-        let el_signal = el_signal.clone();
-        let prop = prop.clone();
-
-        let _ = watch_with_options(
-            cx,
-            move || (el_signal.get(), prop.get()),
-            move |_, _, _| update_css_var(),
-            WatchOptions::default().immediate(true),
-        );
-    }
-
-    let _ = watch(
-        cx,
-        move || variable.get(),
-        move |val, _, _| {
-            if let Some(el) = el_signal.get() {
-                let el = el.into().unchecked_into::<web_sys::HtmlElement>();
-                let style = el.style();
-                let _ = style.set_property(&prop.get_untracked(), val);
-            }
-        },
-    );
+    }}
 
     (variable, set_variable)
 }
@@ -192,13 +200,26 @@ where
     _marker: PhantomData<T>,
 }
 
-impl Default for UseCssVarOptions<web_sys::Element, web_sys::Element> {
-    fn default() -> Self {
-        Self {
-            target: document().document_element().expect("No document element"),
-            initial_value: "".into(),
-            observe: false,
-            _marker: PhantomData,
+cfg_if! { if #[cfg(feature = "ssr")] {
+    impl Default for UseCssVarOptions<Option<web_sys::Element>, web_sys::Element> {
+        fn default() -> Self {
+            Self {
+                target: None,
+                initial_value: "".into(),
+                observe: false,
+                _marker: PhantomData,
+            }
         }
     }
-}
+} else {
+    impl Default for UseCssVarOptions<web_sys::Element, web_sys::Element> {
+        fn default() -> Self {
+            Self {
+                target: document().document_element().expect("No document element"),
+                initial_value: "".into(),
+                observe: false,
+                _marker: PhantomData,
+            }
+        }
+    }
+}}

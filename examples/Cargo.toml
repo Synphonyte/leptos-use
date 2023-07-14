@@ -38,6 +38,10 @@ members = [
     "watch_throttled",
 ]
 
+exclude = [
+    "ssr"
+]
+
 [package]
 name = "leptos-use-examples"
 version = "0.3.3"

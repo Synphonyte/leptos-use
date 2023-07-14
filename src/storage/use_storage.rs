@@ -1,8 +1,11 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
+
 use crate::utils::{CloneableFn, CloneableFnWithArg, FilterOptions};
 use crate::{
     filter_builder_methods, use_event_listener, watch_pausable_with_options, DebounceOptions,
     ThrottleOptions, WatchOptions, WatchPausableReturn,
 };
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Reflect;
 use leptos::*;
@@ -144,6 +147,10 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// You can specify `debounce` or `throttle` options for limiting writes to storage.
 ///
+/// ## Server-Side Rendering
+///
+/// On the server this falls back to a `create_signal(cx, default)` and an empty remove function.
+///
 /// ## See also
 ///
 /// * [`use_local_storage`]
@@ -188,192 +195,196 @@ where
 
     let (data, set_data) = create_signal(cx, defaults.get_untracked());
 
-    let storage = storage_type.into_storage();
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let remove: Box<dyn CloneableFn> = Box::new(|| {});
+    } else {
+        let storage = storage_type.into_storage();
 
-    let remove: Box<dyn CloneableFn> = match storage {
-        Ok(Some(storage)) => {
-            let on_err = on_error.clone();
+        let remove: Box<dyn CloneableFn> = match storage {
+            Ok(Some(storage)) => {
+                let on_err = on_error.clone();
 
-            let store = storage.clone();
-            let k = key.to_string();
+                let store = storage.clone();
+                let k = key.to_string();
 
-            let write = move |v: &T| {
-                match serde_json::to_string(&v) {
-                    Ok(ref serialized) => match store.get_item(&k) {
-                        Ok(old_value) => {
-                            if old_value.as_ref() != Some(serialized) {
-                                if let Err(e) = store.set_item(&k, serialized) {
-                                    on_err(UseStorageError::StorageAccessError(e));
-                                } else {
-                                    let mut event_init = web_sys::CustomEventInit::new();
-                                    event_init.detail(
-                                        &StorageEventDetail {
-                                            key: Some(k.clone()),
-                                            old_value,
-                                            new_value: Some(serialized.clone()),
-                                            storage_area: Some(store.clone()),
-                                        }
-                                        .into(),
-                                    );
+                let write = move |v: &T| {
+                    match serde_json::to_string(&v) {
+                        Ok(ref serialized) => match store.get_item(&k) {
+                            Ok(old_value) => {
+                                if old_value.as_ref() != Some(serialized) {
+                                    if let Err(e) = store.set_item(&k, serialized) {
+                                        on_err(UseStorageError::StorageAccessError(e));
+                                    } else {
+                                        let mut event_init = web_sys::CustomEventInit::new();
+                                        event_init.detail(
+                                            &StorageEventDetail {
+                                                key: Some(k.clone()),
+                                                old_value,
+                                                new_value: Some(serialized.clone()),
+                                                storage_area: Some(store.clone()),
+                                            }
+                                            .into(),
+                                        );
 
-                                    // importantly this should _not_ be a StorageEvent since those cannot
-                                    // be constructed with a non-built-in storage area
-                                    let _ = window().dispatch_event(
-                                        &web_sys::CustomEvent::new_with_event_init_dict(
-                                            CUSTOM_STORAGE_EVENT_NAME,
-                                            &event_init,
-                                        )
-                                        .expect("Failed to create CustomEvent"),
-                                    );
+                                        // importantly this should _not_ be a StorageEvent since those cannot
+                                        // be constructed with a non-built-in storage area
+                                        let _ = window().dispatch_event(
+                                            &web_sys::CustomEvent::new_with_event_init_dict(
+                                                CUSTOM_STORAGE_EVENT_NAME,
+                                                &event_init,
+                                            )
+                                            .expect("Failed to create CustomEvent"),
+                                        );
+                                    }
                                 }
                             }
-                        }
-                        Err(e) => {
-                            on_err.clone()(UseStorageError::StorageAccessError(e));
-                        }
-                    },
-                    Err(e) => {
-                        on_err.clone()(UseStorageError::SerializationError(e));
-                    }
-                }
-            };
-
-            let store = storage.clone();
-            let on_err = on_error.clone();
-            let k = key.to_string();
-            let def = defaults.clone();
-
-            let read = move |event_detail: Option<StorageEventDetail>| -> Option<T> {
-                let raw_init = match serde_json::to_string(&def.get_untracked()) {
-                    Ok(serialized) => Some(serialized),
-                    Err(e) => {
-                        on_err.clone()(UseStorageError::DefaultSerializationError(e));
-                        None
-                    }
-                };
-
-                let raw_value = if let Some(event_detail) = event_detail {
-                    event_detail.new_value
-                } else {
-                    match store.get_item(&k) {
-                        Ok(raw_value) => match raw_value {
-                            Some(raw_value) => {
-                                Some(merge_defaults(&raw_value, &def.get_untracked()))
+                            Err(e) => {
+                                on_err.clone()(UseStorageError::StorageAccessError(e));
                             }
-                            None => raw_init.clone(),
                         },
                         Err(e) => {
-                            on_err.clone()(UseStorageError::StorageAccessError(e));
-                            None
+                            on_err.clone()(UseStorageError::SerializationError(e));
                         }
                     }
                 };
 
-                match raw_value {
-                    Some(raw_value) => match serde_json::from_str(&raw_value) {
-                        Ok(v) => Some(v),
+                let store = storage.clone();
+                let on_err = on_error.clone();
+                let k = key.to_string();
+                let def = defaults.clone();
+
+                let read = move |event_detail: Option<StorageEventDetail>| -> Option<T> {
+                    let raw_init = match serde_json::to_string(&def.get_untracked()) {
+                        Ok(serialized) => Some(serialized),
                         Err(e) => {
-                            on_err.clone()(UseStorageError::SerializationError(e));
+                            on_err.clone()(UseStorageError::DefaultSerializationError(e));
                             None
                         }
-                    },
-                    None => {
-                        if let Some(raw_init) = &raw_init {
-                            if write_defaults {
-                                if let Err(e) = store.set_item(&k, raw_init) {
-                                    on_err(UseStorageError::StorageAccessError(e));
+                    };
+
+                    let raw_value = if let Some(event_detail) = event_detail {
+                        event_detail.new_value
+                    } else {
+                        match store.get_item(&k) {
+                            Ok(raw_value) => match raw_value {
+                                Some(raw_value) => {
+                                    Some(merge_defaults(&raw_value, &def.get_untracked()))
                                 }
-                            }
-                        }
-
-                        Some(def.get_untracked())
-                    }
-                }
-            };
-
-            let WatchPausableReturn {
-                pause: pause_watch,
-                resume: resume_watch,
-                ..
-            } = watch_pausable_with_options(
-                cx,
-                move || data.get(),
-                move |data, _, _| write.clone()(data),
-                WatchOptions::default().filter(filter),
-            );
-
-            let k = key.to_string();
-            let store = storage.clone();
-
-            let update = move |event_detail: Option<StorageEventDetail>| {
-                if let Some(event_detail) = &event_detail {
-                    if event_detail.storage_area != Some(store) {
-                        return;
-                    }
-
-                    match &event_detail.key {
-                        None => {
-                            set_data.set(defaults.get_untracked());
-                            return;
-                        }
-                        Some(event_key) => {
-                            if event_key != &k {
-                                return;
+                                None => raw_init.clone(),
+                            },
+                            Err(e) => {
+                                on_err.clone()(UseStorageError::StorageAccessError(e));
+                                None
                             }
                         }
                     };
-                }
 
-                pause_watch();
+                    match raw_value {
+                        Some(raw_value) => match serde_json::from_str(&raw_value) {
+                            Ok(v) => Some(v),
+                            Err(e) => {
+                                on_err.clone()(UseStorageError::SerializationError(e));
+                                None
+                            }
+                        },
+                        None => {
+                            if let Some(raw_init) = &raw_init {
+                                if write_defaults {
+                                    if let Err(e) = store.set_item(&k, raw_init) {
+                                        on_err(UseStorageError::StorageAccessError(e));
+                                    }
+                                }
+                            }
 
-                if let Some(value) = read(event_detail.clone()) {
-                    set_data.set(value);
-                }
+                            Some(def.get_untracked())
+                        }
+                    }
+                };
 
-                if event_detail.is_some() {
-                    // use timeout to avoid inifinite loop
-                    let resume = resume_watch.clone();
-                    let _ = set_timeout_with_handle(resume, Duration::ZERO);
-                } else {
-                    resume_watch();
-                }
-            };
-
-            let upd = update.clone();
-            let update_from_custom_event =
-                move |event: web_sys::CustomEvent| upd.clone()(Some(event.into()));
-
-            let upd = update.clone();
-            let update_from_storage_event =
-                move |event: web_sys::StorageEvent| upd.clone()(Some(event.into()));
-
-            if listen_to_storage_changes {
-                let _ = use_event_listener(cx, window(), ev::storage, update_from_storage_event);
-                let _ = use_event_listener(
+                let WatchPausableReturn {
+                    pause: pause_watch,
+                    resume: resume_watch,
+                    ..
+                } = watch_pausable_with_options(
                     cx,
-                    window(),
-                    ev::Custom::new(CUSTOM_STORAGE_EVENT_NAME),
-                    update_from_custom_event,
+                    move || data.get(),
+                    move |data, _, _| write.clone()(data),
+                    WatchOptions::default().filter(filter),
                 );
+
+                let k = key.to_string();
+                let store = storage.clone();
+
+                let update = move |event_detail: Option<StorageEventDetail>| {
+                    if let Some(event_detail) = &event_detail {
+                        if event_detail.storage_area != Some(store) {
+                            return;
+                        }
+
+                        match &event_detail.key {
+                            None => {
+                                set_data.set(defaults.get_untracked());
+                                return;
+                            }
+                            Some(event_key) => {
+                                if event_key != &k {
+                                    return;
+                                }
+                            }
+                        };
+                    }
+
+                    pause_watch();
+
+                    if let Some(value) = read(event_detail.clone()) {
+                        set_data.set(value);
+                    }
+
+                    if event_detail.is_some() {
+                        // use timeout to avoid inifinite loop
+                        let resume = resume_watch.clone();
+                        let _ = set_timeout_with_handle(resume, Duration::ZERO);
+                    } else {
+                        resume_watch();
+                    }
+                };
+
+                let upd = update.clone();
+                let update_from_custom_event =
+                    move |event: web_sys::CustomEvent| upd.clone()(Some(event.into()));
+
+                let upd = update.clone();
+                let update_from_storage_event =
+                    move |event: web_sys::StorageEvent| upd.clone()(Some(event.into()));
+
+                if listen_to_storage_changes {
+                    let _ = use_event_listener(cx, window(), ev::storage, update_from_storage_event);
+                    let _ = use_event_listener(
+                        cx,
+                        window(),
+                        ev::Custom::new(CUSTOM_STORAGE_EVENT_NAME),
+                        update_from_custom_event,
+                    );
+                }
+
+                update(None);
+
+                let k = key.to_string();
+
+                Box::new(move || {
+                    let _ = storage.remove_item(&k);
+                })
             }
-
-            update(None);
-
-            let k = key.to_string();
-
-            Box::new(move || {
-                let _ = storage.remove_item(&k);
-            })
-        }
-        Err(e) => {
-            on_error(UseStorageError::NoStorage(e));
-            Box::new(move || {})
-        }
-        _ => {
-            // do nothing
-            Box::new(move || {})
-        }
-    };
+            Err(e) => {
+                on_error(UseStorageError::NoStorage(e));
+                Box::new(move || {})
+            }
+            _ => {
+                // do nothing
+                Box::new(move || {})
+            }
+        };
+    }}
 
     (data, set_data, move || remove.clone()())
 }

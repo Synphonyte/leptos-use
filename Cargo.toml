@@ -22,6 +22,7 @@ serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 paste = "1"
 lazy_static = "1"
+cfg-if = "1"
 
 [dependencies.web-sys]
 version = "0.3"
@@ -66,6 +67,7 @@ features = [
 docs = []
 math = ["num"]
 storage = ["serde", "serde_json", "web-sys/StorageEvent"]
+ssr = []
 
 [package.metadata.docs.rs]
 all-features = true

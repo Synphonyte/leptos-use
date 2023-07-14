@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::use_event_listener;
+use cfg_if::cfg_if;
 use leptos::ev::{blur, focus};
 use leptos::*;
 
@@ -22,11 +25,23 @@ use leptos::*;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this returns a `Signal` that is always `true`.
 pub fn use_window_focus(cx: Scope) -> Signal<bool> {
-    let (focused, set_focused) = create_signal(cx, document().has_focus().unwrap_or_default());
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let initial_focus = true;
+    } else {
+        let initial_focus = document().has_focus().unwrap_or_default();
+    }}
 
-    let _ = use_event_listener(cx, window(), blur, move |_| set_focused.set(false));
-    let _ = use_event_listener(cx, window(), focus, move |_| set_focused.set(true));
+    let (focused, set_focused) = create_signal(cx, initial_focus);
+
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let _ = use_event_listener(cx, window(), blur, move |_| set_focused.set(false));
+        let _ = use_event_listener(cx, window(), focus, move |_| set_focused.set(true));
+    }}
 
     focused.into()
 }

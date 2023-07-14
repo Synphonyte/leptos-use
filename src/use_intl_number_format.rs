@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
+
 use crate::utils::js_value_from_to_string;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Reflect;
 use leptos::*;
@@ -31,7 +34,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # }
 /// ```
 ///
-/// ### Using locales
+/// ## Using locales
 ///
 /// This example shows some of the variations in localized number formats. In order to get the format
 /// of the language used in the user interface of your application, make sure to specify that language
@@ -81,7 +84,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # }
 /// ```
 ///
-/// ### Using options
+/// ## Using options
 ///
 /// The results can be customized in multiple ways.
 ///
@@ -143,20 +146,29 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// For an exhaustive list of options see [`UseIntlNumberFormatOptions`](https://docs.rs/leptos_use/latest/leptos_use/struct.UseIntlNumberFormatOptions.html).
 ///
-/// ### Formatting ranges
+/// ## Formatting ranges
 ///
 /// Apart from the `format` method, the `format_range` method can be used to format a range of numbers.
 /// Please see [`UseIntlNumberFormatReturn::format_range`](https://docs.rs/leptos_use/latest/leptos_use/struct.UseIntlNumberFormatReturn.html#method.format_range)
 /// for details.
+///
+/// ## Server-Side Rendering
+///
+/// Since `Intl.NumberFormat` is a JavaScript API it is not available on the server. That's why
+/// it falls back to a simple call to `format!()` on the server.
 pub fn use_intl_number_format(options: UseIntlNumberFormatOptions) -> UseIntlNumberFormatReturn {
-    let number_format = js_sys::Intl::NumberFormat::new(
-        &js_sys::Array::from_iter(options.locales.iter().map(JsValue::from)),
-        &js_sys::Object::from(options),
-    );
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        UseIntlNumberFormatReturn
+    } else {
+        let number_format = js_sys::Intl::NumberFormat::new(
+            &js_sys::Array::from_iter(options.locales.iter().map(JsValue::from)),
+            &js_sys::Object::from(options),
+        );
 
-    UseIntlNumberFormatReturn {
-        js_intl_number_format: number_format,
-    }
+        UseIntlNumberFormatReturn {
+            js_intl_number_format: number_format,
+        }
+    }}
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -788,33 +800,45 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
     }
 }
 
-/// Return type of [`use_intl_number_format`].
-pub struct UseIntlNumberFormatReturn {
-    /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
-    pub js_intl_number_format: js_sys::Intl::NumberFormat,
-}
+cfg_if! { if #[cfg(feature = "ssr")] {
+    /// Return type of [`use_intl_number_format`].
+    pub struct UseIntlNumberFormatReturn;
+} else {
+    /// Return type of [`use_intl_number_format`].
+    pub struct UseIntlNumberFormatReturn {
+        /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
+        pub js_intl_number_format: js_sys::Intl::NumberFormat,
+    }
+}}
 
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
     /// See [`use_intl_number_format`] for more information.
     pub fn format<N>(&self, cx: Scope, number: impl Into<MaybeSignal<N>>) -> Signal<String>
     where
-        N: Clone + 'static,
+        N: Clone + Display + 'static,
         js_sys::Number: From<N>,
     {
         let number = number.into();
-        let number_format = self.js_intl_number_format.clone();
 
-        Signal::derive(cx, move || {
-            if let Ok(result) = number_format
-                .format()
-                .call1(&number_format, &js_sys::Number::from(number.get()).into())
-            {
-                result.as_string().unwrap_or_default()
-            } else {
-                "".to_string()
-            }
-        })
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            Signal::derive(cx, move || {
+                format!("{}", number.get())
+            })
+        } else {
+            let number_format = self.js_intl_number_format.clone();
+
+            Signal::derive(cx, move || {
+                if let Ok(result) = number_format
+                    .format()
+                    .call1(&number_format, &js_sys::Number::from(number.get()).into())
+                {
+                    result.as_string().unwrap_or_default()
+                } else {
+                    "".to_string()
+                }
+            })
+        }}
     }
 
     /// Formats a range of numbers according to the locale and formatting options of this `Intl.NumberFormat` object.
@@ -870,30 +894,37 @@ impl UseIntlNumberFormatReturn {
         end: impl Into<MaybeSignal<NEnd>>,
     ) -> Signal<String>
     where
-        NStart: Clone + 'static,
-        NEnd: Clone + 'static,
+        NStart: Clone + Display + 'static,
+        NEnd: Clone + Display + 'static,
         js_sys::Number: From<NStart>,
         js_sys::Number: From<NEnd>,
     {
         let start = start.into();
         let end = end.into();
-        let number_format = self.js_intl_number_format.clone();
 
-        Signal::derive(cx, move || {
-            if let Ok(function) = Reflect::get(&number_format, &"formatRange".into()) {
-                let function = function.unchecked_into::<js_sys::Function>();
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            Signal::derive(cx, move || {
+                format!("{} - {}", start.get(), end.get())
+            })
+        } else {
+            let number_format = self.js_intl_number_format.clone();
 
-                if let Ok(result) = function.call2(
-                    &number_format,
-                    &js_sys::Number::from(start.get()).into(),
-                    &js_sys::Number::from(end.get()).into(),
-                ) {
-                    return result.as_string().unwrap_or_default();
+            Signal::derive(cx, move || {
+                if let Ok(function) = Reflect::get(&number_format, &"formatRange".into()) {
+                    let function = function.unchecked_into::<js_sys::Function>();
+
+                    if let Ok(result) = function.call2(
+                        &number_format,
+                        &js_sys::Number::from(start.get()).into(),
+                        &js_sys::Number::from(end.get()).into(),
+                    ) {
+                        return result.as_string().unwrap_or_default();
+                    }
                 }
-            }
 
-            "".to_string()
-        })
+                "".to_string()
+            })
+        }}
     }
 
     // TODO : Allows locale-aware formatting of strings produced by this `Intl.NumberFormat` object.

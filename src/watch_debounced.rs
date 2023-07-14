@@ -60,6 +60,12 @@ use leptos::*;
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
 /// - [Debouncing and Throttling Explained Through Examples](https://css-tricks.com/debouncing-throttling-explained-examples/)
 ///
+/// ## Server-Side Rendering
+///
+/// On the server the callback
+/// will never be called except if you set `immediate` to `true` in which case the callback will be
+/// called exactly once.
+///
 /// ## See also
 ///
 /// * [`watch`]

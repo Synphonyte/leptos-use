@@ -8,6 +8,7 @@ use std::fmt::{Display, Formatter};
 use crate::core::StorageType;
 use crate::use_preferred_dark;
 use crate::utils::CloneableFnWithArg;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
@@ -87,6 +88,10 @@ use wasm_bindgen::JsCast;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this will by default return `ColorMode::Light`. Persistence is disabled, of course.
 ///
 /// ## See also
 ///
@@ -247,9 +252,9 @@ where
     }
 }
 
-#[cfg(not(feature = "storage"))]
 /// Color modes
-#[derive(Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, Debug)]
+#[cfg_attr(feature = "storage", derive(Serialize, Deserialize))]
 pub enum ColorMode {
     #[default]
     Auto,
@@ -258,61 +263,50 @@ pub enum ColorMode {
     Custom(String),
 }
 
-#[cfg(not(feature = "storage"))]
-fn get_store_signal(
-    cx: Scope,
-    initial_value: MaybeSignal<ColorMode>,
-    storage_signal: Option<RwSignal<ColorMode>>,
-    _storage_key: &String,
-    _storage_enabled: bool,
-    _storage: StorageType,
-    _listen_to_storage_changes: bool,
-) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
-    if let Some(storage_signal) = storage_signal {
-        storage_signal.split()
-    } else {
-        create_signal(cx, initial_value.get_untracked())
+cfg_if! { if #[cfg(feature = "storage")] {
+    fn get_store_signal(
+        cx: Scope,
+        initial_value: MaybeSignal<ColorMode>,
+        storage_signal: Option<RwSignal<ColorMode>>,
+        storage_key: &str,
+        storage_enabled: bool,
+        storage: StorageType,
+        listen_to_storage_changes: bool,
+    ) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+        if let Some(storage_signal) = storage_signal {
+            storage_signal.split()
+        } else if storage_enabled {
+            let (store, set_store, _) = use_storage_with_options(
+                cx,
+                storage_key,
+                initial_value.get_untracked(),
+                UseStorageOptions::default()
+                    .listen_to_storage_changes(listen_to_storage_changes)
+                    .storage_type(storage),
+            );
+
+            (store, set_store)
+        } else {
+            create_signal(cx, initial_value.get_untracked())
+        }
     }
-}
-
-#[cfg(feature = "storage")]
-/// Color modes
-#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
-pub enum ColorMode {
-    #[default]
-    Auto,
-    Light,
-    Dark,
-    Custom(String),
-}
-
-#[cfg(feature = "storage")]
-fn get_store_signal(
-    cx: Scope,
-    initial_value: MaybeSignal<ColorMode>,
-    storage_signal: Option<RwSignal<ColorMode>>,
-    storage_key: &str,
-    storage_enabled: bool,
-    storage: StorageType,
-    listen_to_storage_changes: bool,
-) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
-    if let Some(storage_signal) = storage_signal {
-        storage_signal.split()
-    } else if storage_enabled {
-        let (store, set_store, _) = use_storage_with_options(
-            cx,
-            storage_key,
-            initial_value.get_untracked(),
-            UseStorageOptions::default()
-                .listen_to_storage_changes(listen_to_storage_changes)
-                .storage_type(storage),
-        );
-
-        (store, set_store)
-    } else {
-        create_signal(cx, initial_value.get_untracked())
+} else {
+    fn get_store_signal(
+        cx: Scope,
+        initial_value: MaybeSignal<ColorMode>,
+        storage_signal: Option<RwSignal<ColorMode>>,
+        _storage_key: &String,
+        _storage_enabled: bool,
+        _storage: StorageType,
+        _listen_to_storage_changes: bool,
+    ) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+        if let Some(storage_signal) = storage_signal {
+            storage_signal.split()
+        } else {
+            create_signal(cx, initial_value.get_untracked())
+        }
     }
-}
+}}
 
 impl Display for ColorMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

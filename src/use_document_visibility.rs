@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::use_event_listener;
+use cfg_if::cfg_if;
 use leptos::ev::visibilitychange;
 use leptos::*;
 
@@ -21,12 +24,24 @@ use leptos::*;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this returns a `Signal` that always contains the value `web_sys::VisibilityState::Hidden`.
 pub fn use_document_visibility(cx: Scope) -> Signal<web_sys::VisibilityState> {
-    let (visibility, set_visibility) = create_signal(cx, document().visibility_state());
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let inital_visibility = web_sys::VisibilityState::Hidden;
+    } else {
+        let inital_visibility = document().visibility_state();
+    }}
 
-    let _ = use_event_listener(cx, document(), visibilitychange, move |_| {
-        set_visibility.set(document().visibility_state());
-    });
+    let (visibility, set_visibility) = create_signal(cx, inital_visibility);
+
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let _ = use_event_listener(cx, document(), visibilitychange, move |_| {
+            set_visibility.set(document().visibility_state());
+        });
+    }}
 
     visibility.into()
 }

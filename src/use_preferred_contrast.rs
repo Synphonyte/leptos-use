@@ -19,6 +19,10 @@ use std::fmt::Display;
 /// # }
 /// ```
 ///
+/// ## Server-Side Rendering
+///
+/// On the server this returns a `Signal` that always contains the value `PreferredContrast::NoPreference`.
+///
 /// ## See also
 ///
 /// * [`use_media_query`]

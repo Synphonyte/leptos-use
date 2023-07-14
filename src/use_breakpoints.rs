@@ -103,6 +103,11 @@ use std::hash::Hash;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// Since internally this uses [`use_media_query`], which returns always `false` on the server,
+/// the returned methods also will return `false`.
 pub fn use_breakpoints<K: Eq + Hash + Debug + Clone>(
     cx: Scope,
     breakpoints: HashMap<K, u32>,

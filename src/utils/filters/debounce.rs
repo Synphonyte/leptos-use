@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::utils::CloneableFnWithReturn;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
@@ -56,37 +59,39 @@ where
             return Rc::clone(&last_return_value);
         }
 
-        // Create the max_timer. Clears the regular timer on invoke
-        if let Some(max_duration) = max_duration {
-            if max_timer.get().is_none() {
-                let timer = Rc::clone(&timer);
-                let invok = invoke.clone();
-                max_timer.set(
-                    set_timeout_with_handle(
-                        move || {
-                            clear_timeout(&timer);
-                            invok();
-                        },
-                        Duration::from_millis(max_duration as u64),
-                    )
-                    .ok(),
-                );
+        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+            // Create the max_timer. Clears the regular timer on invoke
+            if let Some(max_duration) = max_duration {
+                if max_timer.get().is_none() {
+                    let timer = Rc::clone(&timer);
+                    let invok = invoke.clone();
+                    max_timer.set(
+                        set_timeout_with_handle(
+                            move || {
+                                clear_timeout(&timer);
+                                invok();
+                            },
+                            Duration::from_millis(max_duration as u64),
+                        )
+                        .ok(),
+                    );
+                }
             }
-        }
 
-        let max_timer = Rc::clone(&max_timer);
+            let max_timer = Rc::clone(&max_timer);
 
-        // Create the regular timer. Clears the max timer on invoke
-        timer.set(
-            set_timeout_with_handle(
-                move || {
-                    clear_timeout(&max_timer);
-                    invoke();
-                },
-                Duration::from_millis(duration as u64),
-            )
-            .ok(),
-        );
+            // Create the regular timer. Clears the max timer on invoke
+            timer.set(
+                set_timeout_with_handle(
+                    move || {
+                        clear_timeout(&max_timer);
+                        invoke();
+                    },
+                    Duration::from_millis(duration as u64),
+                )
+                .ok(),
+            );
+        }}
 
         Rc::clone(&last_return_value)
     }

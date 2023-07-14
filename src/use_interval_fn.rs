@@ -1,5 +1,8 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::utils::Pausable;
 use crate::watch;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::*;
@@ -32,6 +35,10 @@ use std::time::Duration;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this function will simply be ignored.
 pub fn use_interval_fn<CbFn, N>(
     cx: Scope,
     callback: CbFn,
@@ -86,21 +93,23 @@ where
     let interval = interval.into();
 
     let resume = move || {
-        let interval_value = interval.get();
-        if interval_value == 0 {
-            return;
-        }
+        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+            let interval_value = interval.get();
+            if interval_value == 0 {
+                return;
+            }
 
-        set_active.set(true);
+            set_active.set(true);
 
-        if immediate_callback {
-            callback.clone()();
-        }
-        clean();
+            if immediate_callback {
+                callback.clone()();
+            }
+            clean();
 
-        timer.set(
-            set_interval_with_handle(callback.clone(), Duration::from_millis(interval_value)).ok(),
-        );
+            timer.set(
+                set_interval_with_handle(callback.clone(), Duration::from_millis(interval_value)).ok(),
+            );
+        }}
     };
 
     if immediate {

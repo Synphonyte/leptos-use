@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::utils::CloneableFnWithReturn;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Date;
 use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -72,34 +75,38 @@ where
             last_exec.set(Date::now());
             invoke();
         } else if options.trailing {
-            let last_exec = Rc::clone(&last_exec);
-            let is_leading = Rc::clone(&is_leading);
-            timer.set(
-                set_timeout_with_handle(
-                    move || {
-                        last_exec.set(Date::now());
-                        is_leading.set(true);
-                        invoke();
-                        clear();
-                    },
-                    Duration::from_millis(max(0, (duration - elapsed) as u64)),
-                )
-                .ok(),
-            );
+            cfg_if! { if #[cfg(not(feature = "ssr"))] {
+                let last_exec = Rc::clone(&last_exec);
+                let is_leading = Rc::clone(&is_leading);
+                timer.set(
+                    set_timeout_with_handle(
+                        move || {
+                            last_exec.set(Date::now());
+                            is_leading.set(true);
+                            invoke();
+                            clear();
+                        },
+                        Duration::from_millis(max(0, (duration - elapsed) as u64)),
+                    )
+                    .ok(),
+                );
+            }}
         }
 
-        if !options.leading && timer.get().is_none() {
-            let is_leading = Rc::clone(&is_leading);
-            timer.set(
-                set_timeout_with_handle(
-                    move || {
-                        is_leading.set(true);
-                    },
-                    Duration::from_millis(duration as u64),
-                )
-                .ok(),
-            );
-        }
+        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+            if !options.leading && timer.get().is_none() {
+                let is_leading = Rc::clone(&is_leading);
+                timer.set(
+                    set_timeout_with_handle(
+                        move || {
+                            is_leading.set(true);
+                        },
+                        Duration::from_millis(duration as u64),
+                    )
+                    .ok(),
+                );
+            }
+        }}
 
         is_leading.set(false);
 

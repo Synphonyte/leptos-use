@@ -45,6 +45,10 @@ use web_sys::MutationObserverInit;
 /// }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
 pub fn use_mutation_observer<El, T, F>(
     cx: Scope,
     target: El,

@@ -31,6 +31,10 @@ use std::marker::PhantomData;
 /// # }
 /// ```
 ///
+/// ## Server-Side Rendering
+///
+/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
+///
 /// ## See also
 ///
 /// * [`use_intersection_observer`]

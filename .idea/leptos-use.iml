@@ -43,6 +43,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_document_visibility/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_window_focus/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_window_scroll/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/ssr/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_intl_number_format/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_websocket/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/testtest/src" isTestSource="false" />
@@ -69,6 +70,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_breakpoints/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_element_visibility/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_intersection_observer/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/ssr/target" />
       <excludeFolder url="file://$MODULE_DIR$/testtest/target" />
     </content>
     <orderEntry type="inheritedJdk" />

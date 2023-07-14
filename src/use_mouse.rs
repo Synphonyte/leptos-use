@@ -1,5 +1,8 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::core::{ElementMaybeSignal, Position};
 use crate::use_event_listener_with_options;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::*;
@@ -83,6 +86,10 @@ use web_sys::AddEventListenerOptions;
 ///     view! { cx, <div node_ref=element></div> }
 /// }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this returns simple `Signal`s with the `initial_value`s.
 pub fn use_mouse(cx: Scope) -> UseMouseReturn {
     use_mouse_with_options(cx, Default::default())
 }
@@ -154,49 +161,51 @@ where
 
     // TODO : event filters?
 
-    let target = options.target;
-    let mut event_listener_options = AddEventListenerOptions::new();
-    event_listener_options.passive(true);
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let target = options.target;
+        let mut event_listener_options = AddEventListenerOptions::new();
+        event_listener_options.passive(true);
 
-    let _ = use_event_listener_with_options(
-        cx,
-        target.clone(),
-        mousemove,
-        mouse_handler,
-        event_listener_options.clone(),
-    );
-    let _ = use_event_listener_with_options(
-        cx,
-        target.clone(),
-        dragover,
-        drag_handler,
-        event_listener_options.clone(),
-    );
-    if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
         let _ = use_event_listener_with_options(
             cx,
             target.clone(),
-            touchstart,
-            touch_handler.clone(),
+            mousemove,
+            mouse_handler,
             event_listener_options.clone(),
         );
         let _ = use_event_listener_with_options(
             cx,
             target.clone(),
-            touchmove,
-            touch_handler,
+            dragover,
+            drag_handler,
             event_listener_options.clone(),
         );
-        if options.reset_on_touch_ends {
+        if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
                 cx,
-                target,
-                touchend,
-                move |_| reset(),
+                target.clone(),
+                touchstart,
+                touch_handler.clone(),
                 event_listener_options.clone(),
             );
+            let _ = use_event_listener_with_options(
+                cx,
+                target.clone(),
+                touchmove,
+                touch_handler,
+                event_listener_options.clone(),
+            );
+            if options.reset_on_touch_ends {
+                let _ = use_event_listener_with_options(
+                    cx,
+                    target,
+                    touchend,
+                    move |_| reset(),
+                    event_listener_options.clone(),
+                );
+            }
         }
-    }
+    }}
 
     UseMouseReturn {
         x,
@@ -235,18 +244,33 @@ where
     _marker: PhantomData<T>,
 }
 
-impl Default for UseMouseOptions<web_sys::Window, web_sys::Window, UseMouseEventExtractorDefault> {
-    fn default() -> Self {
-        Self {
-            coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
-            target: window(),
-            touch: true,
-            reset_on_touch_ends: false,
-            initial_value: Position { x: 0.0, y: 0.0 },
-            _marker: Default::default(),
+cfg_if! { if #[cfg(feature = "ssr")] {
+    impl Default for UseMouseOptions<Option<web_sys::Window>, web_sys::Window, UseMouseEventExtractorDefault> {
+        fn default() -> Self {
+            Self {
+                coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
+                target: None,
+                touch: true,
+                reset_on_touch_ends: false,
+                initial_value: Position { x: 0.0, y: 0.0 },
+                _marker: Default::default(),
+            }
         }
     }
-}
+} else {
+    impl Default for UseMouseOptions<web_sys::Window, web_sys::Window, UseMouseEventExtractorDefault> {
+        fn default() -> Self {
+            Self {
+                coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
+                target: window(),
+                touch: true,
+                reset_on_touch_ends: false,
+                initial_value: Position { x: 0.0, y: 0.0 },
+                _marker: Default::default(),
+            }
+        }
+    }
+}}
 
 /// Defines how to get the coordinates from the event.
 #[derive(Clone)]

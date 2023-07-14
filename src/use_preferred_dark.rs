@@ -18,6 +18,10 @@ use leptos::*;
 /// # }
 /// ```
 ///
+/// ## Server-Side Rendering
+///
+/// On the server this functions returns a Signal that is always `false`.
+///
 /// ## See also
 ///
 /// * [`use_media_query`]

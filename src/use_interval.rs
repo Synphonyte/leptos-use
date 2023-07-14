@@ -28,6 +28,10 @@ use leptos::*;
 /// # view! { cx, }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this function will simply be ignored.
 pub fn use_interval<N>(
     cx: Scope,
     interval: N,

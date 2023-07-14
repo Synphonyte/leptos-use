@@ -76,11 +76,9 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
-/// Note if your components also run in SSR (Server Side Rendering), you might get errors
-/// because DOM APIs like document and window are not available outside of the browser.
-/// To avoid that you can put the logic inside a
-/// [`create_effect`](https://docs.rs/leptos/latest/leptos/fn.create_effect.html) hook
-/// which only runs client side.
+/// ## Server-Side Rendering
+///
+/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
 pub fn use_event_listener<Ev, El, T, F>(
     cx: Scope,
     target: El,

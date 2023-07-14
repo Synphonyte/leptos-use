@@ -164,6 +164,10 @@ use wasm_bindgen::JsCast;
 /// # }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
 pub fn use_scroll<El, T>(cx: Scope, element: El) -> UseScrollReturn
 where
     El: Clone,

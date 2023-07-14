@@ -67,6 +67,11 @@ use std::rc::Rc;
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
 /// - [Debouncing and Throttling Explained Through Examples](https://css-tricks.com/debouncing-throttling-explained-examples/)
+///
+/// ## Server-Side Rendering
+///
+/// Internally this uses `setTimeout` which is not supported on the server. So usually calling
+/// a debounced function on the server will simply be ignored.
 pub fn use_debounce_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,

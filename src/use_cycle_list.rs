@@ -31,7 +31,6 @@ use leptos::*;
 /// # view! { cx, }
 /// # }
 /// ```
-
 pub fn use_cycle_list<T, L>(
     cx: Scope,
     list: L,

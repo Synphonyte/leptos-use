@@ -1,6 +1,8 @@
 // #![feature(doc_cfg)]
 //! Collection of essential Leptos utilities inspired by SolidJS USE / VueUse
 
+use cfg_if::cfg_if;
+
 pub mod core;
 #[cfg(feature = "docs")]
 pub mod docs;
@@ -10,15 +12,13 @@ pub mod math;
 pub mod storage;
 pub mod utils;
 
-#[cfg(web_sys_unstable_apis)]
-mod use_element_size;
-#[cfg(web_sys_unstable_apis)]
-mod use_resize_observer;
+cfg_if! { if #[cfg(web_sys_unstable_apis)] {
+    mod use_element_size;
+    mod use_resize_observer;
 
-#[cfg(web_sys_unstable_apis)]
-pub use use_element_size::*;
-#[cfg(web_sys_unstable_apis)]
-pub use use_resize_observer::*;
+    pub use use_element_size::*;
+    pub use use_resize_observer::*;
+}}
 
 mod on_click_outside;
 mod use_active_element;

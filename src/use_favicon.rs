@@ -1,4 +1,7 @@
+#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
+
 use crate::watch;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use wasm_bindgen::JsCast;
@@ -53,6 +56,9 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
+/// ## Server-Side Rendering
+///
+/// On the server only the signals work but no favicon will be changed obviously.
 pub fn use_favicon(cx: Scope) -> (ReadSignal<Option<String>>, WriteSignal<Option<String>>) {
     use_favicon_with_options(cx, UseFaviconOptions::default())
 }
@@ -68,39 +74,41 @@ pub fn use_favicon_with_options(
         rel,
     } = options;
 
-    let link_selector = format!("link[rel*=\"{rel}\"]");
-
     let (favicon, set_favicon) = create_signal(cx, new_icon.get_untracked());
 
     if matches!(&new_icon, MaybeSignal::Dynamic(_)) {
         create_effect(cx, move |_| set_favicon.set(new_icon.get()));
     }
 
-    let apply_icon = move |icon: &String| {
-        if let Some(head) = document().head() {
-            if let Ok(links) = head.query_selector_all(&link_selector) {
-                let href = format!("{base_url}{icon}");
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let link_selector = format!("link[rel*=\"{rel}\"]");
 
-                for i in 0..links.length() {
-                    let node = links.get(i).expect("checked length");
-                    let link: web_sys::HtmlLinkElement = node.unchecked_into();
-                    link.set_href(&href);
+        let apply_icon = move |icon: &String| {
+            if let Some(head) = document().head() {
+                if let Ok(links) = head.query_selector_all(&link_selector) {
+                    let href = format!("{base_url}{icon}");
+
+                    for i in 0..links.length() {
+                        let node = links.get(i).expect("checked length");
+                        let link: web_sys::HtmlLinkElement = node.unchecked_into();
+                        link.set_href(&href);
+                    }
                 }
             }
-        }
-    };
+        };
 
-    let _ = watch(
-        cx,
-        move || favicon.get(),
-        move |new_icon, prev_icon, _| {
-            if Some(new_icon) != prev_icon {
-                if let Some(new_icon) = new_icon {
-                    apply_icon(new_icon);
+        let _ = watch(
+            cx,
+            move || favicon.get(),
+            move |new_icon, prev_icon, _| {
+                if Some(new_icon) != prev_icon {
+                    if let Some(new_icon) = new_icon {
+                        apply_icon(new_icon);
+                    }
                 }
-            }
-        },
-    );
+            },
+        );
+    }}
 
     (favicon, set_favicon)
 }
