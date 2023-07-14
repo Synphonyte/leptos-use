@@ -126,6 +126,8 @@ def modify_changelog(args):
         if line.startswith("### New Functions"):
             new_function_heading_exists = True
             break
+        elif line.startswith("## [") and not line.startswith("## [Unreleased"):
+            break
 
     if not new_function_heading_exists:
         changelog_source.insert(7, "### New Functions 🚀\n")
