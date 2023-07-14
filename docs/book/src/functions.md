@@ -10,6 +10,8 @@
 
 <!-- cmdrun python3 generate_function_overview.py sensors -->
 
+<!-- cmdrun python3 generate_function_overview.py network -->
+
 <!-- cmdrun python3 generate_function_overview.py animation -->
 
 <!-- cmdrun python3 generate_function_overview.py watch -->

@@ -1,5 +1,5 @@
-use crate::utils::{create_filter_wrapper, FilterOptions};
-use crate::{filter_builder_methods, DebounceOptions, ThrottleOptions};
+use crate::filter_builder_methods;
+use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::RefCell;

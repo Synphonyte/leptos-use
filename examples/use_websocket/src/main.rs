@@ -1,6 +1,9 @@
 use leptos::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::websocket::*;
+use leptos_use::{
+    use_websocket, use_websocket_with_options, UseWebSocketOptions, UseWebSocketReadyState,
+    UseWebsocketReturn,
+};
 
 use web_sys::{CloseEvent, Event};
 

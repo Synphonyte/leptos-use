@@ -9,8 +9,6 @@ pub mod math;
 #[cfg(feature = "storage")]
 pub mod storage;
 pub mod utils;
-#[cfg(feature = "websocket")]
-pub mod websocket;
 
 #[cfg(web_sys_unstable_apis)]
 mod use_element_size;
@@ -46,6 +44,7 @@ mod use_preferred_dark;
 mod use_scroll;
 mod use_supported;
 mod use_throttle_fn;
+mod use_websocket;
 mod use_window_focus;
 mod use_window_scroll;
 mod watch;
@@ -78,6 +77,7 @@ pub use use_preferred_dark::*;
 pub use use_scroll::*;
 pub use use_supported::*;
 pub use use_throttle_fn::*;
+pub use use_websocket::*;
 pub use use_window_focus::*;
 pub use use_window_scroll::*;
 pub use watch::*;

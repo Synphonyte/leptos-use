@@ -4,7 +4,7 @@ use leptos::html::{AnyElement, ToHtmlElement};
 use leptos::*;
 use web_sys::AddEventListenerOptions;
 
-///
+/// Reactive `document.activeElement`
 ///
 /// ## Demo
 ///

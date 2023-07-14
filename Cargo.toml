@@ -26,6 +26,7 @@ lazy_static = "1"
 [dependencies.web-sys]
 version = "0.3"
 features = [
+    "BinaryType",
     "CssStyleDeclaration",
     "CloseEvent",
     "CustomEvent",
@@ -57,6 +58,7 @@ features = [
     "TouchEvent",
     "TouchList",
     "VisibilityState",
+    "WebSocket",
     "Window",
 ]
 
@@ -64,7 +66,6 @@ features = [
 docs = []
 math = ["num"]
 storage = ["serde", "serde_json", "web-sys/StorageEvent"]
-websocket = ["web-sys/BinaryType", "web-sys/WebSocket"]
 
 [package.metadata.docs.rs]
 all-features = true
