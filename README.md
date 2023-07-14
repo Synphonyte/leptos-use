@@ -89,4 +89,4 @@ To scaffold a new function quickly you can run `template/createfn.sh`. It requir
 | Crate version | Compatible Leptos version |
 |---------------|---------------------------|
 | <= 0.3        | 0.3                       |
-| \>= 0.4       | 0.4                       |
+| 0.4           | 0.4                       |

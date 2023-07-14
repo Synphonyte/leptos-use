@@ -16,6 +16,7 @@ members = [
     "use_element_size",
     "use_element_visibility",
     "use_event_listener",
+    "use_intl_number_format",
     "use_favicon",
     "use_floor",
     "use_intersection_observer",

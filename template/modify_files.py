@@ -13,6 +13,7 @@ def main():
 
     args = parser.parse_args()
 
+    modify_changelog(args)
     modify_librs(args)
     modify_modrs(args)
     modify_summarymd(args)
@@ -104,6 +105,37 @@ def modify_librs(args):
 
     with open("src/lib.rs", "w") as f:
         f.write(lib_source)
+
+
+def modify_changelog(args):
+    with open("CHANGELOG.md", "r") as f:
+        changelog_source = f.readlines()
+
+    unreleased_heading_exists = False
+    for line in changelog_source:
+        if line.startswith("## [Unreleased"):
+            unreleased_heading_exists = True
+            break
+
+    if not unreleased_heading_exists:
+        changelog_source.insert(5, "## [Unreleased] - \n")
+        changelog_source.insert(6, "\n")
+
+    new_function_heading_exists = False
+    for line in changelog_source:
+        if line.startswith("### New Functions"):
+            new_function_heading_exists = True
+            break
+
+    if not new_function_heading_exists:
+        changelog_source.insert(7, "### New Functions 🚀\n")
+        changelog_source.insert(8, "\n")
+        changelog_source.insert(9, "\n")
+
+    changelog_source.insert(9, f"- `{args.function_name}`\n")
+
+    with open("CHANGELOG.md", "w") as f:
+        f.write("".join(changelog_source))
 
 
 if __name__ == '__main__':

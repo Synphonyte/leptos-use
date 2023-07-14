@@ -65,6 +65,10 @@
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 
+# Intl
+
+- [use_intl_number_format](intl/use_intl_number_format.md)
+
 # @Math
 
 - [use_abs](math/use_abs.md)

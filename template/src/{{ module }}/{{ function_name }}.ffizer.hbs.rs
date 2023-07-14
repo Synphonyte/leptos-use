@@ -11,7 +11,7 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos_use{{#if module}}::{{ module }}{{/if}}::{{ function_name }};
+/// # use leptos_use{{#if module}}::{{ module }}{{/if}}::{{ function_name }};
 /// #
 /// # #[component]
 /// # fn Demo(cx: Scope) -> impl IntoView {
