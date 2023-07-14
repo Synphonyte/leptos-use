@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_drop_zone`
 - `use_websocket` (thanks @sectore)
 - `use_intl_number_format`
 

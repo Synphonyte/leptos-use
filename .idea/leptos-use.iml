@@ -47,6 +47,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_intl_number_format/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_websocket/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/testtest/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_drop_zone/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

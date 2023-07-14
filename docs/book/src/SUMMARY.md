@@ -16,6 +16,7 @@
 
 - [use_active_element](elements/use_active_element.md)
 - [use_document_visibility](elements/use_document_visibility.md)
+- [use_drop_zone](elements/use_drop_zone.md)
 - [use_element_size](elements/use_element_size.md)
 - [use_element_visibility](elements/use_element_visibility.md)
 - [use_intersection_observer](elements/use_intersection_observer.md)
