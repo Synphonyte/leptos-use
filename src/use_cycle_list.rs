@@ -84,7 +84,7 @@ where
         }
     };
 
-    let (state, set_state) = get_initial_value().to_signal(cx);
+    let (state, set_state) = get_initial_value().into_signal(cx);
 
     let index = {
         let list = list.clone();

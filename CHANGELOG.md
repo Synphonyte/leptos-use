@@ -3,7 +3,30 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2023-07-15 
+## [Unreleased] -
+
+### Braking Changes 🛠
+
+- The following functions now accept a `MaybeRwSignal` as their initial/default value which means
+  you can use a synchronized `RwSignal` in those places.
+    - `use_color_mode`
+    - `use_cycle_list`
+    - `use_favicon`
+    - `use_storage`
+    - `use_local_storage`
+    - `use_session_storage`
+- Instead of returning `ReadSignal`, the following functions now return `Signal`.
+  - `use_color_mode`
+  - `use_favicon`
+  - `use_storage`
+  - `use_local_storage`
+  - `use_session_storage`
+
+### Fixes 🍕
+
+- `use_drop_zone` now uses `.get_untracked()` in event handlers
+
+## [0.5.0] - 2023-07-15
 
 ### New Functions 🚀
 
@@ -26,8 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.0] - 2023-07-03
 
 ### Braking Changes 🛠
+
 - Required `leptos` version is now 0.4
-- Following the changes in `leptos` there is no longer a `stable` crate feature required in order to use this library with a stable toolchain.
+- Following the changes in `leptos` there is no longer a `stable` crate feature required in order to use this library
+  with a stable toolchain.
   If you want to use it with a nightly toolchain you have to enable the `nightly` feature only on `leptos` directly.
   No change is required for `leptos-use` itself.
 
@@ -61,17 +86,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2023-06-13
 
 ### Braking Changes 🛠
+
 - `use_event_listener` no longer returns a `Box<dyn Fn()>` but a `impl Fn() + Clone`
 
 ### Changes 🔥
 
 - You can now specify a `&str` or `Signal<String>` with CSS selectors wherever a node ref is accepted
 - Callbacks of the following functions no longer require `Clone`
-  - `use_resize_observer`
-  - `use_intersection_observer`
+    - `use_resize_observer`
+    - `use_intersection_observer`
 - These functions now also accept multiple target elements in addition to a single one:
-  - `use_resize_observer`
-  - `use_intersection_observer`
+    - `use_resize_observer`
+    - `use_intersection_observer`
 
 ### New Functions 🚀
 

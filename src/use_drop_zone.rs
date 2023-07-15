@@ -100,7 +100,7 @@ where
         update_files(&event);
 
         on_enter(UseDropZoneEvent {
-            files: files.get(),
+            files: files.get_untracked(),
             event,
         });
     });
@@ -109,7 +109,7 @@ where
         event.prevent_default();
         update_files(&event);
         on_over(UseDropZoneEvent {
-            files: files.get(),
+            files: files.get_untracked(),
             event,
         });
     });
@@ -124,7 +124,7 @@ where
         update_files(&event);
 
         on_leave(UseDropZoneEvent {
-            files: files.get(),
+            files: files.get_untracked(),
             event,
         });
     });
@@ -137,7 +137,7 @@ where
         update_files(&event);
 
         on_drop(UseDropZoneEvent {
-            files: files.get(),
+            files: files.get_untracked(),
             event,
         });
     });

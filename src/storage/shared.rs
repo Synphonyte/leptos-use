@@ -15,10 +15,10 @@ macro_rules! use_specific_storage {
                 cx: Scope,
                 key: &str,
                 defaults: D,
-            ) -> (ReadSignal<T>, WriteSignal<T>, impl Fn() + Clone)
+            ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
             where
                 for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-                D: Into<MaybeSignal<T>>,
+                D: Into<MaybeRwSignal<T>>,
                 T: Clone,
             {
                 [<use_ $storage_name _storage_with_options>](cx, key, defaults, UseSpecificStorageOptions::default())
@@ -34,10 +34,10 @@ macro_rules! use_specific_storage {
                 key: &str,
                 defaults: D,
                 options: UseSpecificStorageOptions<T>,
-            ) -> (ReadSignal<T>, WriteSignal<T>, impl Fn() + Clone)
+            ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
             where
                 for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-                D: Into<MaybeSignal<T>>,
+                D: Into<MaybeRwSignal<T>>,
                 T: Clone,
             {
                 use_storage_with_options(cx, key, defaults, options.into_storage_options(StorageType::[<$storage_name:camel>]))

@@ -1,5 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
+use crate::core::MaybeRwSignal;
 use crate::utils::{CloneableFn, CloneableFnWithArg, FilterOptions};
 use crate::{
     filter_builder_methods, use_event_listener, watch_pausable_with_options, DebounceOptions,
@@ -160,10 +161,10 @@ pub fn use_storage<T, D>(
     cx: Scope,
     key: &str,
     defaults: D,
-) -> (ReadSignal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-    D: Into<MaybeSignal<T>>,
+    D: Into<MaybeRwSignal<T>>,
     T: Clone,
 {
     use_storage_with_options(cx, key, defaults, UseStorageOptions::default())
@@ -176,10 +177,10 @@ pub fn use_storage_with_options<T, D>(
     key: &str,
     defaults: D,
     options: UseStorageOptions<T>,
-) -> (ReadSignal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-    D: Into<MaybeSignal<T>>,
+    D: Into<MaybeRwSignal<T>>,
     T: Clone,
 {
     let defaults = defaults.into();
@@ -193,7 +194,9 @@ where
         filter,
     } = options;
 
-    let (data, set_data) = create_signal(cx, defaults.get_untracked());
+    let (data, set_data) = defaults.into_signal(cx);
+
+    let raw_init = data.get();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let remove: Box<dyn CloneableFn> = Box::new(|| {});
@@ -202,101 +205,102 @@ where
 
         let remove: Box<dyn CloneableFn> = match storage {
             Ok(Some(storage)) => {
-                let on_err = on_error.clone();
+                let write = {
+                    let on_error = on_error.clone();
+                    let storage = storage.clone();
+                    let key = key.to_string();
 
-                let store = storage.clone();
-                let k = key.to_string();
+                    move |v: &T| {
+                        match serde_json::to_string(&v) {
+                            Ok(ref serialized) => match storage.get_item(&key) {
+                                Ok(old_value) => {
+                                    if old_value.as_ref() != Some(serialized) {
+                                        if let Err(e) = storage.set_item(&key, serialized) {
+                                            on_error(UseStorageError::StorageAccessError(e));
+                                        } else {
+                                            let mut event_init = web_sys::CustomEventInit::new();
+                                            event_init.detail(
+                                                &StorageEventDetail {
+                                                    key: Some(key.clone()),
+                                                    old_value,
+                                                    new_value: Some(serialized.clone()),
+                                                    storage_area: Some(storage.clone()),
+                                                }
+                                                .into(),
+                                            );
 
-                let write = move |v: &T| {
-                    match serde_json::to_string(&v) {
-                        Ok(ref serialized) => match store.get_item(&k) {
-                            Ok(old_value) => {
-                                if old_value.as_ref() != Some(serialized) {
-                                    if let Err(e) = store.set_item(&k, serialized) {
-                                        on_err(UseStorageError::StorageAccessError(e));
-                                    } else {
-                                        let mut event_init = web_sys::CustomEventInit::new();
-                                        event_init.detail(
-                                            &StorageEventDetail {
-                                                key: Some(k.clone()),
-                                                old_value,
-                                                new_value: Some(serialized.clone()),
-                                                storage_area: Some(store.clone()),
-                                            }
-                                            .into(),
-                                        );
-
-                                        // importantly this should _not_ be a StorageEvent since those cannot
-                                        // be constructed with a non-built-in storage area
-                                        let _ = window().dispatch_event(
-                                            &web_sys::CustomEvent::new_with_event_init_dict(
-                                                CUSTOM_STORAGE_EVENT_NAME,
-                                                &event_init,
-                                            )
-                                            .expect("Failed to create CustomEvent"),
-                                        );
+                                            // importantly this should _not_ be a StorageEvent since those cannot
+                                            // be constructed with a non-built-in storage area
+                                            let _ = window().dispatch_event(
+                                                &web_sys::CustomEvent::new_with_event_init_dict(
+                                                    CUSTOM_STORAGE_EVENT_NAME,
+                                                    &event_init,
+                                                )
+                                                .expect("Failed to create CustomEvent"),
+                                            );
+                                        }
                                     }
                                 }
-                            }
+                                Err(e) => {
+                                    on_error.clone()(UseStorageError::StorageAccessError(e));
+                                }
+                            },
                             Err(e) => {
-                                on_err.clone()(UseStorageError::StorageAccessError(e));
+                                on_error.clone()(UseStorageError::SerializationError(e));
                             }
-                        },
-                        Err(e) => {
-                            on_err.clone()(UseStorageError::SerializationError(e));
                         }
                     }
                 };
 
-                let store = storage.clone();
-                let on_err = on_error.clone();
-                let k = key.to_string();
-                let def = defaults.clone();
+                let read = {
+                    let storage = storage.clone();
+                    let on_error = on_error.clone();
+                    let key = key.to_string();
+                    let raw_init = raw_init.clone();
 
-                let read = move |event_detail: Option<StorageEventDetail>| -> Option<T> {
-                    let raw_init = match serde_json::to_string(&def.get_untracked()) {
-                        Ok(serialized) => Some(serialized),
-                        Err(e) => {
-                            on_err.clone()(UseStorageError::DefaultSerializationError(e));
-                            None
-                        }
-                    };
+                    move |event_detail: Option<StorageEventDetail>| -> Option<T> {
+                        let serialized_init = match serde_json::to_string(&raw_init) {
+                            Ok(serialized) => Some(serialized),
+                            Err(e) => {
+                                on_error.clone()(UseStorageError::DefaultSerializationError(e));
+                                None
+                            }
+                        };
 
-                    let raw_value = if let Some(event_detail) = event_detail {
-                        event_detail.new_value
-                    } else {
-                        match store.get_item(&k) {
-                            Ok(raw_value) => match raw_value {
-                                Some(raw_value) => {
-                                    Some(merge_defaults(&raw_value, &def.get_untracked()))
+                        let raw_value = if let Some(event_detail) = event_detail {
+                            event_detail.new_value
+                        } else {
+                            match storage.get_item(&key) {
+                                Ok(raw_value) => match raw_value {
+                                    Some(raw_value) => Some(merge_defaults(&raw_value, &raw_init)),
+                                    None => serialized_init.clone(),
+                                },
+                                Err(e) => {
+                                    on_error.clone()(UseStorageError::StorageAccessError(e));
+                                    None
                                 }
-                                None => raw_init.clone(),
-                            },
-                            Err(e) => {
-                                on_err.clone()(UseStorageError::StorageAccessError(e));
-                                None
                             }
-                        }
-                    };
+                        };
 
-                    match raw_value {
-                        Some(raw_value) => match serde_json::from_str(&raw_value) {
-                            Ok(v) => Some(v),
-                            Err(e) => {
-                                on_err.clone()(UseStorageError::SerializationError(e));
-                                None
-                            }
-                        },
-                        None => {
-                            if let Some(raw_init) = &raw_init {
-                                if write_defaults {
-                                    if let Err(e) = store.set_item(&k, raw_init) {
-                                        on_err(UseStorageError::StorageAccessError(e));
+                        match raw_value {
+                            Some(raw_value) => match serde_json::from_str(&raw_value) {
+                                Ok(v) => Some(v),
+                                Err(e) => {
+                                    on_error.clone()(UseStorageError::SerializationError(e));
+                                    None
+                                }
+                            },
+                            None => {
+                                if let Some(serialized_init) = &serialized_init {
+                                    if write_defaults {
+                                        if let Err(e) = storage.set_item(&key, serialized_init) {
+                                            on_error(UseStorageError::StorageAccessError(e));
+                                        }
                                     }
                                 }
-                            }
 
-                            Some(def.get_untracked())
+                                Some(raw_init)
+                            }
                         }
                     }
                 };
@@ -312,40 +316,43 @@ where
                     WatchOptions::default().filter(filter),
                 );
 
-                let k = key.to_string();
-                let store = storage.clone();
+                let update = {
+                    let key = key.to_string();
+                    let storage = storage.clone();
+                    let raw_init = raw_init.clone();
 
-                let update = move |event_detail: Option<StorageEventDetail>| {
-                    if let Some(event_detail) = &event_detail {
-                        if event_detail.storage_area != Some(store) {
-                            return;
-                        }
-
-                        match &event_detail.key {
-                            None => {
-                                set_data.set(defaults.get_untracked());
+                    move |event_detail: Option<StorageEventDetail>| {
+                        if let Some(event_detail) = &event_detail {
+                            if event_detail.storage_area != Some(storage) {
                                 return;
                             }
-                            Some(event_key) => {
-                                if event_key != &k {
+
+                            match &event_detail.key {
+                                None => {
+                                    set_data.set(raw_init);
                                     return;
                                 }
-                            }
-                        };
-                    }
+                                Some(event_key) => {
+                                    if event_key != &key {
+                                        return;
+                                    }
+                                }
+                            };
+                        }
 
-                    pause_watch();
+                        pause_watch();
 
-                    if let Some(value) = read(event_detail.clone()) {
-                        set_data.set(value);
-                    }
+                        if let Some(value) = read(event_detail.clone()) {
+                            set_data.set(value);
+                        }
 
-                    if event_detail.is_some() {
-                        // use timeout to avoid inifinite loop
-                        let resume = resume_watch.clone();
-                        let _ = set_timeout_with_handle(resume, Duration::ZERO);
-                    } else {
-                        resume_watch();
+                        if event_detail.is_some() {
+                            // use timeout to avoid inifinite loop
+                            let resume = resume_watch.clone();
+                            let _ = set_timeout_with_handle(resume, Duration::ZERO);
+                        } else {
+                            resume_watch();
+                        }
                     }
                 };
 

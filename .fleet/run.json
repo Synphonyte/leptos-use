@@ -3,7 +3,13 @@
         {
             "type": "cargo",
             "name": "Tests",
-            "cargoArgs": ["test", "--all-features"],
+            "cargoArgs": ["test", "--features", "math,storage,docs"],
+        },
+        {
+            "type": "cargo",
+            "name": "Clippy",
+            "cargoArgs": ["+nightly", "clippy", "--features", "math,storage,docs", "--tests", "--", "-D", "warnings"],
+            "workingDir": "./",
         },
         
     ]

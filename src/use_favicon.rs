@@ -1,5 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::core::MaybeRwSignal;
 use crate::watch;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
@@ -59,7 +60,7 @@ use wasm_bindgen::JsCast;
 /// ## Server-Side Rendering
 ///
 /// On the server only the signals work but no favicon will be changed obviously.
-pub fn use_favicon(cx: Scope) -> (ReadSignal<Option<String>>, WriteSignal<Option<String>>) {
+pub fn use_favicon(cx: Scope) -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     use_favicon_with_options(cx, UseFaviconOptions::default())
 }
 
@@ -67,18 +68,14 @@ pub fn use_favicon(cx: Scope) -> (ReadSignal<Option<String>>, WriteSignal<Option
 pub fn use_favicon_with_options(
     cx: Scope,
     options: UseFaviconOptions,
-) -> (ReadSignal<Option<String>>, WriteSignal<Option<String>>) {
+) -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     let UseFaviconOptions {
         new_icon,
         base_url,
         rel,
     } = options;
 
-    let (favicon, set_favicon) = create_signal(cx, new_icon.get_untracked());
-
-    if matches!(&new_icon, MaybeSignal::Dynamic(_)) {
-        create_effect(cx, move |_| set_favicon.set(new_icon.get()));
-    }
+    let (favicon, set_favicon) = new_icon.into_signal(cx);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let link_selector = format!("link[rel*=\"{rel}\"]");
@@ -116,9 +113,9 @@ pub fn use_favicon_with_options(
 /// Options for [`use_favicon_with_options`].
 #[derive(DefaultBuilder)]
 pub struct UseFaviconOptions {
-    /// New input favicon. Can be a `Signal` in which case updates will change the favicon. Defaults to None.
+    /// New input favicon. Can be a `RwSignal` in which case updates will change the favicon. Defaults to None.
     #[builder(into)]
-    new_icon: MaybeSignal<Option<String>>,
+    new_icon: MaybeRwSignal<Option<String>>,
 
     /// Base URL of the favicon. Defaults to "".
     #[builder(into)]

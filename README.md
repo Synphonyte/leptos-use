@@ -53,7 +53,7 @@ To run all tests run
 cargo test --all-features
 ```
 
-## Book
+### Book
 
 First you need to install
 

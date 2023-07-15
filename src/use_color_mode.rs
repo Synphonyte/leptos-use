@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 #[cfg(feature = "storage")]
 use crate::storage::{use_storage_with_options, UseStorageOptions};
 #[cfg(feature = "storage")]
@@ -248,7 +248,7 @@ where
     UseColorModeReturn {
         mode,
         set_mode: set_store,
-        store: store.into(),
+        store,
         set_store,
         system,
         state,
@@ -269,20 +269,21 @@ pub enum ColorMode {
 cfg_if! { if #[cfg(feature = "storage")] {
     fn get_store_signal(
         cx: Scope,
-        initial_value: MaybeSignal<ColorMode>,
+        initial_value: MaybeRwSignal<ColorMode>,
         storage_signal: Option<RwSignal<ColorMode>>,
         storage_key: &str,
         storage_enabled: bool,
         storage: StorageType,
         listen_to_storage_changes: bool,
-    ) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
         if let Some(storage_signal) = storage_signal {
-            storage_signal.split()
+            let (store, set_store) = storage_signal.split();
+            (store.into(), set_store)
         } else if storage_enabled {
             let (store, set_store, _) = use_storage_with_options(
                 cx,
                 storage_key,
-                initial_value.get_untracked(),
+                initial_value,
                 UseStorageOptions::default()
                     .listen_to_storage_changes(listen_to_storage_changes)
                     .storage_type(storage),
@@ -290,23 +291,24 @@ cfg_if! { if #[cfg(feature = "storage")] {
 
             (store, set_store)
         } else {
-            create_signal(cx, initial_value.get_untracked())
+            initial_value.into_signal(cx)
         }
     }
 } else {
     fn get_store_signal(
         cx: Scope,
-        initial_value: MaybeSignal<ColorMode>,
+        initial_value: MaybeRwSignal<ColorMode>,
         storage_signal: Option<RwSignal<ColorMode>>,
         _storage_key: &String,
         _storage_enabled: bool,
         _storage: StorageType,
         _listen_to_storage_changes: bool,
-    ) -> (ReadSignal<ColorMode>, WriteSignal<ColorMode>) {
+    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
         if let Some(storage_signal) = storage_signal {
-            storage_signal.split()
+            let (store, set_store) = storage_signal.split();
+            (store.into(), set_store)
         } else {
-            create_signal(cx, initial_value.get_untracked())
+            initial_value.into_signal(cx)
         }
     }
 }}
@@ -368,7 +370,7 @@ where
 
     /// Initial value of the color mode. Defaults to `"Auto"`.
     #[builder(into)]
-    initial_value: MaybeSignal<ColorMode>,
+    initial_value: MaybeRwSignal<ColorMode>,
 
     /// Custom modes that you plan to use as `ColorMode::Custom(x)`. Defaults to `vec![]`.
     custom_modes: Vec<String>,

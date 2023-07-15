@@ -77,14 +77,20 @@ impl From<&str> for MaybeRwSignal<String> {
 }
 
 impl<T: Clone> MaybeRwSignal<T> {
-    pub fn to_signal(&self, cx: Scope) -> (Signal<T>, WriteSignal<T>) {
+    pub fn into_signal(self, cx: Scope) -> (Signal<T>, WriteSignal<T>) {
         match self {
             Self::DynamicRead(s) => {
-                // TODO : this feels hacky
-                let (_, w) = create_signal(cx, s.get_untracked());
-                (*s, w)
+                let (r, w) = create_signal(cx, s.get_untracked());
+
+                create_effect(cx, move |_| {
+                    w.update(move |w| {
+                        *w = s.get();
+                    });
+                });
+
+                (r.into(), w)
             }
-            Self::DynamicRw(r, w) => (*r, *w),
+            Self::DynamicRw(r, w) => (r, w),
             Self::Static(v) => {
                 let (r, w) = create_signal(cx, v.clone());
                 (Signal::from(r), w)
