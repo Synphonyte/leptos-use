@@ -3,13 +3,17 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 
+## [0.5.0] - 2023-07-15 
 
 ### New Functions 🚀
 
 - `use_drop_zone`
 - `use_websocket` (thanks @sectore)
 - `use_intl_number_format`
+
+### Changes 🔥
+
+- Crate is ready for Server-Side Rendering. Enable feature `ssr` like you do for `leptos`.
 
 ## [0.4.1] - 2023-07-07
 
