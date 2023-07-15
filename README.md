@@ -78,7 +78,7 @@ python3 post_build.py
 If you only want to add the example for one function you can run for example
 
 ```shell
-python3 post_build.py use_mequery
+python3 post_build.py use_storage
 ```
 
 ### New Function Template

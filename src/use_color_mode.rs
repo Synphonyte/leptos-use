@@ -130,7 +130,10 @@ where
 
     let modes: Vec<String> = custom_modes
         .into_iter()
-        .chain(vec![ColorMode::Dark.to_string(), ColorMode::Light.to_string()].into_iter())
+        .chain(vec![
+            ColorMode::Dark.to_string(),
+            ColorMode::Light.to_string(),
+        ])
         .collect();
 
     let preferred_dark = use_preferred_dark(cx);

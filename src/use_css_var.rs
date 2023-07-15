@@ -135,7 +135,7 @@ where
             let el_signal = el_signal.clone();
 
             init.attribute_filter(&js_sys::Array::from_iter(
-                vec![JsValue::from_str("style")].into_iter(),
+                vec![JsValue::from_str("style")],
             ));
             use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
                 cx,
