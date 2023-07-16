@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `is_err`
+- `is_ok`
 - `is_none`
 - `is_some`
 - `use_raf_fn`

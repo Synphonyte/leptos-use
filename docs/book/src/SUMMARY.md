@@ -63,7 +63,9 @@
 
 # Utilities
 
+- [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
+- [is_ok](utilities/is_ok.md)
 - [is_some](utilities/is_some.md)
 - [use_cycle_list](utilities/use_cycle_list.md)
 - [use_debounce_fn](utilities/use_debounce_fn.md)

@@ -2,7 +2,9 @@
 resolver = "2"
 
 members = [
+    "is_err",
     "is_none",
+    "is_ok",
     "is_some",
     "on_click_outside",
     "use_abs",
