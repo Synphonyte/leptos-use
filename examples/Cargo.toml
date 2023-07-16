@@ -36,6 +36,7 @@ members = [
     "use_scroll",
     "use_storage",
     "use_throttle_fn",
+    "use_to_string",
     "use_websocket",
     "use_window_focus",
     "use_window_scroll",
