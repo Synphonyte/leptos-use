@@ -26,6 +26,7 @@ members = [
     "use_media_query",
     "use_mouse",
     "use_mutation_observer",
+    "use_raf_fn",
     "use_resize_observer",
     "use_round",
     "use_scroll",

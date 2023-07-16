@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### New Functions 🚀
+
+- `use_raf_fn`
+
 ### Braking Changes 🛠
 
 - The following functions now accept a `MaybeRwSignal` as their initial/default value which means

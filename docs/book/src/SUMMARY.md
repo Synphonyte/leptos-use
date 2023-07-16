@@ -51,6 +51,7 @@
 
 - [use_interval](animation/use_interval.md)
 - [use_interval_fn](animation/use_interval_fn.md)
+- [use_raf_fn](animation/use_raf_fn.md)
 
 # Watch
 
