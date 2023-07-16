@@ -63,6 +63,8 @@
 
 # Utilities
 
+- [is_none](utilities/is_none.md)
+- [is_some](utilities/is_some.md)
 - [use_cycle_list](utilities/use_cycle_list.md)
 - [use_debounce_fn](utilities/use_debounce_fn.md)
 - [use_supported](utilities/use_supported.md)

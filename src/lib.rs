@@ -21,6 +21,8 @@ cfg_if! { if #[cfg(web_sys_unstable_apis)] {
 }}
 
 mod on_click_outside;
+mod is_none;
+mod is_some;
 mod use_active_element;
 mod use_breakpoints;
 mod use_color_mode;
@@ -56,6 +58,8 @@ mod watch_throttled;
 mod whenever;
 
 pub use on_click_outside::*;
+pub use is_none::*;
+pub use is_some::*;
 pub use use_active_element::*;
 pub use use_breakpoints::*;
 pub use use_color_mode::*;
