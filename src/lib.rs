@@ -21,6 +21,7 @@ cfg_if! { if #[cfg(web_sys_unstable_apis)] {
 }}
 
 mod on_click_outside;
+mod use_draggable;
 mod use_to_string;
 mod is_err;
 mod is_ok;
@@ -61,6 +62,7 @@ mod watch_throttled;
 mod whenever;
 
 pub use on_click_outside::*;
+pub use use_draggable::*;
 pub use use_to_string::*;
 pub use is_err::*;
 pub use is_ok::*;

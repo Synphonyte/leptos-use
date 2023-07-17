@@ -2,10 +2,6 @@
 resolver = "2"
 
 members = [
-    "is_err",
-    "is_none",
-    "is_ok",
-    "is_some",
     "on_click_outside",
     "use_abs",
     "use_active_element",
@@ -16,6 +12,7 @@ members = [
     "use_cycle_list",
     "use_debounce_fn",
     "use_document_visibility",
+    "use_draggable",
     "use_drop_zone",
     "use_element_hover",
     "use_element_size",
@@ -36,7 +33,6 @@ members = [
     "use_scroll",
     "use_storage",
     "use_throttle_fn",
-    "use_to_string",
     "use_websocket",
     "use_window_focus",
     "use_window_scroll",
