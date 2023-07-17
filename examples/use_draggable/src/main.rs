@@ -15,7 +15,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         el,
         UseDraggableOptions::default()
             .initial_value(Position {
-                x: inner_width / 4.2,
+                x: inner_width / 2.2,
                 y: 80.0,
             })
             .prevent_default(true),
