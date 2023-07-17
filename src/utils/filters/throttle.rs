@@ -15,7 +15,7 @@ use std::time::Duration;
 pub struct ThrottleOptions {
     /// Invoke on the trailing edge of the timeout. Defaults to `true`.
     pub trailing: bool,
-    /// Invoke on the leading edge of the timeout. Defaults to `true`.
+    /// Invoke on the leading edge of the timeout (=immediately). Defaults to `true`.
     pub leading: bool,
 }
 
