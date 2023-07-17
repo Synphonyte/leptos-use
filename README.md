@@ -41,8 +41,6 @@ fn Demo(cx: Scope) -> impl IntoView {
 }
 ```
 
-We have only just begun implementing the first dozen functions but they are already very usable and ergonomic.
-
 Missing a function? Open a ticket or PR!
 
 ## Development
@@ -90,4 +88,4 @@ To scaffold a new function quickly you can run `template/createfn.sh`. It requir
 | Crate version | Compatible Leptos version |
 |---------------|---------------------------|
 | <= 0.3        | 0.3                       |
-| 0.4, 0.5      | 0.4                       |
+| 0.4, 0.5, 0.6 | 0.4                       |
