@@ -1,7 +1,7 @@
 use crate::{use_throttle_fn_with_options, ThrottleOptions};
 use leptos::*;
 
-/// TODO : Add docs properly and example
+/// Throttle changing of a `Signal` value.
 ///
 /// ## Demo
 ///
@@ -17,6 +17,23 @@ use leptos::*;
 /// # fn Demo(cx: Scope) -> impl IntoView {
 /// let (input, set_input) = create_signal(cx, "");
 /// let throttled = signal_throttled(cx, input, 1000.0);
+/// #
+/// # view! { cx, }
+/// # }
+/// ```
+/// 
+/// ### Options
+///
+/// The usual throttle options `leading` and `trailing` are available. 
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{signal_throttled_with_options, ThrottleOptions};
+/// #
+/// # #[component]
+/// # fn Demo(cx: Scope) -> impl IntoView {
+/// let (input, set_input) = create_signal(cx, "");
+/// let throttled = signal_throttled_with_options(cx, input, 1000.0, ThrottleOptions::default().leading(false).trailing(true));
 /// #
 /// # view! { cx, }
 /// # }
