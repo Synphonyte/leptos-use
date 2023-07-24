@@ -1,5 +1,5 @@
 use crate::core::ElementsMaybeSignal;
-use crate::{use_supported, watch};
+use crate::use_supported;
 use leptos::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -109,7 +109,7 @@ where
     let stop_watch = {
         let cleanup = cleanup.clone();
 
-        watch(
+        leptos::watch(
             cx,
             move || targets.get(),
             move |targets, _, _| {
@@ -127,6 +127,7 @@ where
                     observer.replace(Some(obs));
                 }
             },
+            false,
         )
     };
 

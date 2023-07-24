@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::MaybeRwSignal;
-use crate::watch;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -104,6 +103,7 @@ pub fn use_favicon_with_options(
                     }
                 }
             },
+            false,
         );
     }}
 

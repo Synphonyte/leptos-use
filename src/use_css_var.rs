@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::ElementMaybeSignal;
-use crate::{use_mutation_observer_with_options, watch, watch_with_options, WatchOptions};
+use crate::{use_mutation_observer_with_options, watch_with_options, WatchOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
@@ -170,6 +170,7 @@ where
                     let _ = style.set_property(&prop.get_untracked(), val);
                 }
             },
+            false,
         );
     }}
 

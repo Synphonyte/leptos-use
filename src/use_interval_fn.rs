@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::utils::Pausable;
-use crate::watch;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
@@ -127,6 +126,7 @@ where
                     resume();
                 }
             },
+            false,
         );
         on_cleanup(cx, stop_watch);
     }

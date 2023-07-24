@@ -1,5 +1,4 @@
 use crate::core::MaybeRwSignal;
-use crate::watch;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 
@@ -158,7 +157,12 @@ where
     let _ = {
         let set = set.clone();
 
-        watch(cx, move || list.get(), move |_, _, _| set(index.get()))
+        leptos::watch(
+            cx,
+            move || list.get(),
+            move |_, _, _| set(index.get()),
+            false,
+        )
     };
 
     UseCycleListReturn {
