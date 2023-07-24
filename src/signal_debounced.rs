@@ -1,25 +1,25 @@
 use crate::utils::signal_filtered;
-use crate::{use_throttle_fn_with_options, ThrottleOptions};
+use crate::{use_debounce_fn_with_options, DebounceOptions};
 use leptos::*;
 use paste::paste;
 
 signal_filtered!(
-    /// Throttle changing of a `Signal` value.
+    /// Debounce changing of a `Signal` value.
     ///
     /// ## Demo
     ///
-    /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/signal_throttled)
+    /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/signal_debounced)
     ///
     /// ## Usage
     ///
     /// ```
     /// # use leptos::*;
-    /// # use leptos_use::signal_throttled;
+    /// # use leptos_use::signal_debounced;
     /// #
     /// # #[component]
     /// # fn Demo(cx: Scope) -> impl IntoView {
     /// let (input, set_input) = create_signal(cx, "");
-    /// let throttled = signal_throttled(cx, input, 1000.0);
+    /// let debounced = signal_debounced(cx, input, 1000.0);
     /// #
     /// # view! { cx, }
     /// # }
@@ -27,20 +27,20 @@ signal_filtered!(
     ///
     /// ### Options
     ///
-    /// The usual throttle options `leading` and `trailing` are available.
+    /// The usual debounce option `max_wait` is available.
     ///
     /// ```
     /// # use leptos::*;
-    /// # use leptos_use::{signal_throttled_with_options, ThrottleOptions};
+    /// # use leptos_use::{signal_debounced_with_options, DebounceOptions};
     /// #
     /// # #[component]
     /// # fn Demo(cx: Scope) -> impl IntoView {
     /// let (input, set_input) = create_signal(cx, "");
-    /// let throttled = signal_throttled_with_options(
+    /// let debounced = signal_debounced_with_options(
     ///     cx,
     ///     input,
     ///     1000.0,
-    ///     ThrottleOptions::default().leading(false).trailing(true)
+    ///     DebounceOptions::default().max_wait(Some(500.0))
     /// );
     /// #
     /// # view! { cx, }
@@ -56,7 +56,7 @@ signal_filtered!(
     ///
     /// Internally this uses `setTimeout` which is not supported on the server. So usually
     /// a throttled signal on the server will simply be ignored.
-    throttle
-    /// [`signal_throttled`]
-    /// [`ThrottleOptions`]
+    debounce
+    /// [`signal_debounced`]
+    /// [`DebounceOptions`]
 );

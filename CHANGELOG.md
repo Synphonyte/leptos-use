@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `signal_debounced`
 - `signal_throttled`
+
+### Braking Changes 🛠
+
+- `watch` is now deprecated in favor of `leptos::watch`. `watch_with_options`
+  will continue to exist.
 
 ## [0.6.0] - 2023-07-17
 
