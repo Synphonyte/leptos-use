@@ -25,6 +25,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Check function count badge
         run: python3 docs/generate_count_badge.py --check
+      - name: Check version in docs
+        run: python3 docs/add_version_to_docs.py --check
       - name: Check formatting
         run: cargo fmt --check
       - name: Clippy
