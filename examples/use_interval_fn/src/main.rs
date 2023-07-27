@@ -34,7 +34,8 @@ fn Demo() -> impl IntoView {
         interval,
     );
 
-    view! {         <p>{move || word.get()}</p>
+    view! {
+        <p>{move || word.get()}</p>
         <p>
             "Interval:"
             <input
@@ -48,15 +49,15 @@ fn Demo() -> impl IntoView {
             when=move || is_active.get()
             fallback=move || {
                 let resume = resume.clone();
-                view! {                    <button on:click=move |_| resume()>"Resume"</button>
-                }
+                view! { <button on:click=move |_| resume()>"Resume"</button> }
             }
         >
+
             {
                 let pause = pause.clone();
-                view! {                    <button on:click=move |_| pause()>"Pause"</button>
-                }
+                view! { <button on:click=move |_| pause()>"Pause"</button> }
             }
+
         </Show>
     }
 }
@@ -66,6 +67,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

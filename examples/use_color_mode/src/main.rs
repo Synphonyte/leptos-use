@@ -30,9 +30,8 @@ fn Demo() -> impl IntoView {
         UseCycleListOptions::default().initial_value(Some((mode, set_mode).into())),
     );
 
-    view! {         <button on:click=move |_| next()>
-            { move || format!("{}", state.get()) }
-        </button>
+    view! {
+        <button on:click=move |_| next()>{move || format!("{}", state.get())}</button>
         <Note>"Click to change the color mode"</Note>
     }
 }
@@ -42,6 +41,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

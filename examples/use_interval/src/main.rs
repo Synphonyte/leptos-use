@@ -6,8 +6,9 @@ use leptos_use::{use_interval, UseIntervalReturn};
 fn Demo() -> impl IntoView {
     let UseIntervalReturn { counter, .. } = use_interval(200);
 
-    view! {         <div>
-            <p>"Interval fired: " { counter }</p>
+    view! {
+        <div>
+            <p>"Interval fired: " {counter}</p>
         </div>
     }
 }
@@ -17,6 +18,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

@@ -22,8 +22,7 @@ fn Demo() -> impl IntoView {
         false,
     );
 
-    view! {         <div>{ message }</div>
-    }
+    view! { <div>{message}</div> }
 }
 
 fn main() {
@@ -31,6 +30,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

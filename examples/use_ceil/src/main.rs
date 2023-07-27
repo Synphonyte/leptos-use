@@ -8,7 +8,8 @@ fn Demo() -> impl IntoView {
 
     let result: Signal<f64> = use_ceil(value);
 
-    view! {         <input
+    view! {
+        <input
             class="block"
             prop:value=move || value.get()
             on:input=move |e| set_value.set(event_target_value(&e).parse().unwrap())
@@ -27,6 +28,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

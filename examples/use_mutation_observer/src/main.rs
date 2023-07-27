@@ -43,10 +43,12 @@ fn Demo() -> impl IntoView {
     let enum_msgs =
         Signal::derive(move || messages.get().into_iter().enumerate().collect::<Vec<_>>());
 
-    view! {         <div node_ref=el class=move || class_name.get() style=move || style.get()>
+    view! {
+        <div node_ref=el class=move || class_name.get() style=move || style.get()>
             <For
                 each=move || enum_msgs.get()
-                key=|message| message.0 // list only grows so this is fine here
+                // list only grows so this is fine here
+                key=|message| message.0
                 view=|message| view! { <div>"Mutation Attribute: " <code>{message.1}</code></div> }
             />
         </div>
@@ -58,6 +60,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

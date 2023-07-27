@@ -15,21 +15,21 @@ fn Demo() -> impl IntoView {
         )
     };
 
-    view! {         <Note class="mb-3">"Select the inputs below to see the changes"</Note>
+    view! {
+        <Note class="mb-3">"Select the inputs below to see the changes"</Note>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <For
                 each=move || (1..7)
                 key=|i| *i
-                view=move |i| view! {                     <input type="text" data-id=i class="!my-0 !min-w-0" placeholder=i />
+                view=move |i| {
+                    view! { <input type="text" data-id=i class="!my-0 !min-w-0" placeholder=i/> }
                 }
             />
+
         </div>
 
-        <div class="mt-2">
-            "Current Active Element: "
-            <span class="text-primary">{ key }</span>
-        </div>
+        <div class="mt-2">"Current Active Element: " <span class="text-primary">{key}</span></div>
     }
 }
 
@@ -38,6 +38,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

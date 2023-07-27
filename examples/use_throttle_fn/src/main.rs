@@ -12,17 +12,17 @@ fn Demo() -> impl IntoView {
         1000.0,
     );
 
-    view! {         <button
-            on:click=move |_| {
-                set_click_count.set(click_count.get_untracked() + 1);
-                throttled_fn();
-            }
-        >
+    view! {
+        <button on:click=move |_| {
+            set_click_count.set(click_count.get_untracked() + 1);
+            throttled_fn();
+        }>
+
             "Smash me!"
         </button>
         <Note>"Delay is set to 1000ms for this demo."</Note>
-        <p>"Button clicked: " { click_count }</p>
-        <p>"Event handler called: " { throttled_count }</p>
+        <p>"Button clicked: " {click_count}</p>
+        <p>"Event handler called: " {throttled_count}</p>
     }
 }
 
@@ -31,6 +31,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

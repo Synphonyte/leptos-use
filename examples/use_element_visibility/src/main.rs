@@ -9,7 +9,8 @@ fn Demo() -> impl IntoView {
 
     let is_visible = use_element_visibility(el);
 
-    view! {         <div>
+    view! {
+        <div>
             <Note class="mb-4">"Info on the right bottom corner"</Note>
             <div node_ref=el class="max-w-lg relative area dark:bg-gray-800 shadow-lg z-60">
                 "Target Element (scroll down)"
@@ -17,8 +18,12 @@ fn Demo() -> impl IntoView {
         </div>
         <div class="float m-5 area shadow-lg">
             "Element "
-            <BooleanDisplay value=is_visible true_str="inside" false_str="outside" class="font-bold"/>
-            " the viewport"
+            <BooleanDisplay
+                value=is_visible
+                true_str="inside"
+                false_str="outside"
+                class="font-bold"
+            /> " the viewport"
         </div>
     }
 }
@@ -28,6 +33,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

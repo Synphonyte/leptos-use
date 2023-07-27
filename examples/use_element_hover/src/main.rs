@@ -14,7 +14,10 @@ fn Demo() -> impl IntoView {
             .delay_leave(600),
     );
 
-    view! {         <button node_ref=el>{ move || if is_hovered.get() { "Thank you!" } else { "Hover me" } }</button>
+    view! {
+        <button node_ref=el>
+            {move || if is_hovered.get() { "Thank you!" } else { "Hover me" }}
+        </button>
     }
 }
 
@@ -23,6 +26,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

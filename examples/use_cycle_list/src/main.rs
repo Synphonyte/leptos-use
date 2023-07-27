@@ -10,7 +10,8 @@ fn Demo() -> impl IntoView {
         "Dog", "Cat", "Lizard", "Shark", "Whale", "Dolphin", "Octopus", "Seal",
     ]);
 
-    view! {         <div>
+    view! {
+        <div>
             <div class="text-primary text-lg font-bold">{state}</div>
             <button on:click=move |_| { prev() }>"Prev"</button>
             <button on:click=move |_| { next() }>"Next"</button>
@@ -23,6 +24,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

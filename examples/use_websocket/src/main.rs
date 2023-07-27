@@ -152,53 +152,80 @@ fn Demo() -> impl IntoView {
 
     let connected2 = move || ready_state2.get() == UseWebSocketReadyState::Open;
 
-    view! {       <div class="container">
-        <div class="flex flex-col lg:flex-row gap-4">
-          <div class="w-full lg:w-1/2">
-          <h1 class="text-xl lg:text-4xl mb-2">"use_websocket"</h1>
-            <p>"status: " {status}</p>
-            <button on:click=send_message disabled=move || !connected()>"Send"</button>
-            <button on:click=send_byte_message disabled=move || !connected()>"Send bytes"</button>
-            <button on:click=open_connection disabled=connected>"Open"</button>
-            <button on:click=close_connection disabled=move || !connected()>"Close"</button>
-            <div class="flex items-center">
-              <h3 class="text-2xl mr-2">"History"</h3>
-              <button on:click=move |_| set_history(vec![]) disabled=move || history.get().len() <= 0>"Clear"</button>
-            </div>
-            <For
-              each=move || history.get().into_iter().enumerate()
-              key=|(index, _)| *index
-              view=move |(_, message)| {
-                view! { <div>{message}</div> }
-              }
-              />
+    view! {
+        <div class="container">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <div class="w-full lg:w-1/2">
+                    <h1 class="text-xl lg:text-4xl mb-2">"use_websocket"</h1>
+                    <p>"status: " {status}</p>
+                    <button on:click=send_message disabled=move || !connected()>
+                        "Send"
+                    </button>
+                    <button on:click=send_byte_message disabled=move || !connected()>
+                        "Send bytes"
+                    </button>
+                    <button on:click=open_connection disabled=connected>
+                        "Open"
+                    </button>
+                    <button on:click=close_connection disabled=move || !connected()>
+                        "Close"
+                    </button>
+                    <div class="flex items-center">
+                        <h3 class="text-2xl mr-2">"History"</h3>
+                        <button
+                            on:click=move |_| set_history(vec![])
+                            disabled=move || history.get().len() <= 0
+                        >
+                            "Clear"
+                        </button>
+                    </div>
+                    <For
+                        each=move || history.get().into_iter().enumerate()
+                        key=|(index, _)| *index
+                        view=move |(_, message)| {
+                            view! { <div>{message}</div> }
+                        }
+                    />
 
-          </div>
-          <div class="w-full lg:w-1/2">
-            <h1 class="text-xl lg:text-4xl mb-2">"use_websocket_with_options"</h1>
-            <p>"status: " {status2}</p>
-            <button on:click=open_connection2 disabled={connected2}>"Connect"</button>
-            <button on:click=close_connection2 disabled=move || !connected2()>"Close"</button>
-            <button on:click=send_message2 disabled=move || !connected2()>"Send"</button>
-            <button on:click=send_byte_message2 disabled=move || !connected2()>"Send Bytes"</button>
-            <div class="flex items-center">
-              <h3 class="text-2xl mr-2">"History"</h3>
-              <button on:click=move |_| set_history2(vec![]) disabled=move || history2.get().len() <= 0>"Clear"</button>
+                </div>
+                <div class="w-full lg:w-1/2">
+                    <h1 class="text-xl lg:text-4xl mb-2">"use_websocket_with_options"</h1>
+                    <p>"status: " {status2}</p>
+                    <button on:click=open_connection2 disabled=connected2>
+                        "Connect"
+                    </button>
+                    <button on:click=close_connection2 disabled=move || !connected2()>
+                        "Close"
+                    </button>
+                    <button on:click=send_message2 disabled=move || !connected2()>
+                        "Send"
+                    </button>
+                    <button on:click=send_byte_message2 disabled=move || !connected2()>
+                        "Send Bytes"
+                    </button>
+                    <div class="flex items-center">
+                        <h3 class="text-2xl mr-2">"History"</h3>
+                        <button
+                            on:click=move |_| set_history2(vec![])
+                            disabled=move || history2.get().len() <= 0
+                        >
+                            "Clear"
+                        </button>
+                    </div>
+                    <ul>
+                        <For
+                            each=move || history2.get().into_iter().enumerate()
+                            key=|(index, _)| *index
+                            view=move |(_, message)| {
+                                view! { <li>{message}</li> }
+                            }
+                        />
+
+                    </ul>
+                </div>
             </div>
-            <ul>
-            <For
-              each=move || history2.get().into_iter().enumerate()
-              key=|(index, _)| *index
-              view=move |(_, message)| {
-                view! { <li>{message}</li> }
-              }
-              />
-            </ul>
-          </div>
+
         </div>
-
-
-      </div>
     }
 }
 
@@ -207,6 +234,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

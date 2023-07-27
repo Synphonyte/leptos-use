@@ -17,13 +17,14 @@ fn Demo() -> impl IntoView {
         ));
     });
 
-    view! {         <Note class="mb-2">"Resize the box to see changes"</Note>
+    view! {
+        <Note class="mb-2">"Resize the box to see changes"</Note>
         <textarea
             node_ref=el
             readonly
             class="resize rounded-md p-4 w-[200px] h-[100px] text-2xl leading-10"
             prop:value=move || text.get()
-        />
+        ></textarea>
     }
 }
 
@@ -32,6 +33,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

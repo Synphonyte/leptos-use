@@ -14,9 +14,17 @@ fn Demo() -> impl IntoView {
         set_count.update(|count| *count += 1);
     });
 
-    view! {         <div>Count: { count }</div>
-        <button on:click=move |_| pause() disabled=move || !is_active()>Pause</button>
-        <button on:click=move |_| resume() disabled=is_active>Resume</button>
+    view! {
+        <div>
+            Count:
+            {count}
+        </div>
+        <button on:click=move |_| pause() disabled=move || !is_active()>
+            Pause
+        </button>
+        <button on:click=move |_| resume() disabled=is_active>
+            Resume
+        </button>
     }
 }
 
@@ -25,6 +33,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

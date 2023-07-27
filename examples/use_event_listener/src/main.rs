@@ -22,11 +22,13 @@ fn Demo() -> impl IntoView {
 
     let (cond, set_cond) = create_signal(true);
 
-    view! {         <p>"Check in the dev tools console"</p>
+    view! {
+        <p>"Check in the dev tools console"</p>
         <p>
             <label>
                 <input
-                    type="checkbox" on:change=move |evt| set_cond.set(event_target_checked(&evt))
+                    type="checkbox"
+                    on:change=move |evt| set_cond.set(event_target_checked(&evt))
                     prop:checked=move || cond.get()
                 />
                 "Condition enabled"
@@ -34,13 +36,17 @@ fn Demo() -> impl IntoView {
         </p>
         <Show
             when=move || cond.get()
-            fallback=move || view! {                 <a node_ref=element href="#">
-                    "Condition"
-                    <b>" false "</b>
-                    "[click me]"
-                </a>
+            fallback=move || {
+                view! {
+                    <a node_ref=element href="#">
+                        "Condition"
+                        <b>" false "</b>
+                        "[click me]"
+                    </a>
+                }
             }
         >
+
             <a node_ref=element href="#">
                 "Condition "
                 <b>"true"</b>
@@ -55,7 +61,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to_body(|| {
-        view! {            <Demo />
-        }
+        view! { <Demo/> }
     })
 }

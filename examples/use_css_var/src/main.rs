@@ -33,16 +33,21 @@ fn Demo() -> impl IntoView {
         )
     };
 
-    view! {         <div>
+    view! {
+        <div>
             <div node_ref=el style="--color: #7fa998; color: var(--color)">
-                "Sample text, " {color}
+                "Sample text, "
+                {color}
             </div>
             <button on:click=switch_color>"Change color value"</button>
         </div>
 
         <div>
             <div node_ref=elv style=style class="mt-4">
-                "Sample text, " {key} ": " {color_val}
+                "Sample text, "
+                {key}
+                ": "
+                {color_val}
             </div>
             <button on:click=change_var>"Change color variable"</button>
         </div>
@@ -54,6 +59,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

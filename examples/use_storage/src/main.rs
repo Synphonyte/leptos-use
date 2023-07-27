@@ -24,7 +24,8 @@ fn Demo() -> impl IntoView {
 
     let (state2, ..) = use_storage("banana-state", the_default.clone());
 
-    view! {         <input
+    view! {
+        <input
             class="block"
             prop:value=move || state.get().name
             on:input=move |e| set_state.update(|s| s.name = event_target_value(&e))
@@ -46,20 +47,27 @@ fn Demo() -> impl IntoView {
             class="block"
             prop:value=move || state.get().count
             value=move || state.get().count
-            on:input=move |e| set_state.update(|s| s.count = event_target_value(&e).parse::<f64>().unwrap() as u32)
+            on:input=move |e| {
+                set_state
+                    .update(|s| s.count = event_target_value(&e).parse::<f64>().unwrap() as u32)
+            }
             type="number"
             min="0"
             step="1"
             max="1000"
         />
 
-        <p>"Second "<b><code>"use_storage"</code></b>":"</p>
+        <p>
+            "Second " <b>
+                <code>"use_storage"</code>
+            </b> ":"
+        </p>
 
-        <pre>
-            { move || format!("{:#?}", state2.get()) }
-        </pre>
+        <pre>{move || format!("{:#?}", state2.get())}</pre>
 
-        <Note>"The values are persistent. When you reload the page the values will be the same."</Note>
+        <Note>
+            "The values are persistent. When you reload the page the values will be the same."
+        </Note>
     }
 }
 
@@ -68,6 +76,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

@@ -25,7 +25,8 @@ fn Demo() -> impl IntoView {
         UseIntersectionObserverOptions::default().root(Some(root)),
     );
 
-    view! {         <div class="text-center">
+    view! {
+        <div class="text-center">
             <label class="checkbox">
                 <input
                     type="checkbox"
@@ -39,6 +40,7 @@ fn Demo() -> impl IntoView {
                         }
                     }
                 />
+
                 <span>"Enabled"</span>
             </label>
         </div>
@@ -52,34 +54,40 @@ fn Demo() -> impl IntoView {
 
         <div class="text-center">
             "Element "
-            <BooleanDisplay value=is_visible true_str="inside" false_str="outside" class="font-bold"/>
-            " the viewport"
+            <BooleanDisplay
+                value=is_visible
+                true_str="inside"
+                false_str="outside"
+                class="font-bold"
+            /> " the viewport"
         </div>
 
-        <style>"
-.root {
-  border: 2px dashed #ccc;
-  height: 200px;
-  margin: 2rem 1rem;
-  overflow-y: scroll;
-}
-
-.notice {
-  text-align: center;
-  padding: 3em 0;
-  margin-bottom: 300px;
-  font-style: italic;
-  font-size: 1.8rem;
-  opacity: 0.8;
-}
-
-.target {
-  border: 2px dashed var(--brand-color);
-  padding: 10px;
-  max-height: 150px;
-  margin: 0 2rem 400px;
-}
-        "</style>
+        <style>
+            "
+            .root {
+            border: 2px dashed #ccc;
+            height: 200px;
+            margin: 2rem 1rem;
+            overflow-y: scroll;
+            }
+            
+            .notice {
+            text-align: center;
+            padding: 3em 0;
+            margin-bottom: 300px;
+            font-style: italic;
+            font-size: 1.8rem;
+            opacity: 0.8;
+            }
+            
+            .target {
+            border: 2px dashed var(--brand-color);
+            padding: 10px;
+            max-height: 150px;
+            margin: 0 2rem 400px;
+            }
+            "
+        </style>
     }
 }
 
@@ -88,6 +96,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

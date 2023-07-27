@@ -33,21 +33,32 @@ fn Demo() -> impl IntoView {
             .coord_type(UseMouseCoordType::Custom(Extractor)),
     );
 
-    view! {         <div node_ref=el>
+    view! {
+        <div node_ref=el>
             <p class="font-semibold">"Basic Usage"</p>
             <pre lang="yaml">
-                { move || format!(r#"    x: {}
+                {move || {
+                    format!(
+                        r#"    x: {}
     y: {}
     source_type: {:?}
-"#, mouse_default.x.get(), mouse_default.y.get(), mouse_default.source_type.get()) }
+"#, mouse_default.x.get(),
+                        mouse_default.y.get(), mouse_default.source_type.get()
+                    )
+                }}
             </pre>
             <p class="font-semibold">"Extractor Usage"</p>
             <Note>"Only works when the mouse is over the demo element"</Note>
             <pre lang="yaml">
-                { move || format!(r#"    x: {}
+                {move || {
+                    format!(
+                        r#"    x: {}
     y: {}
     source_type: {:?}
-"#, mouse_with_extractor.x.get(), mouse_with_extractor.y.get(), mouse_with_extractor.source_type.get()) }
+"#, mouse_with_extractor.x
+                        .get(), mouse_with_extractor.y.get(), mouse_with_extractor.source_type.get()
+                    )
+                }}
             </pre>
         </div>
     }
@@ -58,6 +69,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

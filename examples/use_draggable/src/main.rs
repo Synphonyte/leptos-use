@@ -20,7 +20,8 @@ fn Demo() -> impl IntoView {
             .prevent_default(true),
     );
 
-    view! {         <p class="italic op50 text-center">
+    view! {
+        <p class="italic op50 text-center">
             Check the floating box
         </p>
         <div
@@ -30,7 +31,10 @@ fn Demo() -> impl IntoView {
         >
             "👋 Drag me!"
             <div class="text-sm opacity-50">
-                I am at { move || x().round() }, { move || y().round() }
+                   I am
+                {move || x().round()}
+                )
+                {move || y().round()}
             </div>
         </div>
     }
@@ -41,6 +45,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

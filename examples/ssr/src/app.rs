@@ -14,7 +14,6 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-
         <Stylesheet id="leptos" href="/pkg/start-axum.css"/>
 
         <Title text="Leptos-Use SSR Example"/>
@@ -22,9 +21,7 @@ pub fn App() -> impl IntoView {
         <Router fallback=|| {
             let mut outside_errors = Errors::default();
             outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {                 <ErrorTemplate outside_errors/>
-            }
-            .into_view()
+            view! { <ErrorTemplate outside_errors/> }.into_view()
         }>
             <main>
                 <Routes>
@@ -67,10 +64,11 @@ fn HomePage() -> impl IntoView {
     );
     debounced_fn();
 
-    view! {         <h1>"Leptos-Use SSR Example"</h1>
-        <button on:click=on_click>"Click Me: " { count }</button>
-        <p>"Locale \"zh-Hans-CN-u-nu-hanidec\": " { zh_count }</p>
-        <p>"Press any key: " { key }</p>
-        <p>"Debounced called: " { debounce_value }</p>
+    view! {
+        <h1>"Leptos-Use SSR Example"</h1>
+        <button on:click=on_click>"Click Me: " {count}</button>
+        <p>"Locale "zh-Hans-CN-u-nu-hanidec": " {zh_count}</p>
+        <p>"Press any key: " {key}</p>
+        <p>"Debounced called: " {debounce_value}</p>
     }
 }

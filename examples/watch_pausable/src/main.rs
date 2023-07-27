@@ -33,7 +33,8 @@ fn Demo() -> impl IntoView {
         resume();
     };
 
-    view! {         <Note class="mb-2">"Type something below to trigger the watch"</Note>
+    view! {
+        <Note class="mb-2">"Type something below to trigger the watch"</Note>
         <input
             node_ref=input
             class="block"
@@ -42,11 +43,15 @@ fn Demo() -> impl IntoView {
             type="text"
         />
         <p>"Value: " {source}</p>
-        <button prop:disabled=move || !is_active.get() class="orange" on:click=pause>"Pause"</button>
-        <button prop:disabled=move || is_active.get() on:click=resume>"Resume"</button>
+        <button prop:disabled=move || !is_active.get() class="orange" on:click=pause>
+            "Pause"
+        </button>
+        <button prop:disabled=move || is_active.get() on:click=resume>
+            "Resume"
+        </button>
         <button on:click=clear>"Clear Log"</button>
-        <br />
-        <br />
+        <br/>
+        <br/>
         <Note>"Log"</Note>
         <pre>{log}</pre>
     }
@@ -57,6 +62,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

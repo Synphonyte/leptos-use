@@ -29,7 +29,8 @@ fn Demo() -> impl IntoView {
     );
     let in_num = in_nf.format::<f64>(number);
 
-    view! {         <input
+    view! {
+        <input
             class="block"
             prop:value=number
             on:input=move |e| set_number(event_target_value(&e).parse().unwrap())
@@ -38,10 +39,10 @@ fn Demo() -> impl IntoView {
             max="1000000"
             step="0.01"
         />
-        <p>"Number: " { number }</p>
-        <p>"German currency (EUR): " { de_num }</p>
-        <p>"Japanese currency (JPY): " { ja_num }</p>
-        <p>"Indian 3 max significant digits: " { in_num }</p>
+        <p>"Number: " {number}</p>
+        <p>"German currency (EUR): " {de_num}</p>
+        <p>"Japanese currency (JPY): " {ja_num}</p>
+        <p>"Indian 3 max significant digits: " {in_num}</p>
     }
 }
 
@@ -50,6 +51,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }

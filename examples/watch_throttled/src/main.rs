@@ -15,7 +15,8 @@ fn Demo() -> impl IntoView {
         1000.0,
     );
 
-    view! {         <input
+    view! {
+        <input
             class="block"
             prop:value=move || input.get()
             on:input=move |e| set_input.set(event_target_value(&e))
@@ -26,8 +27,8 @@ fn Demo() -> impl IntoView {
             <code>"ms"</code>
             " is set to 1000ms for this demo."
         </Note>
-        <p>"Input: " { input }</p>
-        <p>"Times Updated: " { updated }</p>
+        <p>"Input: " {input}</p>
+        <p>"Times Updated: " {updated}</p>
     }
 }
 
@@ -36,6 +37,6 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to(demo_or_body(), || {
-        view! { <Demo /> }
+        view! { <Demo/> }
     })
 }
