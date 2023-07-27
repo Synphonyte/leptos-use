@@ -18,9 +18,9 @@ use std::hash::Hash;
 /// # use leptos_use::{use_breakpoints, BreakpointsTailwind, breakpoints_tailwind};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let screen_width = use_breakpoints(cx, breakpoints_tailwind());
+/// let screen_width = use_breakpoints(breakpoints_tailwind());
 ///
 /// use BreakpointsTailwind::*;
 ///
@@ -29,7 +29,7 @@ use std::hash::Hash;
 /// let lg_and_smaller = screen_width.le(Lg);
 /// let smaller_than_lg = screen_width.lt(Lg);
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -69,14 +69,14 @@ use std::hash::Hash;
 /// }
 ///
 /// #[component]
-/// fn Demo(cx: Scope) -> impl IntoView {
-///     let screen_width = use_breakpoints(cx, my_breakpoints());
+/// fn Demo() -> impl IntoView {
+///     let screen_width = use_breakpoints(my_breakpoints());
 ///
 ///     use MyBreakpoints::*;
 ///
 ///     let laptop = screen_width.between(Laptop, Desktop);
 ///
-///     view! { cx, }
+///     view! { }
 /// }
 /// ```
 ///
@@ -89,9 +89,9 @@ use std::hash::Hash;
 /// # use leptos_use::{use_breakpoints, BreakpointsTailwind, breakpoints_tailwind};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let screen_width = use_breakpoints(cx, breakpoints_tailwind());
+/// let screen_width = use_breakpoints(breakpoints_tailwind());
 ///
 /// use BreakpointsTailwind::*;
 ///
@@ -100,7 +100,7 @@ use std::hash::Hash;
 /// let lg_and_smaller = screen_width.is_le(Lg);
 /// let smaller_than_lg = screen_width.is_lt(Lg);
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -109,16 +109,14 @@ use std::hash::Hash;
 /// Since internally this uses [`use_media_query`], which returns always `false` on the server,
 /// the returned methods also will return `false`.
 pub fn use_breakpoints<K: Eq + Hash + Debug + Clone>(
-    cx: Scope,
     breakpoints: HashMap<K, u32>,
 ) -> UseBreakpointsReturn<K> {
-    UseBreakpointsReturn { cx, breakpoints }
+    UseBreakpointsReturn { breakpoints }
 }
 
 /// Return type of [`use_breakpoints`]
 #[derive(Clone)]
 pub struct UseBreakpointsReturn<K: Eq + Hash + Debug + Clone> {
-    cx: Scope,
     breakpoints: HashMap<K, u32>,
 }
 
@@ -165,7 +163,7 @@ macro_rules! impl_cmp_reactively {
             #[$attr]
             pub fn $fn(&self, key: K) -> Signal<bool> {
                 if let Some(value) = self.breakpoints.get(&key) {
-                    use_media_query(self.cx, format_media_query!($cmp, $suffix, value))
+                    use_media_query(format_media_query!($cmp, $suffix, value))
                 } else {
                     self.not_found_signal(key)
                 }
@@ -195,7 +193,7 @@ impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
 
     fn not_found_signal(&self, key: K) -> Signal<bool> {
         error!("Breakpoint \"{:?}\" not found", key);
-        Signal::derive(self.cx, || false)
+        Signal::derive(|| false)
     }
 
     fn not_found(&self, key: K) -> bool {
@@ -228,7 +226,7 @@ impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
     pub fn between(&self, min_key: K, max_key: K) -> Signal<bool> {
         if let Some(min) = self.breakpoints.get(&min_key) {
             if let Some(max) = self.breakpoints.get(&max_key) {
-                use_media_query(self.cx, Self::between_media_query(min, max))
+                use_media_query(Self::between_media_query(min, max))
             } else {
                 self.not_found_signal(max_key)
             }
@@ -254,7 +252,7 @@ impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
     pub fn current(&self) -> Signal<Vec<K>> {
         let this = self.clone();
 
-        Signal::derive(self.cx, move || {
+        Signal::derive(move || {
             this.breakpoints
                 .keys()
                 .filter(|k| this.ge((**k).clone()).get())

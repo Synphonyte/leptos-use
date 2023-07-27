@@ -8,8 +8,8 @@ use leptos_use::{
 use web_sys::{CloseEvent, Event};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let (history, set_history) = create_signal(cx, vec![]);
+fn Demo() -> impl IntoView {
+    let (history, set_history) = create_signal(vec![]);
 
     fn update_history(&history: &WriteSignal<Vec<String>>, message: String) {
         let _ = &history.update(|history: &mut Vec<_>| history.push(message));
@@ -27,7 +27,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         open,
         close,
         ..
-    } = use_websocket(cx, "wss://echo.websocket.events/".to_string());
+    } = use_websocket("wss://echo.websocket.events/".to_string());
 
     let send_message = move |_| {
         let m = "Hello, world!".to_string();
@@ -52,13 +52,13 @@ fn Demo(cx: Scope) -> impl IntoView {
         close();
     };
 
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         if let Some(m) = message.get() {
             update_history(&set_history, format! {"[message]: {:?}", m});
         };
     });
 
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         if let Some(m) = message_bytes.get() {
             update_history(&set_history, format! {"[message_bytes]: {:?}", m});
         };
@@ -68,7 +68,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     // use_websocket_with_options
     // ----------------------------
 
-    let (history2, set_history2) = create_signal(cx, vec![]);
+    let (history2, set_history2) = create_signal(vec![]);
 
     let on_open_callback = move |e: Event| {
         set_history2.update(|history: &mut Vec<_>| {
@@ -107,7 +107,6 @@ fn Demo(cx: Scope) -> impl IntoView {
         message_bytes: message_bytes2,
         ..
     } = use_websocket_with_options(
-        cx,
         "wss://echo.websocket.events/".to_string(),
         UseWebSocketOptions::default()
             .manual(true)
@@ -139,13 +138,13 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let status2 = move || ready_state2.get().to_string();
 
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         if let Some(m) = message2.get() {
             update_history(&set_history2, format! {"[message]: {:?}", m});
         };
     });
 
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         if let Some(m) = message_bytes2.get() {
             update_history(&set_history2, format! {"[message_bytes]: {:?}", m});
         };
@@ -153,8 +152,7 @@ fn Demo(cx: Scope) -> impl IntoView {
 
     let connected2 = move || ready_state2.get() == UseWebSocketReadyState::Open;
 
-    view! { cx,
-      <div class="container">
+    view! {       <div class="container">
         <div class="flex flex-col lg:flex-row gap-4">
           <div class="w-full lg:w-1/2">
           <h1 class="text-xl lg:text-4xl mb-2">"use_websocket"</h1>
@@ -170,8 +168,8 @@ fn Demo(cx: Scope) -> impl IntoView {
             <For
               each=move || history.get().into_iter().enumerate()
               key=|(index, _)| *index
-              view=move |cx, (_, message)| {
-                view! {cx,  <div>{message}</div> }
+              view=move |(_, message)| {
+                view! { <div>{message}</div> }
               }
               />
 
@@ -191,8 +189,8 @@ fn Demo(cx: Scope) -> impl IntoView {
             <For
               each=move || history2.get().into_iter().enumerate()
               key=|(index, _)| *index
-              view=move |cx, (_, message)| {
-                view! {cx,  <li>{message}</li> }
+              view=move |(_, message)| {
+                view! { <li>{message}</li> }
               }
               />
             </ul>
@@ -208,7 +206,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Info);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

@@ -11,15 +11,14 @@ use_derive_signal!(
     /// # use leptos_use::is_ok;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
+    /// # fn Demo() -> impl IntoView {
     /// let (example, set_example) = create_signal(
-    ///     cx,
     ///     if js_sys::Math::random() < 0.5 { Ok("Example") } else { Err(()) }
     /// );
     ///
-    /// let is_ok = is_ok(cx, example);
+    /// let is_ok = is_ok(example);
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     is_ok<Result<T, ()>, T: 'static> -> bool

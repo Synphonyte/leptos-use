@@ -42,10 +42,9 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///     pub greeting: String,
 /// }
 ///
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// # pub fn Demo() -> impl IntoView {
 /// // bind struct. Must be serializable.
 /// let (state, set_state, _) = use_storage(
-///     cx,
 ///     "my-state",
 ///     MyState {
 ///         hello: "hi".to_string(),
@@ -54,19 +53,18 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 /// ); // returns Signal<MyState>
 ///
 /// // bind bool.
-/// let (flag, set_flag, remove_flag) = use_storage(cx, "my-flag", true); // returns Signal<bool>
+/// let (flag, set_flag, remove_flag) = use_storage("my-flag", true); // returns Signal<bool>
 ///
 /// // bind number
-/// let (count, set_count, _) = use_storage(cx, "my-count", 0); // returns Signal<i32>
+/// let (count, set_count, _) = use_storage("my-count", 0); // returns Signal<i32>
 ///
 /// // bind string with SessionStorage
 /// let (id, set_id, _) = use_storage_with_options(
-///     cx,
 ///     "my-id",
 ///     "some_string_id".to_string(),
 ///     UseStorageOptions::default().storage_type(StorageType::Session),
 /// );
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -85,7 +83,7 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///     hello: String,
 /// }
 ///
-/// let (state, .. ) = use_storage(cx, "my-state", MyState { hello: "hello" });
+/// let (state, .. ) = use_storage("my-state", MyState { hello: "hello" });
 /// ```
 ///
 /// Now, in a newer version you added a field `greeting` to `MyState`.
@@ -98,7 +96,6 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 /// }
 ///
 /// let (state, .. ) = use_storage(
-///     cx,
 ///     "my-state",
 ///     MyState { hello: "hi", greeting: "whatsup" },
 /// ); // fails to deserialize -> default value
@@ -122,9 +119,8 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///     pub greeting: String,
 /// }
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// # pub fn Demo() -> impl IntoView {
 /// let (state, set_state, _) = use_storage_with_options(
-///     cx,
 ///     "my-state",
 ///     MyState {
 ///         hello: "hi".to_string(),
@@ -140,7 +136,7 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///     }),
 /// );
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -150,30 +146,25 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// ## Server-Side Rendering
 ///
-/// On the server this falls back to a `create_signal(cx, default)` and an empty remove function.
+/// On the server this falls back to a `create_signal(default)` and an empty remove function.
 ///
 /// ## See also
 ///
 /// * [`use_local_storage`]
 /// * [`use_session_storage`]
 // #[doc(cfg(feature = "storage"))]
-pub fn use_storage<T, D>(
-    cx: Scope,
-    key: &str,
-    defaults: D,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+pub fn use_storage<T, D>(key: &str, defaults: D) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
     D: Into<MaybeRwSignal<T>>,
     T: Clone,
 {
-    use_storage_with_options(cx, key, defaults, UseStorageOptions::default())
+    use_storage_with_options(key, defaults, UseStorageOptions::default())
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`]. See [`use_storage`] for how to use.
 // #[doc(cfg(feature = "storage"))]
 pub fn use_storage_with_options<T, D>(
-    cx: Scope,
     key: &str,
     defaults: D,
     options: UseStorageOptions<T>,
@@ -194,7 +185,7 @@ where
         filter,
     } = options;
 
-    let (data, set_data) = defaults.into_signal(cx);
+    let (data, set_data) = defaults.into_signal();
 
     let raw_init = data.get();
 
@@ -310,8 +301,7 @@ where
                     resume: resume_watch,
                     ..
                 } = watch_pausable_with_options(
-                    cx,
-                    move || data.get(),
+                                        move || data.get(),
                     move |data, _, _| write.clone()(data),
                     WatchOptions::default().filter(filter),
                 );
@@ -365,10 +355,9 @@ where
                     move |event: web_sys::StorageEvent| upd.clone()(Some(event.into()));
 
                 if listen_to_storage_changes {
-                    let _ = use_event_listener(cx, window(), ev::storage, update_from_storage_event);
+                    let _ = use_event_listener(window(), ev::storage, update_from_storage_event);
                     let _ = use_event_listener(
-                        cx,
-                        window(),
+                                                window(),
                         ev::Custom::new(CUSTOM_STORAGE_EVENT_NAME),
                         update_from_custom_event,
                     );

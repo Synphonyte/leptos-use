@@ -29,12 +29,12 @@ static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 /// # use leptos_use::on_click_outside;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let target = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let target = create_node_ref::<Div>();
 ///
-/// on_click_outside(cx, target, move |event| { log!("{:?}", event); });
+/// on_click_outside(target, move |event| { log!("{:?}", event); });
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=target>"Hello World"</div>
 ///     <div>"Outside element"</div>
 /// }
@@ -49,15 +49,14 @@ static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 /// ## Server-Side Rendering
 ///
 /// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
-pub fn on_click_outside<El, T, F>(cx: Scope, target: El, handler: F) -> impl FnOnce() + Clone
+pub fn on_click_outside<El, T, F>(target: El, handler: F) -> impl FnOnce() + Clone
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     F: FnMut(web_sys::Event) + Clone + 'static,
 {
     on_click_outside_with_options::<_, _, _, web_sys::EventTarget>(
-        cx,
         target,
         handler,
         OnClickOutsideOptions::default(),
@@ -66,14 +65,13 @@ where
 
 /// Version of `on_click_outside` that takes an `OnClickOutsideOptions`. See `on_click_outside` for more details.
 pub fn on_click_outside_with_options<El, T, F, I>(
-    cx: Scope,
     target: El,
     handler: F,
     options: OnClickOutsideOptions<I>,
 ) -> impl FnOnce() + Clone
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     F: FnMut(web_sys::Event) + Clone + 'static,
     I: Into<web_sys::EventTarget> + Clone + 'static,
@@ -119,7 +117,7 @@ where
         })
     };
 
-    let target = (cx, target).into();
+    let target = (target).into();
 
     let listener = {
         let should_listen = Rc::clone(&should_listen);
@@ -156,7 +154,6 @@ where
         options.passive(true).capture(capture);
 
         use_event_listener_with_options::<_, web_sys::Window, _, _>(
-            cx,
             window(),
             click,
             move |event| listener(event.into()),
@@ -172,7 +169,6 @@ where
         options.passive(true);
 
         use_event_listener_with_options::<_, web_sys::Window, _, _>(
-            cx,
             window(),
             pointerdown,
             move |event| {
@@ -189,7 +185,6 @@ where
 
     let remove_blur_listener = if detect_iframes {
         Some(use_event_listener::<_, web_sys::Window, _, _>(
-            cx,
             window(),
             blur,
             move |event| {

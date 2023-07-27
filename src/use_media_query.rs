@@ -21,13 +21,13 @@ use std::rc::Rc;
 /// # use leptos_use::use_media_query;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let is_large_screen = use_media_query(cx, "(min-width: 1024px)");
+/// let is_large_screen = use_media_query("(min-width: 1024px)");
 ///
-/// let is_dark_preferred = use_media_query(cx, "(prefers-color-scheme: dark)");
+/// let is_dark_preferred = use_media_query("(prefers-color-scheme: dark)");
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -39,10 +39,10 @@ use std::rc::Rc;
 ///
 /// * [`use_preferred_dark`]
 /// * [`use_preferred_contrast`]
-pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
+pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
     let query = query.into();
 
-    let (matches, set_matches) = create_signal(cx, false);
+    let (matches, set_matches) = create_signal(false);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));
@@ -75,8 +75,7 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
                     set_matches.set(media_query.matches());
 
                     remove_listener.replace(Some(Box::new(use_event_listener(
-                        cx,
-                        media_query.clone(),
+                                                media_query.clone(),
                         change,
                         listener.borrow().clone(),
                     ))));
@@ -92,9 +91,9 @@ pub fn use_media_query(cx: Scope, query: impl Into<MaybeSignal<String>>) -> Sign
                 .replace(Box::new(move |_| update()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>);
         }
 
-        create_effect(cx, move |_| update());
+        create_effect(move |_| update());
 
-        on_cleanup(cx, cleanup);
+        on_cleanup(cleanup);
     }}
 
     matches.into()

@@ -12,7 +12,6 @@ macro_rules! use_specific_storage {
         paste! {
             $(#[$outer])*
             pub fn [<use_ $storage_name _storage>]<T, D>(
-                cx: Scope,
                 key: &str,
                 defaults: D,
             ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
@@ -21,7 +20,7 @@ macro_rules! use_specific_storage {
                 D: Into<MaybeRwSignal<T>>,
                 T: Clone,
             {
-                [<use_ $storage_name _storage_with_options>](cx, key, defaults, UseSpecificStorageOptions::default())
+                [<use_ $storage_name _storage_with_options>](key, defaults, UseSpecificStorageOptions::default())
             }
 
             /// Version of
@@ -30,7 +29,6 @@ macro_rules! use_specific_storage {
             #[$simple_func]
             /// for how to use.
             pub fn [<use_ $storage_name _storage_with_options>]<T, D>(
-                cx: Scope,
                 key: &str,
                 defaults: D,
                 options: UseSpecificStorageOptions<T>,
@@ -40,7 +38,7 @@ macro_rules! use_specific_storage {
                 D: Into<MaybeRwSignal<T>>,
                 T: Clone,
             {
-                use_storage_with_options(cx, key, defaults, options.into_storage_options(StorageType::[<$storage_name:camel>]))
+                use_storage_with_options(key, defaults, options.into_storage_options(StorageType::[<$storage_name:camel>]))
             }
         }
     };

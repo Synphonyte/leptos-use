@@ -18,12 +18,12 @@ use std::marker::PhantomData;
 /// # use leptos_use::use_element_visibility;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Div>();
 ///
-/// let is_visible = use_element_visibility(cx, el);
+/// let is_visible = use_element_visibility(el);
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el>
 ///         <h1>{is_visible}</h1>
 ///     </div>
@@ -38,35 +38,32 @@ use std::marker::PhantomData;
 /// ## See also
 ///
 /// * [`use_intersection_observer`]
-pub fn use_element_visibility<El, T>(cx: Scope, target: El) -> Signal<bool>
+pub fn use_element_visibility<El, T>(target: El) -> Signal<bool>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     use_element_visibility_with_options::<El, T, web_sys::Element, web_sys::Element>(
-        cx,
         target,
         UseElementVisibilityOptions::default(),
     )
 }
 
 pub fn use_element_visibility_with_options<El, T, ContainerEl, ContainerT>(
-    cx: Scope,
     target: El,
     options: UseElementVisibilityOptions<ContainerEl, ContainerT>,
 ) -> Signal<bool>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    (Scope, ContainerEl): Into<ElementMaybeSignal<ContainerT, web_sys::Element>>,
+    ContainerEl: Into<ElementMaybeSignal<ContainerT, web_sys::Element>>,
     ContainerT: Into<web_sys::Element> + Clone + 'static,
 {
-    let (is_visible, set_visible) = create_signal(cx, false);
+    let (is_visible, set_visible) = create_signal(false);
 
     use_intersection_observer_with_options(
-        cx,
-        (cx, target).into(),
+        (target).into(),
         move |entries, _| {
             set_visible.set(entries[0].is_intersecting());
         },
@@ -80,7 +77,7 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseElementVisibilityOptions<El, T>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     /// A `web_sys::Element` or `web_sys::Document` object which is an ancestor of the intended `target`,

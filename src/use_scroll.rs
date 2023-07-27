@@ -23,14 +23,14 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let element = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let element = create_node_ref::<Div>();
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, is_scrolling, arrived_state, directions, ..
-/// } = use_scroll(cx, element);
+/// } = use_scroll(element);
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=element>"..."</div>
 /// }
 /// # }
@@ -48,8 +48,8 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollOffset};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// # let element = create_node_ref::<Div>();
 /// #
 /// let UseScrollReturn {
 ///     x,
@@ -61,7 +61,6 @@ use wasm_bindgen::JsCast;
 ///     directions,
 ///     ..
 /// } = use_scroll_with_options(
-///     cx,
 ///     element,
 ///     UseScrollOptions::default().offset(ScrollOffset {
 ///         top: 30.0,
@@ -71,8 +70,7 @@ use wasm_bindgen::JsCast;
 ///     }),
 /// );
 /// #
-/// #     view! { cx,
-/// #         <div node_ref=element>"..."</div>
+/// #     view! { /// #         <div node_ref=element>"..."</div>
 /// #     }
 /// # }
 /// ```
@@ -88,14 +86,14 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let element = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let element = create_node_ref::<Div>();
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
-/// } = use_scroll(cx, element);
+/// } = use_scroll(element);
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=element>"..."</div>
 ///     <button on:click=move |_| set_x(x.get_untracked() + 10.0)>"Scroll right 10px"</button>
 ///     <button on:click=move |_| set_y(y.get_untracked() + 10.0)>"Scroll down 10px"</button>
@@ -116,19 +114,17 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// # let element = create_node_ref::<Div>();
 /// #
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
 /// } = use_scroll_with_options(
-///     cx,
 ///     element,
 ///     UseScrollOptions::default().behavior(ScrollBehavior::Smooth),
 /// );
 /// #
-/// # view! { cx,
-/// #     <div node_ref=element>"..."</div>
+/// # view! { /// #     <div node_ref=element>"..."</div>
 /// # }
 /// # }
 /// ```
@@ -142,25 +138,23 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let element = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// # let element = create_node_ref::<Div>();
 /// #
-/// let (smooth, set_smooth) = create_signal(cx, false);
+/// let (smooth, set_smooth) = create_signal(false);
 ///
-/// let behavior = Signal::derive(cx, move || {
+/// let behavior = Signal::derive(move || {
 ///     if smooth.get() { ScrollBehavior::Smooth } else { ScrollBehavior::Auto }
 /// });
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
 /// } = use_scroll_with_options(
-///     cx,
 ///     element,
 ///     UseScrollOptions::default().behavior(behavior),
 /// );
 /// #
-/// # view! { cx,
-/// #     <div node_ref=element>"..."</div>
+/// # view! { /// #     <div node_ref=element>"..."</div>
 /// # }
 /// # }
 /// ```
@@ -168,31 +162,27 @@ use wasm_bindgen::JsCast;
 /// ## Server-Side Rendering
 ///
 /// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
-pub fn use_scroll<El, T>(cx: Scope, element: El) -> UseScrollReturn
+pub fn use_scroll<El, T>(element: El) -> UseScrollReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    use_scroll_with_options(cx, element, Default::default())
+    use_scroll_with_options(element, Default::default())
 }
 
 /// Version of [`use_scroll`] with options. See [`use_scroll`] for how to use.
 #[allow(unused_variables)]
-pub fn use_scroll_with_options<El, T>(
-    cx: Scope,
-    element: El,
-    options: UseScrollOptions,
-) -> UseScrollReturn
+pub fn use_scroll_with_options<El, T>(element: El, options: UseScrollOptions) -> UseScrollReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    let (internal_x, set_internal_x) = create_signal(cx, 0.0);
-    let (internal_y, set_internal_y) = create_signal(cx, 0.0);
+    let (internal_x, set_internal_x) = create_signal(0.0);
+    let (internal_y, set_internal_y) = create_signal(0.0);
 
-    let signal = (cx, element).into();
+    let signal = (element).into();
     let behavior = options.behavior;
 
     let scroll_to = {
@@ -226,26 +216,20 @@ where
 
     let set_y = Box::new(move |y| scroll_to(None, Some(y)));
 
-    let (is_scrolling, set_is_scrolling) = create_signal(cx, false);
+    let (is_scrolling, set_is_scrolling) = create_signal(false);
 
-    let arrived_state = create_rw_signal(
-        cx,
-        Directions {
-            left: true,
-            right: false,
-            top: true,
-            bottom: false,
-        },
-    );
-    let directions = create_rw_signal(
-        cx,
-        Directions {
-            left: false,
-            right: false,
-            top: false,
-            bottom: false,
-        },
-    );
+    let arrived_state = create_rw_signal(Directions {
+        left: true,
+        right: false,
+        top: true,
+        bottom: false,
+    });
+    let directions = create_rw_signal(Directions {
+        left: false,
+        right: false,
+        top: false,
+        bottom: false,
+    });
 
     let on_scroll_end = {
         let on_stop = options.on_stop.clone();
@@ -359,7 +343,7 @@ where
     let target = {
         let signal = signal.clone();
 
-        Signal::derive(cx, move || {
+        Signal::derive(move || {
             let element = signal.get();
             element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
         })
@@ -385,7 +369,6 @@ where
             web_sys::EventTarget,
             _,
         >(
-            cx,
             target,
             ev::scroll,
             handler,
@@ -398,7 +381,6 @@ where
             web_sys::EventTarget,
             _,
         >(
-            cx,
             target,
             ev::scroll,
             on_scroll_handler,
@@ -412,7 +394,6 @@ where
         web_sys::EventTarget,
         _,
     >(
-        cx,
         target,
         scrollend,
         on_scroll_end,

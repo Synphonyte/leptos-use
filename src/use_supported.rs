@@ -9,18 +9,17 @@ use leptos::*;
 /// # use leptos_use::use_supported;
 /// # use wasm_bindgen::JsValue;
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
+/// # pub fn Demo() -> impl IntoView {
 /// let is_supported = use_supported(
-///     cx,
 ///     || JsValue::from("getBattery").js_in(&window().navigator())
 /// );
 ///
 /// if is_supported.get() {
 ///     // do something
 /// }
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
-pub fn use_supported(cx: Scope, callback: impl Fn() -> bool + 'static) -> Signal<bool> {
-    Signal::derive(cx, callback)
+pub fn use_supported(callback: impl Fn() -> bool + 'static) -> Signal<bool> {
+    Signal::derive(callback)
 }

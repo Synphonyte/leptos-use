@@ -20,7 +20,7 @@ use std::rc::Rc;
 /// # use leptos_use::use_debounce_fn;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let mut debounced_fn = use_debounce_fn(
 ///     || {
 ///         // do something
@@ -29,7 +29,7 @@ use std::rc::Rc;
 /// );
 ///
 /// window_event_listener(resize, move |_| { debounced_fn(); });
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -43,7 +43,7 @@ use std::rc::Rc;
 /// # use leptos_use::utils::DebounceOptions;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let mut debounced_fn = use_debounce_fn_with_options(
 ///     || {
 ///         // do something
@@ -54,7 +54,7 @@ use std::rc::Rc;
 /// );
 ///
 /// window_event_listener(resize, move |_| { debounced_fn(); });
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///

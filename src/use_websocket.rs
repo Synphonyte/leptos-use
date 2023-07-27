@@ -26,7 +26,7 @@ use crate::utils::CloneableFnWithArg;
 /// # use leptos_use::{use_websocket, UseWebSocketReadyState, UseWebsocketReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseWebsocketReturn {
 ///     ready_state,
 ///     message,
@@ -36,7 +36,7 @@ use crate::utils::CloneableFnWithArg;
 ///     open,
 ///     close,
 ///     ..
-/// } = use_websocket(cx, "wss://echo.websocket.events/".to_string());
+/// } = use_websocket("wss://echo.websocket.events/".to_string());
 ///
 /// let send_message = move |_| {
 ///     let m = "Hello, world!".to_string();
@@ -60,7 +60,7 @@ use crate::utils::CloneableFnWithArg;
 ///     close();
 /// };
 ///
-/// view! { cx,
+/// view! {
 ///     <div>
 ///         <p>"status: " {status}</p>
 ///
@@ -80,7 +80,6 @@ use crate::utils::CloneableFnWithArg;
 ///
 /// On the server the returned functions amount to noops.
 pub fn use_websocket(
-    cx: Scope,
     url: String,
 ) -> UseWebsocketReturn<
     impl Fn() + Clone + 'static,
@@ -88,12 +87,11 @@ pub fn use_websocket(
     impl Fn(String) + Clone + 'static,
     impl Fn(Vec<u8>) + Clone + 'static,
 > {
-    use_websocket_with_options(cx, url, UseWebSocketOptions::default())
+    use_websocket_with_options(url, UseWebSocketOptions::default())
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
 pub fn use_websocket_with_options(
-    cx: Scope,
     url: String,
     options: UseWebSocketOptions,
 ) -> UseWebsocketReturn<
@@ -102,32 +100,32 @@ pub fn use_websocket_with_options(
     impl Fn(String) + Clone + 'static,
     impl Fn(Vec<u8>) + Clone,
 > {
-    let (ready_state, set_ready_state) = create_signal(cx, UseWebSocketReadyState::Closed);
-    let (message, set_message) = create_signal(cx, None);
-    let (message_bytes, set_message_bytes) = create_signal(cx, None);
-    let ws_ref: StoredValue<Option<WebSocket>> = store_value(cx, None);
+    let (ready_state, set_ready_state) = create_signal(UseWebSocketReadyState::Closed);
+    let (message, set_message) = create_signal(None);
+    let (message_bytes, set_message_bytes) = create_signal(None);
+    let ws_ref: StoredValue<Option<WebSocket>> = store_value(None);
 
     let reconnect_limit = options.reconnect_limit.unwrap_or(3);
 
-    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(cx, None);
+    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(None);
     let manual = options.manual;
 
-    let reconnect_times_ref: StoredValue<u64> = store_value(cx, 0);
-    let unmounted_ref = store_value(cx, false);
+    let reconnect_times_ref: StoredValue<u64> = store_value(0);
+    let unmounted_ref = store_value(false);
 
-    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(cx, None);
+    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let on_open_ref = store_value(cx, options.on_open);
-        let on_message_ref = store_value(cx, options.on_message);
-        let on_message_bytes_ref = store_value(cx, options.on_message_bytes);
-        let on_error_ref = store_value(cx, options.on_error);
-        let on_close_ref = store_value(cx, options.on_close);
+        let on_open_ref = store_value(options.on_open);
+        let on_message_ref = store_value(options.on_message);
+        let on_message_bytes_ref = store_value(options.on_message_bytes);
+        let on_error_ref = store_value(options.on_error);
+        let on_close_ref = store_value(options.on_close);
 
         let reconnect_interval = options.reconnect_interval.unwrap_or(3 * 1000);
         let protocols = options.protocols;
 
-        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(cx, None);
+        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
         reconnect_ref.set_value({
             let ws = ws_ref.get_value();
             Some(Rc::new(move || {
@@ -319,14 +317,14 @@ pub fn use_websocket_with_options(
     };
 
     // Open connection (not called if option `manual` is true)
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         if !manual {
             open();
         }
     });
 
     // clean up (unmount)
-    on_cleanup(cx, move || {
+    on_cleanup(move || {
         unmounted_ref.set_value(true);
         close();
     });

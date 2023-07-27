@@ -21,11 +21,11 @@ use web_sys::AddEventListenerOptions;
 /// # use leptos_use::use_element_hover;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Button>(cx);
-/// let is_hovered = use_element_hover(cx, el);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Button>();
+/// let is_hovered = use_element_hover(el);
 ///
-/// view! { cx,
+/// view! {
 ///     <button node_ref=el>{ move || format!("{:?}", is_hovered.get()) }</button>
 /// }
 /// # }
@@ -34,25 +34,24 @@ use web_sys::AddEventListenerOptions;
 /// ## Server-Side Rendering
 ///
 /// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
-pub fn use_element_hover<El, T>(cx: Scope, el: El) -> Signal<bool>
+pub fn use_element_hover<El, T>(el: El) -> Signal<bool>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
-    use_element_hover_with_options(cx, el, UseElementHoverOptions::default())
+    use_element_hover_with_options(el, UseElementHoverOptions::default())
 }
 
 /// Version of [`use_element_hover`] that takes a `UseElementHoverOptions`. See [`use_element_hover`] for how to use.
 
 pub fn use_element_hover_with_options<El, T>(
-    cx: Scope,
     el: El,
     options: UseElementHoverOptions,
 ) -> Signal<bool>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let UseElementHoverOptions {
@@ -60,7 +59,7 @@ where
         delay_leave,
     } = options;
 
-    let (is_hovered, set_hovered) = create_signal(cx, false);
+    let (is_hovered, set_hovered) = create_signal(false);
 
     let mut timer: Option<TimeoutHandle> = None;
 
@@ -86,20 +85,14 @@ where
     listener_options.passive(true);
 
     let _ = use_event_listener_with_options(
-        cx,
         el.clone(),
         mouseenter,
         move |_| toggle(true),
         listener_options.clone(),
     );
 
-    let _ = use_event_listener_with_options(
-        cx,
-        el,
-        mouseleave,
-        move |_| toggle(false),
-        listener_options,
-    );
+    let _ =
+        use_event_listener_with_options(el, mouseleave, move |_| toggle(false), listener_options);
 
     is_hovered.into()
 }

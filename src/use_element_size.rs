@@ -25,12 +25,12 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_element_size, UseElementSizeReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref();
 ///
-/// let UseElementSizeReturn { width, height } = use_element_size(cx, el);
+/// let UseElementSizeReturn { width, height } = use_element_size(el);
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el>
 ///         "Width: " {width}
 ///         "Height: " {height}
@@ -46,31 +46,30 @@ use wasm_bindgen::JsCast;
 /// ## See also
 ///
 /// - [`use_resize_observer`]
-pub fn use_element_size<El, T>(cx: Scope, target: El) -> UseElementSizeReturn
+pub fn use_element_size<El, T>(target: El) -> UseElementSizeReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    use_element_size_with_options(cx, target, UseElementSizeOptions::default())
+    use_element_size_with_options(target, UseElementSizeOptions::default())
 }
 
 /// Version of [`use_element_size`] that takes a `UseElementSizeOptions`. See [`use_element_size`] for how to use.
 pub fn use_element_size_with_options<El, T>(
-    cx: Scope,
     target: El,
     options: UseElementSizeOptions,
 ) -> UseElementSizeReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     let window = window();
     let box_ = options.box_;
     let initial_size = options.initial_size;
 
-    let target = (cx, target).into();
+    let target = (target).into();
 
     let is_svg = {
         let target = target.clone();
@@ -88,14 +87,13 @@ where
         }
     };
 
-    let (width, set_width) = create_signal(cx, options.initial_size.width);
-    let (height, set_height) = create_signal(cx, options.initial_size.height);
+    let (width, set_width) = create_signal(options.initial_size.width);
+    let (height, set_height) = create_signal(options.initial_size.height);
 
     {
         let target = target.clone();
 
         let _ = use_resize_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, _, _>(
-            cx,
             target.clone(),
             move |entries, _| {
                 let entry = &entries[0];
@@ -150,7 +148,6 @@ where
     }
 
     let _ = watch_with_options(
-        cx,
         move || target.get(),
         move |ele, _, _| {
             if ele.is_some() {

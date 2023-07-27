@@ -15,9 +15,8 @@ use leptos::*;
 /// use leptos_use::{use_cycle_list, UseCycleListReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseCycleListReturn { state, next, prev, .. } = use_cycle_list(
-///     cx,
 ///     vec!["Dog", "Cat", "Lizard", "Shark", "Whale", "Dolphin", "Octopus", "Seal"]
 /// );
 ///
@@ -27,11 +26,10 @@ use leptos::*;
 ///
 /// log!("{}", state.get()); // "Seal"
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 pub fn use_cycle_list<T, L>(
-    cx: Scope,
     list: L,
 ) -> UseCycleListReturn<
     T,
@@ -44,11 +42,10 @@ where
     T: Clone + PartialEq + 'static,
     L: Into<MaybeSignal<Vec<T>>>,
 {
-    use_cycle_list_with_options(cx, list, UseCycleListOptions::default())
+    use_cycle_list_with_options(list, UseCycleListOptions::default())
 }
 
 pub fn use_cycle_list_with_options<T, L>(
-    cx: Scope,
     list: L,
     options: UseCycleListOptions<T>,
 ) -> UseCycleListReturn<
@@ -83,12 +80,12 @@ where
         }
     };
 
-    let (state, set_state) = get_initial_value().into_signal(cx);
+    let (state, set_state) = get_initial_value().into_signal();
 
     let index = {
         let list = list.clone();
 
-        create_memo(cx, move |_| {
+        create_memo(move |_| {
             list.with(|list| {
                 let index = get_position(&state.get(), list);
 
@@ -157,12 +154,7 @@ where
     let _ = {
         let set = set.clone();
 
-        leptos::watch(
-            cx,
-            move || list.get(),
-            move |_, _, _| set(index.get()),
-            false,
-        )
+        leptos::watch(move || list.get(), move |_, _, _| set(index.get()), false)
     };
 
     UseCycleListReturn {

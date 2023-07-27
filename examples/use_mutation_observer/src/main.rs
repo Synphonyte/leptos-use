@@ -5,17 +5,16 @@ use leptos_use::use_mutation_observer_with_options;
 use std::time::Duration;
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Div>(cx);
-    let (messages, set_messages) = create_signal(cx, vec![]);
-    let (class_name, set_class_name) = create_signal(cx, String::new());
-    let (style, set_style) = create_signal(cx, String::new());
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Div>();
+    let (messages, set_messages) = create_signal(vec![]);
+    let (class_name, set_class_name) = create_signal(String::new());
+    let (style, set_style) = create_signal(String::new());
 
     let mut init = web_sys::MutationObserverInit::new();
     init.attributes(true);
 
     use_mutation_observer_with_options(
-        cx,
         el,
         move |mutations, _| {
             if let Some(mutation) = mutations.first() {
@@ -41,16 +40,14 @@ fn Demo(cx: Scope) -> impl IntoView {
         Duration::from_millis(1550),
     );
 
-    let enum_msgs = Signal::derive(cx, move || {
-        messages.get().into_iter().enumerate().collect::<Vec<_>>()
-    });
+    let enum_msgs =
+        Signal::derive(move || messages.get().into_iter().enumerate().collect::<Vec<_>>());
 
-    view! { cx,
-        <div node_ref=el class=move || class_name.get() style=move || style.get()>
+    view! {         <div node_ref=el class=move || class_name.get() style=move || style.get()>
             <For
                 each=move || enum_msgs.get()
                 key=|message| message.0 // list only grows so this is fine here
-                view=|cx, message| view! { cx, <div>"Mutation Attribute: " <code>{message.1}</code></div> }
+                view=|message| view! { <div>"Mutation Attribute: " <code>{message.1}</code></div> }
             />
         </div>
     }
@@ -60,7 +57,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

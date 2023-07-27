@@ -5,13 +5,12 @@ use leptos_use::docs::demo_or_body;
 use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Div>(cx);
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Div>();
 
     let inner_width = window().inner_width().unwrap().as_f64().unwrap();
 
     let UseDraggableReturn { x, y, style, .. } = use_draggable_with_options(
-        cx,
         el,
         UseDraggableOptions::default()
             .initial_value(Position {
@@ -21,8 +20,7 @@ fn Demo(cx: Scope) -> impl IntoView {
             .prevent_default(true),
     );
 
-    view! { cx,
-        <p class="italic op50 text-center">
+    view! {         <p class="italic op50 text-center">
             Check the floating box
         </p>
         <div
@@ -42,7 +40,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

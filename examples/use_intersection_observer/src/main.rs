@@ -7,10 +7,10 @@ use leptos_use::{
 };
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let root = create_node_ref::<Div>(cx);
-    let target = create_node_ref::<Div>(cx);
-    let (is_visible, set_visible) = create_signal(cx, false);
+fn Demo() -> impl IntoView {
+    let root = create_node_ref::<Div>();
+    let target = create_node_ref::<Div>();
+    let (is_visible, set_visible) = create_signal(false);
 
     let UseIntersectionObserverReturn {
         is_active,
@@ -18,7 +18,6 @@ fn Demo(cx: Scope) -> impl IntoView {
         resume,
         ..
     } = use_intersection_observer_with_options(
-        cx,
         target,
         move |entries, _| {
             set_visible.set(entries[0].is_intersecting());
@@ -26,8 +25,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         UseIntersectionObserverOptions::default().root(Some(root)),
     );
 
-    view! { cx,
-        <div class="text-center">
+    view! {         <div class="text-center">
             <label class="checkbox">
                 <input
                     type="checkbox"
@@ -89,7 +87,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

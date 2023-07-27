@@ -12,7 +12,7 @@ pub struct BananaState {
 }
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
+fn Demo() -> impl IntoView {
     let the_default = BananaState {
         name: "Banana".to_string(),
         color: "Yellow".to_string(),
@@ -20,12 +20,11 @@ fn Demo(cx: Scope) -> impl IntoView {
         count: 0,
     };
 
-    let (state, set_state, _) = use_storage(cx, "banana-state", the_default.clone());
+    let (state, set_state, _) = use_storage("banana-state", the_default.clone());
 
-    let (state2, ..) = use_storage(cx, "banana-state", the_default.clone());
+    let (state2, ..) = use_storage("banana-state", the_default.clone());
 
-    view! { cx,
-        <input
+    view! {         <input
             class="block"
             prop:value=move || state.get().name
             on:input=move |e| set_state.update(|s| s.name = event_target_value(&e))
@@ -60,7 +59,7 @@ fn Demo(cx: Scope) -> impl IntoView {
             { move || format!("{:#?}", state2.get()) }
         </pre>
 
-        <Note>"The values are persistant. When you reload the page the values will be the same."</Note>
+        <Note>"The values are persistent. When you reload the page the values will be the same."</Note>
     }
 }
 
@@ -68,7 +67,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

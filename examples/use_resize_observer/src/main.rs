@@ -4,11 +4,11 @@ use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::use_resize_observer;
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Textarea>(cx);
-    let (text, set_text) = create_signal(cx, "".to_string());
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Textarea>();
+    let (text, set_text) = create_signal("".to_string());
 
-    use_resize_observer(cx, el, move |entries, _| {
+    use_resize_observer(el, move |entries, _| {
         let rect = entries[0].content_rect();
         set_text.set(format!(
             "width: {:.0}\nheight: {:.0}",
@@ -17,8 +17,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         ));
     });
 
-    view! { cx,
-        <Note class="mb-2">"Resize the box to see changes"</Note>
+    view! {         <Note class="mb-2">"Resize the box to see changes"</Note>
         <textarea
             node_ref=el
             readonly
@@ -32,7 +31,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

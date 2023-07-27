@@ -17,12 +17,12 @@ use_simple_math!(
     /// # use leptos_use::math::use_ceil;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (value, set_value) = create_signal(cx, 44.15);
-    /// let result: Signal<f64> = use_ceil(cx, value); // 45
+    /// # fn Demo() -> impl IntoView {
+    /// let (value, set_value) = create_signal(44.15);
+    /// let result: Signal<f64> = use_ceil(value); // 45
     /// #
     /// # assert_eq!(result.get(), 45.0);
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     // #[doc(cfg(feature = "math"))]

@@ -21,14 +21,14 @@ pub use crate::utils::ThrottleOptions;
 /// # use leptos_use::use_throttle_fn;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let mut throttled_fn = use_throttle_fn(
 ///     || {
 ///         // do something, it will be called at most 1 time per second
 ///     },
 ///     1000.0,
 /// );
-/// view! { cx,
+/// view! {
 ///     <button on:click=move |_| { throttled_fn(); }>
 ///         "Smash me!"
 ///     </button>
@@ -42,7 +42,7 @@ pub use crate::utils::ThrottleOptions;
 /// # use leptos::*;
 /// # use leptos_use::{ThrottleOptions, use_throttle_fn_with_options};
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let throttled_fn = use_throttle_fn_with_options(
 ///     || {
 ///         // do something, it will be called at most 1 time per second
@@ -52,7 +52,7 @@ pub use crate::utils::ThrottleOptions;
 ///         .leading(true)
 ///         .trailing(true),
 /// );
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///

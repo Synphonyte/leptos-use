@@ -62,6 +62,11 @@
 - [watch_with_options](watch/watch_with_options.md)
 - [whenever](watch/whenever.md)
 
+# Reactivity
+
+- [signal_debounced](reactivity/signal_debounced.md)
+- [signal_throttled](reactivity/signal_throttled.md)
+
 # Utilities
 
 - [is_err](utilities/is_err.md)

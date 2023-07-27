@@ -3,10 +3,10 @@ use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{breakpoints_tailwind, use_breakpoints, BreakpointsTailwind};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
+fn Demo() -> impl IntoView {
     let breakpoints = breakpoints_tailwind();
 
-    let screen_size = use_breakpoints(cx, breakpoints.clone());
+    let screen_size = use_breakpoints(breakpoints.clone());
 
     use BreakpointsTailwind::*;
 
@@ -24,8 +24,7 @@ fn Demo(cx: Scope) -> impl IntoView {
     let label_classes = "justify-self-end".to_string();
     let svg_classes = "align-middle ml-3 mr-1 opacity-60".to_string();
 
-    view! { cx,
-        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+    view! {         <div class="grid grid-cols-2 gap-x-4 gap-y-3">
             <div class=label_classes.clone()>"Current breakpoints :"</div>
             <code>{move || format!("{:?}", current.get()) }</code>
 
@@ -145,7 +144,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

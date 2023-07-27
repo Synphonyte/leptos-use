@@ -3,9 +3,9 @@ use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{use_debounce_fn_with_options, DebounceOptions};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let (click_count, set_click_count) = create_signal(cx, 0);
-    let (debounced_count, set_debounced_count) = create_signal(cx, 0);
+fn Demo() -> impl IntoView {
+    let (click_count, set_click_count) = create_signal(0);
+    let (debounced_count, set_debounced_count) = create_signal(0);
 
     let debounced_fn = use_debounce_fn_with_options(
         move || set_debounced_count.set(debounced_count.get_untracked() + 1),
@@ -13,8 +13,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         DebounceOptions::default().max_wait(Some(5000.0)),
     );
 
-    view! { cx,
-        <button
+    view! {         <button
             on:click=move |_| {
                 set_click_count.set(click_count.get_untracked() + 1);
                 debounced_fn();
@@ -32,7 +31,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

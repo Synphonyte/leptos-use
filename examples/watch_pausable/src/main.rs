@@ -4,10 +4,10 @@ use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{watch_pausable, WatchPausableReturn};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let input = create_node_ref::<Input>(cx);
-    let (log, set_log) = create_signal(cx, "".to_string());
-    let (source, set_source) = create_signal(cx, "".to_string());
+fn Demo() -> impl IntoView {
+    let input = create_node_ref::<Input>();
+    let (log, set_log) = create_signal("".to_string());
+    let (source, set_source) = create_signal("".to_string());
 
     let WatchPausableReturn {
         pause,
@@ -15,7 +15,6 @@ fn Demo(cx: Scope) -> impl IntoView {
         is_active,
         ..
     } = watch_pausable(
-        cx,
         move || source.get(),
         move |v, _, _| {
             set_log.update(|log| *log = format!("{log}Changed to \"{v}\"\n"));
@@ -34,8 +33,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         resume();
     };
 
-    view! { cx,
-        <Note class="mb-2">"Type something below to trigger the watch"</Note>
+    view! {         <Note class="mb-2">"Type something below to trigger the watch"</Note>
         <input
             node_ref=input
             class="block"
@@ -58,7 +56,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

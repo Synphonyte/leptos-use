@@ -17,15 +17,15 @@ use leptos::*;
 /// # use leptos_use::{use_interval, UseIntervalReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseIntervalReturn {
 ///     counter,
 ///     reset,
 ///     is_active,
 ///     pause,
 ///     resume
-/// }  = use_interval( cx, 200 );
-/// # view! { cx, }
+/// }  = use_interval( 200 );
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -33,18 +33,16 @@ use leptos::*;
 ///
 /// On the server this function will simply be ignored.
 pub fn use_interval<N>(
-    cx: Scope,
     interval: N,
 ) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
     N: Into<MaybeSignal<u64>>,
 {
-    use_interval_with_options(cx, interval, UseIntervalOptions::default())
+    use_interval_with_options(interval, UseIntervalOptions::default())
 }
 
 /// Version of [`use_interval`] that takes `UseIntervalOptions`. See [`use_interval`] for how to use.
 pub fn use_interval_with_options<N>(
-    cx: Scope,
     interval: N,
     options: UseIntervalOptions,
 ) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
@@ -56,7 +54,7 @@ where
         callback,
     } = options;
 
-    let (counter, set_counter) = create_signal(cx, 0u64);
+    let (counter, set_counter) = create_signal(0u64);
 
     let update = move || set_counter.update(|count| *count += 1);
     let reset = move || set_counter.set(0);
@@ -71,7 +69,6 @@ where
         pause,
         resume,
     } = use_interval_fn_with_options(
-        cx,
         cb,
         interval,
         UseIntervalFnOptions {

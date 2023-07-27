@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.6.0"
+version = "0.7.0-alpha"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -13,7 +13,7 @@ repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
 [dependencies]
-leptos = "0.4"
+leptos = "0.5.0-alpha"
 wasm-bindgen = "0.2"
 js-sys = "0.3"
 default-struct-builder = "0.4"
@@ -80,5 +80,3 @@ all-features = true
 rustdoc-args = ["--cfg=web_sys_unstable_apis"]
 rustc-args = ["--cfg=web_sys_unstable_apis"]
 
-[dev-dependencies]
-leptos = "0.4"

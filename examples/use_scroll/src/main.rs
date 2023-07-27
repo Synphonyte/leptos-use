@@ -6,10 +6,10 @@ use leptos_use::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseS
 use web_sys::Event;
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Div>(cx);
-    let (smooth, set_smooth) = create_signal(cx, false);
-    let behavior = Signal::derive(cx, move || {
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Div>();
+    let (smooth, set_smooth) = create_signal(false);
+    let behavior = Signal::derive(move || {
         if smooth.get() {
             ScrollBehavior::Smooth
         } else {
@@ -35,7 +35,6 @@ fn Demo(cx: Scope) -> impl IntoView {
         directions,
         ..
     } = use_scroll_with_options(
-        cx,
         el,
         UseScrollOptions::default()
             .behavior(behavior)
@@ -43,8 +42,7 @@ fn Demo(cx: Scope) -> impl IntoView {
             .on_scroll(on_scroll.clone()),
     );
 
-    view! { cx,
-        <div class="flex">
+    view! {         <div class="flex">
             <div node_ref=el class="w-[300px] h-[300px] m-auto my-auto overflow-scroll bg-gray-500/5 rounded">
                 <div class="w-[500px] h-[400px] relative">
                     <div class="absolute left-0 top-0 bg-gray-500/5 px-2 py-1">
@@ -124,35 +122,35 @@ fn Demo(cx: Scope) -> impl IntoView {
                     <div class="text-right opacity-75">
                         "Top Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().top) />
+                    <BooleanDisplay value=Signal::derive(move || arrived_state.get().top) />
                     <div class="text-right opacity-75">
                         "Right Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().right) />
+                    <BooleanDisplay value=Signal::derive(move || arrived_state.get().right) />
                     <div class="text-right opacity-75">
                         "Bottom Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().bottom) />
+                    <BooleanDisplay value=Signal::derive(move || arrived_state.get().bottom) />
                     <div class="text-right opacity-75">
                         "Left Arrived"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || arrived_state.get().left) />
+                    <BooleanDisplay value=Signal::derive(move || arrived_state.get().left) />
                     <div class="text-right opacity-75">
                         "Scrolling Up"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().top) />
+                    <BooleanDisplay value=Signal::derive(move || directions.get().top) />
                     <div class="text-right opacity-75">
                         "Scrolling Right"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().right) />
+                    <BooleanDisplay value=Signal::derive(move || directions.get().right) />
                     <div class="text-right opacity-75">
                         "Scrolling Down"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().bottom) />
+                    <BooleanDisplay value=Signal::derive(move || directions.get().bottom) />
                     <div class="text-right opacity-75">
                         "Scrolling Left"
                     </div>
-                    <BooleanDisplay value=Signal::derive(cx, move || directions.get().left) />
+                    <BooleanDisplay value=Signal::derive(move || directions.get().left) />
                 </div>
             </div>
         </div>
@@ -163,7 +161,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

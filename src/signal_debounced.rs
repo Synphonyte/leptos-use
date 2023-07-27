@@ -17,11 +17,11 @@ signal_filtered!(
     /// # use leptos_use::signal_debounced;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (input, set_input) = create_signal(cx, "");
-    /// let debounced = signal_debounced(cx, input, 1000.0);
+    /// # fn Demo() -> impl IntoView {
+    /// let (input, set_input) = create_signal("");
+    /// let debounced = signal_debounced(input, 1000.0);
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///
@@ -34,16 +34,15 @@ signal_filtered!(
     /// # use leptos_use::{signal_debounced_with_options, DebounceOptions};
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (input, set_input) = create_signal(cx, "");
+    /// # fn Demo() -> impl IntoView {
+    /// let (input, set_input) = create_signal("");
     /// let debounced = signal_debounced_with_options(
-    ///     cx,
     ///     input,
     ///     1000.0,
     ///     DebounceOptions::default().max_wait(Some(500.0))
     /// );
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///

@@ -3,6 +3,8 @@ resolver = "2"
 
 members = [
     "on_click_outside",
+    "signal_debounced",
+    "signal_throttled",
     "use_abs",
     "use_active_element",
     "use_breakpoints",

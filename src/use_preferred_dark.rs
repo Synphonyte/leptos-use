@@ -10,11 +10,11 @@ use leptos::*;
 /// # use leptos_use::use_preferred_dark;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let is_dark_preferred = use_preferred_dark(cx);
+/// let is_dark_preferred = use_preferred_dark();
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -26,6 +26,6 @@ use leptos::*;
 ///
 /// * [`use_media_query`]
 /// * [`use_preferred_contrast`]
-pub fn use_preferred_dark(cx: Scope) -> Signal<bool> {
-    use_media_query(cx, "(prefers-color-scheme: dark)")
+pub fn use_preferred_dark() -> Signal<bool> {
+    use_media_query("(prefers-color-scheme: dark)")
 }

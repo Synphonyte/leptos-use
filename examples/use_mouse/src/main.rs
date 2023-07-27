@@ -22,20 +22,18 @@ impl UseMouseEventExtractor for Extractor {
 }
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Div>(cx);
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Div>();
 
-    let mouse_default = use_mouse(cx);
+    let mouse_default = use_mouse();
 
     let mouse_with_extractor = use_mouse_with_options(
-        cx,
         UseMouseOptions::default()
             .target(el)
             .coord_type(UseMouseCoordType::Custom(Extractor)),
     );
 
-    view! { cx,
-        <div node_ref=el>
+    view! {         <div node_ref=el>
             <p class="font-semibold">"Basic Usage"</p>
             <pre lang="yaml">
                 { move || format!(r#"    x: {}
@@ -59,7 +57,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

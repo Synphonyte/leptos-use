@@ -2,7 +2,6 @@ use leptos::*;
 
 #[component]
 pub fn BooleanDisplay(
-    cx: Scope,
     #[prop(into)] value: MaybeSignal<bool>,
     #[prop(optional, into)] class: String,
     #[prop(default = "true")] true_str: &'static str,
@@ -19,8 +18,7 @@ pub fn BooleanDisplay(
         )
     };
 
-    view! { cx,
-        <span class=class>
+    view! {         <span class=class>
             { move || if value.get() { true_str} else { false_str } }
         </span>
     }

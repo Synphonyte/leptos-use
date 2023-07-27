@@ -23,19 +23,18 @@ use wasm_bindgen::prelude::*;
 /// # use leptos_use::use_intersection_observer;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Div>(cx);
-/// let (is_visible, set_visible) = create_signal(cx, false);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Div>();
+/// let (is_visible, set_visible) = create_signal(false);
 ///
 /// use_intersection_observer(
-///     cx,
 ///     el,
 ///     move |entries, _| {
 ///         set_visible.set(entries[0].is_intersecting());
 ///     },
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el>
 ///         <h1>"Hello World"</h1>
 ///     </div>
@@ -51,17 +50,15 @@ use wasm_bindgen::prelude::*;
 ///
 /// * [`use_element_visibility`]
 pub fn use_intersection_observer<El, T, F>(
-    cx: Scope,
     target: El,
     callback: F,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
 {
     use_intersection_observer_with_options::<El, T, web_sys::Element, web_sys::Element, F>(
-        cx,
         target,
         callback,
         UseIntersectionObserverOptions::default(),
@@ -70,15 +67,14 @@ where
 
 /// Version of [`use_intersection_observer`] that takes a [`UseIntersectionObserverOptions`]. See [`use_intersection_observer`] for how to use.
 pub fn use_intersection_observer_with_options<El, T, RootEl, RootT, F>(
-    cx: Scope,
     target: El,
     mut callback: F,
     options: UseIntersectionObserverOptions<RootEl, RootT>,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
-    (Scope, RootEl): Into<ElementMaybeSignal<RootT, web_sys::Element>>,
+    RootEl: Into<ElementMaybeSignal<RootT, web_sys::Element>>,
     RootT: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
 {
@@ -104,7 +100,7 @@ where
     )
     .into_js_value();
 
-    let (is_active, set_active) = create_signal(cx, immediate);
+    let (is_active, set_active) = create_signal(immediate);
 
     let observer: Rc<RefCell<Option<web_sys::IntersectionObserver>>> = Rc::new(RefCell::new(None));
 
@@ -118,14 +114,13 @@ where
         }
     };
 
-    let targets = (cx, target).into();
-    let root = root.map(|root| (cx, root).into());
+    let targets = (target).into();
+    let root = root.map(|root| (root).into());
 
     let stop_watch = {
         let cleanup = cleanup.clone();
 
         watch_with_options(
-            cx,
             move || {
                 (
                     targets.get(),
@@ -182,7 +177,7 @@ where
         }
     };
 
-    on_cleanup(cx, stop.clone());
+    on_cleanup(stop.clone());
 
     let pause = {
         let cleanup = cleanup.clone();
@@ -208,7 +203,7 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseIntersectionObserverOptions<El, T>
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     /// If `true`, the `IntersectionObserver` will be attached immediately. Otherwise it

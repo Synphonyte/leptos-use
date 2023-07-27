@@ -20,40 +20,39 @@ use web_sys::AddEventListenerOptions;
 /// use leptos_use::use_active_element;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let active_element = use_active_element(cx);
+/// # fn Demo() -> impl IntoView {
+/// let active_element = use_active_element();
 ///
-/// create_effect(cx, move |_| {
+/// create_effect(move |_| {
 ///     log!("focus changed to {:?}", active_element.get());
 /// });
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
 /// ## Server-Side Rendering
 ///
 /// On the server this returns a `Signal` that always contains the value `None`.
-pub fn use_active_element(cx: Scope) -> Signal<Option<HtmlElement<AnyElement>>> {
+pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
     cfg_if! { if #[cfg(feature = "ssr")] {
         let get_active_element = || { None };
     } else {
         let get_active_element = move || {
             document()
                 .active_element()
-                .map(|el| el.to_leptos_element(cx))
+                .map(|el| el.to_leptos_element())
         };
     }}
 
-    let (active_element, set_active_element) = create_signal(cx, get_active_element());
+    let (active_element, set_active_element) = create_signal(get_active_element());
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let mut listener_options = AddEventListenerOptions::new();
         listener_options.capture(true);
 
         let _ = use_event_listener_with_options(
-            cx,
-            window(),
+                        window(),
             blur,
             move |event| {
                 if event.related_target().is_some() {
@@ -66,8 +65,7 @@ pub fn use_active_element(cx: Scope) -> Signal<Option<HtmlElement<AnyElement>>> 
         );
 
         let _ = use_event_listener_with_options(
-            cx,
-            window(),
+                        window(),
             focus,
             move |_| {
                 set_active_element.update(|el| *el = get_active_element());

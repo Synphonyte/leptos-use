@@ -19,17 +19,17 @@ use web_sys::AddEventListenerOptions;
 /// # use leptos_use::use_window_scroll;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let (x, y) = use_window_scroll(cx);
+/// # fn Demo() -> impl IntoView {
+/// let (x, y) = use_window_scroll();
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
 /// ## Server-Side Rendering
 ///
 /// On the server this returns `Signal`s that are always `0.0`.
-pub fn use_window_scroll(cx: Scope) -> (Signal<f64>, Signal<f64>) {
+pub fn use_window_scroll() -> (Signal<f64>, Signal<f64>) {
     cfg_if! { if #[cfg(feature = "ssr")] {
         let initial_x = 0.0;
         let initial_y = 0.0;
@@ -37,8 +37,8 @@ pub fn use_window_scroll(cx: Scope) -> (Signal<f64>, Signal<f64>) {
         let initial_x = window().scroll_x().unwrap_or_default();
         let initial_y = window().scroll_y().unwrap_or_default();
     }}
-    let (x, set_x) = create_signal(cx, initial_x);
-    let (y, set_y) = create_signal(cx, initial_y);
+    let (x, set_x) = create_signal(initial_x);
+    let (y, set_y) = create_signal(initial_y);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let mut options = AddEventListenerOptions::new();
@@ -46,8 +46,7 @@ pub fn use_window_scroll(cx: Scope) -> (Signal<f64>, Signal<f64>) {
         options.passive(true);
 
         let _ = use_event_listener_with_options(
-            cx,
-            window(),
+                        window(),
             scroll,
             move |_| {
                 set_x.set(window().scroll_x().unwrap_or_default());

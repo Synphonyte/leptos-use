@@ -9,7 +9,6 @@ macro_rules! signal_filtered {
         paste! {
             $(#[$outer])*
             pub fn [<signal_ $filter_name d>]<S, T>(
-                cx: Scope,
                 value: S,
                 ms: impl Into<MaybeSignal<f64>> + 'static,
             ) -> Signal<T>
@@ -17,7 +16,7 @@ macro_rules! signal_filtered {
                 S: Into<Signal<T>>,
                 T: Clone + 'static,
             {
-                [<signal_ $filter_name d_with_options>](cx, value, ms, [<$filter_name:camel Options>]::default())
+                [<signal_ $filter_name d_with_options>](value, ms, [<$filter_name:camel Options>]::default())
             }
 
             /// Version of
@@ -29,7 +28,6 @@ macro_rules! signal_filtered {
             #[$simple_func_doc]
             /// for how to use.
             pub fn [<signal_ $filter_name d_with_options>]<S, T>(
-                cx: Scope,
                 value: S,
                 ms: impl Into<MaybeSignal<f64>> + 'static,
                 options: [<$filter_name:camel Options>],
@@ -45,7 +43,7 @@ macro_rules! signal_filtered {
                     return value;
                 }
 
-                let (filtered, set_filtered) = create_signal(cx, value.get_untracked());
+                let (filtered, set_filtered) = create_signal(value.get_untracked());
 
                 let update = [<use_ $filter_name _fn_with_options>](
                     move || set_filtered.set(value.get_untracked()),
@@ -53,7 +51,7 @@ macro_rules! signal_filtered {
                     options,
                 );
 
-                let _ = watch(cx, move || value.get(), move |_, _, _| update(), false);
+                let _ = watch(move || value.get(), move |_, _, _| update(), false);
 
                 filtered.into()
             }

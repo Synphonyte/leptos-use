@@ -41,7 +41,7 @@ create_effect(
     cx,
     move |_| {
         // window() doesn't work on the server
-        use_event_listener(cx, window(), "resize", move |_| {
+        use_event_listener(window(), "resize", move |_| {
             // ...
         })
     },

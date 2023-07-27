@@ -17,12 +17,12 @@ use_simple_math!(
     /// # use leptos_use::math::use_floor;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (value, set_value) = create_signal(cx, 45.95);
-    /// let result: Signal<f64> = use_floor(cx, value); // 45
+    /// # fn Demo() -> impl IntoView {
+    /// let (value, set_value) = create_signal(45.95);
+    /// let result: Signal<f64> = use_floor(value); // 45
     /// #
     /// # assert_eq!(result.get(), 45.0);
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     // #[doc(cfg(feature = "math"))]

@@ -4,10 +4,10 @@ use leptos_use::docs::demo_or_body;
 use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let el = create_node_ref::<Div>(cx);
+fn Demo() -> impl IntoView {
+    let el = create_node_ref::<Div>();
     let (color, set_color) =
-        use_css_var_with_options(cx, "--color", UseCssVarOptions::default().target(el));
+        use_css_var_with_options("--color", UseCssVarOptions::default().target(el));
     let switch_color = move |_| {
         if color.get() == "#df8543" {
             set_color.set("#7fa998".to_string());
@@ -16,9 +16,9 @@ fn Demo(cx: Scope) -> impl IntoView {
         }
     };
 
-    let elv = create_node_ref::<Div>(cx);
-    let (key, set_key) = create_signal(cx, "--color".to_string());
-    let (color_val, _) = use_css_var_with_options(cx, key, UseCssVarOptions::default().target(elv));
+    let elv = create_node_ref::<Div>();
+    let (key, set_key) = create_signal("--color".to_string());
+    let (color_val, _) = use_css_var_with_options(key, UseCssVarOptions::default().target(elv));
     let change_var = move |_| {
         if key.get() == "--color" {
             set_key.set("--color-one".to_string());
@@ -33,8 +33,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         )
     };
 
-    view! { cx,
-        <div>
+    view! {         <div>
             <div node_ref=el style="--color: #7fa998; color: var(--color)">
                 "Sample text, " {color}
             </div>
@@ -54,7 +53,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

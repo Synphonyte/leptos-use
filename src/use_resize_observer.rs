@@ -1,5 +1,5 @@
 use crate::core::ElementsMaybeSignal;
-use crate::{use_supported, watch};
+use crate::use_supported;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::RefCell;
@@ -25,12 +25,11 @@ use wasm_bindgen::prelude::*;
 /// # use leptos_use::use_resize_observer;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref(cx);
-/// let (text, set_text) = create_signal(cx, "".to_string());
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref();
+/// let (text, set_text) = create_signal("".to_string());
 ///
 /// use_resize_observer(
-///     cx,
 ///     el,
 ///     move |entries, observer| {
 ///         let rect = entries[0].content_rect();
@@ -38,7 +37,7 @@ use wasm_bindgen::prelude::*;
 ///     },
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el>{ move || text.get() }</div>
 /// }
 /// # }
@@ -52,27 +51,25 @@ use wasm_bindgen::prelude::*;
 ///
 /// - [`use_element_size`]
 pub fn use_resize_observer<El, T, F>(
-    cx: Scope,
     target: El, // TODO : multiple elements?
     callback: F,
 ) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
-    use_resize_observer_with_options(cx, target, callback, UseResizeObserverOptions::default())
+    use_resize_observer_with_options(target, callback, UseResizeObserverOptions::default())
 }
 
 /// Version of [`use_resize_observer`] that takes a `web_sys::ResizeObserverOptions`. See [`use_resize_observer`] for how to use.
 pub fn use_resize_observer_with_options<El, T, F>(
-    cx: Scope,
     target: El, // TODO : multiple elements?
     mut callback: F,
     options: UseResizeObserverOptions,
 ) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
@@ -92,7 +89,7 @@ where
 
     let observer: Rc<RefCell<Option<web_sys::ResizeObserver>>> = Rc::new(RefCell::new(None));
 
-    let is_supported = use_supported(cx, || JsValue::from("ResizeObserver").js_in(&window()));
+    let is_supported = use_supported(|| JsValue::from("ResizeObserver").js_in(&window()));
 
     let cleanup = {
         let observer = Rc::clone(&observer);
@@ -106,13 +103,12 @@ where
         }
     };
 
-    let targets = (cx, target).into();
+    let targets = (target).into();
 
     let stop_watch = {
         let cleanup = cleanup.clone();
 
         watch(
-            cx,
             move || targets.get(),
             move |targets, _, _| {
                 cleanup();
@@ -130,6 +126,7 @@ where
                     observer.replace(Some(obs));
                 }
             },
+            false,
         )
     };
 
@@ -138,7 +135,7 @@ where
         stop_watch();
     };
 
-    on_cleanup(cx, stop.clone());
+    on_cleanup(stop.clone());
 
     UseResizeObserverReturn { is_supported, stop }
 }

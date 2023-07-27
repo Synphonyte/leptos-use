@@ -3,12 +3,11 @@ use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{watch_debounced_with_options, WatchDebouncedOptions};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let (input, set_input) = create_signal(cx, "".to_string());
-    let (updated, set_updated) = create_signal(cx, 0);
+fn Demo() -> impl IntoView {
+    let (input, set_input) = create_signal("".to_string());
+    let (updated, set_updated) = create_signal(0);
 
     let _ = watch_debounced_with_options(
-        cx,
         move || input.get(),
         move |_, _, _| {
             set_updated.update(|x| *x += 1);
@@ -17,8 +16,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         WatchDebouncedOptions::default().max_wait(Some(5000.0)),
     );
 
-    view! { cx,
-        <input
+    view! {         <input
             class="block"
             prop:value=move || input.get()
             on:input=move |e| set_input.set(event_target_value(&e))
@@ -40,7 +38,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

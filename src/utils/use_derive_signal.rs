@@ -5,12 +5,12 @@ macro_rules! use_derive_signal {
         $($body:tt)+
     ) => {
         $(#[$outer])*
-        pub fn $name<V $(, $( $type_param ),* )? >(cx: Scope, value: V) -> Signal<$return_type>
+        pub fn $name<V $(, $( $type_param ),* )? >(value: V) -> Signal<$return_type>
         where
             V: Into<MaybeSignal<$inner_signal_type $(< $( $inner_type_param ),+ >)?>> $(, $( $type_param $( : $first_bound $(+ $rest_bound)* )? ),+ )?
         {
             let value = value.into();
-            Signal::derive(cx, move || value.with($($body)+))
+            Signal::derive(move || value.with($($body)+))
         }
     };
 }

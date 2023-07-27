@@ -19,13 +19,13 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::use_favicon;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let (icon, set_icon) = use_favicon(cx);
+/// let (icon, set_icon) = use_favicon();
 ///
 /// set_icon.set(Some("dark.png".to_string())); // change current icon
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -39,33 +39,31 @@ use wasm_bindgen::JsCast;
 /// # use leptos_use::{use_favicon_with_options, UseFaviconOptions, use_preferred_dark};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let is_dark = use_preferred_dark(cx);
+/// let is_dark = use_preferred_dark();
 ///
 /// let (icon, _) = use_favicon_with_options(
-///     cx,
 ///     UseFaviconOptions::default().new_icon(
-///         Signal::derive(cx, move || {
+///         Signal::derive(move || {
 ///             Some((if is_dark.get() { "dark.png" } else { "light.png" }).to_string())
 ///         }),
 ///     )
 /// );
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
 /// ## Server-Side Rendering
 ///
 /// On the server only the signals work but no favicon will be changed obviously.
-pub fn use_favicon(cx: Scope) -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
-    use_favicon_with_options(cx, UseFaviconOptions::default())
+pub fn use_favicon() -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
+    use_favicon_with_options(UseFaviconOptions::default())
 }
 
 /// Version of [`use_favicon`] that accepts a `UseFaviconOptions`. See [`use_favicon`] for more details.
 pub fn use_favicon_with_options(
-    cx: Scope,
     options: UseFaviconOptions,
 ) -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     let UseFaviconOptions {
@@ -74,7 +72,7 @@ pub fn use_favicon_with_options(
         rel,
     } = options;
 
-    let (favicon, set_favicon) = new_icon.into_signal(cx);
+    let (favicon, set_favicon) = new_icon.into_signal();
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let link_selector = format!("link[rel*=\"{rel}\"]");
@@ -94,8 +92,7 @@ pub fn use_favicon_with_options(
         };
 
         let _ = watch(
-            cx,
-            move || favicon.get(),
+                        move || favicon.get(),
             move |new_icon, prev_icon, _| {
                 if Some(new_icon) != prev_icon {
                     if let Some(new_icon) = new_icon {

@@ -19,8 +19,8 @@ use leptos::*;
 /// # use leptos_use::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let drop_zone_el = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let drop_zone_el = create_node_ref::<Div>();
 ///
 /// let on_drop = |event| {
 ///     // called when files are dropped on zone
@@ -30,12 +30,11 @@ use leptos::*;
 ///     is_over_drop_zone,
 ///     ..
 /// } = use_drop_zone_with_options(
-///     cx,
 ///     drop_zone_el,
 ///     UseDropZoneOptions::default().on_drop(on_drop)
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=drop_zone_el>
 ///         "Drop files here"
 ///     </div>
@@ -46,24 +45,23 @@ use leptos::*;
 /// ## Server-Side Rendering
 ///
 /// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
-pub fn use_drop_zone<El, T>(cx: Scope, target: El) -> UseDropZoneReturn
+pub fn use_drop_zone<El, T>(target: El) -> UseDropZoneReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
-    use_drop_zone_with_options(cx, target, UseDropZoneOptions::default())
+    use_drop_zone_with_options(target, UseDropZoneOptions::default())
 }
 
 /// Version of [`use_drop_zone`] that takes a `UseDropZoneOptions`. See [`use_drop_zone`] for how to use.
 pub fn use_drop_zone_with_options<El, T>(
-    cx: Scope,
     target: El,
     options: UseDropZoneOptions,
 ) -> UseDropZoneReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let UseDropZoneOptions {
@@ -73,10 +71,10 @@ where
         mut on_over,
     } = options;
 
-    let (is_over_drop_zone, set_over_drop_zone) = create_signal(cx, false);
-    let (files, set_files) = create_signal(cx, Vec::<web_sys::File>::new());
+    let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
+    let (files, set_files) = create_signal(Vec::<web_sys::File>::new());
 
-    let counter = store_value(cx, 0_usize);
+    let counter = store_value(0_usize);
 
     let update_files = move |event: &web_sys::DragEvent| {
         if let Some(data_transfer) = event.data_transfer() {
@@ -92,7 +90,7 @@ where
         }
     };
 
-    let _ = use_event_listener(cx, target.clone(), dragenter, move |event| {
+    let _ = use_event_listener(target.clone(), dragenter, move |event| {
         event.prevent_default();
         counter.update_value(|counter| *counter += 1);
         set_over_drop_zone.set(true);
@@ -105,7 +103,7 @@ where
         });
     });
 
-    let _ = use_event_listener(cx, target.clone(), dragover, move |event| {
+    let _ = use_event_listener(target.clone(), dragover, move |event| {
         event.prevent_default();
         update_files(&event);
         on_over(UseDropZoneEvent {
@@ -114,7 +112,7 @@ where
         });
     });
 
-    let _ = use_event_listener(cx, target.clone(), dragleave, move |event| {
+    let _ = use_event_listener(target.clone(), dragleave, move |event| {
         event.prevent_default();
         counter.update_value(|counter| *counter -= 1);
         if counter.get_value() == 0 {
@@ -129,7 +127,7 @@ where
         });
     });
 
-    let _ = use_event_listener(cx, target, drop, move |event| {
+    let _ = use_event_listener(target, drop, move |event| {
         event.prevent_default();
         counter.update_value(|counter| *counter = 0);
         set_over_drop_zone.set(false);

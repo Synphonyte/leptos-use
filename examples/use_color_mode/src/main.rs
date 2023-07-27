@@ -7,9 +7,8 @@ use leptos_use::{
 };
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
+fn Demo() -> impl IntoView {
     let UseColorModeReturn { mode, set_mode, .. } = use_color_mode_with_options(
-        cx,
         UseColorModeOptions::default()
             .custom_modes(vec![
                 "rust".into(),
@@ -17,11 +16,10 @@ fn Demo(cx: Scope) -> impl IntoView {
                 "navy".into(),
                 "ayu".into(),
             ])
-            .initial_value(ColorMode::from(html(cx).class_name())),
+            .initial_value(ColorMode::from(html().class_name())),
     );
 
     let UseCycleListReturn { state, next, .. } = use_cycle_list_with_options(
-        cx,
         vec![
             ColorMode::Light,
             ColorMode::Custom("rust".into()),
@@ -32,8 +30,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         UseCycleListOptions::default().initial_value(Some((mode, set_mode).into())),
     );
 
-    view! { cx,
-        <button on:click=move |_| next()>
+    view! {         <button on:click=move |_| next()>
             { move || format!("{}", state.get()) }
         </button>
         <Note>"Click to change the color mode"</Note>
@@ -44,7 +41,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

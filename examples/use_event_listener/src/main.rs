@@ -4,14 +4,14 @@ use leptos::*;
 use leptos_use::use_event_listener;
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let _ = use_event_listener(cx, window(), keydown, |evt| {
+fn Demo() -> impl IntoView {
+    let _ = use_event_listener(window(), keydown, |evt| {
         log!("window keydown: '{}'", evt.key());
     });
 
-    let element = create_node_ref::<A>(cx);
+    let element = create_node_ref::<A>();
 
-    let _ = use_event_listener(cx, element, click, |evt| {
+    let _ = use_event_listener(element, click, |evt| {
         log!(
             "click from element '{:?}'",
             event_target::<web_sys::HtmlElement>(&evt).inner_text()
@@ -20,10 +20,9 @@ fn Demo(cx: Scope) -> impl IntoView {
         evt.prevent_default();
     });
 
-    let (cond, set_cond) = create_signal(cx, true);
+    let (cond, set_cond) = create_signal(true);
 
-    view! { cx,
-        <p>"Check in the dev tools console"</p>
+    view! {         <p>"Check in the dev tools console"</p>
         <p>
             <label>
                 <input
@@ -35,8 +34,7 @@ fn Demo(cx: Scope) -> impl IntoView {
         </p>
         <Show
             when=move || cond.get()
-            fallback=move |cx| view! { cx,
-                <a node_ref=element href="#">
+            fallback=move || view! {                 <a node_ref=element href="#">
                     "Condition"
                     <b>" false "</b>
                     "[click me]"
@@ -56,9 +54,8 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to_body(|cx| {
-        view! {cx,
-            <Demo />
+    mount_to_body(|| {
+        view! {            <Demo />
         }
     })
 }

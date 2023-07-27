@@ -4,7 +4,7 @@ macro_rules! use_partial_cmp {
     $ord:pat
     ) => {
         $(#[$outer])*
-        pub fn $fn_name<C, S, N>(cx: Scope, container: S) -> Signal<Option<N>>
+        pub fn $fn_name<C, S, N>(container: S) -> Signal<Option<N>>
         where
             S: Into<MaybeSignal<C>>,
             C: 'static,
@@ -13,7 +13,7 @@ macro_rules! use_partial_cmp {
         {
             let container = container.into();
 
-            create_memo(cx, move |_| {
+            create_memo(move |_| {
                 container.with(|container| {
                     if container.into_iter().count() == 0 {
                         return None;
@@ -45,13 +45,13 @@ macro_rules! use_simple_math {
         ) => {
         paste! {
             $(#[$outer])*
-            pub fn  [<use_ $fn_name>]<S, N>(cx: Scope, x: S) -> Signal<N>
+            pub fn  [<use_ $fn_name>]<S, N>(x: S) -> Signal<N>
             where
                 S: Into<MaybeSignal<N>>,
                 N: Float,
             {
                 let x = x.into();
-                Signal::derive(cx, move || x.get().$fn_name())
+                Signal::derive(move || x.get().$fn_name())
             }
         }
     };

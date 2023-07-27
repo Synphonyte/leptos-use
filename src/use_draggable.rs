@@ -23,8 +23,8 @@ use web_sys::PointerEvent;
 /// use leptos_use::core::Position;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Div>();
 ///
 /// // `style` is a helper string "left: {x}px; top: {y}px;"
 /// let UseDraggableReturn {
@@ -33,21 +33,20 @@ use web_sys::PointerEvent;
 ///     style,
 ///     ..
 /// } = use_draggable_with_options(
-///     cx,
 ///     el,
 ///     UseDraggableOptions::default().initial_value(Position { x: 40.0, y: 40.0 }),
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el style=move || format!("position: fixed; {}", style.get())>
 ///         Drag me! I am at { x }, { y }
 ///     </div>
 /// }
 /// # }
 /// ```
-pub fn use_draggable<El, T>(cx: Scope, target: El) -> UseDraggableReturn
+pub fn use_draggable<El, T>(target: El) -> UseDraggableReturn
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     use_draggable_with_options::<
@@ -57,22 +56,21 @@ where
         web_sys::EventTarget,
         web_sys::EventTarget,
         web_sys::EventTarget,
-    >(cx, target, UseDraggableOptions::default())
+    >(target, UseDraggableOptions::default())
 }
 
 /// Version of [`use_draggable`] that takes a `UseDraggableOptions`. See [`use_draggable`] for how to use.
 pub fn use_draggable_with_options<El, T, DragEl, DragT, HandleEl, HandleT>(
-    cx: Scope,
     target: El,
     options: UseDraggableOptions<DragEl, DragT, HandleEl, HandleT>,
 ) -> UseDraggableReturn
 where
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     DragEl: Clone,
-    (Scope, DragEl): Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
+    DragEl: Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
     DragT: Into<web_sys::EventTarget> + Clone + 'static,
-    (Scope, HandleEl): Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
+    HandleEl: Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
     HandleT: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let UseDraggableOptions {
@@ -89,18 +87,18 @@ where
         ..
     } = options;
 
-    let target = (cx, target).into();
+    let target = (target).into();
 
     let dragging_handle = if let Some(handle) = handle {
-        let handle = (cx, handle).into();
-        Signal::derive(cx, move || handle.get().map(|handle| handle.into()))
+        let handle = (handle).into();
+        Signal::derive(move || handle.get().map(|handle| handle.into()))
     } else {
         let target = target.clone();
-        Signal::derive(cx, move || target.get().map(|target| target.into()))
+        Signal::derive(move || target.get().map(|target| target.into()))
     };
 
-    let (position, set_position) = initial_value.into_signal(cx);
-    let (start_position, set_start_position) = create_signal(cx, None::<Position>);
+    let (position, set_position) = initial_value.into_signal();
+    let (start_position, set_start_position) = create_signal(None::<Position>);
 
     let filter_event = move |event: &PointerEvent| {
         let ty = event.pointer_type();
@@ -189,21 +187,18 @@ where
     listener_options.capture(true);
 
     let _ = use_event_listener_with_options(
-        cx,
         dragging_handle,
         pointerdown,
         on_pointer_down,
         listener_options.clone(),
     );
     let _ = use_event_listener_with_options(
-        cx,
         dragging_element.clone(),
         pointermove,
         on_pointer_move,
         listener_options.clone(),
     );
     let _ = use_event_listener_with_options(
-        cx,
         dragging_element,
         pointerup,
         on_pointer_up,
@@ -211,12 +206,12 @@ where
     );
 
     UseDraggableReturn {
-        x: Signal::derive(cx, move || position.get().x),
-        y: Signal::derive(cx, move || position.get().y),
+        x: Signal::derive(move || position.get().x),
+        y: Signal::derive(move || position.get().y),
         position,
         set_position,
-        is_dragging: Signal::derive(cx, move || start_position.get().is_some()),
-        style: Signal::derive(cx, move || {
+        is_dragging: Signal::derive(move || start_position.get().is_some()),
+        style: Signal::derive(move || {
             let position = position.get();
             format!("left: {}px; top: {}px;", position.x, position.y)
         }),
@@ -227,9 +222,9 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseDraggableOptions<DragEl, DragT, HandleEl, HandleT>
 where
-    (Scope, DragEl): Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
+    DragEl: Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
     DragT: Into<web_sys::EventTarget> + Clone + 'static,
-    (Scope, HandleEl): Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
+    HandleEl: Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
     HandleT: Into<web_sys::EventTarget> + Clone + 'static,
 {
     /// Only start the dragging when click on the element directly. Defaults to `false`.

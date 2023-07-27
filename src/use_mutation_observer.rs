@@ -22,15 +22,14 @@ use web_sys::MutationObserverInit;
 /// # use leptos_use::use_mutation_observer_with_options;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Pre>(cx);
-/// let (text, set_text) = create_signal(cx, "".to_string());
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Pre>();
+/// let (text, set_text) = create_signal("".to_string());
 ///
 /// let mut init = web_sys::MutationObserverInit::new();
 /// init.attributes(true);
 ///
 /// use_mutation_observer_with_options(
-///     cx,
 ///     el,
 ///     move |mutations, _| {
 ///         if let Some(mutation) = mutations.first() {
@@ -40,7 +39,7 @@ use web_sys::MutationObserverInit;
 ///     init,
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <pre node_ref=el>{ text }</pre>
 /// }
 /// # }
@@ -50,27 +49,25 @@ use web_sys::MutationObserverInit;
 ///
 /// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
 pub fn use_mutation_observer<El, T, F>(
-    cx: Scope,
     target: El,
     callback: F,
 ) -> UseMutationObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
 {
-    use_mutation_observer_with_options(cx, target, callback, MutationObserverInit::default())
+    use_mutation_observer_with_options(target, callback, MutationObserverInit::default())
 }
 
 /// Version of [`use_mutation_observer`] that takes a `web_sys::MutationObserverInit`. See [`use_mutation_observer`] for how to use.
 pub fn use_mutation_observer_with_options<El, T, F>(
-    cx: Scope,
     target: El,
     mut callback: F,
     options: web_sys::MutationObserverInit,
 ) -> UseMutationObserverReturn<impl Fn() + Clone>
 where
-    (Scope, El): Into<ElementsMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
 {
@@ -90,7 +87,7 @@ where
 
     let observer: Rc<RefCell<Option<web_sys::MutationObserver>>> = Rc::new(RefCell::new(None));
 
-    let is_supported = use_supported(cx, || JsValue::from("MutationObserver").js_in(&window()));
+    let is_supported = use_supported(|| JsValue::from("MutationObserver").js_in(&window()));
 
     let cleanup = {
         let observer = Rc::clone(&observer);
@@ -104,13 +101,12 @@ where
         }
     };
 
-    let targets = (cx, target).into();
+    let targets = (target).into();
 
     let stop_watch = {
         let cleanup = cleanup.clone();
 
         leptos::watch(
-            cx,
             move || targets.get(),
             move |targets, _, _| {
                 cleanup();
@@ -136,7 +132,7 @@ where
         stop_watch();
     };
 
-    on_cleanup(cx, stop.clone());
+    on_cleanup(stop.clone());
 
     UseMutationObserverReturn { is_supported, stop }
 }

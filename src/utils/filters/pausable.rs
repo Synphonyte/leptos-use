@@ -20,7 +20,6 @@ where
 }
 
 pub fn pausable_wrapper<F, Arg, R>(
-    cx: Scope,
     function: F,
 ) -> PausableWrapperReturn<
     impl Fn() + Clone,
@@ -33,7 +32,7 @@ where
     R: 'static,
     F: Fn(Arg) -> R + Clone,
 {
-    let (active, set_active) = create_signal(cx, true);
+    let (active, set_active) = create_signal(true);
 
     let pause = move || {
         set_active(false);

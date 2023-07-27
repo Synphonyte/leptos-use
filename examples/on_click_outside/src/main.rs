@@ -4,16 +4,15 @@ use leptos_use::docs::demo_or_body;
 use leptos_use::on_click_outside;
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let (show_modal, set_show_modal) = create_signal(cx, false);
-    let modal_ref = create_node_ref::<Div>(cx);
+fn Demo() -> impl IntoView {
+    let (show_modal, set_show_modal) = create_signal(false);
+    let modal_ref = create_node_ref::<Div>();
 
-    let _ = on_click_outside(cx, modal_ref, move |_| set_show_modal.set(false));
+    let _ = on_click_outside(modal_ref, move |_| set_show_modal.set(false));
 
-    view! { cx,
-        <button on:click=move |_| set_show_modal.set(true)>"Open Modal"</button>
+    view! {         <button on:click=move |_| set_show_modal.set(true)>"Open Modal"</button>
 
-        <Show when=move || show_modal.get() fallback=|_| ()>
+        <Show when=move || show_modal.get() fallback=|| ()>
             <div node_ref=modal_ref class="modal">
                 <div class="inner">
                     <button class="button small" title="Close" on:click=move |_| set_show_modal.set(false)>"𝖷"</button>
@@ -70,7 +69,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), |cx| {
-        view! { cx, <Demo /> }
+    mount_to(demo_or_body(), || {
+        view! { <Demo /> }
     })
 }

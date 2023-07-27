@@ -14,20 +14,20 @@ use leptos::*;
 /// # use leptos_use{{#if module}}::{{ module }}{{/if}}::{{ function_name }};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// {{ function_name }}({{#if scope }}cx{{/if}});
+/// # fn Demo() -> impl IntoView {
+/// {{ function_name }}();
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```{{#if feature}}
 // #[doc(cfg(feature = "{{feature}}"))]{{/if}}
-pub fn {{ function_name }}({{#if scope }}cx: Scope{{/if}}) -> {{ to_pascal_case function_name }}Return {
-    {{ function_name }}_with_options({{#if scope }}cx, {{/if}}{{ to_pascal_case function_name }}Options::default())
+pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
+    {{ function_name }}_with_options({{ to_pascal_case function_name }}Options::default())
 }
 
 /// Version of [`{{ function_name }}`] that takes a `{{ to_pascal_case function_name }}Options`. See [`{{ function_name }}`] for how to use.{{#if feature}}
 // #[doc(cfg(feature = "{{feature}}"))]{{/if}}
-pub fn {{ function_name }}_with_options({{#if scope }}cx: Scope, {{/if}}options: {{ to_pascal_case function_name }}Options) -> {{ to_pascal_case function_name }}Return {
+pub fn {{ function_name }}_with_options(options: {{ to_pascal_case function_name }}Options) -> {{ to_pascal_case function_name }}Return {
     {{ to_pascal_case function_name }}Return {}
 }
 

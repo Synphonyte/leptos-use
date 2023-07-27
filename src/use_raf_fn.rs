@@ -21,38 +21,36 @@ use wasm_bindgen::JsCast;
 /// use leptos_use::utils::Pausable;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let (count, set_count) = create_signal(cx, 0);
+/// # fn Demo() -> impl IntoView {
+/// let (count, set_count) = create_signal(0);
 ///
-/// let Pausable { pause, resume, is_active } = use_raf_fn(cx, move |_| {
+/// let Pausable { pause, resume, is_active } = use_raf_fn(move |_| {
 ///     set_count.update(|count| *count += 1);
 /// });
 ///
-/// view! { cx, <div>Count: { count }</div> }
+/// view! { <div>Count: { count }</div> }
 /// }
 /// ```
 ///
 /// You can use `use_raf_fn_with_options` and set `immediate` to `false`. In that case
 /// you have to call `resume()` before the `callback` is executed.
 pub fn use_raf_fn(
-    cx: Scope,
     callback: impl Fn(UseRafFnCallbackArgs) + Clone + 'static,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
-    use_raf_fn_with_options(cx, callback, UseRafFnOptions::default())
+    use_raf_fn_with_options(callback, UseRafFnOptions::default())
 }
 
 /// Version of [`use_raf_fn`] that takes a `UseRafFnOptions`. See [`use_raf_fn`] for how to use.
 pub fn use_raf_fn_with_options(
-    cx: Scope,
     callback: impl Fn(UseRafFnCallbackArgs) + Clone + 'static,
     options: UseRafFnOptions,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
     let UseRafFnOptions { immediate } = options;
 
-    let previous_frame_timestamp = store_value(cx, 0.0_f64);
-    let raf_handle = store_value(cx, None::<i32>);
+    let previous_frame_timestamp = store_value(0.0_f64);
+    let raf_handle = store_value(None::<i32>);
 
-    let (is_active, set_active) = create_signal(cx, false);
+    let (is_active, set_active) = create_signal(false);
 
     let loop_ref = Rc::new(RefCell::new(Box::new(|_: f64| {}) as Box<dyn Fn(f64)>));
 
@@ -122,7 +120,7 @@ pub fn use_raf_fn_with_options(
         resume();
     }
 
-    on_cleanup(cx, pause);
+    on_cleanup(pause);
 
     Pausable {
         resume,

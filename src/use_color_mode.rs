@@ -30,14 +30,14 @@ use wasm_bindgen::JsCast;
 /// use leptos_use::{use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseColorModeReturn {
 ///     mode, // Signal<ColorMode::dark | ColorMode::light>
 ///     set_mode,
 ///     ..
-/// } = use_color_mode(cx);
+/// } = use_color_mode();
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -53,8 +53,8 @@ use wasm_bindgen::JsCast;
 /// use leptos_use::{ColorMode, use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// # let UseColorModeReturn { mode, set_mode, .. } = use_color_mode(cx);
+/// # fn Demo() -> impl IntoView {
+/// # let UseColorModeReturn { mode, set_mode, .. } = use_color_mode();
 /// #
 /// mode.get(); // ColorMode::Dark or ColorMode::Light
 ///
@@ -62,7 +62,7 @@ use wasm_bindgen::JsCast;
 ///
 /// set_mode.set(ColorMode::Auto); // change to auto mode
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -73,9 +73,8 @@ use wasm_bindgen::JsCast;
 /// use leptos_use::{use_color_mode_with_options, UseColorModeOptions, UseColorModeReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseColorModeReturn { mode, set_mode, .. } = use_color_mode_with_options(
-///     cx,
 ///     UseColorModeOptions::default()
 ///         .attribute("theme") // instead of writing to `class`
 ///         .custom_modes(vec![
@@ -85,7 +84,7 @@ use wasm_bindgen::JsCast;
 ///         ]),
 /// ); // Signal<ColorMode::Dark | ColorMode::Light | ColorMode::Custom("dim") | ColorMode::Custom("cafe")>
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -98,18 +97,15 @@ use wasm_bindgen::JsCast;
 /// * [`use_dark`]
 /// * [`use_preferred_dark`]
 /// * [`use_storage`]
-pub fn use_color_mode(cx: Scope) -> UseColorModeReturn {
-    use_color_mode_with_options(cx, UseColorModeOptions::default())
+pub fn use_color_mode() -> UseColorModeReturn {
+    use_color_mode_with_options(UseColorModeOptions::default())
 }
 
 /// Version of [`use_color_mode`] that takes a `UseColorModeOptions`. See [`use_color_mode`] for how to use.
-pub fn use_color_mode_with_options<El, T>(
-    cx: Scope,
-    options: UseColorModeOptions<El, T>,
-) -> UseColorModeReturn
+pub fn use_color_mode_with_options<El, T>(options: UseColorModeOptions<El, T>) -> UseColorModeReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     let UseColorModeOptions {
@@ -136,9 +132,9 @@ where
         ])
         .collect();
 
-    let preferred_dark = use_preferred_dark(cx);
+    let preferred_dark = use_preferred_dark();
 
-    let system = Signal::derive(cx, move || {
+    let system = Signal::derive(move || {
         if preferred_dark.get() {
             ColorMode::Dark
         } else {
@@ -147,7 +143,6 @@ where
     });
 
     let (store, set_store) = get_store_signal(
-        cx,
         initial_value,
         storage_signal,
         &storage_key,
@@ -156,7 +151,7 @@ where
         listen_to_storage_changes,
     );
 
-    let state = Signal::derive(cx, move || {
+    let state = Signal::derive(move || {
         let value = store.get();
         if value == ColorMode::Auto {
             system.get()
@@ -165,7 +160,7 @@ where
         }
     });
 
-    let target = (cx, target).into();
+    let target = (target).into();
 
     let update_html_attrs = {
         move |target: ElementMaybeSignal<T, web_sys::Element>,
@@ -228,7 +223,7 @@ where
         });
     };
 
-    create_effect(cx, {
+    create_effect({
         let on_changed = on_changed.clone();
 
         move |_| {
@@ -236,14 +231,11 @@ where
         }
     });
 
-    on_cleanup(cx, move || {
+    on_cleanup(move || {
         on_changed(state.get());
     });
 
-    let mode = Signal::derive(
-        cx,
-        move || if emit_auto { store.get() } else { state.get() },
-    );
+    let mode = Signal::derive(move || if emit_auto { store.get() } else { state.get() });
 
     UseColorModeReturn {
         mode,
@@ -268,7 +260,6 @@ pub enum ColorMode {
 
 cfg_if! { if #[cfg(feature = "storage")] {
     fn get_store_signal(
-        cx: Scope,
         initial_value: MaybeRwSignal<ColorMode>,
         storage_signal: Option<RwSignal<ColorMode>>,
         storage_key: &str,
@@ -281,8 +272,7 @@ cfg_if! { if #[cfg(feature = "storage")] {
             (store.into(), set_store)
         } else if storage_enabled {
             let (store, set_store, _) = use_storage_with_options(
-                cx,
-                storage_key,
+                                storage_key,
                 initial_value,
                 UseStorageOptions::default()
                     .listen_to_storage_changes(listen_to_storage_changes)
@@ -291,12 +281,11 @@ cfg_if! { if #[cfg(feature = "storage")] {
 
             (store, set_store)
         } else {
-            initial_value.into_signal(cx)
+            initial_value.into_signal()
         }
     }
 } else {
     fn get_store_signal(
-        cx: Scope,
         initial_value: MaybeRwSignal<ColorMode>,
         storage_signal: Option<RwSignal<ColorMode>>,
         _storage_key: &String,
@@ -308,7 +297,7 @@ cfg_if! { if #[cfg(feature = "storage")] {
             let (store, set_store) = storage_signal.split();
             (store.into(), set_store)
         } else {
-            initial_value.into_signal(cx)
+            initial_value.into_signal()
         }
     }
 }}
@@ -358,7 +347,7 @@ pub struct UseColorModeOnChangeArgs {
 pub struct UseColorModeOptions<El, T>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     /// Element that the color mode will be applied to. Defaults to `"html"`.

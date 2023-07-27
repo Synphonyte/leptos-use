@@ -32,8 +32,8 @@ use leptos::*;
 use leptos_use::{use_mouse, UseMouseReturn};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let UseMouseReturn { x, y, .. } = use_mouse(cx);
+fn Demo() -> impl IntoView {
+    let UseMouseReturn { x, y, .. } = use_mouse();
     
     view! { cx,
         {x} " x " {y}
@@ -89,3 +89,4 @@ To scaffold a new function quickly you can run `template/createfn.sh`. It requir
 |---------------|---------------------------|
 | <= 0.3        | 0.3                       |
 | 0.4, 0.5, 0.6 | 0.4                       |
+| main          | 0.5.0-alpha               |

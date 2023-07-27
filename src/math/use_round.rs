@@ -17,12 +17,12 @@ use_simple_math!(
     /// # use leptos_use::math::use_round;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (value, set_value) = create_signal(cx, 45.95);
-    /// let result: Signal<f64> = use_round(cx, value); // 46
+    /// # fn Demo() -> impl IntoView {
+    /// let (value, set_value) = create_signal(45.95);
+    /// let result: Signal<f64> = use_round(value); // 46
     /// #
     /// # assert_eq!(result.get(), 46.0);
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     // #[doc(cfg(feature = "math"))]

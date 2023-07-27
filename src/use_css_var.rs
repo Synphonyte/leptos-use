@@ -22,12 +22,12 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::use_css_var;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let (color, set_color) = use_css_var(cx, "--color");
+/// # fn Demo() -> impl IntoView {
+/// let (color, set_color) = use_css_var("--color");
 ///
 /// set_color.set("red".to_string());
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -38,11 +38,11 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::use_css_var;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let (key, set_key) = create_signal(cx, "--color".to_string());
-/// let (color, set_color) = use_css_var(cx, key);
+/// # fn Demo() -> impl IntoView {
+/// let (key, set_key) = create_signal("--color".to_string());
+/// let (color, set_color) = use_css_var(key);
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -55,11 +55,10 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let el = create_node_ref::<Div>(cx);
+/// # fn Demo() -> impl IntoView {
+/// let el = create_node_ref::<Div>();
 ///
 /// let (color, set_color) = use_css_var_with_options(
-///     cx,
 ///     "--color",
 ///     UseCssVarOptions::default()
 ///         .target(el)
@@ -67,7 +66,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .observe(true),
 /// );
 ///
-/// view! { cx,
+/// view! {
 ///     <div node_ref=el>"..."</div>
 /// }
 /// # }
@@ -75,24 +74,22 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ## Server-Side Rendering
 ///
-/// On the server this simply returns `create_signal(cx, options.initial_value)`.
+/// On the server this simply returns `create_signal(options.initial_value)`.
 pub fn use_css_var(
-    cx: Scope,
     prop: impl Into<MaybeSignal<String>>,
 ) -> (ReadSignal<String>, WriteSignal<String>) {
-    use_css_var_with_options(cx, prop, UseCssVarOptions::default())
+    use_css_var_with_options(prop, UseCssVarOptions::default())
 }
 
 /// Version of [`use_css_var`] that takes a `UseCssVarOptions`. See [`use_css_var`] for how to use.
 pub fn use_css_var_with_options<P, El, T>(
-    cx: Scope,
     prop: P,
     options: UseCssVarOptions<El, T>,
 ) -> (ReadSignal<String>, WriteSignal<String>)
 where
     P: Into<MaybeSignal<String>>,
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     let UseCssVarOptions {
@@ -102,10 +99,10 @@ where
         ..
     } = options;
 
-    let (variable, set_variable) = create_signal(cx, initial_value.clone());
+    let (variable, set_variable) = create_signal(initial_value.clone());
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let el_signal = (cx, target).into();
+        let el_signal = (target).into();
         let prop = prop.into();
 
         let update_css_var = {
@@ -138,8 +135,7 @@ where
                 vec![JsValue::from_str("style")],
             ));
             use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
-                cx,
-                el_signal,
+                                el_signal,
                 move |_, _| update_css_var(),
                 init,
             );
@@ -153,16 +149,14 @@ where
             let prop = prop.clone();
 
             let _ = watch_with_options(
-                cx,
-                move || (el_signal.get(), prop.get()),
+                                move || (el_signal.get(), prop.get()),
                 move |_, _, _| update_css_var(),
                 WatchOptions::default().immediate(true),
             );
         }
 
         let _ = watch(
-            cx,
-            move || variable.get(),
+                        move || variable.get(),
             move |val, _, _| {
                 if let Some(el) = el_signal.get() {
                     let el = el.into().unchecked_into::<web_sys::HtmlElement>();
@@ -182,7 +176,7 @@ where
 pub struct UseCssVarOptions<El, T>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     /// The target element to read the variable from and set the variable on.

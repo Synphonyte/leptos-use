@@ -23,11 +23,11 @@ use web_sys::AddEventListenerOptions;
 /// # use leptos_use::{use_mouse, UseMouseReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseMouseReturn {
 ///     x, y, source_type, ..
-/// } = use_mouse(cx);
-/// # view! { cx, }
+/// } = use_mouse();
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -39,14 +39,13 @@ use web_sys::AddEventListenerOptions;
 /// # use leptos_use::{use_mouse_with_options, UseMouseOptions, UseMouseReturn};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let UseMouseReturn {
 ///     x, y, ..
 /// } = use_mouse_with_options(
-///     cx,
 ///     UseMouseOptions::default().touch(false)
 /// );
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -72,42 +71,38 @@ use web_sys::AddEventListenerOptions;
 /// }
 ///
 /// #[component]
-/// fn Demo(cx: Scope) -> impl IntoView {
-///     let element = create_node_ref::<Div>(cx);
+/// fn Demo() -> impl IntoView {
+///     let element = create_node_ref::<Div>();
 ///
 ///     let UseMouseReturn {
 ///         x, y, source_type, ..
 ///     } = use_mouse_with_options(
-///         cx,
 ///         UseMouseOptions::default()
 ///             .target(element)
 ///             .coord_type(UseMouseCoordType::Custom(MyExtractor))
 ///     );
-///     view! { cx, <div node_ref=element></div> }
+///     view! { <div node_ref=element></div> }
 /// }
 /// ```
 ///
 /// ## Server-Side Rendering
 ///
 /// On the server this returns simple `Signal`s with the `initial_value`s.
-pub fn use_mouse(cx: Scope) -> UseMouseReturn {
-    use_mouse_with_options(cx, Default::default())
+pub fn use_mouse() -> UseMouseReturn {
+    use_mouse_with_options(Default::default())
 }
 
 /// Variant of [`use_mouse`] that accepts options. Please see [`use_mouse`] for how to use.
-pub fn use_mouse_with_options<El, T, Ex>(
-    cx: Scope,
-    options: UseMouseOptions<El, T, Ex>,
-) -> UseMouseReturn
+pub fn use_mouse_with_options<El, T, Ex>(options: UseMouseOptions<El, T, Ex>) -> UseMouseReturn
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     Ex: UseMouseEventExtractor + Clone + 'static,
 {
-    let (x, set_x) = create_signal(cx, options.initial_value.x);
-    let (y, set_y) = create_signal(cx, options.initial_value.y);
-    let (source_type, set_source_type) = create_signal(cx, UseMouseSourceType::Unset);
+    let (x, set_x) = create_signal(options.initial_value.x);
+    let (y, set_y) = create_signal(options.initial_value.y);
+    let (source_type, set_source_type) = create_signal(UseMouseSourceType::Unset);
 
     let mouse_handler = {
         let coord_type = options.coord_type.clone();
@@ -167,38 +162,33 @@ where
         event_listener_options.passive(true);
 
         let _ = use_event_listener_with_options(
-            cx,
-            target.clone(),
+                        target.clone(),
             mousemove,
             mouse_handler,
             event_listener_options.clone(),
         );
         let _ = use_event_listener_with_options(
-            cx,
-            target.clone(),
+                        target.clone(),
             dragover,
             drag_handler,
             event_listener_options.clone(),
         );
         if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
-                cx,
-                target.clone(),
+                                target.clone(),
                 touchstart,
                 touch_handler.clone(),
                 event_listener_options.clone(),
             );
             let _ = use_event_listener_with_options(
-                cx,
-                target.clone(),
+                                target.clone(),
                 touchmove,
                 touch_handler,
                 event_listener_options.clone(),
             );
             if options.reset_on_touch_ends {
                 let _ = use_event_listener_with_options(
-                    cx,
-                    target,
+                                        target,
                     touchend,
                     move |_| reset(),
                     event_listener_options.clone(),
@@ -221,7 +211,7 @@ where
 pub struct UseMouseOptions<El, T, Ex>
 where
     El: Clone,
-    (Scope, El): Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     Ex: UseMouseEventExtractor + Clone,
 {

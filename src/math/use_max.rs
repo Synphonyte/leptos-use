@@ -18,12 +18,12 @@ use_partial_cmp!(
     /// # use leptos_use::math::use_max;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (values, set_values) = create_signal(cx, vec![1.0, 2.0, 3.0, f32::NAN, 4.0, 5.0]);
-    /// let result = use_max::<Vec<f32>, _, _>(cx, values); // Some(5.0)
+    /// # fn Demo() -> impl IntoView {
+    /// let (values, set_values) = create_signal(vec![1.0, 2.0, 3.0, f32::NAN, 4.0, 5.0]);
+    /// let result = use_max::<Vec<f32>, _, _>(values); // Some(5.0)
     /// #
     /// # assert_eq!(result.get(), Some(5.0));
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     // #[doc(cfg(feature = "math"))]

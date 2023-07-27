@@ -23,14 +23,14 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
-/// let (number, set_number) = create_signal(cx, 3500);
+/// # fn Demo() -> impl IntoView {
+/// let (number, set_number) = create_signal(3500);
 ///
 /// let number_format = use_intl_number_format(UseIntlNumberFormatOptions::default());
 ///
-/// let formatted = number_format.format::<u16>(cx, number); // "3,500" if in US English locale
+/// let formatted = number_format.format::<u16>(number); // "3,500" if in US English locale
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -45,42 +45,42 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let number = 123456.789_f32;
 ///
 /// // German uses comma as decimal separator and period for thousands
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("de-DE"),
 /// );
-/// let formatted = number_format.format(cx, number); // 123.456,789
+/// let formatted = number_format.format(number); // 123.456,789
 ///
 /// // Arabic in most Arabic speaking countries uses real Arabic digits
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("ar-EG"),
 /// );
-/// let formatted = number_format.format(cx, number); // ١٢٣٤٥٦٫٧٨٩
+/// let formatted = number_format.format(number); // ١٢٣٤٥٦٫٧٨٩
 ///
 /// // India uses thousands/lakh/crore separators
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("en-IN"),
 /// );
-/// let formatted = number_format.format(cx, number); // 1,23,456.789
+/// let formatted = number_format.format(number); // 1,23,456.789
 ///
 /// // the nu extension key requests a numbering system, e.g. Chinese decimal
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("zh-Hans-CN-u-nu-hanidec"),
 /// );
-/// let formatted = number_format.format(cx, number); // 一二三,四五六.七八九
+/// let formatted = number_format.format(number); // 一二三,四五六.七八九
 ///
 /// // when requesting a language that may not be supported, such as
 /// // Balinese, include a fallback language, in this case Indonesian
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locales(vec!["ban".to_string(), "id".to_string()]),
 /// );
-/// let formatted = number_format.format(cx, number); // 123.456,789
+/// let formatted = number_format.format(number); // 123.456,789
 ///
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -93,7 +93,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # use leptos_use::{NumberStyle, UnitDisplay, use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let number = 123456.789_f64;
 ///
 /// // request a currency format
@@ -103,7 +103,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Currency)
 ///         .currency("EUR"),
 /// );
-/// let formatted = number_format.format(cx, number); // 123.456,79 €
+/// let formatted = number_format.format(number); // 123.456,79 €
 ///
 /// // the Japanese yen doesn't use a minor unit
 /// let number_format = use_intl_number_format(
@@ -112,7 +112,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Currency)
 ///         .currency("JPY"),
 /// );
-/// let formatted = number_format.format(cx, number); // ￥123,457
+/// let formatted = number_format.format(number); // ￥123,457
 ///
 /// // limit to three significant digits
 /// let number_format = use_intl_number_format(
@@ -120,7 +120,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .locale("en-IN")
 ///         .maximum_significant_digits(3),
 /// );
-/// let formatted = number_format.format(cx, number); // 1,23,000
+/// let formatted = number_format.format(number); // 1,23,000
 ///
 /// // Formatting with units
 /// let number_format = use_intl_number_format(
@@ -129,7 +129,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Unit)
 ///         .unit("kilometer-per-hour"),
 /// );
-/// let formatted = number_format.format(cx, 50); // 50 km/h
+/// let formatted = number_format.format(50); // 50 km/h
 ///
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default()
@@ -138,9 +138,9 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .unit("liter")
 ///         .unit_display(UnitDisplay::Long),
 /// );
-/// let formatted = number_format.format(cx, 16); // 16 litres
+/// let formatted = number_format.format(16); // 16 litres
 /// #
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -603,7 +603,7 @@ pub struct UseIntlNumberFormatOptions {
     /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions, NumberStyle};
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
+    /// # fn Demo() -> impl IntoView {
     /// let nf = use_intl_number_format(
     ///     UseIntlNumberFormatOptions::default()
     ///         .style(NumberStyle::Currency)
@@ -612,11 +612,11 @@ pub struct UseIntlNumberFormatOptions {
     ///         .rounding_increment(5),    
     /// );
     ///
-    /// let formatted = nf.format(cx, 11.29); // "$11.30"
-    /// let formatted = nf.format(cx, 11.25); // "$11.25"
-    /// let formatted = nf.format(cx, 11.22); // "$11.20"
+    /// let formatted = nf.format(11.29); // "$11.30"
+    /// let formatted = nf.format(11.25); // "$11.25"
+    /// let formatted = nf.format(11.22); // "$11.20"
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///
@@ -814,7 +814,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
     /// See [`use_intl_number_format`] for more information.
-    pub fn format<N>(&self, cx: Scope, number: impl Into<MaybeSignal<N>>) -> Signal<String>
+    pub fn format<N>(&self, number: impl Into<MaybeSignal<N>>) -> Signal<String>
     where
         N: Clone + Display + 'static,
         js_sys::Number: From<N>,
@@ -822,13 +822,13 @@ impl UseIntlNumberFormatReturn {
         let number = number.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive(cx, move || {
+            Signal::derive(move || {
                 format!("{}", number.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive(cx, move || {
+            Signal::derive(move || {
                 if let Ok(result) = number_format
                     .format()
                     .call1(&number_format, &js_sys::Number::from(number.get()).into())
@@ -848,7 +848,7 @@ impl UseIntlNumberFormatReturn {
     /// # use leptos_use::{NumberStyle, use_intl_number_format, UseIntlNumberFormatOptions};
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
+    /// # fn Demo() -> impl IntoView {
     /// let nf = use_intl_number_format(
     ///     UseIntlNumberFormatOptions::default()
     ///         .locale("en-US")
@@ -857,13 +857,13 @@ impl UseIntlNumberFormatReturn {
     ///         .maximum_fraction_digits(0),
     /// );
     ///
-    /// let formatted = nf.format_range(cx, 3, 5); // "$3 – $5"
+    /// let formatted = nf.format_range(3, 5); // "$3 – $5"
     ///
     /// // Note: the "approximately equals" symbol is added if
     /// // startRange and endRange round to the same values.
-    /// let formatted = nf.format_range(cx, 2.9, 3.1); // "~$3"
+    /// let formatted = nf.format_range(2.9, 3.1); // "~$3"
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///
@@ -872,7 +872,7 @@ impl UseIntlNumberFormatReturn {
     /// # use leptos_use::{NumberStyle, use_intl_number_format, UseIntlNumberFormatOptions};
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
+    /// # fn Demo() -> impl IntoView {
     /// let nf = use_intl_number_format(
     ///     UseIntlNumberFormatOptions::default()
     ///         .locale("es-ES")
@@ -881,15 +881,14 @@ impl UseIntlNumberFormatReturn {
     ///         .maximum_fraction_digits(0),
     /// );
     ///
-    /// let formatted = nf.format_range(cx, 3, 5); // "3-5 €"
-    /// let formatted = nf.format_range(cx, 2.9, 3.1); // "~3 €"
+    /// let formatted = nf.format_range(3, 5); // "3-5 €"
+    /// let formatted = nf.format_range(2.9, 3.1); // "~3 €"
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     pub fn format_range<NStart, NEnd>(
         &self,
-        cx: Scope,
         start: impl Into<MaybeSignal<NStart>>,
         end: impl Into<MaybeSignal<NEnd>>,
     ) -> Signal<String>
@@ -903,13 +902,13 @@ impl UseIntlNumberFormatReturn {
         let end = end.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive(cx, move || {
+            Signal::derive(move || {
                 format!("{} - {}", start.get(), end.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive(cx, move || {
+            Signal::derive(move || {
                 if let Ok(function) = Reflect::get(&number_format, &"formatRange".into()) {
                     let function = function.unchecked_into::<js_sys::Function>();
 
@@ -930,7 +929,7 @@ impl UseIntlNumberFormatReturn {
     // TODO : Allows locale-aware formatting of strings produced by this `Intl.NumberFormat` object.
     // pub fn format_to_parts<N>(
     //     &self,
-    //     cx: Scope,
+    //     ,
     //     number: impl Into<MaybeSignal<N>>,
     // ) -> Signal<Vec<String>>
     // where
@@ -940,7 +939,7 @@ impl UseIntlNumberFormatReturn {
     //     let number = number.into();
     //     let number_format = self.js_intl_number_format.clone();
     //
-    //     Signal::derive(cx, move || {
+    //     Signal::derive(move || {
     //         let array = number_format.format_to_parts(number.get().into());
     //
     //         array

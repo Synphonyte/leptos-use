@@ -23,15 +23,14 @@ use std::time::Duration;
 /// # use leptos_use::utils::Pausable;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// let Pausable { pause, resume, is_active } = use_interval_fn(
-///     cx,
 ///     || {
 ///         // do something
 ///     },
 ///     1000,
 /// );
-/// # view! { cx, }
+/// # view! { }
 /// # }
 /// ```
 ///
@@ -39,7 +38,6 @@ use std::time::Duration;
 ///
 /// On the server this function will simply be ignored.
 pub fn use_interval_fn<CbFn, N>(
-    cx: Scope,
     callback: CbFn,
     interval: N,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone>
@@ -47,12 +45,11 @@ where
     CbFn: Fn() + Clone + 'static,
     N: Into<MaybeSignal<u64>>,
 {
-    use_interval_fn_with_options(cx, callback, interval, UseIntervalFnOptions::default())
+    use_interval_fn_with_options(callback, interval, UseIntervalFnOptions::default())
 }
 
 /// Version of [`use_interval_fn`] that takes `UseIntervalFnOptions`. See [`use_interval_fn`] for how to use.
 pub fn use_interval_fn_with_options<CbFn, N>(
-    cx: Scope,
     callback: CbFn,
     interval: N,
     options: UseIntervalFnOptions,
@@ -68,7 +65,7 @@ where
 
     let timer: Rc<Cell<Option<IntervalHandle>>> = Rc::new(Cell::new(None));
 
-    let (is_active, set_active) = create_signal(cx, false);
+    let (is_active, set_active) = create_signal(false);
 
     let clean = {
         let timer = Rc::clone(&timer);
@@ -119,7 +116,6 @@ where
         let resume = resume.clone();
 
         let stop_watch = watch(
-            cx,
             move || interval.get(),
             move |_, _, _| {
                 if is_active.get() {
@@ -128,10 +124,10 @@ where
             },
             false,
         );
-        on_cleanup(cx, stop_watch);
+        on_cleanup(stop_watch);
     }
 
-    on_cleanup(cx, pause.clone());
+    on_cleanup(pause.clone());
 
     Pausable {
         is_active: is_active.into(),

@@ -17,12 +17,12 @@ use_simple_math!(
     /// # use leptos_use::math::use_abs;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (value, set_value) = create_signal(cx, -32.25);
-    /// let result: Signal<f64> = use_abs(cx, value); // 32.25
+    /// # fn Demo() -> impl IntoView {
+    /// let (value, set_value) = create_signal(-32.25);
+    /// let result: Signal<f64> = use_abs(value); // 32.25
     /// #
     /// # assert_eq!(result.get(), 32.25);
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     // #[doc(cfg(feature = "math"))]

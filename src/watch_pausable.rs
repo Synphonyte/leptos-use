@@ -13,8 +13,8 @@ use leptos::*;
 /// # use leptos::*;
 /// # use leptos_use::{watch_pausable, WatchPausableReturn};
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// let (source, set_source) = create_signal(cx, "foo".to_string());
+/// # pub fn Demo() -> impl IntoView {
+/// let (source, set_source) = create_signal("foo".to_string());
 ///
 /// let WatchPausableReturn {
 ///     stop,
@@ -22,7 +22,6 @@ use leptos::*;
 ///     resume,
 ///     ..
 /// } = watch_pausable(
-///     cx,
 ///     move || source.get(),
 ///     |v, _, _| {
 ///         log!("Changed to {}", v);
@@ -38,7 +37,7 @@ use leptos::*;
 /// resume();
 ///
 /// set_source.set("hello".to_string()); // > "Changed to hello"
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -54,7 +53,6 @@ use leptos::*;
 ///
 /// * [`watch`]
 pub fn watch_pausable<W, T, DFn, CFn>(
-    cx: Scope,
     deps: DFn,
     callback: CFn,
 ) -> WatchPausableReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
@@ -64,12 +62,11 @@ where
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    watch_pausable_with_options(cx, deps, callback, WatchOptions::default())
+    watch_pausable_with_options(deps, callback, WatchOptions::default())
 }
 
 /// Version of `watch_pausable` that accepts `WatchOptions`. See [`watch_pausable`] for how to use.
 pub fn watch_pausable_with_options<W, T, DFn, CFn>(
-    cx: Scope,
     deps: DFn,
     callback: CFn,
     options: WatchOptions,
@@ -80,7 +77,7 @@ where
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    let (is_active, set_active) = create_signal(cx, true);
+    let (is_active, set_active) = create_signal(true);
 
     let pausable_callback = move |val: &W, prev_val: Option<&W>, prev_ret: Option<Option<T>>| {
         if is_active.get_untracked() {
@@ -90,7 +87,7 @@ where
         }
     };
 
-    let stop = watch_with_options(cx, deps, pausable_callback, options);
+    let stop = watch_with_options(deps, pausable_callback, options);
 
     let pause = move || {
         set_active.set(false);

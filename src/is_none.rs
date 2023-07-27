@@ -11,15 +11,14 @@ use_derive_signal!(
     /// # use leptos_use::is_none;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
+    /// # fn Demo() -> impl IntoView {
     /// let (example, set_example) = create_signal(
-    ///     cx,
     ///     if js_sys::Math::random() < 0.5 { Some("Example") } else { None }
     /// );
     ///
-    /// let is_empty = is_none(cx, example);
+    /// let is_empty = is_none(example);
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     is_none<Option<T>, T: 'static> -> bool

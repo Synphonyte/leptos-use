@@ -14,11 +14,10 @@ use leptos::*;
 /// # use leptos::*;
 /// # use leptos_use::watch_debounced;
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// #     let (source, set_source) = create_signal(cx, 0);
+/// # pub fn Demo() -> impl IntoView {
+/// #     let (source, set_source) = create_signal(0);
 /// #
 /// watch_debounced(
-///     cx,
 ///     move || source.get(),
 ///     move |_, _, _| {
 ///         log!("changed!");
@@ -26,11 +25,11 @@ use leptos::*;
 ///     500.0,
 /// );
 ///
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
-/// This really is only shorthand shorthand for `watch_with_options(cx, deps, callback, WatchOptions::default().debounce(ms))`.
+/// This really is only shorthand shorthand for `watch_with_options(deps, callback, WatchOptions::default().debounce(ms))`.
 ///
 /// There's also `watch_debounced_with_options` where you can specify the other watch options (except `filter`).
 ///
@@ -38,11 +37,10 @@ use leptos::*;
 /// # use leptos::*;
 /// # use leptos_use::{watch_debounced_with_options, WatchDebouncedOptions};
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// #     let (source, set_source) = create_signal(cx, 0);
+/// # pub fn Demo() -> impl IntoView {
+/// #     let (source, set_source) = create_signal(0);
 /// #
 /// watch_debounced_with_options(
-///     cx,
 ///     move || source.get(),
 ///     move |_, _, _| {
 ///         log!("changed!");
@@ -51,7 +49,7 @@ use leptos::*;
 ///     WatchDebouncedOptions::default().max_wait(Some(1000.0)),
 /// );
 ///
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -70,24 +68,18 @@ use leptos::*;
 ///
 /// * [`watch`]
 /// * [`watch_throttled`]
-pub fn watch_debounced<W, T, DFn, CFn>(
-    cx: Scope,
-    deps: DFn,
-    callback: CFn,
-    ms: f64,
-) -> impl Fn() + Clone
+pub fn watch_debounced<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    watch_with_options(cx, deps, callback, WatchOptions::default().debounce(ms))
+    watch_with_options(deps, callback, WatchOptions::default().debounce(ms))
 }
 
 /// Version of `watch_debounced` that accepts `WatchDebouncedOptions`. See [`watch_debounced`] for how to use.
 pub fn watch_debounced_with_options<W, T, DFn, CFn>(
-    cx: Scope,
     deps: DFn,
     callback: CFn,
     ms: f64,
@@ -100,7 +92,6 @@ where
     T: Clone + 'static,
 {
     watch_with_options(
-        cx,
         deps,
         callback,
         WatchOptions::default()

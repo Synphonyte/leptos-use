@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Braking Changes 🛠
 
+- Leptos version is now 0.5
+- No `cx: Scope` params are supported/needed anymore because of the changes in Leptos.
+  Please check the release notes of Leptos 0.5 for how to upgrade.
 - `watch` is now deprecated in favor of `leptos::watch`. `watch_with_options`
   will continue to exist.
 

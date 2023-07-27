@@ -19,8 +19,8 @@ use leptos::*;
 use leptos_use::{use_mouse, UseMouseReturn};
 
 #[component]
-fn Demo(cx: Scope) -> impl IntoView {
-    let UseMouseReturn { x, y, .. } = use_mouse(cx);
+fn Demo() -> impl IntoView {
+    let UseMouseReturn { x, y, .. } = use_mouse();
     
     view! { cx,
         {x} " x " {y}

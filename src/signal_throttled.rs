@@ -17,11 +17,11 @@ signal_filtered!(
     /// # use leptos_use::signal_throttled;
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (input, set_input) = create_signal(cx, "");
-    /// let throttled = signal_throttled(cx, input, 1000.0);
+    /// # fn Demo() -> impl IntoView {
+    /// let (input, set_input) = create_signal("");
+    /// let throttled = signal_throttled(input, 1000.0);
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///
@@ -34,16 +34,15 @@ signal_filtered!(
     /// # use leptos_use::{signal_throttled_with_options, ThrottleOptions};
     /// #
     /// # #[component]
-    /// # fn Demo(cx: Scope) -> impl IntoView {
-    /// let (input, set_input) = create_signal(cx, "");
+    /// # fn Demo() -> impl IntoView {
+    /// let (input, set_input) = create_signal("");
     /// let throttled = signal_throttled_with_options(
-    ///     cx,
     ///     input,
     ///     1000.0,
     ///     ThrottleOptions::default().leading(false).trailing(true)
     /// );
     /// #
-    /// # view! { cx, }
+    /// # view! { }
     /// # }
     /// ```
     ///

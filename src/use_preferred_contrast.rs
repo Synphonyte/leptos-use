@@ -11,11 +11,11 @@ use std::fmt::Display;
 /// # use leptos_use::use_preferred_contrast;
 /// #
 /// # #[component]
-/// # fn Demo(cx: Scope) -> impl IntoView {
+/// # fn Demo() -> impl IntoView {
 /// #
-/// let preferred_contrast = use_preferred_contrast(cx);
+/// let preferred_contrast = use_preferred_contrast();
 /// #
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -27,12 +27,12 @@ use std::fmt::Display;
 ///
 /// * [`use_media_query`]
 /// * [`use_preferred_dark`]
-pub fn use_preferred_contrast(cx: Scope) -> Signal<PreferredContrast> {
-    let is_more = use_media_query(cx, "(prefers-contrast: more)");
-    let is_less = use_media_query(cx, "(prefers-contrast: less)");
-    let is_custom = use_media_query(cx, "(prefers-contrast: custom)");
+pub fn use_preferred_contrast() -> Signal<PreferredContrast> {
+    let is_more = use_media_query("(prefers-contrast: more)");
+    let is_less = use_media_query("(prefers-contrast: less)");
+    let is_custom = use_media_query("(prefers-contrast: custom)");
 
-    Signal::derive(cx, move || {
+    Signal::derive(move || {
         if is_more.get() {
             PreferredContrast::More
         } else if is_less.get() {

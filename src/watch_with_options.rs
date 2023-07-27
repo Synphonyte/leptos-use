@@ -19,11 +19,10 @@ use std::rc::Rc;
 /// # use leptos::*;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// let (num, set_num) = create_signal(cx, 0);
+/// # pub fn Demo() -> impl IntoView {
+/// let (num, set_num) = create_signal(0);
 ///
 /// watch_with_options(
-///     cx,
 ///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("Number {}", num);
@@ -32,7 +31,7 @@ use std::rc::Rc;
 /// ); // > "Number 0"
 ///
 /// set_num.set(1); // > "Number 1"
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -44,18 +43,17 @@ use std::rc::Rc;
 /// # use leptos::*;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// # let (num, set_num) = create_signal(cx, 0);
+/// # pub fn Demo() -> impl IntoView {
+/// # let (num, set_num) = create_signal(0);
 /// #
 /// watch_with_options(
-///     cx,
 ///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("Number {}", num);
 ///     },
 ///     WatchOptions::default().throttle(100.0), // there's also `throttle_with_options`
 /// );
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -63,18 +61,17 @@ use std::rc::Rc;
 /// # use leptos::*;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
-/// # pub fn Demo(cx: Scope) -> impl IntoView {
-/// # let (num, set_num) = create_signal(cx, 0);
+/// # pub fn Demo() -> impl IntoView {
+/// # let (num, set_num) = create_signal(0);
 /// #
 /// watch_with_options(
-///     cx,
 ///     move || num.get(),
 ///     move |num, _, _| {
 ///         log!("number {}", num);
 ///     },
 ///     WatchOptions::default().debounce(100.0), // there's also `debounce_with_options`
 /// );
-/// #    view! { cx, }
+/// #    view! { }
 /// # }
 /// ```
 ///
@@ -91,7 +88,6 @@ use std::rc::Rc;
 
 /// Version of `watch` that accepts `WatchOptions`. See [`watch`] for how to use.
 pub fn watch_with_options<W, T, DFn, CFn>(
-    cx: Scope,
     deps: DFn,
     callback: CFn,
     options: WatchOptions,
@@ -127,7 +123,6 @@ where
         create_filter_wrapper(options.filter.filter_fn(), wrapped_callback.clone());
 
     leptos::watch(
-        cx,
         deps,
         move |deps_value, previous_deps_value, did_run_before| {
             cur_deps_value.replace(Some(deps_value.clone()));
@@ -144,7 +139,7 @@ where
         options.immediate,
     )
 
-    // create_effect(cx, move |did_run_before| {
+    // create_effect(move |did_run_before| {
     //     if !is_active.get() {
     //         return;
     //     }
@@ -187,12 +182,12 @@ impl WatchOptions {
 
 #[deprecated(since = "0.7.0", note = "Use `leptos::watch` instead")]
 #[inline(always)]
-pub fn watch<W, T, DFn, CFn>(cx: Scope, deps: DFn, callback: CFn) -> impl Fn() + Clone
+pub fn watch<W, T, DFn, CFn>(deps: DFn, callback: CFn) -> impl Fn() + Clone
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    leptos::watch(cx, deps, callback, false)
+    leptos::watch(deps, callback, false)
 }
