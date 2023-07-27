@@ -1,12 +1,33 @@
 use leptos::*;
-use leptos_use::docs::demo_or_body;
+use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::signal_debounced;
 
 #[component]
 fn Demo() -> impl IntoView {
-    // signal_debounced();
+    let (input, set_input) = create_signal("".to_string());
+    let debounced = signal_debounced(input, 1000.0);
 
-    view! {}
+    view! {
+        <div>
+            <input
+                type="text"
+                value=input
+                on:input=move |event| set_input(event_target_value(&event))
+                placeholder="Try to type quickly, then stop..."
+            />
+            <Note>
+                Delay is set to 1000ms for this demo.
+            </Note>
+            <p>
+                Input signal:
+                {input}
+            </p>
+            <p>
+                Debounced signal:
+                {debounced}
+            </p>
+        </div>
+    }
 }
 
 fn main() {
