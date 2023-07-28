@@ -36,6 +36,7 @@ members = [
     "use_storage",
     "use_throttle_fn",
     "use_websocket",
+    "use_webtransport",
     "use_window_focus",
     "use_window_scroll",
     "watch_debounced",
