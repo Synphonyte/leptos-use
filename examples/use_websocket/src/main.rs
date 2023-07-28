@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{
-    use_websocket, use_websocket_with_options, UseWebSocketOptions, UseWebSocketReadyState,
+    use_websocket, use_websocket_with_options, UseWebSocketOptions, ConnectionReadyState,
     UseWebsocketReturn,
 };
 
@@ -43,7 +43,7 @@ fn Demo() -> impl IntoView {
 
     let status = move || ready_state().to_string();
 
-    let connected = move || ready_state.get() == UseWebSocketReadyState::Open;
+    let connected = move || ready_state.get() == ConnectionReadyState::Open;
 
     let open_connection = move |_| {
         open();
@@ -150,7 +150,7 @@ fn Demo() -> impl IntoView {
         };
     });
 
-    let connected2 = move || ready_state2.get() == UseWebSocketReadyState::Open;
+    let connected2 = move || ready_state2.get() == ConnectionReadyState::Open;
 
     view! {
         <div class="container">

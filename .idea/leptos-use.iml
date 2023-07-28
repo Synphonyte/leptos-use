@@ -52,6 +52,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/signal_throttled/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_draggable/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_raf_fn/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
