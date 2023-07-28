@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - takes  now a `&str` instead of a `String` as its `url` parameter.
   -  The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
   - The returned signals  `ready_state`, `message`, `message_bytes` have now the type 
-    `Signal<...>` instead of `ReadSignal<...>` to make it more consistens with other functions.
+    `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
   - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
   - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
     To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
