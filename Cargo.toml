@@ -27,6 +27,7 @@ cfg-if = "1"
 [dependencies.web-sys]
 version = "0.3"
 features = [
+    "AddEventListenerOptions",
     "BinaryType",
     "CssStyleDeclaration",
     "CloseEvent",
@@ -37,6 +38,9 @@ features = [
     "DataTransfer",
     "DragEvent",
     "Element",
+    "EventListener",
+    "EventListenerOptions",
+    "EventTarget",
     "File",
     "FileList",
     "HtmlElement",
