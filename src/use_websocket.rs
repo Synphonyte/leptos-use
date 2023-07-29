@@ -24,7 +24,8 @@ use crate::utils::CloneableFnWithArg;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_websocket,  UseWebsocketReturn};
+/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use leptos_use::core::ConnectionReadyState;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -37,16 +38,14 @@ use crate::utils::CloneableFnWithArg;
 ///     open,
 ///     close,
 ///     ..
-/// } = use_websocket("wss://echo.websocket.events/".to_string());
+/// } = use_websocket("wss://echo.websocket.events/");
 ///
 /// let send_message = move |_| {
-///     let m = "Hello, world!".to_string();
-///     send(m.clone());
+///     send("Hello, world!".to_string());
 /// };
 ///
 /// let send_byte_message = move |_| {
-///     let m = b"Hello, world!\r\n".to_vec();
-///     send_bytes(m.clone());
+///     send_bytes(b"Hello, world!\r\n".to_vec());
 /// };
 ///
 /// let status = move || ready_state.get().to_string();
@@ -118,167 +117,167 @@ pub fn use_websocket_with_options(
 
     let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
 
-    // cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    let on_open_ref = store_value(options.on_open);
-    let on_message_ref = store_value(options.on_message);
-    let on_message_bytes_ref = store_value(options.on_message_bytes);
-    let on_error_ref = store_value(options.on_error);
-    let on_close_ref = store_value(options.on_close);
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let on_open_ref = store_value(options.on_open);
+        let on_message_ref = store_value(options.on_message);
+        let on_message_bytes_ref = store_value(options.on_message_bytes);
+        let on_error_ref = store_value(options.on_error);
+        let on_close_ref = store_value(options.on_close);
 
-    let reconnect_interval = options.reconnect_interval;
-    let protocols = options.protocols;
+        let reconnect_interval = options.reconnect_interval;
+        let protocols = options.protocols;
 
-    let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
-    reconnect_ref.set_value({
-        let ws = ws_ref.get_value();
-        Some(Rc::new(move || {
-            if reconnect_times_ref.get_value() < reconnect_limit
-                && ws
-                    .clone()
-                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
-            {
-                reconnect_timer_ref.set_value(
-                    set_timeout_with_handle(
-                        move || {
-                            if let Some(connect) = connect_ref.get_value() {
-                                connect();
-                                reconnect_times_ref.update_value(|current| *current += 1);
-                            }
-                        },
-                        Duration::from_millis(reconnect_interval),
-                    )
-                    .ok(),
-                );
-            }
-        }))
-    });
-
-    connect_ref.set_value({
-        let ws = ws_ref.get_value();
-        let url = url;
-
-        Some(Rc::new(move || {
-            reconnect_timer_ref.set_value(None);
-
-            if let Some(web_socket) = &ws {
-                let _ = web_socket.close();
-            }
-
-            let web_socket = {
-                protocols.as_ref().map_or_else(
-                    || WebSocket::new(&url).unwrap_throw(),
-                    |protocols| {
-                        let array = protocols
-                            .iter()
-                            .map(|p| JsValue::from(p.clone()))
-                            .collect::<Array>();
-                        WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
-                            .unwrap_throw()
-                    },
-                )
-            };
-            web_socket.set_binary_type(BinaryType::Arraybuffer);
-            set_ready_state.set(ConnectionReadyState::Connecting);
-
-            // onopen handler
-            {
-                let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
-                    if unmounted_ref.get_value() {
-                        return;
-                    }
-
-                    let callback = on_open_ref.get_value();
-                    callback(e);
-
-                    set_ready_state.set(ConnectionReadyState::Open);
-                }) as Box<dyn FnMut(Event)>);
-                web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
-                // Forget the closure to keep it alive
-                onopen_closure.forget();
-            }
-
-            // onmessage handler
-            {
-                let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
-                    if unmounted_ref.get_value() {
-                        return;
-                    }
-
-                    e.data().dyn_into::<js_sys::ArrayBuffer>().map_or_else(
-                        |_| {
-                            e.data().dyn_into::<js_sys::JsString>().map_or_else(
-                                |_| {
-                                    unreachable!("message event, received Unknown: {:?}", e.data());
-                                },
-                                |txt| {
-                                    let txt = String::from(&txt);
-                                    let callback = on_message_ref.get_value();
-                                    callback(txt.clone());
-
-                                    set_message.set(Some(txt));
-                                },
-                            );
-                        },
-                        |array_buffer| {
-                            let array = js_sys::Uint8Array::new(&array_buffer);
-                            let array = array.to_vec();
-                            let callback = on_message_bytes_ref.get_value();
-                            callback(array.clone());
-
-                            set_message_bytes.set(Some(array));
-                        },
+        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
+        reconnect_ref.set_value({
+            let ws = ws_ref.get_value();
+            Some(Rc::new(move || {
+                if reconnect_times_ref.get_value() < reconnect_limit
+                    && ws
+                        .clone()
+                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                {
+                    reconnect_timer_ref.set_value(
+                        set_timeout_with_handle(
+                            move || {
+                                if let Some(connect) = connect_ref.get_value() {
+                                    connect();
+                                    reconnect_times_ref.update_value(|current| *current += 1);
+                                }
+                            },
+                            Duration::from_millis(reconnect_interval),
+                        )
+                        .ok(),
                     );
-                })
-                    as Box<dyn FnMut(MessageEvent)>);
-                web_socket.set_onmessage(Some(onmessage_closure.as_ref().unchecked_ref()));
-                onmessage_closure.forget();
-            }
+                }
+            }))
+        });
 
-            // onerror handler
-            {
-                let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
-                    if unmounted_ref.get_value() {
-                        return;
-                    }
+        connect_ref.set_value({
+            let ws = ws_ref.get_value();
+            let url = url;
 
-                    if let Some(reconnect) = &reconnect_ref.get_value() {
-                        reconnect();
-                    }
+            Some(Rc::new(move || {
+                reconnect_timer_ref.set_value(None);
 
-                    let callback = on_error_ref.get_value();
-                    callback(e);
+                if let Some(web_socket) = &ws {
+                    let _ = web_socket.close();
+                }
 
-                    set_ready_state.set(ConnectionReadyState::Closed);
-                }) as Box<dyn FnMut(Event)>);
-                web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
-                onerror_closure.forget();
-            }
+                let web_socket = {
+                    protocols.as_ref().map_or_else(
+                        || WebSocket::new(&url).unwrap_throw(),
+                        |protocols| {
+                            let array = protocols
+                                .iter()
+                                .map(|p| JsValue::from(p.clone()))
+                                .collect::<Array>();
+                            WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
+                                .unwrap_throw()
+                        },
+                    )
+                };
+                web_socket.set_binary_type(BinaryType::Arraybuffer);
+                set_ready_state.set(ConnectionReadyState::Connecting);
 
-            // onclose handler
-            {
-                let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
-                    if unmounted_ref.get_value() {
-                        return;
-                    }
+                // onopen handler
+                {
+                    let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
+                        if unmounted_ref.get_value() {
+                            return;
+                        }
 
-                    if let Some(reconnect) = &reconnect_ref.get_value() {
-                        reconnect();
-                    }
+                        let callback = on_open_ref.get_value();
+                        callback(e);
 
-                    let callback = on_close_ref.get_value();
-                    callback(e);
+                        set_ready_state.set(ConnectionReadyState::Open);
+                    }) as Box<dyn FnMut(Event)>);
+                    web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
+                    // Forget the closure to keep it alive
+                    onopen_closure.forget();
+                }
 
-                    set_ready_state.set(ConnectionReadyState::Closed);
-                })
-                    as Box<dyn FnMut(CloseEvent)>);
-                web_socket.set_onclose(Some(onclose_closure.as_ref().unchecked_ref()));
-                onclose_closure.forget();
-            }
+                // onmessage handler
+                {
+                    let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
+                        if unmounted_ref.get_value() {
+                            return;
+                        }
 
-            ws_ref.set_value(Some(web_socket));
-        }))
-    });
-    // }}
+                        e.data().dyn_into::<js_sys::ArrayBuffer>().map_or_else(
+                            |_| {
+                                e.data().dyn_into::<js_sys::JsString>().map_or_else(
+                                    |_| {
+                                        unreachable!("message event, received Unknown: {:?}", e.data());
+                                    },
+                                    |txt| {
+                                        let txt = String::from(&txt);
+                                        let callback = on_message_ref.get_value();
+                                        callback(txt.clone());
+
+                                        set_message.set(Some(txt));
+                                    },
+                                );
+                            },
+                            |array_buffer| {
+                                let array = js_sys::Uint8Array::new(&array_buffer);
+                                let array = array.to_vec();
+                                let callback = on_message_bytes_ref.get_value();
+                                callback(array.clone());
+
+                                set_message_bytes.set(Some(array));
+                            },
+                        );
+                    })
+                        as Box<dyn FnMut(MessageEvent)>);
+                    web_socket.set_onmessage(Some(onmessage_closure.as_ref().unchecked_ref()));
+                    onmessage_closure.forget();
+                }
+
+                // onerror handler
+                {
+                    let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
+                        if unmounted_ref.get_value() {
+                            return;
+                        }
+
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
+
+                        let callback = on_error_ref.get_value();
+                        callback(e);
+
+                        set_ready_state.set(ConnectionReadyState::Closed);
+                    }) as Box<dyn FnMut(Event)>);
+                    web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
+                    onerror_closure.forget();
+                }
+
+                // onclose handler
+                {
+                    let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
+                        if unmounted_ref.get_value() {
+                            return;
+                        }
+
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
+
+                        let callback = on_close_ref.get_value();
+                        callback(e);
+
+                        set_ready_state.set(ConnectionReadyState::Closed);
+                    })
+                        as Box<dyn FnMut(CloseEvent)>);
+                    web_socket.set_onclose(Some(onclose_closure.as_ref().unchecked_ref()));
+                    onclose_closure.forget();
+                }
+
+                ws_ref.set_value(Some(web_socket));
+            }))
+        });
+    }}
 
     // Send text (String)
     let send = {
