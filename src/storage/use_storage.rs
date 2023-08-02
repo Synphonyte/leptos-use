@@ -196,7 +196,7 @@ where
 
     let (data, set_data) = defaults.into_signal(cx);
 
-    let raw_init = data.get();
+    let raw_init = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let remove: Box<dyn CloneableFn> = Box::new(|| {});
