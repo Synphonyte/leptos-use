@@ -187,7 +187,7 @@ where
 
     let (data, set_data) = defaults.into_signal();
 
-    let raw_init = data.get();
+    let raw_init = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let remove: Box<dyn CloneableFn> = Box::new(|| {});
@@ -301,7 +301,7 @@ where
                     resume: resume_watch,
                     ..
                 } = watch_pausable_with_options(
-                                        move || data.get(),
+                    move || data.get(),
                     move |data, _, _| write.clone()(data),
                     WatchOptions::default().filter(filter),
                 );
