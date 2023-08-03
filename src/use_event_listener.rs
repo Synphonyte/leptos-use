@@ -119,11 +119,13 @@ where
 
     let cleanup_fn = {
         let closure_js = closure_js.clone();
+        let options = options.clone();
 
         move |element: &web_sys::EventTarget| {
-            let _ = element.remove_event_listener_with_callback(
+            let _ = element.remove_event_listener_with_callback_and_event_listener_options(
                 &event_name,
                 closure_js.as_ref().unchecked_ref(),
+                options.unchecked_ref(),
             );
         }
     };
@@ -132,8 +134,7 @@ where
 
     let signal = (cx, target).into();
 
-    let prev_element: Rc<RefCell<Option<web_sys::EventTarget>>> =
-        Rc::new(RefCell::new(signal.get_untracked().map(|e| e.into())));
+    let prev_element = Rc::new(RefCell::new(None::<web_sys::EventTarget>));
 
     let cleanup_prev_element = {
         let prev_element = prev_element.clone();
