@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
     To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
 
+## [0.6.1] - 2023-08-03
+
+### Fixes 🍕
+
+- `use_storage` now uses `.get_untracked()` to avoid warnings.
+
 ## [0.6.0] - 2023-07-17
 
 ### New Functions 🚀
