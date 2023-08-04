@@ -31,9 +31,8 @@ fn Demo() -> impl IntoView {
         >
             "👋 Drag me!"
             <div class="text-sm opacity-50">
-                   I am
-                {move || x().round()}
-                )
+                I am
+                {move || x().round()},
                 {move || y().round()}
             </div>
         </div>
