@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
     "on_click_outside",
+    "portal",
     "signal_debounced",
     "signal_throttled",
     "use_abs",
