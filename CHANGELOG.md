@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
     To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
 
+### Other Changes 🔥
+
+- Callback in `use_raf_fn` doesn't require to be cloneable anymore
+
 ## [0.6.2] - 2023-08-03
 
 ### Fixes 🍕
