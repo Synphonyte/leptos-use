@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{
-    use_websocket, use_websocket_with_options, UseWebSocketOptions, ConnectionReadyState,
+    core::ConnectionReadyState, use_websocket, use_websocket_with_options, UseWebSocketOptions,
     UseWebsocketReturn,
 };
 
@@ -27,7 +27,7 @@ fn Demo() -> impl IntoView {
         open,
         close,
         ..
-    } = use_websocket("wss://echo.websocket.events/".to_string());
+    } = use_websocket("wss://echo.websocket.events/");
 
     let send_message = move |_| {
         let m = "Hello, world!".to_string();
@@ -107,9 +107,9 @@ fn Demo() -> impl IntoView {
         message_bytes: message_bytes2,
         ..
     } = use_websocket_with_options(
-        "wss://echo.websocket.events/".to_string(),
+        "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
-            .manual(true)
+            .immediate(false)
             .on_open(on_open_callback.clone())
             .on_close(on_close_callback.clone())
             .on_error(on_error_callback.clone())
