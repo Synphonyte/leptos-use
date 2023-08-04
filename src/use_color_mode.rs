@@ -7,11 +7,11 @@ use std::fmt::{Display, Formatter};
 
 use crate::core::StorageType;
 use crate::use_preferred_dark;
-use crate::utils::CloneableFnWithArg;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
+use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
@@ -217,10 +217,7 @@ where
     };
 
     let on_changed = move |mode: ColorMode| {
-        on_changed(UseColorModeOnChangeArgs {
-            mode,
-            default_handler: Box::new(default_on_changed.clone()),
-        });
+        on_changed(mode, Rc::new(default_on_changed.clone()));
     };
 
     create_effect({
@@ -333,16 +330,6 @@ impl From<String> for ColorMode {
     }
 }
 
-/// Arguments to [`UseColorModeOptions::on_changed`]
-#[derive(Clone)]
-pub struct UseColorModeOnChangeArgs {
-    /// The color mode to change to.
-    pub mode: ColorMode,
-
-    /// The default handler that would have been called if the `on_changed` handler had not been specified.
-    pub default_handler: Box<dyn CloneableFnWithArg<ColorMode>>,
-}
-
 #[derive(DefaultBuilder)]
 pub struct UseColorModeOptions<El, T>
 where
@@ -367,7 +354,10 @@ where
     /// Custom handler that is called on updates.
     /// If specified this will override the default behavior.
     /// To get the default behaviour back you can call the provided `default_handler` function.
-    on_changed: Box<dyn CloneableFnWithArg<UseColorModeOnChangeArgs>>,
+    /// It takes two parameters:
+    /// - `mode: ColorMode`: The color mode to change to.
+    ///  -`default_handler: Rc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
+    on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.
     /// Storage requires the *create feature* **`storage`** to be enabled.
@@ -411,6 +401,8 @@ where
     _marker: PhantomData<T>,
 }
 
+type OnChangedFn = Rc<dyn Fn(ColorMode, Rc<dyn Fn(ColorMode)>)>;
+
 impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
     fn default() -> Self {
         Self {
@@ -418,9 +410,7 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             attribute: "class".into(),
             initial_value: ColorMode::Auto.into(),
             custom_modes: vec![],
-            on_changed: Box::new(move |args: UseColorModeOnChangeArgs| {
-                (args.default_handler)(args.mode)
-            }),
+            on_changed: Rc::new(move |mode, default_handler| (default_handler)(mode)),
             storage_signal: None,
             storage_key: "leptos-use-color-scheme".into(),
             storage: StorageType::default(),

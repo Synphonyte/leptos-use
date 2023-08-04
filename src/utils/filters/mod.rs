@@ -4,40 +4,39 @@ mod throttle;
 pub use debounce::*;
 pub use throttle::*;
 
-use crate::utils::{CloneableFnWithArgAndReturn, CloneableFnWithReturn};
 use leptos::MaybeSignal;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-macro_rules! BoxFilterFn {
+macro_rules! RcFilterFn {
     ($R:ident) => {
-        Box<dyn CloneableFnWithArgAndReturn<Box<dyn CloneableFnWithReturn<$R>>, Rc<RefCell<Option<$R>>>>>
+        Rc<dyn Fn(Rc<dyn Fn() -> $R>) -> Rc<RefCell<Option<$R>>>>
     }
 }
 
 pub fn create_filter_wrapper<F, R>(
-    filter: BoxFilterFn!(R),
+    filter: RcFilterFn!(R),
     func: F,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce() -> R + Clone + 'static,
+    F: Fn() -> R + Clone + 'static,
     R: 'static,
 {
-    move || filter.clone()(Box::new(func.clone()))
+    move || Rc::clone(&filter)(Rc::new(func.clone()))
 }
 
 pub fn create_filter_wrapper_with_arg<F, Arg, R>(
-    filter: BoxFilterFn!(R),
+    filter: RcFilterFn!(R),
     func: F,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce(Arg) -> R + Clone + 'static,
+    F: Fn(Arg) -> R + Clone + 'static,
     R: 'static,
     Arg: Clone + 'static,
 {
     move |arg: Arg| {
         let func = func.clone();
-        filter.clone()(Box::new(move || func(arg)))
+        Rc::clone(&filter)(Rc::new(move || func(arg.clone())))
     }
 }
 
@@ -57,16 +56,16 @@ pub enum FilterOptions {
 }
 
 impl FilterOptions {
-    pub fn filter_fn<R>(&self) -> BoxFilterFn!(R)
+    pub fn filter_fn<R>(&self) -> RcFilterFn!(R)
     where
         R: 'static,
     {
         match self {
-            FilterOptions::Debounce { ms, options } => Box::new(debounce_filter(*ms, *options)),
-            FilterOptions::Throttle { ms, options } => Box::new(throttle_filter(*ms, *options)),
-            FilterOptions::None => Box::new(|invoke: Box<dyn CloneableFnWithReturn<R>>| {
-                Rc::new(RefCell::new(Some(invoke())))
-            }),
+            FilterOptions::Debounce { ms, options } => Rc::new(debounce_filter(*ms, *options)),
+            FilterOptions::Throttle { ms, options } => Rc::new(throttle_filter(*ms, *options)),
+            FilterOptions::None => {
+                Rc::new(|invoke: Rc<dyn Fn() -> R>| Rc::new(RefCell::new(Some(invoke()))))
+            }
         }
     }
 }

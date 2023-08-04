@@ -1,6 +1,5 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::utils::CloneableFnWithReturn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Date;
@@ -31,7 +30,7 @@ impl Default for ThrottleOptions {
 pub fn throttle_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl Fn(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Rc<dyn Fn() -> R>) -> Rc<RefCell<Option<R>>> + Clone
 where
     R: 'static,
 {
@@ -50,7 +49,7 @@ where
 
     let ms = ms.into();
 
-    move |mut _invoke: Box<dyn CloneableFnWithReturn<R>>| {
+    move |mut _invoke: Rc<dyn Fn() -> R>| {
         let duration = ms.get_untracked();
         let elapsed = Date::now() - last_exec.get();
 

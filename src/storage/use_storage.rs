@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
 use crate::core::MaybeRwSignal;
-use crate::utils::{CloneableFn, CloneableFnWithArg, FilterOptions};
+use crate::utils::FilterOptions;
 use crate::{
     filter_builder_methods, use_event_listener, watch_pausable_with_options, DebounceOptions,
     ThrottleOptions, WatchOptions, WatchPausableReturn,
@@ -12,6 +12,7 @@ use js_sys::Reflect;
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
+use std::rc::Rc;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -190,18 +191,18 @@ where
     let raw_init = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
-        let remove: Box<dyn CloneableFn> = Box::new(|| {});
+        let remove: Rc<dyn Fn()> = Rc::new(|| {});
     } else {
         let storage = storage_type.into_storage();
 
-        let remove: Box<dyn CloneableFn> = match storage {
+        let remove: Rc<dyn Fn()> = match storage {
             Ok(Some(storage)) => {
                 let write = {
                     let on_error = on_error.clone();
                     let storage = storage.clone();
                     let key = key.to_string();
 
-                    move |v: &T| {
+                    Rc::new(move |v: &T| {
                         match serde_json::to_string(&v) {
                             Ok(ref serialized) => match storage.get_item(&key) {
                                 Ok(old_value) => {
@@ -240,7 +241,7 @@ where
                                 on_error.clone()(UseStorageError::SerializationError(e));
                             }
                         }
-                    }
+                    })
                 };
 
                 let read = {
@@ -249,51 +250,53 @@ where
                     let key = key.to_string();
                     let raw_init = raw_init.clone();
 
-                    move |event_detail: Option<StorageEventDetail>| -> Option<T> {
-                        let serialized_init = match serde_json::to_string(&raw_init) {
-                            Ok(serialized) => Some(serialized),
-                            Err(e) => {
-                                on_error.clone()(UseStorageError::DefaultSerializationError(e));
-                                None
-                            }
-                        };
-
-                        let raw_value = if let Some(event_detail) = event_detail {
-                            event_detail.new_value
-                        } else {
-                            match storage.get_item(&key) {
-                                Ok(raw_value) => match raw_value {
-                                    Some(raw_value) => Some(merge_defaults(&raw_value, &raw_init)),
-                                    None => serialized_init.clone(),
-                                },
+                    Rc::new(
+                        move |event_detail: Option<StorageEventDetail>| -> Option<T> {
+                            let serialized_init = match serde_json::to_string(&raw_init) {
+                                Ok(serialized) => Some(serialized),
                                 Err(e) => {
-                                    on_error.clone()(UseStorageError::StorageAccessError(e));
+                                    on_error.clone()(UseStorageError::DefaultSerializationError(e));
                                     None
                                 }
-                            }
-                        };
+                            };
 
-                        match raw_value {
-                            Some(raw_value) => match serde_json::from_str(&raw_value) {
-                                Ok(v) => Some(v),
-                                Err(e) => {
-                                    on_error.clone()(UseStorageError::SerializationError(e));
-                                    None
-                                }
-                            },
-                            None => {
-                                if let Some(serialized_init) = &serialized_init {
-                                    if write_defaults {
-                                        if let Err(e) = storage.set_item(&key, serialized_init) {
-                                            on_error(UseStorageError::StorageAccessError(e));
-                                        }
+                            let raw_value = if let Some(event_detail) = event_detail {
+                                event_detail.new_value
+                            } else {
+                                match storage.get_item(&key) {
+                                    Ok(raw_value) => match raw_value {
+                                        Some(raw_value) => Some(merge_defaults(&raw_value, &raw_init)),
+                                        None => serialized_init.clone(),
+                                    },
+                                    Err(e) => {
+                                        on_error.clone()(UseStorageError::StorageAccessError(e));
+                                        None
                                     }
                                 }
+                            };
 
-                                Some(raw_init)
+                            match raw_value {
+                                Some(raw_value) => match serde_json::from_str(&raw_value) {
+                                    Ok(v) => Some(v),
+                                    Err(e) => {
+                                        on_error.clone()(UseStorageError::SerializationError(e));
+                                        None
+                                    }
+                                },
+                                None => {
+                                    if let Some(serialized_init) = &serialized_init {
+                                        if write_defaults {
+                                            if let Err(e) = storage.set_item(&key, serialized_init) {
+                                                on_error(UseStorageError::StorageAccessError(e));
+                                            }
+                                        }
+                                    }
+
+                                    Some(raw_init.clone())
+                                }
                             }
-                        }
-                    }
+                        },
+                    )
                 };
 
                 let WatchPausableReturn {
@@ -311,15 +314,15 @@ where
                     let storage = storage.clone();
                     let raw_init = raw_init.clone();
 
-                    move |event_detail: Option<StorageEventDetail>| {
+                    Rc::new(move |event_detail: Option<StorageEventDetail>| {
                         if let Some(event_detail) = &event_detail {
-                            if event_detail.storage_area != Some(storage) {
+                            if event_detail.storage_area != Some(storage.clone()) {
                                 return;
                             }
 
                             match &event_detail.key {
                                 None => {
-                                    set_data.set(raw_init);
+                                    set_data.set(raw_init.clone());
                                     return;
                                 }
                                 Some(event_key) => {
@@ -343,21 +346,25 @@ where
                         } else {
                             resume_watch();
                         }
-                    }
+                    })
                 };
 
-                let upd = update.clone();
-                let update_from_custom_event =
-                    move |event: web_sys::CustomEvent| upd.clone()(Some(event.into()));
+                let update_from_custom_event = {
+                    let update = Rc::clone(&update);
 
-                let upd = update.clone();
-                let update_from_storage_event =
-                    move |event: web_sys::StorageEvent| upd.clone()(Some(event.into()));
+                    move |event: web_sys::CustomEvent| update(Some(event.into()))
+                };
+
+                let update_from_storage_event = {
+                    let update = Rc::clone(&update);
+
+                    move |event: web_sys::StorageEvent| update(Some(event.into()))
+                };
 
                 if listen_to_storage_changes {
                     let _ = use_event_listener(window(), ev::storage, update_from_storage_event);
                     let _ = use_event_listener(
-                                                window(),
+                        window(),
                         ev::Custom::new(CUSTOM_STORAGE_EVENT_NAME),
                         update_from_custom_event,
                     );
@@ -367,22 +374,22 @@ where
 
                 let k = key.to_string();
 
-                Box::new(move || {
+                Rc::new(move || {
                     let _ = storage.remove_item(&k);
                 })
             }
             Err(e) => {
                 on_error(UseStorageError::NoStorage(e));
-                Box::new(move || {})
+                Rc::new(move || {})
             }
             _ => {
                 // do nothing
-                Box::new(move || {})
+                Rc::new(move || {})
             }
         };
     }}
 
-    (data, set_data, move || remove.clone()())
+    (data, set_data, move || remove())
 }
 
 #[derive(Clone)]
@@ -461,7 +468,7 @@ pub struct UseStorageOptions<T> {
     /// Defaults to simply returning the stored value.
     pub(crate) merge_defaults: fn(&str, &T) -> String,
     /// Optional callback whenever an error occurs. The callback takes an argument of type [`UseStorageError`].
-    pub(crate) on_error: Box<dyn CloneableFnWithArg<UseStorageError>>,
+    pub(crate) on_error: Rc<dyn Fn(UseStorageError)>,
 
     /// Debounce or throttle the writing to storage whenever the value changes.
     pub(crate) filter: FilterOptions,
@@ -474,7 +481,7 @@ impl<T> Default for UseStorageOptions<T> {
             listen_to_storage_changes: true,
             write_defaults: true,
             merge_defaults: |stored_value, _default_value| stored_value.to_string(),
-            on_error: Box::new(|_| ()),
+            on_error: Rc::new(|_| ()),
             filter: Default::default(),
         }
     }

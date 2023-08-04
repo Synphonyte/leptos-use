@@ -1,8 +1,9 @@
 use crate::filter_builder_methods;
 use crate::storage::{StorageType, UseStorageError, UseStorageOptions};
-use crate::utils::{CloneableFnWithArg, DebounceOptions, FilterOptions, ThrottleOptions};
+use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
+use std::rc::Rc;
 
 macro_rules! use_specific_storage {
     ($(#[$outer:meta])*
@@ -58,8 +59,7 @@ pub struct UseSpecificStorageOptions<T> {
     /// Defaults to simply returning the stored value.
     merge_defaults: fn(&str, &T) -> String,
     /// Optional callback whenever an error occurs. The callback takes an argument of type [`UseStorageError`].
-    #[builder(into)]
-    on_error: Box<dyn CloneableFnWithArg<UseStorageError>>,
+    on_error: Rc<dyn Fn(UseStorageError)>,
 
     /// Debounce or throttle the writing to storage whenever the value changes.
     filter: FilterOptions,
@@ -71,7 +71,7 @@ impl<T> Default for UseSpecificStorageOptions<T> {
             listen_to_storage_changes: true,
             write_defaults: true,
             merge_defaults: |stored_value, _default_value| stored_value.to_string(),
-            on_error: Box::new(|_| ()),
+            on_error: Rc::new(|_| ()),
             filter: Default::default(),
         }
     }

@@ -77,7 +77,7 @@ pub fn use_debounce_fn<F, R>(
     ms: impl Into<MaybeSignal<f64>> + 'static,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce() -> R + Clone + 'static,
+    F: Fn() -> R + Clone + 'static,
     R: 'static,
 {
     use_debounce_fn_with_options(func, ms, DebounceOptions::default())
@@ -90,10 +90,10 @@ pub fn use_debounce_fn_with_options<F, R>(
     options: DebounceOptions,
 ) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce() -> R + Clone + 'static,
+    F: Fn() -> R + Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper(Box::new(debounce_filter(ms, options)), func)
+    create_filter_wrapper(Rc::new(debounce_filter(ms, options)), func)
 }
 
 /// Version of [`use_debounce_fn`] with an argument for the debounced function. See the docs for [`use_debounce_fn`] for how to use.
@@ -102,7 +102,7 @@ pub fn use_debounce_fn_with_arg<F, Arg, R>(
     ms: impl Into<MaybeSignal<f64>> + 'static,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce(Arg) -> R + Clone + 'static,
+    F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
     R: 'static,
 {
@@ -116,9 +116,9 @@ pub fn use_debounce_fn_with_arg_and_options<F, Arg, R>(
     options: DebounceOptions,
 ) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
 where
-    F: FnOnce(Arg) -> R + Clone + 'static,
+    F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper_with_arg(Box::new(debounce_filter(ms, options)), func)
+    create_filter_wrapper_with_arg(Rc::new(debounce_filter(ms, options)), func)
 }
