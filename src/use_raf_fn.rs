@@ -35,14 +35,14 @@ use wasm_bindgen::JsCast;
 /// You can use `use_raf_fn_with_options` and set `immediate` to `false`. In that case
 /// you have to call `resume()` before the `callback` is executed.
 pub fn use_raf_fn(
-    callback: impl Fn(UseRafFnCallbackArgs) + Clone + 'static,
+    callback: impl Fn(UseRafFnCallbackArgs) + 'static,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
     use_raf_fn_with_options(callback, UseRafFnOptions::default())
 }
 
 /// Version of [`use_raf_fn`] that takes a `UseRafFnOptions`. See [`use_raf_fn`] for how to use.
 pub fn use_raf_fn_with_options(
-    callback: impl Fn(UseRafFnCallbackArgs) + Clone + 'static,
+    callback: impl Fn(UseRafFnCallbackArgs) + 'static,
     options: UseRafFnOptions,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
     let UseRafFnOptions { immediate } = options;
