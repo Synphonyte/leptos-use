@@ -1,6 +1,7 @@
-use crate::utils::{CloneableFnWithArg, Pausable};
+use crate::utils::Pausable;
 use crate::{use_interval_fn_with_options, UseIntervalFnOptions};
 use default_struct_builder::DefaultBuilder;
+use std::rc::Rc;
 
 use leptos::*;
 
@@ -61,7 +62,7 @@ where
 
     let cb = move || {
         update();
-        callback.clone()(counter.get());
+        callback(counter.get());
     };
 
     let Pausable {
@@ -93,14 +94,14 @@ pub struct UseIntervalOptions {
     immediate: bool,
 
     /// Callback on every interval.
-    callback: Box<dyn CloneableFnWithArg<u64>>,
+    callback: Rc<dyn Fn(u64)>,
 }
 
 impl Default for UseIntervalOptions {
     fn default() -> Self {
         Self {
             immediate: true,
-            callback: Box::new(|_: u64| {}),
+            callback: Rc::new(|_: u64| {}),
         }
     }
 }

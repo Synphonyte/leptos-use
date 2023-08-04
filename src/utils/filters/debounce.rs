@@ -1,6 +1,5 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::utils::CloneableFnWithReturn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -20,7 +19,7 @@ pub struct DebounceOptions {
 pub fn debounce_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions,
-) -> impl Fn(Box<dyn CloneableFnWithReturn<R>>) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Rc<dyn Fn() -> R>) -> Rc<RefCell<Option<R>>> + Clone
 where
     R: 'static,
 {
@@ -38,7 +37,7 @@ where
     let ms = ms.into();
     let max_wait_signal = options.max_wait;
 
-    move |_invoke: Box<dyn CloneableFnWithReturn<R>>| {
+    move |_invoke: Rc<dyn Fn() -> R>| {
         let duration = ms.get_untracked();
         let max_duration = max_wait_signal.get_untracked();
 

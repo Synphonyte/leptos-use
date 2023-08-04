@@ -1,11 +1,11 @@
 use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
-use crate::utils::CloneableFnWithArg;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
 use leptos::*;
 use std::borrow::Cow;
+use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
 /// Reactive scroll position and state.
@@ -232,7 +232,7 @@ where
     });
 
     let on_scroll_end = {
-        let on_stop = options.on_stop.clone();
+        let on_stop = Rc::clone(&options.on_stop);
 
         move |e| {
             if !is_scrolling.get_untracked() {
@@ -328,7 +328,7 @@ where
     };
 
     let on_scroll_handler = {
-        let on_scroll = options.on_scroll.clone();
+        let on_scroll = Rc::clone(&options.on_scroll);
 
         move |e: web_sys::Event| {
             let target: web_sys::Element = event_target(&e);
@@ -441,10 +441,10 @@ pub struct UseScrollOptions {
     offset: ScrollOffset,
 
     /// Callback when scrolling is happening.
-    on_scroll: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_scroll: Rc<dyn Fn(web_sys::Event)>,
 
     /// Callback when scrolling stops (after `idle` + `throttle` milliseconds have passed).
-    on_stop: Box<dyn CloneableFnWithArg<web_sys::Event>>,
+    on_stop: Rc<dyn Fn(web_sys::Event)>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
     event_listener_options: web_sys::AddEventListenerOptions,
@@ -461,8 +461,8 @@ impl Default for UseScrollOptions {
             throttle: 0.0,
             idle: 200.0,
             offset: ScrollOffset::default(),
-            on_scroll: Box::new(|_| {}),
-            on_stop: Box::new(|_| {}),
+            on_scroll: Rc::new(|_| {}),
+            on_stop: Rc::new(|_| {}),
             event_listener_options: Default::default(),
             behavior: Default::default(),
         }

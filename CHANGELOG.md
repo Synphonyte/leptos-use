@@ -25,9 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
   - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
     To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
+- `use_color_mode`:
+  - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
+- Throttled or debounced functions cannot be `FnOnce` anymore.
+- All traits `ClonableFn...` have been removed.
 
 ### Other Changes 🔥
 
+- Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
 
 ## [0.6.2] - 2023-08-03

@@ -1,9 +1,10 @@
 use crate::core::ElementMaybeSignal;
 use crate::use_event_listener;
-use crate::utils::CloneableFnMutWithArg;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragenter, dragleave, dragover, drop};
 use leptos::*;
+use std::fmt::{Debug, Formatter};
+use std::rc::Rc;
 
 /// Create a zone where files can be dropped.
 ///
@@ -65,10 +66,10 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let UseDropZoneOptions {
-        mut on_drop,
-        mut on_enter,
-        mut on_leave,
-        mut on_over,
+        on_drop,
+        on_enter,
+        on_leave,
+        on_over,
     } = options;
 
     let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
@@ -147,16 +148,33 @@ where
 }
 
 /// Options for [`use_drop_zone_with_options`].
-#[derive(DefaultBuilder, Default, Clone, Debug)]
+#[derive(DefaultBuilder, Clone)]
 pub struct UseDropZoneOptions {
     /// Event handler for the [`drop`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event) event
-    on_drop: Box<dyn CloneableFnMutWithArg<UseDropZoneEvent>>,
+    on_drop: Rc<dyn Fn(UseDropZoneEvent)>,
     /// Event handler for the [`dragenter`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragenter_event) event
-    on_enter: Box<dyn CloneableFnMutWithArg<UseDropZoneEvent>>,
+    on_enter: Rc<dyn Fn(UseDropZoneEvent)>,
     /// Event handler for the [`dragleave`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragleave_event) event
-    on_leave: Box<dyn CloneableFnMutWithArg<UseDropZoneEvent>>,
+    on_leave: Rc<dyn Fn(UseDropZoneEvent)>,
     /// Event handler for the [`dragover`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragover_event) event
-    on_over: Box<dyn CloneableFnMutWithArg<UseDropZoneEvent>>,
+    on_over: Rc<dyn Fn(UseDropZoneEvent)>,
+}
+
+impl Default for UseDropZoneOptions {
+    fn default() -> Self {
+        Self {
+            on_drop: Rc::new(|_| {}),
+            on_enter: Rc::new(|_| {}),
+            on_leave: Rc::new(|_| {}),
+            on_over: Rc::new(|_| {}),
+        }
+    }
+}
+
+impl Debug for UseDropZoneOptions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "UseDropZoneOptions")
+    }
 }
 
 /// Event passed as argument to the event handler functions of `UseDropZoneOptions`.

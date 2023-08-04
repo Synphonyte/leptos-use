@@ -1,10 +1,10 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
 use crate::use_event_listener_with_options;
-use crate::utils::{CloneableFnMutWithArg, CloneableFnWithArgAndReturn};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::*;
 use std::marker::PhantomData;
+use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::PointerEvent;
 
@@ -134,7 +134,7 @@ where
                     x: event.client_x() as f64 - rect.left(),
                     y: event.client_y() as f64 - rect.top(),
                 };
-                if !on_start.clone()(UseDraggableCallbackArgs {
+                if !on_start(UseDraggableCallbackArgs {
                     position,
                     event: event.clone(),
                 }) {
@@ -159,7 +159,7 @@ where
                     y: event.client_y() as f64 - start_position.y,
                 };
                 set_position.set(position);
-                on_move.clone()(UseDraggableCallbackArgs {
+                on_move(UseDraggableCallbackArgs {
                     position,
                     event: event.clone(),
                 });
@@ -176,7 +176,7 @@ where
             return;
         }
         set_start_position.set(None);
-        on_end.clone()(UseDraggableCallbackArgs {
+        on_end(UseDraggableCallbackArgs {
             position: position.get_untracked(),
             event: event.clone(),
         });
@@ -253,13 +253,13 @@ where
     initial_value: MaybeRwSignal<Position>,
 
     /// Callback when the dragging starts. Return `false` to prevent dragging.
-    on_start: Box<dyn CloneableFnWithArgAndReturn<UseDraggableCallbackArgs, bool>>,
+    on_start: Rc<dyn Fn(UseDraggableCallbackArgs) -> bool>,
 
     /// Callback during dragging.
-    on_move: Box<dyn CloneableFnMutWithArg<UseDraggableCallbackArgs>>,
+    on_move: Rc<dyn Fn(UseDraggableCallbackArgs)>,
 
     /// Callback when dragging end.
-    on_end: Box<dyn CloneableFnMutWithArg<UseDraggableCallbackArgs>>,
+    on_end: Rc<dyn Fn(UseDraggableCallbackArgs)>,
 
     #[builder(skip)]
     _marker1: PhantomData<DragT>,
@@ -284,9 +284,9 @@ impl Default
             handle: None,
             pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],
             initial_value: MaybeRwSignal::default(),
-            on_start: Box::new(|_| true),
-            on_move: Box::new(|_| {}),
-            on_end: Box::new(|_| {}),
+            on_start: Rc::new(|_| true),
+            on_move: Rc::new(|_| {}),
+            on_end: Rc::new(|_| {}),
             _marker1: PhantomData,
             _marker2: PhantomData,
         }

@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
 use crate::use_event_listener;
-use crate::utils::CloneableFnMutWithArg;
 use cfg_if::cfg_if;
 use leptos::ev::change;
 use leptos::*;
@@ -48,8 +47,7 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
         let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));
         let remove_listener: RemoveListener = Rc::new(RefCell::new(None));
 
-        let listener: Rc<RefCell<Box<dyn CloneableFnMutWithArg<web_sys::Event>>>> =
-            Rc::new(RefCell::new(Box::new(|_| {})));
+        let listener = Rc::new(RefCell::new(Rc::new(|_| {}) as Rc<dyn Fn(web_sys::Event)>));
 
         let cleanup = {
             let remove_listener = Rc::clone(&remove_listener);
@@ -65,7 +63,7 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
             let cleanup = cleanup.clone();
             let listener = Rc::clone(&listener);
 
-            move || {
+            Rc::new(move || {
                 cleanup();
 
                 let mut media_query = media_query.borrow_mut();
@@ -74,21 +72,22 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
                 if let Some(media_query) = media_query.as_ref() {
                     set_matches.set(media_query.matches());
 
+                    let listener = Rc::clone(&*listener.borrow());
+
                     remove_listener.replace(Some(Box::new(use_event_listener(
-                                                media_query.clone(),
+                        media_query.clone(),
                         change,
-                        listener.borrow().clone(),
+                        move |e| listener(e),
                     ))));
                 } else {
                     set_matches.set(false);
                 }
-            }
+            })
         };
 
         {
-            let update = update.clone();
-            listener
-                .replace(Box::new(move |_| update()) as Box<dyn CloneableFnMutWithArg<web_sys::Event>>);
+            let update = Rc::clone(&update);
+            listener.replace(Rc::new(move |_| update()) as Rc<dyn Fn(web_sys::Event)>);
         }
 
         create_effect(move |_| update());
