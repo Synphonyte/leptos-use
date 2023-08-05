@@ -305,7 +305,7 @@ where
                     ..
                 } = watch_pausable_with_options(
                     move || data.get(),
-                    move |data, _, _| write.clone()(data),
+                    move |data, _, _| Rc::clone(&write)(data),
                     WatchOptions::default().filter(filter),
                 );
 
@@ -340,7 +340,7 @@ where
                         }
 
                         if event_detail.is_some() {
-                            // use timeout to avoid inifinite loop
+                            // use timeout to avoid infinite loop
                             let resume = resume_watch.clone();
                             let _ = set_timeout_with_handle(resume, Duration::ZERO);
                         } else {
@@ -352,7 +352,10 @@ where
                 let update_from_custom_event = {
                     let update = Rc::clone(&update);
 
-                    move |event: web_sys::CustomEvent| update(Some(event.into()))
+                    move |event: web_sys::CustomEvent| {
+                        let update = Rc::clone(&update);
+                        queue_microtask(move || update(Some(event.into())))
+                    }
                 };
 
                 let update_from_storage_event = {

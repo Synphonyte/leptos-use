@@ -269,7 +269,7 @@ cfg_if! { if #[cfg(feature = "storage")] {
             (store.into(), set_store)
         } else if storage_enabled {
             let (store, set_store, _) = use_storage_with_options(
-                                storage_key,
+                storage_key,
                 initial_value,
                 UseStorageOptions::default()
                     .listen_to_storage_changes(listen_to_storage_changes)
