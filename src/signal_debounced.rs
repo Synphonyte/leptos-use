@@ -19,7 +19,7 @@ signal_filtered!(
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = create_signal("");
-    /// let debounced = signal_debounced(input, 1000.0);
+    /// let debounced: Signal<&'static str> = signal_debounced(input, 1000.0);
     /// #
     /// # view! { }
     /// # }
@@ -36,7 +36,7 @@ signal_filtered!(
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = create_signal("");
-    /// let debounced = signal_debounced_with_options(
+    /// let debounced: Signal<&'static str> = signal_debounced_with_options(
     ///     input,
     ///     1000.0,
     ///     DebounceOptions::default().max_wait(Some(500.0))
