@@ -19,7 +19,7 @@ signal_filtered!(
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = create_signal("");
-    /// let throttled = signal_throttled(input, 1000.0);
+    /// let throttled: Signal<&'static str> = signal_throttled(input, 1000.0);
     /// #
     /// # view! { }
     /// # }
@@ -36,7 +36,7 @@ signal_filtered!(
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = create_signal("");
-    /// let throttled = signal_throttled_with_options(
+    /// let throttled: Signal<&'static str> = signal_throttled_with_options(
     ///     input,
     ///     1000.0,
     ///     ThrottleOptions::default().leading(false).trailing(true)
