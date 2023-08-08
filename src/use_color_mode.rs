@@ -285,7 +285,7 @@ cfg_if! { if #[cfg(feature = "storage")] {
     fn get_store_signal(
         initial_value: MaybeRwSignal<ColorMode>,
         storage_signal: Option<RwSignal<ColorMode>>,
-        _storage_key: &String,
+        _storage_key: &str,
         _storage_enabled: bool,
         _storage: StorageType,
         _listen_to_storage_changes: bool,
