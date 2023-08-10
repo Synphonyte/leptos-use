@@ -66,14 +66,10 @@ where
         move |entries, _| {
             // In some circumstances Chrome passes a first (or only) entry which has a zero bounding client rect
             // and returns `is_intersecting` erroneously as `false`.
-            if let Some(entry) = entries
-                .into_iter()
-                .filter(|entry| {
-                    let rect = entry.bounding_client_rect();
-                    rect.width() > 0.0 || rect.height() > 0.0
-                })
-                .next()
-            {
+            if let Some(entry) = entries.into_iter().find(|entry| {
+                let rect = entry.bounding_client_rect();
+                rect.width() > 0.0 || rect.height() > 0.0
+            }) {
                 set_visible.set(entry.is_intersecting());
             }
         },
