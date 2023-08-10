@@ -40,7 +40,6 @@ use std::marker::PhantomData;
 /// * [`use_intersection_observer`]
 pub fn use_element_visibility<El, T>(target: El) -> Signal<bool>
 where
-    El: Clone,
     El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
@@ -63,9 +62,20 @@ where
     let (is_visible, set_visible) = create_signal(false);
 
     use_intersection_observer_with_options(
-        (target).into(),
+        target.into(),
         move |entries, _| {
-            set_visible.set(entries[0].is_intersecting());
+            // In some circumstances Chrome passes a first (or only) entry which has a zero bounding client rect
+            // and returns `is_intersecting` erroneously as `false`.
+            if let Some(entry) = entries
+                .into_iter()
+                .filter(|entry| {
+                    let rect = entry.bounding_client_rect();
+                    rect.width() > 0.0 || rect.height() > 0.0
+                })
+                .next()
+            {
+                set_visible.set(entry.is_intersecting());
+            }
         },
         UseIntersectionObserverOptions::default().root(options.viewport),
     );
