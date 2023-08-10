@@ -15,9 +15,11 @@ pub mod utils;
 cfg_if! { if #[cfg(web_sys_unstable_apis)] {
     mod use_element_size;
     mod use_resize_observer;
+    mod use_webtransport;
 
     pub use use_element_size::*;
     pub use use_resize_observer::*;
+    pub use use_webtransport::*;
 }}
 
 mod is_err;
@@ -55,7 +57,6 @@ mod use_supported;
 mod use_throttle_fn;
 mod use_to_string;
 mod use_websocket;
-mod use_webtransport;
 mod use_window_focus;
 mod use_window_scroll;
 mod watch_debounced;
@@ -99,7 +100,6 @@ pub use use_supported::*;
 pub use use_throttle_fn::*;
 pub use use_to_string::*;
 pub use use_websocket::*;
-pub use use_webtransport::*;
 pub use use_window_focus::*;
 pub use use_window_scroll::*;
 pub use watch_debounced::*;
