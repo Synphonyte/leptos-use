@@ -36,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
 
+### Fixes 🍕
+
+- `use_element_visibility` didn't work in some cases on Chrome properly. This has been fixed.
+
 ## [0.6.2] - 2023-08-03
 
 ### Fixes 🍕
