@@ -58,6 +58,10 @@ features = [
     "Navigator",
     "NodeList",
     "PointerEvent",
+    "ReadableStream",
+    "ReadableStreamByobReader",
+    "ReadableStreamGetReaderOptions",
+    "ReadableStreamReaderMode",
     "ResizeObserver",
     "ResizeObserverBoxOptions",
     "ResizeObserverEntry",
@@ -73,7 +77,10 @@ features = [
     "WebSocket",
     "WebTransport",
     "WebTransportOptions",
+    "WebTransportDatagramDuplexStream",
     "Window",
+    "WritableStream",
+    "WritableStreamDefaultWriter",
 ]
 
 [features]
