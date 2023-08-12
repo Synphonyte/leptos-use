@@ -3,6 +3,7 @@
 use cfg_if::cfg_if;
 use core::fmt;
 use leptos::{leptos_dom::helpers::TimeoutHandle, *};
+use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -113,7 +114,7 @@ pub fn use_websocket_with_options(
     let manual = options.manual;
 
     let reconnect_times_ref: StoredValue<u64> = store_value(cx, 0);
-    let unmounted_ref = store_value(cx, false);
+    let unmounted = Rc::new(Cell::new(false));
 
     let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(cx, None);
 
@@ -133,8 +134,8 @@ pub fn use_websocket_with_options(
             Some(Rc::new(move || {
                 if reconnect_times_ref.get_value() < reconnect_limit
                     && ws
-                    .clone()
-                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                        .clone()
+                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -146,7 +147,7 @@ pub fn use_websocket_with_options(
                             },
                             Duration::from_millis(reconnect_interval),
                         )
-                            .ok(),
+                        .ok(),
                     );
                 }
             }))
@@ -155,6 +156,7 @@ pub fn use_websocket_with_options(
         connect_ref.set_value({
             let ws = ws_ref.get_value();
             let url = url;
+            let unmounted = Rc::clone(&unmounted);
 
             Some(Rc::new(move || {
                 reconnect_timer_ref.set_value(None);
@@ -182,8 +184,10 @@ pub fn use_websocket_with_options(
 
                 // onopen handler
                 {
+                    let unmounted = Rc::clone(&unmounted);
+
                     let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
-                        if unmounted_ref.get_value() {
+                        if unmounted.get() {
                             return;
                         }
 
@@ -199,8 +203,10 @@ pub fn use_websocket_with_options(
 
                 // onmessage handler
                 {
+                    let unmounted = Rc::clone(&unmounted);
+
                     let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
-                        if unmounted_ref.get_value() {
+                        if unmounted.get() {
                             return;
                         }
 
@@ -235,8 +241,10 @@ pub fn use_websocket_with_options(
                 }
                 // onerror handler
                 {
+                    let unmounted = Rc::clone(&unmounted);
+
                     let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
-                        if unmounted_ref.get_value() {
+                        if unmounted.get() {
                             return;
                         }
 
@@ -254,8 +262,10 @@ pub fn use_websocket_with_options(
                 }
                 // onclose handler
                 {
+                    let unmounted = Rc::clone(&unmounted);
+
                     let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
-                        if unmounted_ref.get_value() {
+                        if unmounted.get() {
                             return;
                         }
 
@@ -327,7 +337,7 @@ pub fn use_websocket_with_options(
 
     // clean up (unmount)
     on_cleanup(cx, move || {
-        unmounted_ref.set_value(true);
+        unmounted.set(true);
         close();
     });
 

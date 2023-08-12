@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2023-08-12
+
+### Fixes 🍕
+
+- `use_websocket` panicked after unmount
+
 ## [0.6.2] - 2023-08-03
 
 ### Fixes 🍕
