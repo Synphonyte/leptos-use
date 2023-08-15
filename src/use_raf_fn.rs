@@ -1,7 +1,7 @@
 use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
@@ -47,8 +47,7 @@ pub fn use_raf_fn_with_options(
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
     let UseRafFnOptions { immediate } = options;
 
-    let previous_frame_timestamp = store_value(0.0_f64);
-    let raf_handle = store_value(None::<i32>);
+    let raf_handle = Rc::new(Cell::new(None::<i32>));
 
     let (is_active, set_active) = create_signal(false);
 
@@ -56,11 +55,12 @@ pub fn use_raf_fn_with_options(
 
     let request_next_frame = {
         let loop_ref = Rc::clone(&loop_ref);
+        let raf_handle = Rc::clone(&raf_handle);
 
         move || {
             let loop_ref = Rc::clone(&loop_ref);
 
-            raf_handle.set_value(
+            raf_handle.set(
                 window()
                     .request_animation_frame(
                         Closure::once_into_js(move |timestamp: f64| {
@@ -76,13 +76,14 @@ pub fn use_raf_fn_with_options(
 
     let loop_fn = {
         let request_next_frame = request_next_frame.clone();
+        let mut previous_frame_timestamp = Cell::new(0.0_f64);
 
         move |timestamp: f64| {
             if !is_active.get() {
                 return;
             }
 
-            let prev_timestamp = previous_frame_timestamp.get_value();
+            let prev_timestamp = previous_frame_timestamp.get();
             let delta = if prev_timestamp > 0.0 {
                 timestamp - prev_timestamp
             } else {
@@ -91,7 +92,7 @@ pub fn use_raf_fn_with_options(
 
             callback(UseRafFnCallbackArgs { delta, timestamp });
 
-            previous_frame_timestamp.set_value(timestamp);
+            previous_frame_timestamp.set(timestamp);
 
             request_next_frame();
         }
@@ -109,18 +110,18 @@ pub fn use_raf_fn_with_options(
     let pause = move || {
         set_active.set(false);
 
-        let handle = raf_handle.get_value();
+        let handle = raf_handle.get();
         if let Some(handle) = handle {
             let _ = window().cancel_animation_frame(handle);
         }
-        raf_handle.set_value(None);
+        raf_handle.set(None);
     };
 
     if immediate {
         resume();
     }
 
-    on_cleanup(pause);
+    on_cleanup(pause.clone());
 
     Pausable {
         resume,
