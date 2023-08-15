@@ -90,4 +90,4 @@ To scaffold a new function quickly you can run `template/createfn.sh`. It requir
 |---------------|---------------------------|
 | <= 0.3        | 0.3                       |
 | 0.4, 0.5, 0.6 | 0.4                       |
-| main          | 0.5.0-alpha               |
+| main          | 0.5.0-alpha/beta          |
