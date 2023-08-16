@@ -378,7 +378,7 @@ where
                 target,
                 ev::scroll,
                 handler,
-                options.event_listener_options.clone(),
+                options.event_listener_options.clone().unwrap_or_default(),
             );
         } else {
             let _ = use_event_listener_with_options::<
@@ -390,7 +390,7 @@ where
                 target,
                 ev::scroll,
                 on_scroll_handler,
-                options.event_listener_options.clone(),
+                options.event_listener_options.clone().unwrap_or_default(),
             );
         }
 
@@ -403,7 +403,7 @@ where
             target,
             scrollend,
             on_scroll_end,
-            options.event_listener_options,
+            options.event_listener_options.unwrap_or_default(),
         );
 
         let measure = Box::new(move || {
@@ -454,7 +454,8 @@ pub struct UseScrollOptions {
     on_stop: Rc<dyn Fn(web_sys::Event)>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
-    event_listener_options: web_sys::AddEventListenerOptions,
+    #[builder(into)]
+    event_listener_options: Option<web_sys::AddEventListenerOptions>,
 
     /// When changing the `x` or `y` signals this specifies the scroll behaviour.
     /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.
