@@ -76,7 +76,7 @@ pub fn use_raf_fn_with_options(
 
     let loop_fn = {
         let request_next_frame = request_next_frame.clone();
-        let mut previous_frame_timestamp = Cell::new(0.0_f64);
+        let previous_frame_timestamp = Cell::new(0.0_f64);
 
         move |timestamp: f64| {
             if !is_active.get() {

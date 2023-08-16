@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `signal_debounced`
 - `signal_throttled`
 
-### Braking Changes 🛠
+### Breaking Changes 🛠
 
 - Leptos version is now 0.5
 - No `cx: Scope` params are supported/needed anymore because of the changes in Leptos.
@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
+- `use_scroll` is now callable on the server
 
 ### Fixes 🍕
 
@@ -69,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `is_some`
 - `use_raf_fn`
 
-### Braking Changes 🛠
+### Breaking Changes 🛠
 
 - The following functions now accept a `MaybeRwSignal` as their initial/default value which means
   you can use a synchronized `RwSignal` in those places.
@@ -112,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 2023-07-03
 
-### Braking Changes 🛠
+### Breaking Changes 🛠
 
 - Required `leptos` version is now 0.4
 - Following the changes in `leptos` there is no longer a `stable` crate feature required in order to use this library
@@ -149,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2023-06-13
 
-### Braking Changes 🛠
+### Breaking Changes 🛠
 
 - `use_event_listener` no longer returns a `Box<dyn Fn()>` but a `impl Fn() + Clone`
 
@@ -179,7 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2023-06-11
 
-### Braking Changes
+### Breaking Changes
 
 - `watch` doesn't accept `immediate` as a direct argument anymore. This is only provided by the option variant.
 - `watch` has now variant `watch_with_options` which allows for debouncing and throttling.

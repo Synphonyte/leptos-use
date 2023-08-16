@@ -1,6 +1,7 @@
 use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
 use leptos::*;
@@ -161,7 +162,7 @@ use wasm_bindgen::JsCast;
 ///
 /// ## Server-Side Rendering
 ///
-/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
+/// On the server this returns signals that don't change and setters that are noops.
 pub fn use_scroll<El, T>(element: El) -> UseScrollReturn
 where
     El: Clone,
@@ -182,40 +183,6 @@ where
     let (internal_x, set_internal_x) = create_signal(0.0);
     let (internal_y, set_internal_y) = create_signal(0.0);
 
-    let signal = (element).into();
-    let behavior = options.behavior;
-
-    let scroll_to = {
-        let signal = signal.clone();
-
-        move |x: Option<f64>, y: Option<f64>| {
-            let element = signal.get_untracked();
-
-            if let Some(element) = element {
-                let element = element.into();
-
-                let mut scroll_options = web_sys::ScrollToOptions::new();
-                scroll_options.behavior(behavior.get_untracked().into());
-
-                if let Some(x) = x {
-                    scroll_options.left(x);
-                }
-                if let Some(y) = y {
-                    scroll_options.top(y);
-                }
-
-                element.scroll_to_with_scroll_to_options(&scroll_options);
-            }
-        }
-    };
-
-    let set_x = {
-        let scroll_to = scroll_to.clone();
-        Box::new(move |x| scroll_to(Some(x), None))
-    };
-
-    let set_y = Box::new(move |y| scroll_to(None, Some(y)));
-
     let (is_scrolling, set_is_scrolling) = create_signal(false);
 
     let arrived_state = create_rw_signal(Directions {
@@ -231,182 +198,222 @@ where
         bottom: false,
     });
 
-    let on_scroll_end = {
-        let on_stop = Rc::clone(&options.on_stop);
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let set_x = Box::new(|_| {});
+        let set_y = Box::new(|_| {});
+        let measure = Box::new(|| {});
+    } else {
+        let signal = element.into();
+        let behavior = options.behavior;
 
-        move |e| {
-            if !is_scrolling.get_untracked() {
-                return;
-            }
+        let scroll_to = {
+            let signal = signal.clone();
 
-            set_is_scrolling.set(false);
-            directions.update(|directions| {
-                directions.left = false;
-                directions.right = false;
-                directions.top = false;
-                directions.bottom = false;
-                on_stop.clone()(e);
-            });
-        }
-    };
+            move |x: Option<f64>, y: Option<f64>| {
+                let element = signal.get_untracked();
 
-    let throttle = options.throttle;
+                if let Some(element) = element {
+                    let element = element.into();
 
-    let on_scroll_end_debounced =
-        use_debounce_fn_with_arg(on_scroll_end.clone(), throttle + options.idle);
+                    let mut scroll_options = web_sys::ScrollToOptions::new();
+                    scroll_options.behavior(behavior.get_untracked().into());
 
-    let offset = options.offset;
+                    if let Some(x) = x {
+                        scroll_options.left(x);
+                    }
+                    if let Some(y) = y {
+                        scroll_options.top(y);
+                    }
 
-    let set_arrived_state = move |target: web_sys::Element| {
-        let style = window()
-            .get_computed_style(&target)
-            .expect("failed to get computed style");
-
-        if let Some(style) = style {
-            let display = style
-                .get_property_value("display")
-                .expect("failed to get display");
-            let flex_direction = style
-                .get_property_value("flex-direction")
-                .expect("failed to get flex-direction");
-
-            let scroll_left = target.scroll_left() as f64;
-            let scroll_left_abs = scroll_left.abs();
-
-            directions.update(|directions| {
-                directions.left = scroll_left < internal_x.get_untracked();
-                directions.right = scroll_left > internal_x.get_untracked();
-            });
-
-            let left = scroll_left_abs <= offset.left;
-            let right = scroll_left_abs + target.client_width() as f64
-                >= target.scroll_width() as f64 - offset.right - ARRIVED_STATE_THRESHOLD_PIXELS;
-
-            arrived_state.update(|arrived_state| {
-                if display == "flex" && flex_direction == "row-reverse" {
-                    arrived_state.left = right;
-                    arrived_state.right = left;
-                } else {
-                    arrived_state.left = left;
-                    arrived_state.right = right;
+                    element.scroll_to_with_scroll_to_options(&scroll_options);
                 }
-            });
-            set_internal_x.set(scroll_left);
-
-            let mut scroll_top = target.scroll_top() as f64;
-
-            // patch for mobile compatibility
-            if target == document().unchecked_into::<web_sys::Element>() && scroll_top == 0.0 {
-                scroll_top = document().body().expect("failed to get body").scroll_top() as f64;
             }
-
-            let scroll_top_abs = scroll_top.abs();
-
-            directions.update(|directions| {
-                directions.top = scroll_top < internal_y.get_untracked();
-                directions.bottom = scroll_top > internal_y.get_untracked();
-            });
-
-            let top = scroll_top_abs <= offset.top;
-            let bottom = scroll_top_abs + target.client_height() as f64
-                >= target.scroll_height() as f64 - offset.bottom - ARRIVED_STATE_THRESHOLD_PIXELS;
-
-            // reverse columns and rows behave exactly the other way around,
-            // bottom is treated as top and top is treated as the negative version of bottom
-            arrived_state.update(|arrived_state| {
-                if display == "flex" && flex_direction == "column-reverse" {
-                    arrived_state.top = bottom;
-                    arrived_state.bottom = top;
-                } else {
-                    arrived_state.top = top;
-                    arrived_state.bottom = bottom;
-                }
-            });
-
-            set_internal_y.set(scroll_top);
-        }
-    };
-
-    let on_scroll_handler = {
-        let on_scroll = Rc::clone(&options.on_scroll);
-
-        move |e: web_sys::Event| {
-            let target: web_sys::Element = event_target(&e);
-
-            set_arrived_state(target);
-            set_is_scrolling.set(true);
-            on_scroll_end_debounced.clone()(e.clone());
-            on_scroll.clone()(e);
-        }
-    };
-
-    let target = {
-        let signal = signal.clone();
-
-        Signal::derive(move || {
-            let element = signal.get();
-            element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
-        })
-    };
-
-    if throttle >= 0.0 {
-        let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(
-            on_scroll_handler.clone(),
-            throttle,
-            ThrottleOptions {
-                trailing: true,
-                leading: false,
-            },
-        );
-
-        let handler = move |e: web_sys::Event| {
-            throttled_scroll_handler.clone()(e);
         };
 
-        let _ = use_event_listener_with_options::<
-            _,
-            Signal<Option<web_sys::EventTarget>>,
-            web_sys::EventTarget,
-            _,
-        >(
-            target,
-            ev::scroll,
-            handler,
-            options.event_listener_options.clone(),
-        );
-    } else {
-        let _ = use_event_listener_with_options::<
-            _,
-            Signal<Option<web_sys::EventTarget>>,
-            web_sys::EventTarget,
-            _,
-        >(
-            target,
-            ev::scroll,
-            on_scroll_handler,
-            options.event_listener_options.clone(),
-        );
-    }
+        let set_x = {
+            let scroll_to = scroll_to.clone();
+            Box::new(move |x| scroll_to(Some(x), None))
+        };
 
-    let _ = use_event_listener_with_options::<
-        _,
-        Signal<Option<web_sys::EventTarget>>,
-        web_sys::EventTarget,
-        _,
-    >(
-        target,
-        scrollend,
-        on_scroll_end,
-        options.event_listener_options,
-    );
+        let set_y = Box::new(move |y| scroll_to(None, Some(y)));
 
-    let measure = Box::new(move || {
-        let el = signal.get_untracked();
-        if let Some(el) = el {
-            let el = el.into();
-            set_arrived_state(el);
+        let on_scroll_end = {
+            let on_stop = Rc::clone(&options.on_stop);
+
+            move |e| {
+                if !is_scrolling.get_untracked() {
+                    return;
+                }
+
+                set_is_scrolling.set(false);
+                directions.update(|directions| {
+                    directions.left = false;
+                    directions.right = false;
+                    directions.top = false;
+                    directions.bottom = false;
+                    on_stop.clone()(e);
+                });
+            }
+        };
+
+        let throttle = options.throttle;
+
+        let on_scroll_end_debounced =
+            use_debounce_fn_with_arg(on_scroll_end.clone(), throttle + options.idle);
+
+        let offset = options.offset;
+
+        let set_arrived_state = move |target: web_sys::Element| {
+            let style = window()
+                .get_computed_style(&target)
+                .expect("failed to get computed style");
+
+            if let Some(style) = style {
+                let display = style
+                    .get_property_value("display")
+                    .expect("failed to get display");
+                let flex_direction = style
+                    .get_property_value("flex-direction")
+                    .expect("failed to get flex-direction");
+
+                let scroll_left = target.scroll_left() as f64;
+                let scroll_left_abs = scroll_left.abs();
+
+                directions.update(|directions| {
+                    directions.left = scroll_left < internal_x.get_untracked();
+                    directions.right = scroll_left > internal_x.get_untracked();
+                });
+
+                let left = scroll_left_abs <= offset.left;
+                let right = scroll_left_abs + target.client_width() as f64
+                    >= target.scroll_width() as f64 - offset.right - ARRIVED_STATE_THRESHOLD_PIXELS;
+
+                arrived_state.update(|arrived_state| {
+                    if display == "flex" && flex_direction == "row-reverse" {
+                        arrived_state.left = right;
+                        arrived_state.right = left;
+                    } else {
+                        arrived_state.left = left;
+                        arrived_state.right = right;
+                    }
+                });
+                set_internal_x.set(scroll_left);
+
+                let mut scroll_top = target.scroll_top() as f64;
+
+                // patch for mobile compatibility
+                if target == document().unchecked_into::<web_sys::Element>() && scroll_top == 0.0 {
+                    scroll_top = document().body().expect("failed to get body").scroll_top() as f64;
+                }
+
+                let scroll_top_abs = scroll_top.abs();
+
+                directions.update(|directions| {
+                    directions.top = scroll_top < internal_y.get_untracked();
+                    directions.bottom = scroll_top > internal_y.get_untracked();
+                });
+
+                let top = scroll_top_abs <= offset.top;
+                let bottom = scroll_top_abs + target.client_height() as f64
+                    >= target.scroll_height() as f64 - offset.bottom - ARRIVED_STATE_THRESHOLD_PIXELS;
+
+                // reverse columns and rows behave exactly the other way around,
+                // bottom is treated as top and top is treated as the negative version of bottom
+                arrived_state.update(|arrived_state| {
+                    if display == "flex" && flex_direction == "column-reverse" {
+                        arrived_state.top = bottom;
+                        arrived_state.bottom = top;
+                    } else {
+                        arrived_state.top = top;
+                        arrived_state.bottom = bottom;
+                    }
+                });
+
+                set_internal_y.set(scroll_top);
+            }
+        };
+
+        let on_scroll_handler = {
+            let on_scroll = Rc::clone(&options.on_scroll);
+
+            move |e: web_sys::Event| {
+                let target: web_sys::Element = event_target(&e);
+
+                set_arrived_state(target);
+                set_is_scrolling.set(true);
+                on_scroll_end_debounced.clone()(e.clone());
+                on_scroll.clone()(e);
+            }
+        };
+
+        let target = {
+            let signal = signal.clone();
+
+            Signal::derive(move || {
+                let element = signal.get();
+                element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
+            })
+        };
+
+        if throttle >= 0.0 {
+            let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(
+                on_scroll_handler.clone(),
+                throttle,
+                ThrottleOptions {
+                    trailing: true,
+                    leading: false,
+                },
+            );
+
+            let handler = move |e: web_sys::Event| {
+                throttled_scroll_handler.clone()(e);
+            };
+
+            let _ = use_event_listener_with_options::<
+                _,
+                Signal<Option<web_sys::EventTarget>>,
+                web_sys::EventTarget,
+                _,
+            >(
+                target,
+                ev::scroll,
+                handler,
+                options.event_listener_options.clone(),
+            );
+        } else {
+            let _ = use_event_listener_with_options::<
+                _,
+                Signal<Option<web_sys::EventTarget>>,
+                web_sys::EventTarget,
+                _,
+            >(
+                target,
+                ev::scroll,
+                on_scroll_handler,
+                options.event_listener_options.clone(),
+            );
         }
-    });
+
+        let _ = use_event_listener_with_options::<
+            _,
+            Signal<Option<web_sys::EventTarget>>,
+            web_sys::EventTarget,
+            _,
+        >(
+            target,
+            scrollend,
+            on_scroll_end,
+            options.event_listener_options,
+        );
+
+        let measure = Box::new(move || {
+            let el = signal.get_untracked();
+            if let Some(el) = el {
+                let el = el.into();
+                set_arrived_state(el);
+            }
+        });
+    }}
 
     UseScrollReturn {
         x: internal_x.into(),
