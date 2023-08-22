@@ -24,6 +24,9 @@ paste = "1"
 lazy_static = "1"
 cfg-if = "1"
 wasm-bindgen-futures = "0.4"
+async-trait = "0.1"
+rmp-serde = { version = "1.1", optional = true }
+thiserror = "1"
 
 [dependencies.web-sys]
 version = "0.3"
@@ -78,7 +81,10 @@ features = [
     "WebTransport",
     "WebTransportOptions",
     "WebTransportDatagramDuplexStream",
+    "WebTransportBidirectionalStream",
     "Window",
+    "WebTransportReceiveStream",
+    "WebTransportSendStream",
     "WritableStream",
     "WritableStreamDefaultWriter",
 ]
@@ -86,8 +92,9 @@ features = [
 [features]
 docs = []
 math = ["num"]
-storage = ["serde", "serde_json", "web-sys/StorageEvent"]
+storage = ["dep:serde", "dep:serde_json", "web-sys/StorageEvent"]
 ssr = []
+msgpack = ["dep:rmp-serde", "dep:serde"]
 
 [package.metadata.docs.rs]
 all-features = true

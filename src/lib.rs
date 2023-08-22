@@ -57,7 +57,6 @@ mod use_supported;
 mod use_throttle_fn;
 mod use_to_string;
 mod use_websocket;
-mod use_webtransport;
 mod use_window_focus;
 mod use_window_scroll;
 mod watch_debounced;
