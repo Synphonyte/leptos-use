@@ -32,7 +32,6 @@ Please refer to the [functions list](functions.md) for more details.
 
 ## Stable Rust
 
-Just like `leptos` this library can be safely run on stable rust. Just don't
-forget to consult the Getting Started section of the `leptos` docs to understand
-what that means. As of writing, it concerns mainly the getter and setter syntax
-on signals, and the use of `cx` in closures.
+Just like `leptos` this library can be safely run on stable rust. 
+In the [Getting Started section](https://leptos-rs.github.io/leptos/02_getting_started.html) 
+of the `leptos` docs you can read more about what this means.
