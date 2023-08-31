@@ -2,7 +2,7 @@ use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::EventDescriptor;
+use leptos::ev::{scrollend, EventDescriptor};
 use leptos::*;
 use std::borrow::Cow;
 use std::rc::Rc;
@@ -514,26 +514,4 @@ pub struct ScrollOffset {
     pub top: f64,
     pub right: f64,
     pub bottom: f64,
-}
-
-// TODO : remove when leptos merges PR https://github.com/leptos-rs/leptos/pull/1105
-
-#[allow(non_camel_case_types)]
-#[derive(Copy, Clone)]
-struct scrollend;
-
-impl EventDescriptor for scrollend {
-    type EventType = web_sys::Event;
-
-    #[inline(always)]
-    fn name(&self) -> Cow<'static, str> {
-        "scrollend".into()
-    }
-
-    #[inline(always)]
-    fn event_delegation_key(&self) -> Cow<'static, str> {
-        "$$$scrollend".into()
-    }
-
-    const BUBBLES: bool = false;
 }

@@ -41,10 +41,12 @@ where
     }
 }
 
-impl<T, E> SignalGet<Option<T>> for ElementMaybeSignal<T, E>
+impl<T, E> SignalGet for ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Option<T>;
+
     fn get(&self) -> Option<T> {
         match self {
             Self::Static(t) => t.clone(),
@@ -62,10 +64,12 @@ where
     }
 }
 
-impl<T, E> SignalWith<Option<T>> for ElementMaybeSignal<T, E>
+impl<T, E> SignalWith for ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Option<T>;
+
     fn with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
             Self::Static(t) => f(t),
@@ -83,10 +87,12 @@ where
     }
 }
 
-impl<T, E> SignalWithUntracked<Option<T>> for ElementMaybeSignal<T, E>
+impl<T, E> SignalWithUntracked for ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Option<T>;
+
     fn with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
             Self::Static(t) => f(t),
@@ -104,10 +110,12 @@ where
     }
 }
 
-impl<T, E> SignalGetUntracked<Option<T>> for ElementMaybeSignal<T, E>
+impl<T, E> SignalGetUntracked for ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Option<T>;
+
     fn get_untracked(&self) -> Option<T> {
         match self {
             Self::Static(t) => t.clone(),
