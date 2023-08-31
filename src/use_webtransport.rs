@@ -149,6 +149,20 @@ pub fn use_webtransport_with_options(
         }
     };
 
+    let on_closed = {
+        let reconnect = Rc::clone(&reconnect);
+        let unmounted = Rc::clone(&unmounted);
+
+        move || {
+            if unmounted.get() {
+                return;
+            }
+
+            // TODO
+            // reconnect();
+        }
+    };
+
     let close = {
         let transport = Rc::clone(&transport);
         let reconnect_count = Rc::clone(&reconnect_count);
@@ -206,10 +220,14 @@ pub fn use_webtransport_with_options(
 
     // TODO : reliable streams
 
-    on_cleanup(move || {
-        unmounted.set(true);
-        close();
-    });
+    {
+        let unmounted = Rc::clone(&unmounted);
+
+        on_cleanup(move || {
+            unmounted.set(true);
+            close();
+        });
+    }
 
     UseWebTransportReturn {
         transport,
@@ -263,19 +281,17 @@ fn lazy_initialize_reader(
         if !initialized.get() {
             initialized.set(true);
 
-            listen_to_stream(
-                get_readable_stream(),
-                move || initialized.set(false),
-                on_value,
-            );
+            listen_to_stream(get_readable_stream(), on_value, move || {
+                initialized.set(false)
+            });
         }
     }
 }
 
 fn listen_to_stream(
     readable_stream: web_sys::ReadableStream,
-    on_done: impl Fn() + 'static,
     on_value: impl Fn(JsValue) + 'static,
+    on_done: impl Fn() + 'static,
 ) {
     let mut reader_options = web_sys::ReadableStreamGetReaderOptions::new();
     reader_options.mode(web_sys::ReadableStreamReaderMode::Byob);
@@ -478,6 +494,7 @@ impl CloseableStream for BidirStream {
 }
 
 /// Return type of [`use_webtransport`].
+#[derive(Clone, Debug)]
 pub struct UseWebTransportReturn {
     transport: Rc<RefCell<Option<web_sys::WebTransport>>>,
     datagrams_writer: Rc<RefCell<Option<web_sys::WritableStreamDefaultWriter>>>,
