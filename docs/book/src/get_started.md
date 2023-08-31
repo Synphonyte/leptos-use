@@ -32,10 +32,7 @@ Please refer to the [functions list](functions.md) for more details.
 
 ## Stable Rust
 
-By default — like `leptos` — the library assumes you're using the
-nightly Rust toolchain. This allows for more ergonomic use of signals.
-If you want to use stable Rust, you have to enable the `stable` crate feature.
-
-```toml
-leptos-use = { version = "...", features = ["stable"] }
-```
+Just like `leptos` this library can be safely run on stable rust. Just don't
+forget to consult the Getting Started section of the `leptos` docs to understand
+what that means. As of writing, it concerns mainly the getter and setter syntax
+on signals, and the use of `cx` in closures.
