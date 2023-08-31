@@ -10,9 +10,13 @@ fn Demo() -> impl IntoView {
     let transport = use_webtransport_with_options(
         "https://echo.webtransport.day",
         UseWebTransportOptions::default()
-            .on_open(|_| set_datagrams_log.update(|log| log.push("Connection opened".to_string())))
-            .on_close(|_| set_datagrams_log.update(|log| log.push("Connection closed".to_string())))
-            .on_error(|e| set_datagrams_log.update(|log| log.push(format!("Error: {:?}", e)))),
+            .on_open(move || {
+                set_datagrams_log.update(|log| log.push("Connection opened".to_string()))
+            })
+            .on_close(move || {
+                set_datagrams_log.update(|log| log.push("Connection closed".to_string()))
+            })
+            .on_error(move |e| set_datagrams_log.update(|log| log.push(format!("Error: {:?}", e)))),
     );
 
     let (text, set_text) = create_signal("".to_string());
@@ -24,6 +28,7 @@ fn Demo() -> impl IntoView {
             set_datagrams_log.update(|log| log.push(format!("Sent datagram: '{}'", text())));
 
             transport.send_datagrams(text().as_bytes());
+            set_text("".to_string());
         }
     };
 
@@ -46,12 +51,12 @@ fn Demo() -> impl IntoView {
 
     view! {
         <h2>Datagrams</h2>
-        <textarea on:change=move |e| set_text(event_target_value(&e))/>
+        <textarea on:change=move |e| set_text(event_target_value(&e)) prop:value=text />
         <button on:click=on_send disabled=move || ready_state() != ConnectionReadyState::Open>"Send"</button>
 
         <div>
             <ul>
-                {move || log().iter().map(|l| view! { <li>{l}</li> }).collect::<Vec<_>>()}
+                {move || datagrams_log().iter().map(|l| view! { <li>{l}</li> }).collect::<Vec<_>>()}
             </ul>
         </div>
     }
