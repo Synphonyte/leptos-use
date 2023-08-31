@@ -154,7 +154,6 @@ pub fn use_websocket_with_options(
 
         connect_ref.set_value({
             let ws = ws_ref.get_value();
-            let url = url;
             let unmounted = Rc::clone(&unmounted);
 
             Some(Rc::new(move || {

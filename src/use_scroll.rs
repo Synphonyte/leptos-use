@@ -3,9 +3,8 @@ use crate::use_event_listener::use_event_listener_with_options;
 use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::{scrollend, EventDescriptor};
+use leptos::ev::scrollend;
 use leptos::*;
-use std::borrow::Cow;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
