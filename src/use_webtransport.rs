@@ -6,7 +6,6 @@ use js_sys::Reflect;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::*;
 use std::cell::{Cell, RefCell};
-use std::future::Future;
 use std::rc::Rc;
 use std::time::Duration;
 use wasm_bindgen::prelude::*;
@@ -52,7 +51,7 @@ pub fn use_webtransport_with_options(
 ) -> UseWebTransportReturn {
     let UseWebTransportOptions {
         on_open,
-        on_error,
+        // on_error,
         on_close,
         on_receive_stream,
         on_bidir_stream,
@@ -344,7 +343,7 @@ pub struct UseWebTransportOptions {
     on_open: Rc<dyn Fn()>,
 
     /// Error callback.
-    on_error: Rc<dyn Fn(WebTransportError)>,
+    // TODO : ? on_error: Rc<dyn Fn(WebTransportError)>,
 
     /// Callback when `WebTransport` is closed.
     on_close: Rc<dyn Fn()>,
@@ -371,7 +370,7 @@ impl Default for UseWebTransportOptions {
     fn default() -> Self {
         Self {
             on_open: Rc::new(|| {}),
-            on_error: Rc::new(|_| {}),
+            // on_error: Rc::new(|_| {}),
             on_close: Rc::new(|| {}),
             on_receive_stream: Rc::new(|_| {}),
             on_bidir_stream: Rc::new(|_| {}),
@@ -392,6 +391,7 @@ pub trait CloseableStream {
 #[async_trait(?Send)]
 pub trait SendableStream {
     fn writer(&self) -> &web_sys::WritableStreamDefaultWriter;
+
     fn send_bytes(&self, data: &[u8]) {
         let arr = js_sys::Uint8Array::from(data);
         let _ = self.writer().write_with_chunk(&arr);
@@ -422,6 +422,7 @@ pub trait SendableStream {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct SendStream {
     pub writer: web_sys::WritableStreamDefaultWriter,
 }
@@ -449,12 +450,16 @@ impl CloseableStream for SendStream {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct ReceiveStream {
     pub reader: web_sys::ReadableStreamDefaultReader,
     pub message: Signal<Option<Vec<u8>>>,
-    pub close: Rc<dyn Fn()>,
+    // pub close: Rc<dyn Fn()>,
 }
 
+// TODO : implement ReceiveStream
+
+#[derive(Clone, Debug)]
 pub struct BidirStream {
     pub writer: web_sys::WritableStreamDefaultWriter,
     pub bytes: Signal<Option<Vec<u8>>>,
@@ -492,6 +497,14 @@ impl CloseableStream for BidirStream {
             .map_err(|e| WebTransportError::OnCloseWriter(e))?;
 
         Ok(())
+    }
+}
+
+#[async_trait(?Send)]
+impl SendableStream for BidirStream {
+    #[inline(always)]
+    fn writer(&self) -> &web_sys::WritableStreamDefaultWriter {
+        &self.writer
     }
 }
 
@@ -595,6 +608,7 @@ pub enum WebTransportError {
     OnCloseReader(JsValue),
 }
 
+/// Error enum for [`SendStream::send`]
 #[derive(Error, Debug)]
 pub enum SendError {
     #[error("Failed to write to stream")]
