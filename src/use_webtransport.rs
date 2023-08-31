@@ -106,23 +106,27 @@ pub fn use_webtransport_with_options(
         let on_open = Rc::clone(&on_open);
 
         move || {
-            let transport = transport.borrow();
-
             reconnect_timer.set(None);
 
-            if let Some(transport) = transport.as_ref() {
+            if let Some(transport) = transport.borrow().as_ref() {
                 transport.close();
             }
 
             let options = web_sys::WebTransportOptions::new();
-            let transport = web_sys::WebTransport::new_with_options(&url, &options).unwrap_throw();
+            transport.replace(Some(
+                web_sys::WebTransport::new_with_options(&url, &options).unwrap_throw(),
+            ));
 
             set_ready_state.set(ConnectionReadyState::Connecting);
 
             spawn_local({
                 let on_open = Rc::clone(&on_open);
+                let transport = Rc::clone(&transport);
 
                 async move {
+                    let transport = transport.borrow();
+                    let transport = transport.as_ref().expect("Transport should be set");
+
                     match JsFuture::from(transport.ready()).await {
                         Ok(_) => {
                             set_ready_state.set(ConnectionReadyState::Open);
@@ -229,6 +233,10 @@ pub fn use_webtransport_with_options(
         });
     }
 
+    if immediate {
+        open();
+    }
+
     UseWebTransportReturn {
         transport,
         ready_state,
@@ -241,7 +249,9 @@ fn get_or_create_datagrams_writer(
     datagrams_writer: Rc<RefCell<Option<web_sys::WritableStreamDefaultWriter>>>,
     transport: &web_sys::WebTransport,
 ) -> web_sys::WritableStreamDefaultWriter {
-    if let Some(writer) = datagrams_writer.borrow().clone() {
+    let writer = datagrams_writer.borrow().clone();
+
+    if let Some(writer) = writer {
         writer
     } else {
         let writer = transport
@@ -293,20 +303,12 @@ fn listen_to_stream(
     on_value: impl Fn(JsValue) + 'static,
     on_done: impl Fn() + 'static,
 ) {
-    let mut reader_options = web_sys::ReadableStreamGetReaderOptions::new();
-    reader_options.mode(web_sys::ReadableStreamReaderMode::Byob);
-
-    let reader: web_sys::ReadableStreamByobReader = readable_stream
-        .get_reader_with_options(&reader_options)
-        .unchecked_into();
+    let reader: web_sys::ReadableStreamDefaultReader =
+        readable_stream.get_reader().unchecked_into();
 
     spawn_local(async move {
-        // the length value 4000 is taken from the MDN example
-        // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamBYOBReader/read#examples
-        let mut buffer = [0_u8; 4000];
-
         loop {
-            let result = JsFuture::from(reader.read_with_u8_array(&mut buffer)).await;
+            let result = JsFuture::from(reader.read()).await;
             match result {
                 Ok(result) => {
                     let done = Reflect::get(&result, &"done".into())
@@ -448,7 +450,7 @@ impl CloseableStream for SendStream {
 }
 
 pub struct ReceiveStream {
-    pub reader: web_sys::ReadableStreamByobReader,
+    pub reader: web_sys::ReadableStreamDefaultReader,
     pub message: Signal<Option<Vec<u8>>>,
     pub close: Rc<dyn Fn()>,
 }
@@ -581,6 +583,7 @@ impl UseWebTransportReturn {
 }
 
 /// Error enum for [`UseWebTransportOptions::on_error`]
+#[derive(Debug)]
 pub enum WebTransportError {
     /// The `WebTransport` is not connected yet. Call `open` first.
     NotConnected,
