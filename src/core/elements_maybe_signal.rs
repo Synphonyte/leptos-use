@@ -42,10 +42,12 @@ where
     }
 }
 
-impl<T, E> SignalGet<Vec<Option<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> SignalGet for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Vec<Option<T>>;
+
     fn get(&self) -> Vec<Option<T>> {
         match self {
             Self::Static(v) => v.clone(),
@@ -63,10 +65,12 @@ where
     }
 }
 
-impl<T, E> SignalWith<Vec<Option<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> SignalWith for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Vec<Option<T>>;
+
     fn with<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> O {
         match self {
             Self::Static(v) => f(v),
@@ -84,10 +88,12 @@ where
     }
 }
 
-impl<T, E> SignalWithUntracked<Vec<Option<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> SignalWithUntracked for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Vec<Option<T>>;
+
     fn with_untracked<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> O {
         match self {
             Self::Static(t) => f(t),
@@ -105,10 +111,12 @@ where
     }
 }
 
-impl<T, E> SignalGetUntracked<Vec<Option<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> SignalGetUntracked for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
+    type Value = Vec<Option<T>>;
+
     fn get_untracked(&self) -> Vec<Option<T>> {
         match self {
             Self::Static(t) => t.clone(),
