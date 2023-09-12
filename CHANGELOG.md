@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_geolocation`
 - `signal_debounced`
 - `signal_throttled`
 
@@ -15,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Leptos version is now 0.5
 - No `cx: Scope` params are supported/needed anymore because of the changes in Leptos.
   Please check the release notes of Leptos 0.5 for how to upgrade.
-- `watch` is now removed in favor of `leptos::watch` and will be removed in a future release.
-`watch_with_options` will continue to exist.
+- `watch` is now deprecated in favor of `leptos::watch` and will be removed in a future release.
+  `watch_with_options` will continue to exist.
 - `use_websocket`:
   - takes  now a `&str` instead of a `String` as its `url` parameter.
   -  The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.

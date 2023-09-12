@@ -22,6 +22,7 @@ members = [
     "use_event_listener",
     "use_favicon",
     "use_floor",
+    "use_geolocation",
     "use_intersection_observer",
     "use_interval",
     "use_interval_fn",
