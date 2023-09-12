@@ -4,6 +4,7 @@ use paste::paste;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
+use leptos::logging::error;
 
 /// Reactive viewport breakpoints.
 ///
