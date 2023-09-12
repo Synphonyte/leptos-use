@@ -11,6 +11,7 @@ use default_struct_builder::DefaultBuilder;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::watch_throttled;
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -34,6 +35,7 @@ use default_struct_builder::DefaultBuilder;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_throttled_with_options, WatchThrottledOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {

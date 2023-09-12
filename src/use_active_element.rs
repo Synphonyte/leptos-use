@@ -17,6 +17,7 @@ use web_sys::AddEventListenerOptions;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// use leptos_use::use_active_element;
 /// #
 /// # #[component]

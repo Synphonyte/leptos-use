@@ -6,6 +6,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -23,6 +24,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -41,6 +43,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -60,6 +63,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{WatchOptions, whenever_with_options};
 /// #
 /// # pub fn Demo() -> impl IntoView {

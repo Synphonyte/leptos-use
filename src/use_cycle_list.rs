@@ -12,6 +12,7 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// use leptos_use::{use_cycle_list, UseCycleListReturn};
 /// #
 /// # #[component]

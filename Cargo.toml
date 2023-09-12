@@ -13,7 +13,7 @@ repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
 [dependencies]
-leptos = "0.5.0-beta2"
+leptos = "0.5.0-rc1"
 wasm-bindgen = "0.2"
 js-sys = "0.3"
 default-struct-builder = "0.5"

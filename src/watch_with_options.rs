@@ -17,6 +17,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -41,6 +42,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -59,6 +61,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {

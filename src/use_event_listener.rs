@@ -16,6 +16,7 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::visibilitychange;
+/// # use leptos::logging::log;
 /// # use leptos_use::use_event_listener;
 /// #
 /// # #[component]
@@ -33,6 +34,7 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::click;
+/// # use leptos::logging::log;
 /// # use leptos_use::use_event_listener;
 /// #
 /// # #[component]
@@ -61,6 +63,7 @@ use wasm_bindgen::JsCast;
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::keydown;
+/// # use leptos::logging::log;
 /// # use web_sys::KeyboardEvent;
 /// # use leptos_use::use_event_listener;
 /// #

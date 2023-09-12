@@ -1,4 +1,5 @@
 use leptos::html::Div;
+use leptos::logging::log;
 use leptos::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseScrollReturn};

@@ -25,6 +25,7 @@ static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 /// ```
 /// # use leptos::*;
 /// # use leptos::ev::resize;
+/// # use leptos::logging::log;
 /// # use leptos::html::Div;
 /// # use leptos_use::on_click_outside;
 /// #
