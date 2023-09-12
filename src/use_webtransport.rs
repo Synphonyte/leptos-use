@@ -381,22 +381,38 @@ impl Default for UseWebTransportOptions {
     }
 }
 
+/// Wether the stream is open or closed
+pub enum StreamState {
+    Open,
+    Closed,
+}
+
 #[async_trait(?Send)]
+/// Trait to close a stream
 pub trait CloseableStream {
+    /// Getter for the stream state (open/closed)
+    fn state(&self) -> Signal<StreamState>;
+
+    /// Close the stream ignoring any potential errors
     fn close(&self);
 
+    /// Close the stream asynchronously with a result providing potential errors
     async fn close_async(&self) -> Result<(), WebTransportError>;
 }
 
 #[async_trait(?Send)]
+/// Trait to send data in a stream
 pub trait SendableStream {
+    /// Getter for the stream writer
     fn writer(&self) -> &web_sys::WritableStreamDefaultWriter;
 
+    /// Send data in the form of bytes ignoring potential errors
     fn send_bytes(&self, data: &[u8]) {
         let arr = js_sys::Uint8Array::from(data);
         let _ = self.writer().write_with_chunk(&arr);
     }
 
+    /// Send data in the form of bytes asynchronously with a result providing potential errors
     async fn send_bytes_async(&self, data: &[u8]) -> Result<(), SendError> {
         let arr = js_sys::Uint8Array::from(data);
         let _ = JsFuture::from(self.writer().write_with_chunk(&arr))
@@ -407,6 +423,8 @@ pub trait SendableStream {
     }
 
     #[cfg(any(feature = "msgpack", feature = "bincode"))]
+    /// Send data in the form of a serializable object ignoring potential errors
+    /// Requires the feature `msgpack` or `bincode`
     fn send<T: Serialize>(&self, data: &T) {
         self.send_bytes(
             to_vec(data)
@@ -416,6 +434,8 @@ pub trait SendableStream {
     }
 
     #[cfg(any(feature = "msgpack", feature = "bincode"))]
+    /// Send data in the form of a serializable object asynchronously with a result providing potential errors
+    /// Requires the feature `msgpack` or `bincode`
     async fn send_async<T: Serialize>(&self, data: &T) -> Result<(), SendError> {
         let serialized = to_vec(data)?;
         self.send_bytes_async(&serialized).await
@@ -423,8 +443,11 @@ pub trait SendableStream {
 }
 
 #[derive(Clone, Debug)]
+/// Stream for sending data
 pub struct SendStream {
-    pub writer: web_sys::WritableStreamDefaultWriter,
+    writer: web_sys::WritableStreamDefaultWriter,
+    state: Signal<StreamState>,
+    set_state: WriteSignal<StreamState>,
 }
 
 #[async_trait(?Send)]
@@ -437,6 +460,12 @@ impl SendableStream for SendStream {
 
 #[async_trait(?Send)]
 impl CloseableStream for SendStream {
+    #[inline(always)]
+    fn state(&self) -> Signal<StreamState> {
+        self.state
+    }
+
+    #[inline(always)]
     fn close(&self) {
         let _ = self.writer.close();
     }
@@ -451,18 +480,24 @@ impl CloseableStream for SendStream {
 }
 
 #[derive(Clone, Debug)]
+/// Stream for receiving data
 pub struct ReceiveStream {
     pub reader: web_sys::ReadableStreamDefaultReader,
     pub message: Signal<Option<Vec<u8>>>,
     // pub close: Rc<dyn Fn()>,
+    state: Signal<StreamState>,
+    set_state: WriteSignal<StreamState>,
 }
 
 // TODO : implement ReceiveStream
 
 #[derive(Clone, Debug)]
+/// Bidirectional stream for sending and receiving data
 pub struct BidirStream {
-    pub writer: web_sys::WritableStreamDefaultWriter,
+    writer: web_sys::WritableStreamDefaultWriter,
     pub bytes: Signal<Option<Vec<u8>>>,
+    state: Signal<StreamState>,
+    set_state: WriteSignal<StreamState>,
 }
 
 cfg_if! { if #[cfg(any(feature = "msgpack", feature = "bincode"))] {
@@ -487,6 +522,12 @@ cfg_if! { if #[cfg(any(feature = "msgpack", feature = "bincode"))] {
 
 #[async_trait(?Send)]
 impl CloseableStream for BidirStream {
+    #[inline(always)]
+    fn state(&self) -> Signal<StreamState> {
+        self.state
+    }
+
+    #[inline(always)]
     fn close(&self) {
         let _ = self.writer.close();
     }
@@ -516,6 +557,7 @@ pub struct UseWebTransportReturn {
 
     /// The current state of the `WebTransport` connection.
     pub ready_state: Signal<ConnectionReadyState>,
+
     /// Latest datagrams message received
     pub datagrams: Signal<Option<Vec<u8>>>,
 }
@@ -550,7 +592,13 @@ impl UseWebTransportReturn {
                 .get_writer()
                 .map_err(|e| WebTransportError::FailedToOpenWriter(e))?;
 
-            Ok(SendStream { writer })
+            let (state, set_state) = create_signal(StreamState::Open);
+
+            Ok(SendStream {
+                writer,
+                state: state.into(),
+                set_state,
+            })
         } else {
             Err(WebTransportError::NotConnected)
         }
