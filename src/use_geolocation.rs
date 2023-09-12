@@ -1,3 +1,4 @@
+use crate::use_window;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::Cell;
@@ -60,7 +61,7 @@ pub fn use_geolocation_with_options(
         let position_options = options.as_position_options();
 
         move || {
-            let navigator = Some(window().navigator());
+            let navigator = use_window().navigator();
             if let Some(navigator) = navigator {
                 if let Ok(geolocation) = navigator.geolocation() {
                     let update_position =
@@ -93,7 +94,7 @@ pub fn use_geolocation_with_options(
         let watch_handle = Rc::clone(&watch_handle);
 
         move || {
-            let navigator = Some(window().navigator());
+            let navigator = use_window().navigator();
             if let Some(navigator) = navigator {
                 if let Some(handle) = watch_handle.take() {
                     if let Ok(geolocation) = navigator.geolocation() {

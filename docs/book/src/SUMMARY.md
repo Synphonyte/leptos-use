@@ -15,6 +15,7 @@
 # Elements
 
 - [use_active_element](elements/use_active_element.md)
+- [use_document](elements/use_document.md)
 - [use_document_visibility](elements/use_document_visibility.md)
 - [use_draggable](elements/use_draggable.md)
 - [use_drop_zone](elements/use_drop_zone.md)
@@ -23,6 +24,7 @@
 - [use_intersection_observer](elements/use_intersection_observer.md)
 - [use_mutation_observer](elements/use_mutation_observer.md)
 - [use_resize_observer](elements/use_resize_observer.md)
+- [use_window](elements/use_window.md)
 - [use_window_focus](elements/use_window_focus.md)
 - [use_window_scroll](elements/use_window_scroll.md)
 
