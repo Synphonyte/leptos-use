@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::use_mutation_observer_with_options;
+use leptos_use::{use_mutation_observer_with_options, UseMutationObserverOptions};
 use std::time::Duration;
 
 #[component]
@@ -10,9 +10,6 @@ fn Demo() -> impl IntoView {
     let (messages, set_messages) = create_signal(vec![]);
     let (class_name, set_class_name) = create_signal(String::new());
     let (style, set_style) = create_signal(String::new());
-
-    let mut init = web_sys::MutationObserverInit::new();
-    init.attributes(true);
 
     use_mutation_observer_with_options(
         el,
@@ -23,7 +20,7 @@ fn Demo() -> impl IntoView {
                 });
             }
         },
-        init,
+        UseMutationObserverOptions::default().attributes(true),
     );
 
     let _ = set_timeout_with_handle(

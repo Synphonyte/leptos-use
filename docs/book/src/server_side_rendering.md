@@ -32,18 +32,23 @@ and the server.
 
 ## Functions with Target Elements
 
-A lot of functions like `use_event_listener` and `use_element_size` are only useful when a target HTML/SVG element is
-available. This is not the case on the server. You can simply wrap them in `create_effect` which will cause them to
-be only called in the browser.
+A lot of functions like `use_resize_observer` and `use_element_size` are only useful when a target HTML/SVG element is
+available. This is not always the case on the server. If you use them with `NodeRefs` they will just work in SSR.
+But what if you want to use them with `window()` or `document()`?
+
+To enable that we provide the helper functions [`use_window()`](elements/use_window.md) and [`use_document()`](elements/use_document.md) which return
+a new-type-wrapped `Option<web_sys::Window>` or `Option<web_sys::Document>` respectively. These can be
+used safely on the server. The following code works on both the client and the server:
 
 ```rust
-create_effect(
-    cx,
-    move |_| {
-        // window() doesn't work on the server
-        use_event_listener(window(), "resize", move |_| {
-            // ...
-        })
-    },
-);
+use leptos::*;
+use leptos::ev::keyup;
+use leptos_use::{use_event_listener, use_window};
+
+use_event_listener(use_window(), keyup, |evt| {
+    ...
+}); 
 ```
+
+There are some convenience methods provided as well, like `use_document().body()` which
+just propagate a `None` on the server.

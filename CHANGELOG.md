@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 
+## [Unreleased] -
 
 ### New Functions 🚀
 
@@ -20,17 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Please check the release notes of Leptos 0.5 for how to upgrade.
 - `watch` is now deprecated in favor of `leptos::watch` and will be removed in a future release.
   `watch_with_options` will continue to exist.
-- `use_event_listener_with_options` now takes a `UseEventListenerOptions` instead of a `web_sys::AddEventListenerOptions`.
+- `use_event_listener_with_options` now takes a `UseEventListenerOptions` instead of
+  a `web_sys::AddEventListenerOptions`.
+- `use_mutation_observer_with_options` now takes a `UseMutationObserverOptions` instead of
+  a `web_sys::MutationObserverInit`.
 - `use_websocket`:
-  - takes  now a `&str` instead of a `String` as its `url` parameter.
-  -  The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
-  - The returned signals  `ready_state`, `message`, `message_bytes` have now the type 
-    `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
-  - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
-  - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
-    To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
+    - takes now a `&str` instead of a `String` as its `url` parameter.
+    - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
+    - The returned signals  `ready_state`, `message`, `message_bytes` have now the type
+      `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
+    - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
+    - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
+      To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
 - `use_color_mode`:
-  - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
+    - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
 - Throttled or debounced functions cannot be `FnOnce` anymore.
 - All traits `ClonableFn...` have been removed.
 
@@ -38,9 +41,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
-- `use_scroll` is now callable on the server
-- `use_event_listener` can now be called safely on the server.
-
+- All (!) functions can now be safely called on the server. Specifically this includes the following that
+- panicked on the server:
+    - `use_scroll`
+    - `use_event_listener`
+    - `use_element_hover`
+    - `on_click_outside`
+    - `use_drop_zone`
+    - `use_element_size`
+    - `use_element_visibility`
+    - `use_resize_observer`
+    - `use_intersection_observer`
+    - `use_mutation_observer`
 
 ### Fixes 🍕
 
@@ -87,11 +99,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `use_local_storage`
     - `use_session_storage`
 - Instead of returning `ReadSignal`, the following functions now return `Signal`.
-  - `use_color_mode`
-  - `use_favicon`
-  - `use_storage`
-  - `use_local_storage`
-  - `use_session_storage`
+    - `use_color_mode`
+    - `use_favicon`
+    - `use_storage`
+    - `use_local_storage`
+    - `use_session_storage`
 
 ### Fixes 🍕
 

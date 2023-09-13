@@ -1,14 +1,13 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::{ElementMaybeSignal, Position};
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::*;
 use std::marker::PhantomData;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::AddEventListenerOptions;
 
 /// Reactive mouse position
 ///
@@ -158,40 +157,39 @@ where
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let target = options.target;
-        let mut event_listener_options = AddEventListenerOptions::new();
-        event_listener_options.passive(true);
+        let event_listener_options = UseEventListenerOptions::default().passive(true);
 
         let _ = use_event_listener_with_options(
                         target.clone(),
             mousemove,
             mouse_handler,
-            event_listener_options.clone(),
+            event_listener_options,
         );
         let _ = use_event_listener_with_options(
                         target.clone(),
             dragover,
             drag_handler,
-            event_listener_options.clone(),
+            event_listener_options,
         );
         if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
                                 target.clone(),
                 touchstart,
                 touch_handler.clone(),
-                event_listener_options.clone(),
+                event_listener_options,
             );
             let _ = use_event_listener_with_options(
                                 target.clone(),
                 touchmove,
                 touch_handler,
-                event_listener_options.clone(),
+                event_listener_options,
             );
             if options.reset_on_touch_ends {
                 let _ = use_event_listener_with_options(
                                         target,
                     touchend,
                     move |_| reset(),
-                    event_listener_options.clone(),
+                    event_listener_options,
                 );
             }
         }

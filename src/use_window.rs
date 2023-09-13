@@ -1,7 +1,9 @@
 use crate::{use_document, UseDocument};
 use cfg_if::cfg_if;
-use leptos::*;
 use std::ops::Deref;
+
+#[cfg(not(feature = "ssr"))]
+use leptos::*;
 
 /// SSR safe `window()`.
 /// This returns just a new-type wrapper around `Option<Window>`.

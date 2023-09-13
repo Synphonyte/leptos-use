@@ -5,7 +5,8 @@ use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::use_local_storage;
 use leptos_use::{
-    use_debounce_fn, use_event_listener, use_intl_number_format, UseIntlNumberFormatOptions,
+    use_debounce_fn, use_event_listener, use_intl_number_format, use_window,
+    UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -47,11 +48,9 @@ fn HomePage() -> impl IntoView {
 
     let (key, set_key) = create_signal("".to_string());
 
-    create_effect(move |_| {
-        // window() doesn't work on the server
-        let _ = use_event_listener(window(), keypress, move |evt: KeyboardEvent| {
-            set_key(evt.key())
-        });
+    // window() doesn't work on the server so we provide use_window()
+    let _ = use_event_listener(use_window(), keypress, move |evt: KeyboardEvent| {
+        set_key(evt.key())
     });
 
     let (debounce_value, set_debounce_value) = create_signal("not called");
@@ -65,10 +64,10 @@ fn HomePage() -> impl IntoView {
     debounced_fn();
 
     view! {
-        <h1>"Leptos-Use SSR Example"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
-        <p>"Locale "zh-Hans-CN-u-nu-hanidec": " {zh_count}</p>
-        <p>"Press any key: " {key}</p>
-        <p>"Debounced called: " {debounce_value}</p>
+        <h1>Leptos-Use SSR Example</h1>
+        <button on:click=on_click>Click Me: {count}</button>
+        <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
+        <p>Press any key: {key}</p>
+        <p>Debounced called: {debounce_value}</p>
     }
 }

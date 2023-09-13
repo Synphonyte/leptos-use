@@ -1,6 +1,8 @@
 use cfg_if::cfg_if;
-use leptos::*;
 use std::ops::Deref;
+
+#[cfg(not(feature = "ssr"))]
+use leptos::*;
 
 /// SSR safe `document()`.
 /// This returns just a new-type wrapper around `Option<Document>`.
@@ -44,8 +46,11 @@ impl Deref for UseDocument {
 }
 
 impl UseDocument {
-    /// Returns `Some(HtmlElement)` in the Browser. `None` otherwise.
     pub fn body(&self) -> Option<web_sys::HtmlElement> {
         self.0.as_ref().and_then(|d| d.body())
+    }
+
+    pub fn active_element(&self) -> Option<web_sys::Element> {
+        self.0.as_ref().and_then(|d| d.active_element())
     }
 }

@@ -1,13 +1,16 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::ElementMaybeSignal;
-use crate::{use_mutation_observer_with_options, watch_with_options, WatchOptions};
+use crate::{
+    use_mutation_observer_with_options, watch_with_options, UseMutationObserverOptions,
+    WatchOptions,
+};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
 use std::time::Duration;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsCast;
 
 /// Manipulate CSS variables.
 ///
@@ -127,17 +130,14 @@ where
         };
 
         if observe {
-            let mut init = web_sys::MutationObserverInit::new();
             let update_css_var = update_css_var.clone();
             let el_signal = el_signal.clone();
 
-            init.attribute_filter(&js_sys::Array::from_iter(
-                vec![JsValue::from_str("style")],
-            ));
             use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
                                 el_signal,
                 move |_, _| update_css_var(),
-                init,
+                UseMutationObserverOptions::default()
+                    .attribute_filter(vec!["style".to_string()]),
             );
         }
 

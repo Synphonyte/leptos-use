@@ -1,10 +1,9 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use leptos::ev::scroll;
 use leptos::*;
-use web_sys::AddEventListenerOptions;
 
 /// Reactive window scroll.
 ///
@@ -40,21 +39,17 @@ pub fn use_window_scroll() -> (Signal<f64>, Signal<f64>) {
     let (x, set_x) = create_signal(initial_x);
     let (y, set_y) = create_signal(initial_y);
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let mut options = AddEventListenerOptions::new();
-        options.capture(false);
-        options.passive(true);
-
-        let _ = use_event_listener_with_options(
-                        window(),
-            scroll,
-            move |_| {
-                set_x.set(window().scroll_x().unwrap_or_default());
-                set_y.set(window().scroll_y().unwrap_or_default());
-            },
-            options,
-        );
-    }}
+    let _ = use_event_listener_with_options(
+        use_window(),
+        scroll,
+        move |_| {
+            set_x.set(window().scroll_x().unwrap_or_default());
+            set_y.set(window().scroll_y().unwrap_or_default());
+        },
+        UseEventListenerOptions::default()
+            .capture(false)
+            .passive(true),
+    );
 
     (x.into(), y.into())
 }

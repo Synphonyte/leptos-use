@@ -1,8 +1,11 @@
 use crate::core::ElementMaybeSignal;
-use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptions};
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
+
+#[cfg(not(feature = "ssr"))]
+use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptions};
 
 /// Tracks the visibility of an element within the viewport.
 ///
@@ -33,7 +36,7 @@ use std::marker::PhantomData;
 ///
 /// ## Server-Side Rendering
 ///
-/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
+/// On the server this returns a `Signal` that always contains the value `false`.
 ///
 /// ## See also
 ///
@@ -49,6 +52,8 @@ where
     )
 }
 
+/// Version of [`use_element_visibility`] with that takes a `UseElementVisibilityOptions`. See [`use_element_visibility`] for how to use.
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
 pub fn use_element_visibility_with_options<El, T, ContainerEl, ContainerT>(
     target: El,
     options: UseElementVisibilityOptions<ContainerEl, ContainerT>,
@@ -61,20 +66,22 @@ where
 {
     let (is_visible, set_visible) = create_signal(false);
 
-    use_intersection_observer_with_options(
-        target.into(),
-        move |entries, _| {
-            // In some circumstances Chrome passes a first (or only) entry which has a zero bounding client rect
-            // and returns `is_intersecting` erroneously as `false`.
-            if let Some(entry) = entries.into_iter().find(|entry| {
-                let rect = entry.bounding_client_rect();
-                rect.width() > 0.0 || rect.height() > 0.0
-            }) {
-                set_visible.set(entry.is_intersecting());
-            }
-        },
-        UseIntersectionObserverOptions::default().root(options.viewport),
-    );
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        use_intersection_observer_with_options(
+            target.into(),
+            move |entries, _| {
+                // In some circumstances Chrome passes a first (or only) entry which has a zero bounding client rect
+                // and returns `is_intersecting` erroneously as `false`.
+                if let Some(entry) = entries.into_iter().find(|entry| {
+                    let rect = entry.bounding_client_rect();
+                    rect.width() > 0.0 || rect.height() > 0.0
+                }) {
+                    set_visible.set(entry.is_intersecting());
+                }
+            },
+            UseIntersectionObserverOptions::default().root(options.viewport),
+        );
+    }}
 
     is_visible.into()
 }
@@ -92,6 +99,7 @@ where
     /// Defaults to `None` (which means the root `document` will be used).
     /// Please note that setting this to a `Some(document)` may not be supported by all browsers.
     /// See [Browser Compatibility](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver#browser_compatibility)
+    #[cfg_attr(feature = "ssr", allow(dead_code))]
     viewport: Option<El>,
 
     #[builder(skip)]
