@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Please check the release notes of Leptos 0.5 for how to upgrade.
 - `watch` is now deprecated in favor of `leptos::watch` and will be removed in a future release.
   `watch_with_options` will continue to exist.
+- `use_event_listener_with_options` now takes a `UseEventListenerOptions` instead of a `web_sys::AddEventListenerOptions`.
 - `use_websocket`:
   - takes  now a `&str` instead of a `String` as its `url` parameter.
   -  The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
@@ -38,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
 - `use_scroll` is now callable on the server
+- `use_event_listener` can now be called safely on the server.
+
 
 ### Fixes 🍕
 

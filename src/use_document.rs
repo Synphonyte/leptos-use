@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::ops::Deref;
 
@@ -34,6 +33,7 @@ pub fn use_document() -> UseDocument {
 }
 
 /// Return type of [`use_document`].
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UseDocument(Option<web_sys::Document>);
 
 impl Deref for UseDocument {

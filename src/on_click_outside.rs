@@ -1,6 +1,6 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use crate::utils::IS_IOS;
-use crate::{use_event_listener, use_event_listener_with_options};
+use crate::{use_event_listener, use_event_listener_with_options, UseEventListenerOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{blur, click, pointerdown};
 use leptos::*;
@@ -9,7 +9,6 @@ use std::rc::Rc;
 use std::sync::RwLock;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
-use web_sys::AddEventListenerOptions;
 
 static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 
@@ -151,23 +150,19 @@ where
     let remove_click_listener = {
         let mut listener = listener.clone();
 
-        let mut options = AddEventListenerOptions::default();
-        options.passive(true).capture(capture);
-
         use_event_listener_with_options::<_, web_sys::Window, _, _>(
             window(),
             click,
             move |event| listener(event.into()),
-            options,
+            UseEventListenerOptions::default()
+                .passive(true)
+                .capture(capture),
         )
     };
 
     let remove_pointer_listener = {
         let target = target.clone();
         let should_listen = Rc::clone(&should_listen);
-
-        let mut options = AddEventListenerOptions::default();
-        options.passive(true);
 
         use_event_listener_with_options::<_, web_sys::Window, _, _>(
             window(),
@@ -180,7 +175,7 @@ where
                     );
                 }
             },
-            options,
+            UseEventListenerOptions::default().passive(true),
         )
     };
 

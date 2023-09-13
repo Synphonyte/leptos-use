@@ -1,11 +1,10 @@
 use crate::core::ElementMaybeSignal;
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::*;
 use std::time::Duration;
-use web_sys::AddEventListenerOptions;
 
 /// Reactive element's hover state.
 ///
@@ -81,14 +80,13 @@ where
         }
     };
 
-    let mut listener_options = AddEventListenerOptions::new();
-    listener_options.passive(true);
+    let mut listener_options = UseEventListenerOptions::default().passive(true);
 
     let _ = use_event_listener_with_options(
         el.clone(),
         mouseenter,
         move |_| toggle(true),
-        listener_options.clone(),
+        listener_options,
     );
 
     let _ =

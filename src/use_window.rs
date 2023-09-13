@@ -1,6 +1,5 @@
 use crate::{use_document, UseDocument};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::ops::Deref;
 
@@ -36,6 +35,7 @@ pub fn use_window() -> UseWindow {
 }
 
 /// Return type of [`use_window`].
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UseWindow(Option<web_sys::Window>);
 
 impl Deref for UseWindow {
