@@ -80,7 +80,7 @@ where
         }
     };
 
-    let mut listener_options = UseEventListenerOptions::default().passive(true);
+    let listener_options = UseEventListenerOptions::default().passive(true);
 
     let _ = use_event_listener_with_options(
         el.clone(),

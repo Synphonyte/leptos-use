@@ -1,6 +1,6 @@
 use crate::core::ElementMaybeSignal;
 use crate::use_event_listener::use_event_listener_with_options;
-use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
+use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::scrollend;
@@ -377,7 +377,7 @@ where
                 target,
                 ev::scroll,
                 handler,
-                options.event_listener_options.clone().unwrap_or_default(),
+                options.event_listener_options.unwrap_or_default(),
             );
         } else {
             let _ = use_event_listener_with_options::<
@@ -389,7 +389,7 @@ where
                 target,
                 ev::scroll,
                 on_scroll_handler,
-                options.event_listener_options.clone().unwrap_or_default(),
+                options.event_listener_options.unwrap_or_default(),
             );
         }
 
@@ -454,7 +454,7 @@ pub struct UseScrollOptions {
 
     /// Options passed to the `addEventListener("scroll", ...)` call
     #[builder(into)]
-    event_listener_options: Option<web_sys::AddEventListenerOptions>,
+    event_listener_options: Option<UseEventListenerOptions>,
 
     /// When changing the `x` or `y` signals this specifies the scroll behaviour.
     /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.

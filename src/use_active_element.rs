@@ -1,11 +1,10 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use leptos::ev::{blur, focus};
 use leptos::html::{AnyElement, ToHtmlElement};
 use leptos::*;
-use web_sys::AddEventListenerOptions;
 
 /// Reactive `document.activeElement`
 ///
@@ -49,8 +48,8 @@ pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
     let (active_element, set_active_element) = create_signal(get_active_element());
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let mut listener_options = AddEventListenerOptions::new();
-        listener_options.capture(true);
+        let listener_options = UseEventListenerOptions::default()
+            .capture(true);
 
         let _ = use_event_listener_with_options(
                         window(),
@@ -62,7 +61,7 @@ pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
 
                 set_active_element.update(|el| *el = get_active_element());
             },
-            listener_options.clone(),
+            listener_options,
         );
 
         let _ = use_event_listener_with_options(
