@@ -1,6 +1,5 @@
 use crate::core::ConnectionReadyState;
 use async_trait::async_trait;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Reflect;
 use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -17,6 +16,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "msgpack")]
 use rmp_serde::{from_slice, to_vec};
 use thiserror::Error;
+use web_sys::WebTransportBidirectionalStream;
 
 #[cfg(feature = "bincode")]
 use bincode::serde::{decode_from_slice as from_slice, encode_to_vec as to_vec};
@@ -103,6 +103,8 @@ pub fn use_webtransport_with_options(
         let transport = Rc::clone(&transport);
         let reconnect_timer = Rc::clone(&reconnect_timer);
         let on_open = Rc::clone(&on_open);
+        let on_bidir_stream = Rc::clone(&on_bidir_stream);
+        let on_receive_stream = Rc::clone(&on_receive_stream);
 
         move || {
             reconnect_timer.set(None);
@@ -119,8 +121,10 @@ pub fn use_webtransport_with_options(
             set_ready_state.set(ConnectionReadyState::Connecting);
 
             spawn_local({
-                let on_open = Rc::clone(&on_open);
                 let transport = Rc::clone(&transport);
+                let on_open = Rc::clone(&on_open);
+                let on_bidir_stream = Rc::clone(&on_bidir_stream);
+                let on_receive_stream = Rc::clone(&on_receive_stream);
 
                 async move {
                     let transport = transport.borrow();
@@ -130,6 +134,37 @@ pub fn use_webtransport_with_options(
                         Ok(_) => {
                             set_ready_state.set(ConnectionReadyState::Open);
                             on_open();
+
+                            listen_to_stream(
+                                transport.incoming_bidirectional_streams(),
+                                move |value| {
+                                    let stream: web_sys::WebTransportBidirectionalStream =
+                                        value.unchecked_into();
+
+                                    if let Ok(stream) = create_bidir_stream(stream, ready_state) {
+                                        on_bidir_stream(stream);
+                                    }
+                                },
+                                || {},
+                            );
+                            listen_to_stream(
+                                transport.incoming_unidirectional_streams(),
+                                move |value| {
+                                    let stream: web_sys::ReadableStream = value.unchecked_into();
+
+                                    let (state, set_state, bytes) = create_state_and_bytes_signal(
+                                        stream.unchecked_into(),
+                                        ready_state,
+                                    );
+
+                                    on_receive_stream(ReceiveStream {
+                                        bytes,
+                                        state,
+                                        set_state,
+                                    });
+                                },
+                                || {},
+                            );
                         }
                         Err(e) => {
                             // TODO : handle error?
@@ -181,10 +216,10 @@ pub fn use_webtransport_with_options(
                     let result = JsFuture::from(transport.closed()).await;
                     set_ready_state.set(ConnectionReadyState::Closed);
 
+                    on_closed();
+
                     match result {
-                        Ok(_) => {
-                            on_close();
-                        }
+                        Ok(_) => {}
                         Err(e) => {
                             // TODO : handle error?
                         }
@@ -215,13 +250,12 @@ pub fn use_webtransport_with_options(
                         .readable()
                 },
                 set_datagrams,
+                || {},
             );
 
             datagrams_signal.get()
         }
     });
-
-    // TODO : reliable streams
 
     {
         let unmounted = Rc::clone(&unmounted);
@@ -268,6 +302,7 @@ fn lazy_initialize_u8_reader(
     initialized: Rc<Cell<bool>>,
     get_readable_stream: impl Fn() -> web_sys::ReadableStream,
     set_signal: WriteSignal<Option<Vec<u8>>>,
+    on_done: impl Fn() + 'static,
 ) {
     lazy_initialize_reader(
         ready_state,
@@ -277,6 +312,7 @@ fn lazy_initialize_u8_reader(
             let value: js_sys::Uint8Array = value.into();
             set_signal.set(Some(value.to_vec()));
         },
+        on_done,
     );
 }
 
@@ -285,13 +321,15 @@ fn lazy_initialize_reader(
     initialized: Rc<Cell<bool>>,
     get_readable_stream: impl Fn() -> web_sys::ReadableStream,
     on_value: impl Fn(JsValue) + 'static,
+    on_done: impl Fn() + 'static,
 ) {
     if ready_state.get() == ConnectionReadyState::Open {
         if !initialized.get() {
             initialized.set(true);
 
             listen_to_stream(get_readable_stream(), on_value, move || {
-                initialized.set(false)
+                initialized.set(false);
+                on_done();
             });
         }
     }
@@ -382,6 +420,7 @@ impl Default for UseWebTransportOptions {
 }
 
 /// Wether the stream is open or closed
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum StreamState {
     Open,
     Closed,
@@ -402,18 +441,24 @@ pub trait CloseableStream {
 
 #[async_trait(?Send)]
 /// Trait to send data in a stream
-pub trait SendableStream {
+pub trait SendableStream: CloseableStream {
     /// Getter for the stream writer
     fn writer(&self) -> &web_sys::WritableStreamDefaultWriter;
 
     /// Send data in the form of bytes ignoring potential errors
     fn send_bytes(&self, data: &[u8]) {
-        let arr = js_sys::Uint8Array::from(data);
-        let _ = self.writer().write_with_chunk(&arr);
+        if self.state().get() == StreamState::Open {
+            let arr = js_sys::Uint8Array::from(data);
+            let _ = self.writer().write_with_chunk(&arr);
+        }
     }
 
     /// Send data in the form of bytes asynchronously with a result providing potential errors
     async fn send_bytes_async(&self, data: &[u8]) -> Result<(), SendError> {
+        if self.state().get() != StreamState::Open {
+            return Err(SendError::StreamNotOpen);
+        }
+
         let arr = js_sys::Uint8Array::from(data);
         let _ = JsFuture::from(self.writer().write_with_chunk(&arr))
             .await
@@ -442,6 +487,18 @@ pub trait SendableStream {
     }
 }
 
+#[async_trait(?Send)]
+/// Trait to receive data in a stream
+pub trait ReceivableStream: CloseableStream {
+    #[cfg(any(feature = "msgpack", feature = "bincode"))]
+    /// Receive data in the form of a serializable object ignoring potential errors
+    fn receive<T: for<'a> Deserialize<'a>>(&self) -> Signal<Option<T>>;
+
+    #[cfg(any(feature = "msgpack", feature = "bincode"))]
+    /// Receive data in the form of a serializable object asynchronously with a result providing potential errors
+    fn try_receive<T: for<'a> Deserialize<'a>>(&self) -> Signal<Option<Result<T, ReceiveError>>>;
+}
+
 #[derive(Clone, Debug)]
 /// Stream for sending data
 pub struct SendStream {
@@ -450,41 +507,11 @@ pub struct SendStream {
     set_state: WriteSignal<StreamState>,
 }
 
-#[async_trait(?Send)]
-impl SendableStream for SendStream {
-    #[inline(always)]
-    fn writer(&self) -> &web_sys::WritableStreamDefaultWriter {
-        &self.writer
-    }
-}
-
-#[async_trait(?Send)]
-impl CloseableStream for SendStream {
-    #[inline(always)]
-    fn state(&self) -> Signal<StreamState> {
-        self.state
-    }
-
-    #[inline(always)]
-    fn close(&self) {
-        let _ = self.writer.close();
-    }
-
-    async fn close_async(&self) -> Result<(), WebTransportError> {
-        let _ = JsFuture::from(self.writer.close())
-            .await
-            .map_err(|e| WebTransportError::OnCloseWriter(e))?;
-
-        Ok(())
-    }
-}
-
 #[derive(Clone, Debug)]
 /// Stream for receiving data
+#[allow(dead_code)]
 pub struct ReceiveStream {
-    pub reader: web_sys::ReadableStreamDefaultReader,
-    pub message: Signal<Option<Vec<u8>>>,
-    // pub close: Rc<dyn Fn()>,
+    pub bytes: Signal<Option<Vec<u8>>>,
     state: Signal<StreamState>,
     set_state: WriteSignal<StreamState>,
 }
@@ -500,54 +527,88 @@ pub struct BidirStream {
     set_state: WriteSignal<StreamState>,
 }
 
-cfg_if! { if #[cfg(any(feature = "msgpack", feature = "bincode"))] {
-    impl BidirStream {
-        pub fn receive<T: for <'a> Deserialize<'a>>(&self) -> Signal<Option<T>> {
-            let bytes = self.bytes;
+macro_rules! impl_receivable_stream {
+    ($ty:ty) => {
+        impl BidirStream {
+            #[cfg(any(feature = "msgpack", feature = "bincode"))]
+            pub fn receive<T: for<'a> Deserialize<'a>>(&self) -> Signal<Option<T>> {
+                let bytes = self.bytes;
 
-            Signal::derive(move || {
-                 bytes.get().map(|bytes| from_slice(bytes.as_slice()).expect("Deserialization should not fail"))
-            })
+                Signal::derive(move || {
+                    if self.state.get() != StreamState::Open {
+                        None
+                    } else {
+                        bytes
+                            .get()
+                            .and_then(|bytes| from_slice(bytes.as_slice()).ok())
+                    }
+                })
+            }
+
+            #[cfg(any(feature = "msgpack", feature = "bincode"))]
+            pub fn try_receive<T: for<'a> Deserialize<'a>>(
+                &self,
+            ) -> Signal<Option<Result<T, ReceiveError>>> {
+                let bytes = self.bytes;
+
+                Signal::derive(move || {
+                    if self.state.get() != StreamState::Open {
+                        None
+                    } else {
+                        bytes.get().map(|bytes| Ok(from_slice(bytes.as_slice())?))
+                    }
+                })
+            }
         }
-
-        pub fn try_receive<T: for <'a> Deserialize<'a>>(&self) -> Signal<Option<Result<T, ReceiveError>>> {
-            let bytes = self.bytes;
-
-            Signal::derive(move || {
-                 bytes.get().map(|bytes| Ok(from_slice(bytes.as_slice())?))
-            })
-        }
-    }
-}}
-
-#[async_trait(?Send)]
-impl CloseableStream for BidirStream {
-    #[inline(always)]
-    fn state(&self) -> Signal<StreamState> {
-        self.state
-    }
-
-    #[inline(always)]
-    fn close(&self) {
-        let _ = self.writer.close();
-    }
-
-    async fn close_async(&self) -> Result<(), WebTransportError> {
-        let _ = JsFuture::from(self.writer.close())
-            .await
-            .map_err(|e| WebTransportError::OnCloseWriter(e))?;
-
-        Ok(())
-    }
+    };
 }
 
-#[async_trait(?Send)]
-impl SendableStream for BidirStream {
-    #[inline(always)]
-    fn writer(&self) -> &web_sys::WritableStreamDefaultWriter {
-        &self.writer
-    }
+impl_receivable_stream!(ReceiveStream);
+impl_receivable_stream!(BidirStream);
+
+macro_rules! impl_sendable_stream {
+    ($ty:ty) => {
+        #[async_trait(?Send)]
+        impl SendableStream for $ty {
+            #[inline(always)]
+            fn writer(&self) -> &web_sys::WritableStreamDefaultWriter {
+                &self.writer
+            }
+        }
+    };
 }
+
+impl_sendable_stream!(SendStream);
+impl_sendable_stream!(BidirStream);
+
+macro_rules! impl_closable_stream {
+    ($ty:ty) => {
+        #[async_trait(?Send)]
+        impl CloseableStream for $ty {
+            #[inline(always)]
+            fn state(&self) -> Signal<StreamState> {
+                self.state
+            }
+
+            #[inline(always)]
+            fn close(&self) {
+                let _ = self.writer.close();
+                self.set_state.set(StreamState::Closed);
+            }
+
+            async fn close_async(&self) -> Result<(), WebTransportError> {
+                let _ = JsFuture::from(self.writer.close())
+                    .await
+                    .map_err(|e| WebTransportError::OnCloseWriter(e))?;
+
+                Ok(())
+            }
+        }
+    };
+}
+
+impl_closable_stream!(SendStream);
+impl_closable_stream!(BidirStream);
 
 /// Return type of [`use_webtransport`].
 #[derive(Clone, Debug)]
@@ -581,8 +642,8 @@ impl UseWebTransportReturn {
 
     // TODO : send_datagrams_async
 
-    /// Create a unidirectional send stream
-    pub async fn create_send_stream(&self) -> Result<SendStream, WebTransportError> {
+    /// Open a unidirectional send stream
+    pub async fn open_send_stream(&self) -> Result<SendStream, WebTransportError> {
         if let Some(transport) = self.transport.borrow().as_ref() {
             let result = JsFuture::from(transport.create_unidirectional_stream())
                 .await
@@ -604,43 +665,78 @@ impl UseWebTransportReturn {
         }
     }
 
-    /// Create a bidirectional stream
-    pub async fn create_bidir_stream(&self) -> Result<BidirStream, WebTransportError> {
+    /// Open a bidirectional stream
+    pub async fn open_bidir_stream(&self) -> Result<BidirStream, WebTransportError> {
         if let Some(transport) = self.transport.borrow().as_ref() {
             let result = JsFuture::from(transport.create_bidirectional_stream())
                 .await
                 .map_err(|e| WebTransportError::FailedToOpenStream(e))?;
             let stream: web_sys::WebTransportBidirectionalStream = result.unchecked_into();
-            let writer = stream
-                .writable()
-                .get_writer()
-                .map_err(|e| WebTransportError::FailedToOpenWriter(e))?;
+            let ready_state = self.ready_state;
 
-            let bytes = Signal::derive({
-                let reader_initialized = Rc::new(Cell::new(false));
-                let ready_state = self.ready_state;
-                let (message_signal, set_message) = create_signal(None::<Vec<u8>>);
-                let stream = stream.clone();
-
-                move || {
-                    let stream = stream.clone();
-
-                    lazy_initialize_u8_reader(
-                        ready_state,
-                        Rc::clone(&reader_initialized),
-                        move || stream.readable().unchecked_into(),
-                        set_message,
-                    );
-
-                    message_signal.get()
-                }
-            });
-
-            Ok(BidirStream { writer, bytes })
+            create_bidir_stream(stream, ready_state)
         } else {
             Err(WebTransportError::NotConnected)
         }
     }
+}
+
+fn create_state_and_bytes_signal(
+    stream: web_sys::ReadableStream,
+    ready_state: Signal<ConnectionReadyState>,
+) -> (
+    Signal<StreamState>,
+    WriteSignal<StreamState>,
+    Signal<Option<Vec<u8>>>,
+) {
+    let (state, set_state) = create_signal(StreamState::Open);
+
+    let bytes = Signal::derive({
+        let reader_initialized = Rc::new(Cell::new(false));
+        let (message_signal, set_message) = create_signal(None::<Vec<u8>>);
+
+        let stream = stream.clone();
+
+        move || {
+            let stream = stream.clone();
+
+            lazy_initialize_u8_reader(
+                ready_state,
+                Rc::clone(&reader_initialized),
+                move || stream.clone().unchecked_into(),
+                set_message,
+                move || {
+                    set_state.set(StreamState::Closed);
+                },
+            );
+
+            message_signal.get()
+        }
+    });
+
+    (state.into(), set_state, bytes)
+}
+
+fn create_bidir_stream(
+    stream: WebTransportBidirectionalStream,
+    ready_state: Signal<ConnectionReadyState>,
+) -> Result<BidirStream, WebTransportError> {
+    let writer = stream
+        .writable()
+        .get_writer()
+        .map_err(|e| WebTransportError::FailedToOpenWriter(e))?;
+
+    let (state, set_state, bytes) =
+        create_state_and_bytes_signal(stream.readable().unchecked_into(), ready_state);
+
+    let bidir_stream = BidirStream {
+        writer,
+        bytes,
+        state,
+        set_state,
+    };
+
+    Ok(bidir_stream)
 }
 
 /// Error enum for [`UseWebTransportOptions::on_error`]
@@ -659,6 +755,9 @@ pub enum WebTransportError {
 /// Error enum for [`SendStream::send`]
 #[derive(Error, Debug)]
 pub enum SendError {
+    #[error("Stream is not open")]
+    StreamNotOpen,
+
     #[error("Failed to write to stream")]
     FailedToWrite(JsValue),
 
