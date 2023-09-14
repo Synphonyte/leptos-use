@@ -1,10 +1,14 @@
 use crate::core::ElementMaybeSignal;
-use crate::use_event_listener;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::{dragenter, dragleave, dragover, drop};
 use leptos::*;
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use crate::use_event_listener;
+    use leptos::ev::{dragenter, dragleave, dragover, drop};
+}}
 
 /// Create a zone where files can be dropped.
 ///
@@ -45,7 +49,8 @@ use std::rc::Rc;
 ///
 /// ## Server-Side Rendering
 ///
-/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
+/// On the server the returned `file` signal always contains an empty `Vec` and
+/// `is_over_drop_zone` contains always `false`
 pub fn use_drop_zone<El, T>(target: El) -> UseDropZoneReturn
 where
     El: Clone,
@@ -56,6 +61,7 @@ where
 }
 
 /// Version of [`use_drop_zone`] that takes a `UseDropZoneOptions`. See [`use_drop_zone`] for how to use.
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
 pub fn use_drop_zone_with_options<El, T>(
     target: El,
     options: UseDropZoneOptions,
@@ -65,81 +71,83 @@ where
     El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
-    let UseDropZoneOptions {
-        on_drop,
-        on_enter,
-        on_leave,
-        on_over,
-    } = options;
-
     let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
     let (files, set_files) = create_signal(Vec::<web_sys::File>::new());
 
-    let counter = store_value(0_usize);
+    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        let UseDropZoneOptions {
+            on_drop,
+            on_enter,
+            on_leave,
+            on_over,
+        } = options;
 
-    let update_files = move |event: &web_sys::DragEvent| {
-        if let Some(data_transfer) = event.data_transfer() {
-            let files: Vec<web_sys::File> = data_transfer
-                .files()
-                .map(|f| js_sys::Array::from(&f).to_vec())
-                .unwrap_or_default()
-                .into_iter()
-                .map(web_sys::File::from)
-                .collect();
+        let counter = store_value(0_usize);
 
-            set_files.update(move |f| *f = files);
-        }
-    };
+        let update_files = move |event: &web_sys::DragEvent| {
+            if let Some(data_transfer) = event.data_transfer() {
+                let files: Vec<web_sys::File> = data_transfer
+                    .files()
+                    .map(|f| js_sys::Array::from(&f).to_vec())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(web_sys::File::from)
+                    .collect();
 
-    let _ = use_event_listener(target.clone(), dragenter, move |event| {
-        event.prevent_default();
-        counter.update_value(|counter| *counter += 1);
-        set_over_drop_zone.set(true);
+                set_files.update(move |f| *f = files);
+            }
+        };
 
-        update_files(&event);
+        let _ = use_event_listener(target.clone(), dragenter, move |event| {
+            event.prevent_default();
+            counter.update_value(|counter| *counter += 1);
+            set_over_drop_zone.set(true);
 
-        on_enter(UseDropZoneEvent {
-            files: files.get_untracked(),
-            event,
+            update_files(&event);
+
+            on_enter(UseDropZoneEvent {
+                files: files.get_untracked(),
+                event,
+            });
         });
-    });
 
-    let _ = use_event_listener(target.clone(), dragover, move |event| {
-        event.prevent_default();
-        update_files(&event);
-        on_over(UseDropZoneEvent {
-            files: files.get_untracked(),
-            event,
+        let _ = use_event_listener(target.clone(), dragover, move |event| {
+            event.prevent_default();
+            update_files(&event);
+            on_over(UseDropZoneEvent {
+                files: files.get_untracked(),
+                event,
+            });
         });
-    });
 
-    let _ = use_event_listener(target.clone(), dragleave, move |event| {
-        event.prevent_default();
-        counter.update_value(|counter| *counter -= 1);
-        if counter.get_value() == 0 {
+        let _ = use_event_listener(target.clone(), dragleave, move |event| {
+            event.prevent_default();
+            counter.update_value(|counter| *counter -= 1);
+            if counter.get_value() == 0 {
+                set_over_drop_zone.set(false);
+            }
+
+            update_files(&event);
+
+            on_leave(UseDropZoneEvent {
+                files: files.get_untracked(),
+                event,
+            });
+        });
+
+        let _ = use_event_listener(target, drop, move |event| {
+            event.prevent_default();
+            counter.update_value(|counter| *counter = 0);
             set_over_drop_zone.set(false);
-        }
 
-        update_files(&event);
+            update_files(&event);
 
-        on_leave(UseDropZoneEvent {
-            files: files.get_untracked(),
-            event,
+            on_drop(UseDropZoneEvent {
+                files: files.get_untracked(),
+                event,
+            });
         });
-    });
-
-    let _ = use_event_listener(target, drop, move |event| {
-        event.prevent_default();
-        counter.update_value(|counter| *counter = 0);
-        set_over_drop_zone.set(false);
-
-        update_files(&event);
-
-        on_drop(UseDropZoneEvent {
-            files: files.get_untracked(),
-            event,
-        });
-    });
+    }}
 
     UseDropZoneReturn {
         files: files.into(),
@@ -149,6 +157,7 @@ where
 
 /// Options for [`use_drop_zone_with_options`].
 #[derive(DefaultBuilder, Clone)]
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseDropZoneOptions {
     /// Event handler for the [`drop`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event) event
     on_drop: Rc<dyn Fn(UseDropZoneEvent)>,

@@ -1,12 +1,24 @@
 use crate::core::ElementMaybeSignal;
-use crate::use_event_listener::use_event_listener_with_options;
-use crate::{use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions};
+use crate::UseEventListenerOptions;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::scrollend;
 use leptos::*;
 use std::rc::Rc;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+use crate::use_event_listener::use_event_listener_with_options;
+use crate::{
+    use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions,
+};
+use leptos::ev::scrollend;
 use wasm_bindgen::JsCast;
+
+/// We have to check if the scroll amount is close enough to some threshold in order to
+/// more accurately calculate arrivedState. This is because scrollTop/scrollLeft are non-rounded
+/// numbers, while scrollHeight/scrollWidth and clientHeight/clientWidth are rounded.
+/// https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollHeight#determine_if_an_element_has_been_totally_scrolled
+const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
+}}
 
 /// Reactive scroll position and state.
 ///
@@ -172,7 +184,7 @@ where
 }
 
 /// Version of [`use_scroll`] with options. See [`use_scroll`] for how to use.
-#[allow(unused_variables)]
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
 pub fn use_scroll_with_options<El, T>(element: El, options: UseScrollOptions) -> UseScrollReturn
 where
     El: Clone,
@@ -377,7 +389,7 @@ where
                 target,
                 ev::scroll,
                 handler,
-                options.event_listener_options.clone().unwrap_or_default(),
+                options.event_listener_options,
             );
         } else {
             let _ = use_event_listener_with_options::<
@@ -389,7 +401,7 @@ where
                 target,
                 ev::scroll,
                 on_scroll_handler,
-                options.event_listener_options.clone().unwrap_or_default(),
+                options.event_listener_options,
             );
         }
 
@@ -402,7 +414,7 @@ where
             target,
             scrollend,
             on_scroll_end,
-            options.event_listener_options.unwrap_or_default(),
+            options.event_listener_options,
         );
 
         let measure = Box::new(move || {
@@ -426,15 +438,10 @@ where
     }
 }
 
-/// We have to check if the scroll amount is close enough to some threshold in order to
-/// more accurately calculate arrivedState. This is because scrollTop/scrollLeft are non-rounded
-/// numbers, while scrollHeight/scrollWidth and clientHeight/clientWidth are rounded.
-/// https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollHeight#determine_if_an_element_has_been_totally_scrolled
-const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
-
 /// Options for [`use_scroll`].
 #[derive(DefaultBuilder)]
 /// Options for [`use_scroll_with_options`].
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseScrollOptions {
     /// Throttle time in milliseconds for the scroll events. Defaults to 0 (disabled).
     throttle: f64,
@@ -453,8 +460,7 @@ pub struct UseScrollOptions {
     on_stop: Rc<dyn Fn(web_sys::Event)>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
-    #[builder(into)]
-    event_listener_options: Option<web_sys::AddEventListenerOptions>,
+    event_listener_options: UseEventListenerOptions,
 
     /// When changing the `x` or `y` signals this specifies the scroll behaviour.
     /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.

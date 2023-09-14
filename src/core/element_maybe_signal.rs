@@ -1,3 +1,4 @@
+use crate::{UseDocument, UseWindow};
 use leptos::html::ElementDescriptor;
 use leptos::*;
 use std::marker::PhantomData;
@@ -152,6 +153,22 @@ where
         ElementMaybeSignal::Static(target)
     }
 }
+
+macro_rules! impl_from_deref_option {
+    ($ty:ty, $ty2:ty) => {
+        impl<E> From<$ty> for ElementMaybeSignal<$ty2, E>
+        where
+            E: From<$ty2> + 'static,
+        {
+            fn from(value: $ty) -> Self {
+                Self::Static((*value).clone())
+            }
+        }
+    };
+}
+
+impl_from_deref_option!(UseWindow, web_sys::Window);
+impl_from_deref_option!(UseDocument, web_sys::Document);
 
 // From string (selector) ///////////////////////////////////////////////////////////////
 

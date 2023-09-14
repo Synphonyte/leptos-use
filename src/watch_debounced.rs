@@ -12,6 +12,7 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::watch_debounced;
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -35,6 +36,7 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_debounced_with_options, WatchDebouncedOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {

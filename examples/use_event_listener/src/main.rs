@@ -1,5 +1,6 @@
 use leptos::ev::{click, keydown};
 use leptos::html::A;
+use leptos::logging::log;
 use leptos::*;
 use leptos_use::use_event_listener;
 

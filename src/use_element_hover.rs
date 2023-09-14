@@ -1,11 +1,14 @@
 use crate::core::ElementMaybeSignal;
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::*;
-use std::time::Duration;
-use web_sys::AddEventListenerOptions;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use std::time::Duration;
+}}
 
 /// Reactive element's hover state.
 ///
@@ -33,7 +36,7 @@ use web_sys::AddEventListenerOptions;
 ///
 /// ## Server-Side Rendering
 ///
-/// Please refer to ["Functions with Target Elements"](https://leptos-use.rs/server_side_rendering.html#functions-with-target-elements)
+/// On the server this returns a `Signal` that always contains the value `false`.
 pub fn use_element_hover<El, T>(el: El) -> Signal<bool>
 where
     El: Clone,
@@ -45,6 +48,7 @@ where
 
 /// Version of [`use_element_hover`] that takes a `UseElementHoverOptions`. See [`use_element_hover`] for how to use.
 
+#[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
 pub fn use_element_hover_with_options<El, T>(
     el: El,
     options: UseElementHoverOptions,
@@ -64,31 +68,32 @@ where
     let mut timer: Option<TimeoutHandle> = None;
 
     let mut toggle = move |entering: bool| {
-        let delay = if entering { delay_enter } else { delay_leave };
+        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+            let delay = if entering { delay_enter } else { delay_leave };
 
-        if let Some(handle) = timer.take() {
-            handle.clear();
-        }
+            if let Some(handle) = timer.take() {
+                handle.clear();
+            }
 
-        if delay > 0 {
-            timer = set_timeout_with_handle(
-                move || set_hovered.set(entering),
-                Duration::from_millis(delay),
-            )
-            .ok();
-        } else {
-            set_hovered.set(entering);
-        }
+            if delay > 0 {
+                timer = set_timeout_with_handle(
+                    move || set_hovered.set(entering),
+                    Duration::from_millis(delay),
+                )
+                .ok();
+            } else {
+                set_hovered.set(entering);
+            }
+        }}
     };
 
-    let mut listener_options = AddEventListenerOptions::new();
-    listener_options.passive(true);
+    let listener_options = UseEventListenerOptions::default().passive(true);
 
     let _ = use_event_listener_with_options(
         el.clone(),
         mouseenter,
         move |_| toggle(true),
-        listener_options.clone(),
+        listener_options,
     );
 
     let _ =

@@ -11,6 +11,7 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{watch_pausable, WatchPausableReturn};
 /// #
 /// # pub fn Demo() -> impl IntoView {

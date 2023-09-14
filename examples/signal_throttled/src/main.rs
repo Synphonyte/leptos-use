@@ -5,7 +5,7 @@ use leptos_use::signal_throttled;
 #[component]
 fn Demo() -> impl IntoView {
     let (input, set_input) = create_signal("".to_string());
-    let throttled = signal_throttled(input, 1000.0);
+    let throttled: Signal<String> = signal_throttled(input, 1000.0);
 
     view! {
         <div>

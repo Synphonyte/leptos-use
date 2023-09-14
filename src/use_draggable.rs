@@ -1,5 +1,5 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
-use crate::use_event_listener_with_options;
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::*;
@@ -183,20 +183,19 @@ where
         handle_event(event);
     };
 
-    let mut listener_options = web_sys::AddEventListenerOptions::new();
-    listener_options.capture(true);
+    let listener_options = UseEventListenerOptions::default().capture(true);
 
     let _ = use_event_listener_with_options(
         dragging_handle,
         pointerdown,
         on_pointer_down,
-        listener_options.clone(),
+        listener_options,
     );
     let _ = use_event_listener_with_options(
         dragging_element.clone(),
         pointermove,
         on_pointer_move,
-        listener_options.clone(),
+        listener_options,
     );
     let _ = use_event_listener_with_options(
         dragging_element,

@@ -5,7 +5,7 @@ use leptos_use::signal_debounced;
 #[component]
 fn Demo() -> impl IntoView {
     let (input, set_input) = create_signal("".to_string());
-    let debounced = signal_debounced(input, 1000.0);
+    let debounced: Signal<String> = signal_debounced(input, 1000.0);
 
     view! {
         <div>
