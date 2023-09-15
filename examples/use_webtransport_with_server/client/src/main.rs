@@ -18,7 +18,7 @@ fn Demo() -> impl IntoView {
     let id = store_value(0);
 
     let transport = use_webtransport_with_options(
-        "https://echo.webtransport.day",
+        "https://localhost:4433",
         UseWebTransportOptions::default()
             .on_open(move || {
                 set_datagrams_log.update(|log| log.push("Connection opened".to_string()))

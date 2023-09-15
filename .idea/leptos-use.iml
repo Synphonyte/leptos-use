@@ -54,6 +54,8 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_raf_fn/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_geolocation/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/client/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/server/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />
@@ -115,6 +117,8 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_debounced/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_pausable/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/watch_throttled/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/client/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/server/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

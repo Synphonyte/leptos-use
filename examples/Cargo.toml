@@ -46,7 +46,8 @@ members = [
 ]
 
 exclude = [
-    "ssr"
+    "ssr",
+    "use_webtransport_with_server",
 ]
 
 [package]
