@@ -439,8 +439,6 @@ fn normalize_url(url: &str) -> String {
     } else {
         if url.starts_with("ws://") || url.starts_with("wss://") {
             url.to_string()
-        } else if url.starts_with("http://") || url.starts_with("https://") {
-            url.replacen("http", "ws", 1)
         } else if url.starts_with("//") {
             format!("{}{}", detect_protocol(), url)
         } else if url.starts_with('/') {
