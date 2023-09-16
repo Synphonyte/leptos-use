@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other Changes 🔥
 
+- `use_websocket` can use relative urls now
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
 - All (!) functions can now be safely called on the server. Specifically this includes the following that
