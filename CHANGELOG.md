@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_timestamp`
+- `use_idle`
 - `use_document`
 - `use_window`
 - `use_geolocation`

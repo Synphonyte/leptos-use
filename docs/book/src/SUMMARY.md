@@ -44,6 +44,7 @@
 - [on_click_outside](sensors/on_click_outside.md)
 - [use_element_hover](sensors/use_element_hover.md)
 - [use_geolocation](sensors/use_geolocation.md)
+- [use_idle](sensors/use_idle.md)
 - [use_mouse](sensors/use_mouse.md)
 - [use_scroll](sensors/use_scroll.md)
 
@@ -56,6 +57,7 @@
 - [use_interval](animation/use_interval.md)
 - [use_interval_fn](animation/use_interval_fn.md)
 - [use_raf_fn](animation/use_raf_fn.md)
+- [use_timestamp](animation/use_timestamp.md)
 
 # Watch
 
