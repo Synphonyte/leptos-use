@@ -74,9 +74,22 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// # }
 /// ```
 ///
+/// ## Relative Paths
+///
+/// If the provided `url` is relative, it will be resolved relative to the current page.
+/// Urls will be resolved like this:
+///
+/// | Current Page                   | Relative Url             | Resolved Url                        |
+/// |--------------------------------|--------------------------|-------------------------------------|
+/// | http://example.com/some/where  | /api/ws                  | ws://example.com/api/ws             |
+/// | https://example.com/some/where | /api/ws                  | wss://example.com/api/ws            |
+/// | https://example.com/some/where | api/ws                   | wss://example.com/some/where/api/ws |
+/// | https://example.com/some/where | //otherdomain.com/api/ws | wss://otherdomain.com/api/ws        |
+///
+///
 /// ## Server-Side Rendering
 ///
-/// On the server the returned functions amount to noops.
+/// On the server the returned functions amount to no-ops.
 pub fn use_websocket(
     url: &str,
 ) -> UseWebsocketReturn<
@@ -98,8 +111,8 @@ pub fn use_websocket_with_options(
     impl Fn(String) + Clone + 'static,
     impl Fn(Vec<u8>) + Clone,
 > {
-    let url = url.to_string();
-
+    let url = normalize_url(url);
+    logging::log!("{}", url);
     let UseWebSocketOptions {
         on_open,
         on_message,
@@ -418,4 +431,43 @@ where
     pub send: SendFn,
     /// Sends binary data
     pub send_bytes: SendBytesFn,
+}
+
+fn normalize_url(url: &str) -> String {
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        url.to_string()
+    } else {
+        if url.starts_with("ws://") || url.starts_with("wss://") {
+            url.to_string()
+        } else if url.starts_with("//") {
+            format!("{}{}", detect_protocol(), url)
+        } else if url.starts_with('/') {
+            format!(
+                "{}//{}{}",
+                detect_protocol(),
+                window().location().host().expect("Host not found"),
+                url
+            )
+        } else {
+            let mut path = window().location().pathname().expect("Pathname not found");
+            if !path.ends_with('/') {
+                path.push('/')
+            }
+            format!(
+                "{}//{}{}{}",
+                detect_protocol(),
+                window().location().host().expect("Host not found"),
+                path,
+                url
+            )
+        }
+    }}
+}
+
+fn detect_protocol() -> String {
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        "ws".to_string()
+    } else {
+        window().location().protocol().expect("Protocol not found").replace("http", "ws")
+    }}
 }

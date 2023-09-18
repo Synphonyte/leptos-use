@@ -56,6 +56,20 @@ pub enum FilterOptions {
 }
 
 impl FilterOptions {
+    pub fn debounce(ms: impl Into<MaybeSignal<f64>>) -> Self {
+        Self::Debounce {
+            ms: ms.into(),
+            options: DebounceOptions::default(),
+        }
+    }
+
+    pub fn throttle(ms: impl Into<MaybeSignal<f64>>) -> Self {
+        Self::Throttle {
+            ms: ms.into(),
+            options: ThrottleOptions::default(),
+        }
+    }
+
     pub fn filter_fn<R>(&self) -> RcFilterFn!(R)
     where
         R: 'static,
