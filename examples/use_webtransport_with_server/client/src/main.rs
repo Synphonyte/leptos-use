@@ -14,6 +14,7 @@ use stream_send::*;
 #[component]
 fn Demo() -> impl IntoView {
     let (datagrams_log, set_datagrams_log) = create_signal(vec![]);
+    let (bidir_streams, set_bidir_streams) = create_signal(vec![]);
 
     let id = store_value(0);
 
@@ -25,6 +26,14 @@ fn Demo() -> impl IntoView {
             })
             .on_close(move || {
                 set_datagrams_log.update(|log| log.push("Connection closed".to_string()))
+            })
+            .on_bidir_stream(move |bidir_stream| {
+                let i = id.get_value();
+                id.set_value(i + 1);
+
+                set_datagrams_log
+                    .update(|log| log.push("Server opened bidirectional stream".to_string()));
+                set_bidir_streams.update(|s| s.push((i, bidir_stream, "server")));
             }),
     );
 
@@ -56,8 +65,6 @@ fn Demo() -> impl IntoView {
         false,
     );
 
-    let (bidir_streams, set_bidir_streams) = create_signal(vec![]);
-
     let on_open_bidir_stream = {
         let transport = transport.clone();
 
@@ -70,7 +77,7 @@ fn Demo() -> impl IntoView {
                         let i = id.get_value();
                         id.set_value(i + 1);
 
-                        set_bidir_streams.update(|s| s.push((i, bidir_stream)));
+                        set_bidir_streams.update(|s| s.push((i, bidir_stream, "client")));
                     }
                     Err(e) => {
                         set_datagrams_log.update(|log| {
@@ -95,8 +102,14 @@ fn Demo() -> impl IntoView {
         <h2>Bidir Streams</h2>
         <For
             each=bidir_streams
-            key=|(i, _)| *i
-            view=move |(_, bidir_stream)| view! { <StreamBidir ready_state=ready_state stream=bidir_stream.clone() /> }
+            key=|(i, _, _)| *i
+            view=move |(i, bidir_stream, opened_by)| view! {
+                <StreamBidir
+                    ready_state=ready_state
+                    stream=bidir_stream.clone()
+                    opened_by=opened_by
+                />
+            }
         />
     }
 }
