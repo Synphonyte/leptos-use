@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a `web_sys::MutationObserverInit`.
 - `use_websocket`:
     - takes now a `&str` instead of a `String` as its `url` parameter.
+    - same for the returned `send` method.
     - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
     - The returned signals  `ready_state`, `message`, `message_bytes` have now the type
       `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.

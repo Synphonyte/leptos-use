@@ -39,7 +39,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// } = use_websocket("wss://echo.websocket.events/");
 ///
 /// let send_message = move |_| {
-///     send("Hello, world!".to_string());
+///     send("Hello, world!");
 /// };
 ///
 /// let send_byte_message = move |_| {
@@ -95,7 +95,7 @@ pub fn use_websocket(
 ) -> UseWebsocketReturn<
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(String) + Clone + 'static,
+    impl Fn(&str) + Clone + 'static,
     impl Fn(Vec<u8>) + Clone + 'static,
 > {
     use_websocket_with_options(url, UseWebSocketOptions::default())
@@ -108,7 +108,7 @@ pub fn use_websocket_with_options(
 ) -> UseWebsocketReturn<
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(String) + Clone + 'static,
+    impl Fn(&str) + Clone + 'static,
     impl Fn(Vec<u8>) + Clone,
 > {
     let url = normalize_url(url);
@@ -302,10 +302,10 @@ pub fn use_websocket_with_options(
 
     // Send text (String)
     let send = {
-        Box::new(move |data: String| {
+        Box::new(move |data: &str| {
             if ready_state.get() == ConnectionReadyState::Open {
                 if let Some(web_socket) = ws_ref.get_value() {
-                    let _ = web_socket.send_with_str(&data);
+                    let _ = web_socket.send_with_str(data);
                 }
             }
         })
@@ -412,7 +412,7 @@ pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
 where
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(String) + Clone + 'static,
+    SendFn: Fn(&str) + Clone + 'static,
     SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
 {
     /// The current state of the `WebSocket` connection.

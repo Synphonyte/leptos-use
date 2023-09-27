@@ -30,8 +30,8 @@ fn Demo() -> impl IntoView {
     } = use_websocket("wss://echo.websocket.events/");
 
     let send_message = move |_| {
-        let m = "Hello, world!".to_string();
-        send(m.clone());
+        let m = "Hello, world!";
+        send(m);
         set_history.update(|history: &mut Vec<_>| history.push(format! {"[send]: {:?}", m}));
     };
 
@@ -125,8 +125,8 @@ fn Demo() -> impl IntoView {
     };
 
     let send_message2 = move |_| {
-        let message = "Hello, use_leptos!".to_string();
-        send2(message.clone());
+        let message = "Hello, use_leptos!";
+        send2(message);
         update_history(&set_history2, format! {"[send]: {:?}", message});
     };
 
