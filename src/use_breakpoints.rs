@@ -251,15 +251,27 @@ impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
 
     /// Reactive Vec of all breakpoints that fulfill `[screen size]` >= `key`
     pub fn current(&self) -> Signal<Vec<K>> {
-        let this = self.clone();
+        let breakpoints = self.breakpoints.clone();
+        let keys: Vec<_> = breakpoints.keys().cloned().collect();
 
-        Signal::derive(move || {
-            this.breakpoints
-                .keys()
-                .filter(|k| this.ge((**k).clone()).get())
+        let ge = move |key: &K| {
+            let value = breakpoints
+                .get(key)
+                .expect("only used with keys() from the HashMap");
+
+            use_media_query(format_media_query!("min", =, value))
+        };
+
+        let signals: Vec<_> = keys.iter().map(ge.clone()).collect();
+
+        create_memo(move |_| {
+            keys.iter()
                 .cloned()
+                .zip(signals.iter().cloned())
+                .filter_map(|(key, signal)| signal.get().then_some(key))
                 .collect::<Vec<_>>()
         })
+        .into()
     }
 }
 
