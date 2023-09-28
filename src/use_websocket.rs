@@ -67,8 +67,8 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///         <button on:click=open_connection disabled=connected>"Open"</button>
 ///         <button on:click=close_connection disabled=move || !connected()>"Close"</button>
 ///
-///         <p>"Receive message: " {format! {"{:?}", message}}</p>
-///         <p>"Receive byte message: " {format! {"{:?}", message_bytes}}</p>
+///         <p>"Receive message: " {move || format!("{:?}", message())}</p>
+///         <p>"Receive byte message: " {move || format!("{:?}", message_bytes())}</p>
 ///     </div>
 /// }
 /// # }
