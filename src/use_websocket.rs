@@ -67,8 +67,8 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///         <button on:click=open_connection disabled=connected>"Open"</button>
 ///         <button on:click=close_connection disabled=move || !connected()>"Close"</button>
 ///
-///         <p>"Receive message: " {move || format!("{:?}", message())}</p>
-///         <p>"Receive byte message: " {move || format!("{:?}", message_bytes())}</p>
+///         <p>"Receive message: " {move || format!("{:?}", message.get())}</p>
+///         <p>"Receive byte message: " {move || format!("{:?}", message_bytes.get())}</p>
 ///     </div>
 /// }
 /// # }
@@ -86,6 +86,106 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// | https://example.com/some/where | api/ws                   | wss://example.com/some/where/api/ws |
 /// | https://example.com/some/where | //otherdomain.com/api/ws | wss://otherdomain.com/api/ws        |
 ///
+///
+/// ## Usage with `provide_context`
+///
+/// The return value of `use_websocket` utilizes several type parameters which can make it
+/// cumbersome to use with `provide_context` + `expect_context`.
+/// The following example shows how to avoid type parameters with dynamic dispatch.
+/// This sacrifices a little bit of performance for the sake of ergonomics. However,
+/// compared to network transmission speeds this loss of performance is negligible.
+///
+/// First we define the `struct` that is going to be passed around as context.
+///
+/// ```
+/// # use leptos::*;
+/// use std::rc::Rc;
+///
+/// #[derive(Clone)]
+/// pub struct WebsocketContext {
+///     pub message: Signal<Option<String>>,
+///     send: Rc<dyn Fn(&str)>,  // use Rc to make it easily cloneable
+/// }
+///
+/// impl WebsocketContext {
+///     pub fn new(message: Signal<Option<String>>, send: Rc<dyn Fn(&str)>) -> Self {
+///         Self {
+///             message,
+///             send,
+///         }
+///     }
+///
+///     // create a method to avoid having to use parantheses around the field
+///     #[inline(always)]
+///     pub fn send(&self, message: &str) {
+///         (self.send)(message)
+///     }
+/// }
+/// ```
+///
+/// Now you can provide the context like the following.
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use std::rc::Rc;
+/// # #[derive(Clone)]
+/// # pub struct WebsocketContext {
+/// #     pub message: Signal<Option<String>>,
+/// #     send: Rc<dyn Fn(&str)>,
+/// # }
+/// #
+/// # impl WebsocketContext {
+/// #     pub fn new(message: Signal<Option<String>>, send: Rc<dyn Fn(&str)>) -> Self {
+/// #         Self {
+/// #             message,
+/// #             send,
+/// #         }
+/// #     }
+/// # }
+///
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let UseWebsocketReturn {
+///     message,
+///     send,
+///     ..
+/// } = use_websocket("ws:://some.websocket.io");
+///
+/// provide_context(WebsocketContext::new(message, Rc::new(send.clone())));
+/// #
+/// # view! {}
+/// # }
+/// ```
+///
+/// Finally let's use the context:
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use std::rc::Rc;
+/// # #[derive(Clone)]
+/// # pub struct WebsocketContext {
+/// #     pub message: Signal<Option<String>>,
+/// #     send: Rc<dyn Fn(&str)>,
+/// # }
+/// #
+/// # impl WebsocketContext {
+/// #     #[inline(always)]
+/// #     pub fn send(&self, message: &str) {
+/// #         (self.send)(message)
+/// #     }
+/// # }
+///
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let websocket = expect_context::<WebsocketContext>();
+///
+/// websocket.send("Hello World!");
+/// #
+/// # view! {}
+/// # }
+/// ```
 ///
 /// ## Server-Side Rendering
 ///
