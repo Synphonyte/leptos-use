@@ -30,8 +30,8 @@ fn Demo() -> impl IntoView {
     } = use_websocket("wss://echo.websocket.events/");
 
     let send_message = move |_| {
-        let m = "Hello, world!".to_string();
-        send(m.clone());
+        let m = "Hello, world!";
+        send(m);
         set_history.update(|history: &mut Vec<_>| history.push(format! {"[send]: {:?}", m}));
     };
 
@@ -125,8 +125,8 @@ fn Demo() -> impl IntoView {
     };
 
     let send_message2 = move |_| {
-        let message = "Hello, use_leptos!".to_string();
-        send2(message.clone());
+        let message = "Hello, use_leptos!";
+        send2(message);
         update_history(&set_history2, format! {"[send]: {:?}", message});
     };
 
@@ -182,10 +182,10 @@ fn Demo() -> impl IntoView {
                     <For
                         each=move || history.get().into_iter().enumerate()
                         key=|(index, _)| *index
-                        view=move |(_, message)| {
-                            view! { <div>{message}</div> }
-                        }
-                    />
+                        let:item
+                    >
+                        <div>{item.1}</div>
+                    </For>
 
                 </div>
                 <div class="w-full lg:w-1/2">
@@ -216,11 +216,10 @@ fn Demo() -> impl IntoView {
                         <For
                             each=move || history2.get().into_iter().enumerate()
                             key=|(index, _)| *index
-                            view=move |(_, message)| {
-                                view! { <li>{message}</li> }
-                            }
-                        />
-
+                            let:item
+                        >
+                            <li>{item.1}</li>
+                        </For>
                     </ul>
                 </div>
             </div>

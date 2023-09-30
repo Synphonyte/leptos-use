@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] -
+## [0.7.0] - 2023-09-30
 
 ### New Functions 🚀
 
@@ -29,12 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a `web_sys::MutationObserverInit`.
 - `use_websocket`:
     - takes now a `&str` instead of a `String` as its `url` parameter.
+    - same for the returned `send` method.
     - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
     - The returned signals  `ready_state`, `message`, `message_bytes` have now the type
       `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
     - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
     - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
       To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
+    - Added documentation how pass it ergonomically as context.
 - `use_color_mode`:
     - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
 - Throttled or debounced functions cannot be `FnOnce` anymore.
@@ -45,8 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_websocket` can use relative urls now
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
-- All (!) functions can now be safely called on the server. Specifically this includes the following that
-- panicked on the server:
+- All (!) functions can now be safely called on the server. Specifically this includes the following that before
+  panicked on the server:
     - `use_scroll`
     - `use_event_listener`
     - `use_element_hover`

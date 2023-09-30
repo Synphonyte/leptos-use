@@ -46,6 +46,7 @@ fn Demo() -> impl IntoView {
                         mouse_default.y.get(), mouse_default.source_type.get()
                     )
                 }}
+
             </pre>
             <p class="font-semibold">"Extractor Usage"</p>
             <Note>"Only works when the mouse is over the demo element"</Note>
@@ -59,6 +60,7 @@ fn Demo() -> impl IntoView {
                         .get(), mouse_with_extractor.y.get(), mouse_with_extractor.source_type.get()
                     )
                 }}
+
             </pre>
         </div>
     }
