@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 
 
 def main():
@@ -43,7 +44,7 @@ def build_and_copy_demo(category, md_name):
             html = f.read()
             head_split = html.split("<head>")
             target_head = head_split[1].split("</head>")[0]
-            body_split = html.split("<body>")[1].split("</body>")
+            body_split = re.split("<body[^>]*>", html)[1].split("</body>")
             target_body = body_split[0]
 
         with open(book_html_path, "w") as f:
