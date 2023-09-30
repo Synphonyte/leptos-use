@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] -
+## [0.7.0] - 2023-09-30
 
 ### New Functions 🚀
 
@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_websocket` can use relative urls now
 - Callbacks in options don't require to be cloneable anymore
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
-- All (!) functions can now be safely called on the server. Specifically this includes the following that
-- panicked on the server:
+- All (!) functions can now be safely called on the server. Specifically this includes the following that before
+  panicked on the server:
     - `use_scroll`
     - `use_event_listener`
     - `use_element_hover`

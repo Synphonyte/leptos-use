@@ -22,10 +22,10 @@ fn Demo() -> impl IntoView {
             <For
                 each=move || (1..7)
                 key=|i| *i
-                view=move |i| {
-                    view! { <input type="text" data-id=i class="!my-0 !min-w-0" placeholder=i/> }
-                }
-            />
+                let:i
+            >
+                <input type="text" data-id=i class="!my-0 !min-w-0" placeholder=i/>
+            </For>
 
         </div>
 

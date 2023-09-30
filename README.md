@@ -13,7 +13,7 @@
     <a href="https://crates.io/crates/leptos-use"><img src="https://img.shields.io/crates/v/leptos-use.svg?label=&color=%232C1275" alt="Crates.io"/></a>
     <a href="https://leptos-use.rs/server_side_rendering.html"><img src="https://img.shields.io/badge/-SSR-%236a214b" alt="SSR"></a> 
     <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-docs%20%26%20demos-%239A233F" alt="Docs & Demos"></a> 
-    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-51%20functions-%23EF3939" alt="51 Functions" /></a>
+    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-58%20functions-%23EF3939" alt="58 Functions" /></a>
 </p>
 
 <br/>
@@ -82,7 +82,8 @@ python3 post_build.py use_storage
 
 ### New Function Template
 
-To scaffold a new function quickly you can run `template/createfn.sh`. It requires that [`ffizer`](https://ffizer.github.io/) is installed.
+To scaffold a new function quickly you can run `template/createfn.sh`. It requires that [`ffizer`](https://ffizer.github.io/) and Python 3 is installed.
+This will create the function file in the src directory, scaffold an example directory and an entry in the book.
 
 ## Leptos compatibility
 
@@ -90,4 +91,4 @@ To scaffold a new function quickly you can run `template/createfn.sh`. It requir
 |---------------|---------------------------|
 | <= 0.3        | 0.3                       |
 | 0.4, 0.5, 0.6 | 0.4                       |
-| main          | 0.5.0-alpha/beta/rc       |
+| 0.7           | 0.5                       |

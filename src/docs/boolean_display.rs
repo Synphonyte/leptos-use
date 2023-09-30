@@ -18,8 +18,5 @@ pub fn BooleanDisplay(
         )
     };
 
-    view! {         <span class=class>
-            { move || if value.get() { true_str} else { false_str } }
-        </span>
-    }
+    view! { <span class=class>{move || if value.get() { true_str } else { false_str }}</span> }
 }

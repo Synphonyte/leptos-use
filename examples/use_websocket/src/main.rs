@@ -182,10 +182,10 @@ fn Demo() -> impl IntoView {
                     <For
                         each=move || history.get().into_iter().enumerate()
                         key=|(index, _)| *index
-                        view=move |(_, message)| {
-                            view! { <div>{message}</div> }
-                        }
-                    />
+                        let:item
+                    >
+                        <div>{item.1}</div>
+                    </For>
 
                 </div>
                 <div class="w-full lg:w-1/2">
@@ -216,11 +216,10 @@ fn Demo() -> impl IntoView {
                         <For
                             each=move || history2.get().into_iter().enumerate()
                             key=|(index, _)| *index
-                            view=move |(_, message)| {
-                                view! { <li>{message}</li> }
-                            }
-                        />
-
+                            let:item
+                        >
+                            <li>{item.1}</li>
+                        </For>
                     </ul>
                 </div>
             </div>

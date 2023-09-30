@@ -51,6 +51,7 @@ fn Demo() -> impl IntoView {
                 set_state
                     .update(|s| s.count = event_target_value(&e).parse::<f64>().unwrap() as u32)
             }
+
             type="number"
             min="0"
             step="1"

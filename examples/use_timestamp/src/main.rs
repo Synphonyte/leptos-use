@@ -7,7 +7,10 @@ fn Demo() -> impl IntoView {
     let timestamp = use_timestamp();
 
     view! {
-        <div>Timestamp: {timestamp}</div>
+        <div>
+            Timestamp:
+            {timestamp}
+        </div>
     }
 }
 

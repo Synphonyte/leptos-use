@@ -42,29 +42,27 @@ fn Demo() -> impl IntoView {
                         <For
                             each=files
                             key=|f| f.name()
-                            view=move |file| {
-                                view! {
-                                    <div class="w-200px bg-black-200/10 ma-2 pa-6">
-                                        <p>
-                                            Name:
-                                            {file.name()}
-                                        </p>
-                                        <p>
-                                            Size:
-                                            {file.size()}
-                                        </p>
-                                        <p>
-                                            Type:
-                                            {file.type_()}
-                                        </p>
-                                        <p>
-                                            Last modified:
-                                            {file.last_modified()}
-                                        </p>
-                                    </div>
-                                }
-                            }
-                        />
+                            let:file
+                        >
+                            <div class="w-200px bg-black-200/10 ma-2 pa-6">
+                                <p>
+                                    Name:
+                                    {file.name()}
+                                </p>
+                                <p>
+                                    Size:
+                                    {file.size()}
+                                </p>
+                                <p>
+                                    Type:
+                                    {file.type_()}
+                                </p>
+                                <p>
+                                    Last modified:
+                                    {file.last_modified()}
+                                </p>
+                            </div>
+                        </For>
                     </div>
                 </div>
             </div>

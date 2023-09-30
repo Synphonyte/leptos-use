@@ -46,8 +46,10 @@ fn Demo() -> impl IntoView {
                 each=move || enum_msgs.get()
                 // list only grows so this is fine here
                 key=|message| message.0
-                view=|message| view! { <div>"Mutation Attribute: " <code>{message.1}</code></div> }
-            />
+                let:message
+            >
+                <div>"Mutation Attribute: " <code>{message.1}</code></div>
+            </For>
         </div>
     }
 }

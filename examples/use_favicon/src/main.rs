@@ -21,6 +21,7 @@ fn Demo() -> impl IntoView {
                     set_icon.set(Some("favicon-leptos.ico".into()));
                 }
             >
+
                 <img
                     class=img_classes.clone()
                     width="32"
@@ -37,6 +38,7 @@ fn Demo() -> impl IntoView {
                     set_icon.set(Some("favicon-red.svg".into()));
                 }
             >
+
                 <img
                     class=img_classes.clone()
                     width="32"
@@ -53,6 +55,7 @@ fn Demo() -> impl IntoView {
                     set_icon.set(Some("favicon-green.svg".into()));
                 }
             >
+
                 <img
                     class=img_classes.clone()
                     width="32"
@@ -69,6 +72,7 @@ fn Demo() -> impl IntoView {
                     set_icon.set(Some("favicon-blue.svg".into()));
                 }
             >
+
                 <img
                     class=img_classes.clone()
                     width="32"
@@ -85,6 +89,7 @@ fn Demo() -> impl IntoView {
                     set_icon.set(Some("favicon-orange.svg".into()));
                 }
             >
+
                 <img
                     class=img_classes
                     width="32"
