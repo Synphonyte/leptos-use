@@ -35,6 +35,7 @@ members = [
     "use_resize_observer",
     "use_round",
     "use_scroll",
+    "use_sorted",
     "use_storage",
     "use_throttle_fn",
     "use_timestamp",

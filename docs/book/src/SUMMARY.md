@@ -72,8 +72,11 @@
 - [signal_debounced](reactivity/signal_debounced.md)
 - [signal_throttled](reactivity/signal_throttled.md)
 
-# Utilities
+# Iterable
 
+- [use_sorted](iterable/use_sorted.md)
+
+# Utilities
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)
