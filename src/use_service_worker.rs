@@ -35,22 +35,23 @@ pub fn use_service_worker() -> UseServiceWorkerReturn {
 
 /// Version of [`use_service_worker`] that takes a `UseServiceWorkerOptions`. See [`use_service_worker`] for how to use.
 pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseServiceWorkerReturn {
-    // Reload the page whenever a new ServiceWorker is installed.
+    // Trigger the user-defined action (page-reload by default)
+    // whenever a new ServiceWorker is installed.
     if let Some(navigator) = use_window().navigator() {
         let on_controller_change = options.on_controller_change.clone();
-        let reload = Closure::wrap(Box::new(move |_event: JsValue| {
+        let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
             on_controller_change.call(());
         }) as Box<dyn FnMut(JsValue)>)
         .into_js_value();
         navigator
             .service_worker()
-            .set_oncontrollerchange(Some(reload.as_ref().unchecked_ref()));
+            .set_oncontrollerchange(Some(js_closure.as_ref().unchecked_ref()));
     }
 
     // Create async actions.
-    let create_or_update_registration = create_action_create_or_update_sw_registration();
-    let get_registration = create_action_get_sw_registration();
-    let update_action = create_action_update_sw();
+    let create_or_update_registration = create_action_create_or_update_registration();
+    let get_registration = create_action_get_registration();
+    let update_sw = create_action_update();
 
     // Immediately create or update the SW registration.
     create_or_update_registration.dispatch(ServiceWorkerScriptUrl(options.script_url.to_string()));
@@ -60,7 +61,8 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
         Signal::derive(move || {
             let a = get_registration.value().get();
             let b = create_or_update_registration.value().get();
-            // We only dispatch create_or_update_registration once. Whenever we manually re-fetched the registration, the result of that has precedence!
+            // We only dispatch create_or_update_registration once.
+            // Whenever we manually re-fetched the registration, the result of that has precedence!
             match a {
                 Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
                 None => match b {
@@ -84,7 +86,7 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
                 registration.set_onupdatefound(Some(fetch_registration.as_ref().unchecked_ref()));
 
                 // Trigger a check to see IF an updated SW is available.
-                update_action.dispatch(registration.clone());
+                update_sw.dispatch(registration.clone());
 
                 // If a SW is installing, we must be notified if its state changes!
                 if let Some(sw) = registration.installing() {
@@ -126,7 +128,7 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
         check_for_update: Callback::new(move |()| {
             registration.with(|reg| {
                 if let Ok(reg) = reg {
-                    update_action.dispatch(reg.clone())
+                    update_sw.dispatch(reg.clone())
                 }
             })
         }),
@@ -135,7 +137,9 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
                 match reg.waiting() {
                     Some(sw) => {
                         tracing::info!("Updating to newly installed SW...");
-                        sw.post_message(&JsValue::from_str(&options.skip_waiting_message)).expect("post message");
+                        if let Err(err) = sw.post_message(&JsValue::from_str(&options.skip_waiting_message)) {
+                            tracing::warn!("Could not send message to active SW: Error: {err:?}");
+                        }
                     },
                     None => {
                         tracing::warn!("You tried to update the SW while no new SW was waiting. This is probably a bug.");
@@ -149,12 +153,13 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
 /// Options for [`use_service_worker_with_options`].
 #[derive(DefaultBuilder)]
 pub struct UseServiceWorkerOptions {
-    /// The name of your service-worker.
-    /// You will most likely deploy the service-worker JS fiel alongside your app.
-    /// A typical name is 'service-worker.js'.
+    /// The name of your service-worker file. Must be deployed alongside your app.
+    /// The default name is 'service-worker.js'.
     pub script_url: Cow<'static, str>,
 
     /// The message sent to a waiting ServiceWorker when you call the `skip_waiting` callback.
+    /// The callback is part of the return type of [`use_service_worker`]!
+    /// The default message is 'skipWaiting'.
     pub skip_waiting_message: Cow<'static, str>,
 
     /// What should happen when a new service worker was activated?
@@ -170,11 +175,10 @@ impl Default for UseServiceWorkerOptions {
             on_controller_change: Callback::new(move |()| {
                 use std::ops::Deref;
                 if let Some(window) = use_window().deref() {
-                    match window.location().reload() {
-                        Ok(()) => {}
-                        Err(err) => tracing::warn!(
+                    if let Err(err) = window.location().reload() {
+                        tracing::warn!(
                             "Detected a ServiceWorkerController change but the page reload failed! Error: {err:?}"
-                        ),
+                        );
                     }
                 }
             }),
@@ -196,10 +200,11 @@ pub struct UseServiceWorkerReturn {
     /// Whether a SW is active.
     pub active: Signal<bool>,
 
-    /// Check for ServiceWorker update.
+    /// Check for a ServiceWorker update.
     pub check_for_update: Callback<()>,
 
     /// Call this to activate a new ("waiting") SW if one is available.
+    /// Calling this while the [`UseServiceWorkerReturn::waiting`] signal resolves to false has no effect.
     pub skip_waiting: Callback<()>,
 }
 
@@ -212,24 +217,23 @@ pub enum ServiceWorkerRegistrationError {
 }
 
 /// A leptos action which asynchronously checks for ServiceWorker updates, given an existing ServiceWorkerRegistration.
-fn create_action_update_sw(
+fn create_action_update(
 ) -> Action<ServiceWorkerRegistration, Result<ServiceWorkerRegistration, JsValue>> {
     create_action(move |registration: &ServiceWorkerRegistration| {
         let registration = registration.clone();
         async move {
-            let update_promise = registration.update().expect("update to not fail");
-            wasm_bindgen_futures::JsFuture::from(update_promise)
-                .await
-                .map(|ok| {
-                    ok.dyn_into::<ServiceWorkerRegistration>()
-                        .expect("conversion into ServiceWorkerRegistration")
-                })
+            match registration.update() {
+                Ok(promise) => wasm_bindgen_futures::JsFuture::from(promise)
+                    .await
+                    .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>()),
+                Err(err) => Err(err),
+            }
         }
     })
 }
 
 /// A leptos action which asynchronously creates or updates and than retrieves the ServiceWorkerRegistration.
-fn create_action_create_or_update_sw_registration(
+fn create_action_create_or_update_registration(
 ) -> Action<ServiceWorkerScriptUrl, Result<ServiceWorkerRegistration, JsValue>> {
     create_action(move |script_url: &ServiceWorkerScriptUrl| {
         let script_url = script_url.0.to_owned();
@@ -238,10 +242,7 @@ fn create_action_create_or_update_sw_registration(
                 let promise = navigator.service_worker().register(script_url.as_str());
                 wasm_bindgen_futures::JsFuture::from(promise)
                     .await
-                    .map(|ok| {
-                        ok.dyn_into::<ServiceWorkerRegistration>()
-                            .expect("conversion into ServiceWorkerRegistration")
-                    })
+                    .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
             } else {
                 Err(JsValue::from_str("no navigator"))
             }
@@ -250,20 +251,15 @@ fn create_action_create_or_update_sw_registration(
 }
 
 /// A leptos action which asynchronously fetches the current ServiceWorkerRegistration.
-fn create_action_get_sw_registration() -> Action<(), Result<ServiceWorkerRegistration, JsValue>> {
-    create_action(move |(): &()| {
-        async move {
-            if let Some(navigator) = use_window().navigator() {
-                let promise = navigator.service_worker().get_registration(); // Could take a scope like "/app"...
-                wasm_bindgen_futures::JsFuture::from(promise)
-                    .await
-                    .map(|ok| {
-                        ok.dyn_into::<ServiceWorkerRegistration>()
-                            .expect("conversion into ServiceWorkerRegistration")
-                    })
-            } else {
-                Err(JsValue::from_str("no navigator"))
-            }
+fn create_action_get_registration() -> Action<(), Result<ServiceWorkerRegistration, JsValue>> {
+    create_action(move |(): &()| async move {
+        if let Some(navigator) = use_window().navigator() {
+            let promise = navigator.service_worker().get_registration();
+            wasm_bindgen_futures::JsFuture::from(promise)
+                .await
+                .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
+        } else {
+            Err(JsValue::from_str("no navigator"))
         }
     })
 }
