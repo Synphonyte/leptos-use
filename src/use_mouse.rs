@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::{ElementMaybeSignal, Position};
-use crate::{use_event_listener_with_options, UseEventListenerOptions};
+use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
@@ -208,8 +208,7 @@ where
 /// Options for [`use_mouse_with_options`].
 pub struct UseMouseOptions<El, T, Ex>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Clone + Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     Ex: UseMouseEventExtractor + Clone,
 {
@@ -232,33 +231,18 @@ where
     _marker: PhantomData<T>,
 }
 
-cfg_if! { if #[cfg(feature = "ssr")] {
-    impl Default for UseMouseOptions<Option<web_sys::Window>, web_sys::Window, UseMouseEventExtractorDefault> {
-        fn default() -> Self {
-            Self {
-                coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
-                target: None,
-                touch: true,
-                reset_on_touch_ends: false,
-                initial_value: Position { x: 0.0, y: 0.0 },
-                _marker: Default::default(),
-            }
+impl Default for UseMouseOptions<UseWindow, web_sys::Window, UseMouseEventExtractorDefault> {
+    fn default() -> Self {
+        Self {
+            coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
+            target: use_window(),
+            touch: true,
+            reset_on_touch_ends: false,
+            initial_value: Position { x: 0.0, y: 0.0 },
+            _marker: PhantomData,
         }
     }
-} else {
-    impl Default for UseMouseOptions<web_sys::Window, web_sys::Window, UseMouseEventExtractorDefault> {
-        fn default() -> Self {
-            Self {
-                coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
-                target: window(),
-                touch: true,
-                reset_on_touch_ends: false,
-                initial_value: Position { x: 0.0, y: 0.0 },
-                _marker: Default::default(),
-            }
-        }
-    }
-}}
+}
 
 /// Defines how to get the coordinates from the event.
 #[derive(Clone)]

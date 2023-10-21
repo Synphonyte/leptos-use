@@ -5,6 +5,7 @@ mod maybe_rw_signal;
 mod pointer_type;
 mod position;
 mod size;
+mod ssr_safe_method;
 mod storage;
 
 pub use connection_ready_state::*;
@@ -14,4 +15,5 @@ pub use maybe_rw_signal::*;
 pub use pointer_type::*;
 pub use position::*;
 pub use size::*;
+pub(crate) use ssr_safe_method::*;
 pub use storage::*;

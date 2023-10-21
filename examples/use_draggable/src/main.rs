@@ -2,13 +2,16 @@ use leptos::html::Div;
 use leptos::*;
 use leptos_use::core::Position;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
+use leptos_use::{use_draggable_with_options, use_window, UseDraggableOptions, UseDraggableReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Div>();
 
-    let inner_width = window().inner_width().unwrap().as_f64().unwrap();
+    let inner_width = use_window()
+        .as_ref()
+        .map(|w| w.inner_width().unwrap().as_f64().unwrap())
+        .unwrap_or(0.0);
 
     let UseDraggableReturn { x, y, style, .. } = use_draggable_with_options(
         el,

@@ -1,6 +1,7 @@
 use cfg_if::cfg_if;
 use std::ops::Deref;
 
+use crate::core::impl_ssr_safe_method;
 #[cfg(not(feature = "ssr"))]
 use leptos::*;
 
@@ -46,11 +47,15 @@ impl Deref for UseDocument {
 }
 
 impl UseDocument {
-    pub fn body(&self) -> Option<web_sys::HtmlElement> {
-        self.0.as_ref().and_then(|d| d.body())
-    }
+    impl_ssr_safe_method!(
+        /// Returns `Some(Document)` in the Browser. `None` otherwise.
+        body(&self) -> Option<web_sys::HtmlElement>;
+        .unwrap_or_default()
+    );
 
-    pub fn active_element(&self) -> Option<web_sys::Element> {
-        self.0.as_ref().and_then(|d| d.active_element())
-    }
+    impl_ssr_safe_method!(
+        /// Returns the active (focused) `Some(web_sys::Element)` in the Browser. `None` otherwise.
+        active_element(&self) -> Option<web_sys::Element>;
+        .unwrap_or_default()
+    );
 }

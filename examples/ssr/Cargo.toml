@@ -1,5 +1,5 @@
 [package]
-name = "start-axum"
+name = "leptos-use-ssr"
 version = "0.1.0"
 edition = "2021"
 

@@ -5,8 +5,8 @@ async fn main() {
     use leptos::logging::log;
     use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use start_axum::app::*;
-    use start_axum::fileserv::file_and_error_handler;
+    use leptos_use_ssr::app::*;
+    use leptos_use_ssr::fileserv::file_and_error_handler;
 
     simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
 
@@ -18,7 +18,7 @@ async fn main() {
     let conf = get_configuration(None).await.unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
-    let routes = generate_route_list(|| view! { <App/> }).await;
+    let routes = generate_route_list(|| view! { <App/> });
 
     // build our application with a route
     let app = Router::new()

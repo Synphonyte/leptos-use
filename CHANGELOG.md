@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2023-10-21
+
+### Fixes 🍕
+
+-  Some functions still used `window()` which could lead to panics in SSR. This is now fixed.
+  Specifically for `use_draggable`.
+
 ## [0.7.1] - 2023-10-02 
 
 ### New Function 🚀
