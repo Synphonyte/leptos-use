@@ -1,0 +1,7 @@
+[build]
+public_url = "/demo/"
+
+[[hooks]]
+stage = "post_build"
+command = "bash"
+command_arguments = ["-c", "./post_build.sh"]
