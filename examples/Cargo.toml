@@ -40,6 +40,7 @@ members = [
     "use_storage",
     "use_throttle_fn",
     "use_timestamp",
+    "use_web_notification",
     "use_websocket",
     "use_window_focus",
     "use_window_scroll",

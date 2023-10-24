@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_web_notification` - thanks for the help @centershocks44
 - `use_infinite_scroll`
 
 ### Breaking Changes 🛠

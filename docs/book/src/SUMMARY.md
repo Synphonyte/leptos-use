@@ -38,6 +38,7 @@
 - [use_media_query](browser/use_media_query.md)
 - [use_preferred_contrast](browser/use_preferred_contrast.md)
 - [use_preferred_dark](browser/use_preferred_dark.md)
+- [use_web_notification](browser/use_web_notification.md)
 
 # Sensors
 

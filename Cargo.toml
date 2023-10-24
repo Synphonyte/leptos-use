@@ -25,6 +25,7 @@ paste = "1"
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
 
 [dependencies.web-sys]
 version = "0.3"
@@ -60,6 +61,10 @@ features = [
   "MutationRecord",
   "Navigator",
   "NodeList",
+  "Notification",
+  "NotificationDirection",
+  "NotificationOptions",
+  "NotificationPermission",
   "PointerEvent",
   "Position",
   "PositionError",
