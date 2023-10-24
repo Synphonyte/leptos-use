@@ -64,24 +64,10 @@ fn HomePage() -> impl IntoView {
     debounced_fn();
 
     view! {
-        <h1>
-            Leptos-Use SSR Example
-        </h1>
-        <button on:click=on_click>
-            Click Me:
-            {count}
-        </button>
-        <p>
-            Locale zh-Hans-CN-u-nu-hanidec:
-            {zh_count}
-        </p>
-        <p>
-            Press any key:
-            {key}
-        </p>
-        <p>
-            Debounced called:
-            {debounce_value}
-        </p>
+        <h1>Leptos-Use SSR Example</h1>
+        <button on:click=on_click>Click Me: {count}</button>
+        <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
+        <p>Press any key: {key}</p>
+        <p>Debounced called: {debounce_value}</p>
     }
 }

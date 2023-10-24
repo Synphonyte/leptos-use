@@ -24,6 +24,7 @@ members = [
     "use_floor",
     "use_geolocation",
     "use_idle",
+    "use_infinite_scroll",
     "use_intersection_observer",
     "use_interval",
     "use_interval_fn",

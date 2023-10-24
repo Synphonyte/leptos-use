@@ -15,17 +15,9 @@ fn Demo() -> impl IntoView {
                 on:input=move |event| set_input(event_target_value(&event))
                 placeholder="Try to type quickly..."
             />
-            <Note>
-                Delay is set to 1000ms for this demo.
-            </Note>
-            <p>
-                Input signal:
-                {input}
-            </p>
-            <p>
-                Throttled signal:
-                {throttled}
-            </p>
+            <Note>Delay is set to 1000ms for this demo.</Note>
+            <p>Input signal: {input}</p>
+            <p>Throttled signal: {throttled}</p>
         </div>
     }
 }

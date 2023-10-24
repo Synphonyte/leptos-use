@@ -24,20 +24,14 @@ fn Demo() -> impl IntoView {
     );
 
     view! {
-        <p class="italic op50 text-center">
-            Check the floating box
-        </p>
+        <p class="italic op50 text-center">Check the floating box</p>
         <div
             node_ref=el
             class="px-4 py-2 border border-gray-400/30 rounded shadow hover:shadow-lg fixed bg-[--bg] select-none cursor-move z-24"
             style=move || format!("touch-action: none; {}", style())
         >
             "👋 Drag me!"
-            <div class="text-sm opacity-50">
-                I am
-                {move || x().round()},
-                {move || y().round()}
-            </div>
+            <div class="text-sm opacity-50">I am {move || x().round()} , {move || y().round()}</div>
         </div>
     }
 }

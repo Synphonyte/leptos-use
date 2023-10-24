@@ -14,20 +14,11 @@ fn Demo() -> impl IntoView {
 
     view! {
         <Note class="mb-2">
-            For demonstration purpose, the idle timeout is set to
-            <b>
-                5s
-            </b>
+            For demonstration purpose, the idle timeout is set to <b>5s</b>
             in this demo (default 1min).
         </Note>
-        <div class="mb-2">
-            Idle:
-            <BooleanDisplay value=idle/>
-        </div>
-        <div>
-            Inactive:
-            <b>{idled_for} s</b>
-        </div>
+        <div class="mb-2">Idle: <BooleanDisplay value=idle/></div>
+        <div>Inactive: <b>{idled_for} s</b></div>
     }
 }
 

@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 
+
+### New Functions 🚀
+
+- `use_infinite_scroll`
+
+### Breaking Changes 🛠
+
+- `use_scroll` returns `impl Fn(T) + Clone` instead of `Box<dyn Fn(T)>`.
+
+### Other Changes 🔥
+
+- `UseScrollReturn` is now documented
+
 ## [0.7.2] - 2023-10-21
 
 ### Fixes 🍕

@@ -42,8 +42,10 @@ fn Demo() -> impl IntoView {
                         r#"    x: {}
     y: {}
     source_type: {:?}
-"#, mouse_default.x.get(),
-                        mouse_default.y.get(), mouse_default.source_type.get()
+"#,
+                        mouse_default.x.get(),
+                        mouse_default.y.get(),
+                        mouse_default.source_type.get(),
                     )
                 }}
 
@@ -56,8 +58,10 @@ fn Demo() -> impl IntoView {
                         r#"    x: {}
     y: {}
     source_type: {:?}
-"#, mouse_with_extractor.x
-                        .get(), mouse_with_extractor.y.get(), mouse_with_extractor.source_type.get()
+"#,
+                        mouse_with_extractor.x.get(),
+                        mouse_with_extractor.y.get(),
+                        mouse_with_extractor.source_type.get(),
                     )
                 }}
 

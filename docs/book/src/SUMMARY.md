@@ -45,6 +45,7 @@
 - [use_element_hover](sensors/use_element_hover.md)
 - [use_geolocation](sensors/use_geolocation.md)
 - [use_idle](sensors/use_idle.md)
+- [use_infinite_scroll](sensors/use_infinite_scroll.md)
 - [use_mouse](sensors/use_mouse.md)
 - [use_scroll](sensors/use_scroll.md)
 

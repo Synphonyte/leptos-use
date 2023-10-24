@@ -13,69 +13,71 @@ repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
 [dependencies]
-leptos = "0.5"
-wasm-bindgen = "0.2"
-js-sys = "0.3"
+cfg-if = "1"
 default-struct-builder = "0.5"
+futures-util = "0.3"
+gloo-timers = { version = "0.3.0", features = ["futures"] }
+js-sys = "0.3"
+lazy_static = "1"
+leptos = "0.5"
 num = { version = "0.4", optional = true }
+paste = "1"
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
-paste = "1"
-lazy_static = "1"
-cfg-if = "1"
+wasm-bindgen = "0.2"
 
 [dependencies.web-sys]
 version = "0.3"
 features = [
-    "AddEventListenerOptions",
-    "BinaryType",
-    "Coordinates",
-    "CloseEvent",
-    "CssStyleDeclaration",
-    "CustomEvent",
-    "CustomEventInit",
-    "DomRect",
-    "DomRectReadOnly",
-    "DataTransfer",
-    "DragEvent",
-    "Element",
-    "EventListener",
-    "EventListenerOptions",
-    "EventTarget",
-    "File",
-    "FileList",
-    "Geolocation",
-    "HtmlElement",
-    "HtmlLinkElement",
-    "HtmlStyleElement",
-    "IntersectionObserver",
-    "IntersectionObserverInit",
-    "IntersectionObserverEntry",
-    "MediaQueryList",
-    "MouseEvent",
-    "MutationObserver",
-    "MutationObserverInit",
-    "MutationRecord",
-    "Navigator",
-    "NodeList",
-    "PointerEvent",
-    "Position",
-    "PositionError",
-    "PositionOptions",
-    "ResizeObserver",
-    "ResizeObserverBoxOptions",
-    "ResizeObserverEntry",
-    "ResizeObserverOptions",
-    "ResizeObserverSize",
-    "ScrollBehavior",
-    "ScrollToOptions",
-    "Storage",
-    "Touch",
-    "TouchEvent",
-    "TouchList",
-    "VisibilityState",
-    "WebSocket",
-    "Window",
+  "AddEventListenerOptions",
+  "BinaryType",
+  "Coordinates",
+  "CloseEvent",
+  "CssStyleDeclaration",
+  "CustomEvent",
+  "CustomEventInit",
+  "DomRect",
+  "DomRectReadOnly",
+  "DataTransfer",
+  "DragEvent",
+  "Element",
+  "EventListener",
+  "EventListenerOptions",
+  "EventTarget",
+  "File",
+  "FileList",
+  "Geolocation",
+  "HtmlElement",
+  "HtmlLinkElement",
+  "HtmlStyleElement",
+  "IntersectionObserver",
+  "IntersectionObserverInit",
+  "IntersectionObserverEntry",
+  "MediaQueryList",
+  "MouseEvent",
+  "MutationObserver",
+  "MutationObserverInit",
+  "MutationRecord",
+  "Navigator",
+  "NodeList",
+  "PointerEvent",
+  "Position",
+  "PositionError",
+  "PositionOptions",
+  "ResizeObserver",
+  "ResizeObserverBoxOptions",
+  "ResizeObserverEntry",
+  "ResizeObserverOptions",
+  "ResizeObserverSize",
+  "ScrollBehavior",
+  "ScrollToOptions",
+  "Storage",
+  "Touch",
+  "TouchEvent",
+  "TouchList",
+  "VisibilityState",
+  "WebSocket",
+  "Window",
 ]
 
 [features]
