@@ -24,23 +24,20 @@ fn Demo() -> impl IntoView {
 
     view! {
         <div>
-            <p>
-                Supported: <BooleanDisplay value=is_supported />
-            </p>
+            <p>Supported: <BooleanDisplay value=is_supported/></p>
         </div>
 
         <Show
             when=is_supported
-            fallback=|| view! {
-                <div>The Notification Web API is not supported in your browser.</div>
+            fallback=|| {
+                view! { <div>The Notification Web API is not supported in your browser.</div> }
             }
         >
+
             <button on:click={
                 let show = show.clone();
                 move |_| show()
-            }>
-                Show Notification
-            </button>
+            }>Show Notification</button>
         </Show>
     }
 }

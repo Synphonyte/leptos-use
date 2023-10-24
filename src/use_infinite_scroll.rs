@@ -150,26 +150,25 @@ where
                     scroll_width <= client_width
                 };
 
-                if state.arrived_state.get_untracked().get_direction(direction) || is_narrower {
-                    if !is_loading.get_untracked() {
-                        set_loading.set(true);
+                if (state.arrived_state.get_untracked().get_direction(direction) || is_narrower)
+                    && !is_loading.get_untracked()
+                {
+                    set_loading.set(true);
 
-                        let state = state.clone();
-                        let measure = measure.clone();
-                        spawn_local(async move {
-                            join!(
-                                on_load_more.with_value(|f| f(state)),
-                                sleep(Duration::from_millis(interval as u64))
-                            );
+                    let measure = measure.clone();
+                    spawn_local(async move {
+                        join!(
+                            on_load_more.with_value(|f| f(state)),
+                            sleep(Duration::from_millis(interval as u64))
+                        );
 
-                            set_loading.set(false);
-                            sleep(Duration::ZERO).await;
-                            measure();
-                            if let Some(check_and_load) = check_and_load.get_value() {
-                                check_and_load();
-                            }
-                        });
-                    }
+                        set_loading.set(false);
+                        sleep(Duration::ZERO).await;
+                        measure();
+                        if let Some(check_and_load) = check_and_load.get_value() {
+                            check_and_load();
+                        }
+                    });
                 }
             }
         }
@@ -178,7 +177,7 @@ where
     let _ = watch(
         move || is_element_visible.get(),
         move |visible, prev_visible, _| {
-            if *visible && !prev_visible.map(|v| *v).unwrap_or_default() {
+            if *visible && !prev_visible.copied().unwrap_or_default() {
                 measure();
             }
         },

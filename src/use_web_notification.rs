@@ -140,7 +140,7 @@ pub fn use_web_notification_with_options(
         set_permission.set(request_web_notification_permission().await);
     });
 
-    on_cleanup(close.clone());
+    on_cleanup(close);
 
     // Use close() to remove a notification that is no longer relevant to to
     // the user (e.g.the user already read the notification on the webpage).
@@ -157,7 +157,7 @@ pub fn use_web_notification_with_options(
     }
 
     UseWebNotificationReturn {
-        is_supported: is_supported.into(),
+        is_supported,
         notification: notification.into(),
         show,
         close,
@@ -274,19 +274,19 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
         // .renotify(options.renotify);
 
         if let Some(body) = &options.body {
-            web_sys_options.body(&body);
+            web_sys_options.body(body);
         }
 
         if let Some(icon) = &options.icon {
-            web_sys_options.icon(&icon);
+            web_sys_options.icon(icon);
         }
 
         if let Some(language) = &options.language {
-            web_sys_options.lang(&language);
+            web_sys_options.lang(language);
         }
 
         if let Some(tag) = &options.tag {
-            web_sys_options.tag(&tag);
+            web_sys_options.tag(tag);
         }
 
         web_sys_options
