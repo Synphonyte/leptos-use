@@ -1,46 +1,52 @@
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use std::borrow::Cow;
+use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::ServiceWorkerRegistration;
 
 use crate::use_window;
 
+/// Reactive [ServiceWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API).
 ///
-///
-/// ## Demo
-///
-/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_service_worker)
+/// Please check the [working example](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_service_worker).
 ///
 /// ## Usage
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::use_service_worker;
+/// # use leptos_use::{use_service_worker_with_options, UseServiceWorkerOptions, UseServiceWorkerReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// #     let sw = use_service_worker_with_options(UseServiceWorkerOptions {
-/// #         script_url: "service-worker.js".into(),
-/// #         skip_waiting_message: "skipWaiting".into(),
-/// #         ..UseServiceWorkerOptions::default()
-/// #     });
-/// #
-/// #     view! { }
+/// let UseServiceWorkerReturn {
+///         registration,
+///         installing,
+///         waiting,
+///         active,
+///         skip_waiting,
+///         check_for_update,
+/// } = use_service_worker_with_options(UseServiceWorkerOptions::default()
+///     .script_url("service-worker.js")
+///     .skip_waiting_message("skipWaiting"),
+/// );
+///
+/// # view! { }
 /// # }
 /// ```
-pub fn use_service_worker() -> UseServiceWorkerReturn {
+pub fn use_service_worker() -> UseServiceWorkerReturn<impl Fn() + Clone, impl Fn() + Clone> {
     use_service_worker_with_options(UseServiceWorkerOptions::default())
 }
 
 /// Version of [`use_service_worker`] that takes a `UseServiceWorkerOptions`. See [`use_service_worker`] for how to use.
-pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseServiceWorkerReturn {
+pub fn use_service_worker_with_options(
+    options: UseServiceWorkerOptions,
+) -> UseServiceWorkerReturn<impl Fn() + Clone, impl Fn() + Clone> {
     // Trigger the user-defined action (page-reload by default)
     // whenever a new ServiceWorker is installed.
     if let Some(navigator) = use_window().navigator() {
         let on_controller_change = options.on_controller_change.clone();
         let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
-            on_controller_change.call(());
+            on_controller_change();
         }) as Box<dyn FnMut(JsValue)>)
         .into_js_value();
         navigator
@@ -95,7 +101,7 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
             }
             Err(err) => match err {
                 ServiceWorkerRegistrationError::Js(err) => {
-                    tracing::warn!("ServiceWorker registration failed: {err:?}")
+                    logging::warn!("ServiceWorker registration failed: {err:?}")
                 }
                 ServiceWorkerRegistrationError::NeverQueried => {}
             },
@@ -125,28 +131,28 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
                     .unwrap_or_default()
             })
         }),
-        check_for_update: Callback::new(move |()| {
+        check_for_update: move || {
             registration.with(|reg| {
                 if let Ok(reg) = reg {
                     update_sw.dispatch(reg.clone())
                 }
             })
-        }),
-        skip_waiting: Callback::new(move |()| {
+        },
+        skip_waiting: move || {
             registration.with_untracked(|reg| if let Ok(reg) = reg {
                 match reg.waiting() {
                     Some(sw) => {
-                        tracing::info!("Updating to newly installed SW...");
+                        logging::debug_warn!("Updating to newly installed SW...");
                         if let Err(err) = sw.post_message(&JsValue::from_str(&options.skip_waiting_message)) {
-                            tracing::warn!("Could not send message to active SW: Error: {err:?}");
+                            logging::warn!("Could not send message to active SW: Error: {err:?}");
                         }
                     },
                     None => {
-                        tracing::warn!("You tried to update the SW while no new SW was waiting. This is probably a bug.");
+                        logging::warn!("You tried to update the SW while no new SW was waiting. This is probably a bug.");
                     },
                 }
             });
-        }),
+        },
     }
 }
 
@@ -155,16 +161,18 @@ pub fn use_service_worker_with_options(options: UseServiceWorkerOptions) -> UseS
 pub struct UseServiceWorkerOptions {
     /// The name of your service-worker file. Must be deployed alongside your app.
     /// The default name is 'service-worker.js'.
-    pub script_url: Cow<'static, str>,
+    #[builder(into)]
+    script_url: String,
 
     /// The message sent to a waiting ServiceWorker when you call the `skip_waiting` callback.
     /// The callback is part of the return type of [`use_service_worker`]!
     /// The default message is 'skipWaiting'.
-    pub skip_waiting_message: Cow<'static, str>,
+    #[builder(into)]
+    skip_waiting_message: String,
 
     /// What should happen when a new service worker was activated?
     /// The default implementation reloads the current page.
-    pub on_controller_change: Callback<()>,
+    on_controller_change: Rc<dyn Fn()>,
 }
 
 impl Default for UseServiceWorkerOptions {
@@ -172,11 +180,11 @@ impl Default for UseServiceWorkerOptions {
         Self {
             script_url: "service-worker.js".into(),
             skip_waiting_message: "skipWaiting".into(),
-            on_controller_change: Callback::new(move |()| {
+            on_controller_change: Rc::new(move || {
                 use std::ops::Deref;
                 if let Some(window) = use_window().deref() {
                     if let Err(err) = window.location().reload() {
-                        tracing::warn!(
+                        logging::warn!(
                             "Detected a ServiceWorkerController change but the page reload failed! Error: {err:?}"
                         );
                     }
@@ -187,7 +195,11 @@ impl Default for UseServiceWorkerOptions {
 }
 
 /// Return type of [`use_service_worker`].
-pub struct UseServiceWorkerReturn {
+pub struct UseServiceWorkerReturn<CheckFn, SkipFn>
+where
+    CheckFn: Fn() + Clone,
+    SkipFn: Fn() + Clone,
+{
     /// The current registration state.
     pub registration: Signal<Result<ServiceWorkerRegistration, ServiceWorkerRegistrationError>>,
 
@@ -201,11 +213,11 @@ pub struct UseServiceWorkerReturn {
     pub active: Signal<bool>,
 
     /// Check for a ServiceWorker update.
-    pub check_for_update: Callback<()>,
+    pub check_for_update: CheckFn,
 
     /// Call this to activate a new ("waiting") SW if one is available.
     /// Calling this while the [`UseServiceWorkerReturn::waiting`] signal resolves to false has no effect.
-    pub skip_waiting: Callback<()>,
+    pub skip_waiting: SkipFn,
 }
 
 struct ServiceWorkerScriptUrl(pub String);
