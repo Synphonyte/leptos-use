@@ -8,6 +8,7 @@ use web_sys::Storage;
 #[derive(Clone)]
 pub struct UseStorageOptions<Err> {
     on_error: Rc<dyn Fn(UseStorageError<Err>)>,
+    listen_to_storage_changes: bool,
 }
 
 /// Session handling errors returned by [`use_storage`].
@@ -47,7 +48,10 @@ where
     T: Clone + Default + PartialEq + TryFrom<String> + ToString,
 {
     // TODO ssr
-    let UseStorageOptions { on_error } = options;
+    let UseStorageOptions {
+        on_error,
+        listen_to_storage_changes,
+    } = options;
     let storage: Result<Storage, ()> = handle_error(&on_error, try_storage());
 
     let initial_value = storage
@@ -93,9 +97,9 @@ where
 
     // Listen for storage events
     // Note: we only receive events from other tabs / windows, not from internal updates.
-    let _ = {
+    if listen_to_storage_changes {
         let key = key.as_ref().to_owned();
-        use_event_listener_with_options(
+        let _ = use_event_listener_with_options(
             use_window(),
             leptos::ev::storage,
             move |ev| {
@@ -111,7 +115,7 @@ where
                 }
             },
             UseEventListenerOptions::default().passive(true),
-        )
+        );
     };
 
     let value = create_memo(move |_| data.get().unwrap_or_default());
@@ -152,6 +156,7 @@ impl<Err: std::fmt::Debug> Default for UseStorageOptions<Err> {
     fn default() -> Self {
         Self {
             on_error: Rc::new(|_err| ()),
+            listen_to_storage_changes: true,
         }
     }
 }
@@ -160,6 +165,14 @@ impl<Err> UseStorageOptions<Err> {
     pub fn on_error(self, on_error: impl Fn(UseStorageError<Err>) + 'static) -> Self {
         Self {
             on_error: Rc::new(on_error),
+            ..self
+        }
+    }
+
+    pub fn listen_to_storage_changes(self, listen_to_storage_changes: bool) -> Self {
+        Self {
+            listen_to_storage_changes,
+            ..self
         }
     }
 }
