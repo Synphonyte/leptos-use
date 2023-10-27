@@ -84,6 +84,7 @@ features = [
   "ServiceWorkerRegistration",
   "ServiceWorkerState",
   "Storage",
+  "StorageEvent",
   "Touch",
   "TouchEvent",
   "TouchList",
@@ -95,7 +96,6 @@ features = [
 [features]
 docs = []
 math = ["num"]
-storage = ["base64", "serde", "serde_json", "web-sys/StorageEvent"]
 ssr = []
 
 [package.metadata.docs.rs]

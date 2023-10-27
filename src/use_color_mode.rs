@@ -1,13 +1,9 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
-#[cfg(feature = "storage")]
 use crate::storage::{use_storage_with_options, UseStorageOptions};
-#[cfg(feature = "storage")]
-use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
 use crate::core::StorageType;
 use crate::use_preferred_dark;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
@@ -255,49 +251,29 @@ pub enum ColorMode {
     Custom(String),
 }
 
-cfg_if! { if #[cfg(feature = "storage")] {
-    fn get_store_signal(
-        initial_value: MaybeRwSignal<ColorMode>,
-        storage_signal: Option<RwSignal<ColorMode>>,
-        storage_key: &str,
-        storage_enabled: bool,
-        storage: StorageType,
-        listen_to_storage_changes: bool,
-    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-        if let Some(storage_signal) = storage_signal {
-            let (store, set_store) = storage_signal.split();
-            (store.into(), set_store)
-        } else if storage_enabled {
-            let (store, set_store, _) = use_storage_with_options(
-                storage_key,
-                initial_value,
-                UseStorageOptions::default()
-                    .listen_to_storage_changes(listen_to_storage_changes)
-                    .storage_type(storage),
-            );
-
-            (store, set_store)
-        } else {
-            initial_value.into_signal()
-        }
+fn get_store_signal(
+    initial_value: MaybeRwSignal<ColorMode>,
+    storage_signal: Option<RwSignal<ColorMode>>,
+    storage_key: &str,
+    storage_enabled: bool,
+    storage: StorageType,
+    listen_to_storage_changes: bool,
+) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
+    if let Some(storage_signal) = storage_signal {
+        let (store, set_store) = storage_signal.split();
+        (store.into(), set_store)
+    } else if storage_enabled {
+        use_storage_with_options(
+            storage_key,
+            initial_value,
+            UseStorageOptions::default()
+                .listen_to_storage_changes(listen_to_storage_changes)
+                .storage_type(storage),
+        )
+    } else {
+        initial_value.into_signal()
     }
-} else {
-    fn get_store_signal(
-        initial_value: MaybeRwSignal<ColorMode>,
-        storage_signal: Option<RwSignal<ColorMode>>,
-        _storage_key: &str,
-        _storage_enabled: bool,
-        _storage: StorageType,
-        _listen_to_storage_changes: bool,
-    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-        if let Some(storage_signal) = storage_signal {
-            let (store, set_store) = storage_signal.split();
-            (store.into(), set_store)
-        } else {
-            initial_value.into_signal()
-        }
-    }
-}}
+}
 
 impl Display for ColorMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
