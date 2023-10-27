@@ -1,6 +1,6 @@
 use super::{Codec, UseStorageOptions};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct JsonCodec();
 
 impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {

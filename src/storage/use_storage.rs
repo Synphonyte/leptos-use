@@ -34,17 +34,22 @@ pub enum UseStorageError<Err> {
 }
 
 /// Hook for using local storage. Returns a result of a signal and a setter / deleter.
-pub fn use_local_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> ())
+pub fn use_local_storage<T, C>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
 where
-    T: Clone + Default + FromStr + PartialEq + ToString,
+    T: Clone + Default + PartialEq,
+    C: Codec<T> + Default,
 {
-    use_storage_with_options(StorageType::Local, key, UseStorageOptions::string_codec())
+    use_storage_with_options(
+        StorageType::Local,
+        key,
+        UseStorageOptions::<T, C>::default(),
+    )
 }
 
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> ())
+) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -53,17 +58,24 @@ where
 }
 
 /// Hook for using session storage. Returns a result of a signal and a setter / deleter.
-pub fn use_session_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> ())
+pub fn use_session_storage<T, C>(
+    key: impl AsRef<str>,
+) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
 where
-    T: Clone + Default + FromStr + PartialEq + ToString,
+    T: Clone + Default + PartialEq,
+    C: Codec<T> + Default,
 {
-    use_storage_with_options(StorageType::Session, key, UseStorageOptions::string_codec())
+    use_storage_with_options(
+        StorageType::Session,
+        key,
+        UseStorageOptions::<T, C>::default(),
+    )
 }
 
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> ())
+) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -76,7 +88,7 @@ pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> ())
+) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -206,6 +218,17 @@ fn decode_item<T, C: Codec<T>>(
     .unwrap_or_default()
 }
 
+impl<T: Default + 'static, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
+    fn default() -> Self {
+        Self {
+            codec: C::default(),
+            on_error: Rc::new(|_err| ()),
+            listen_to_storage_changes: true,
+            default_value: MaybeSignal::default(),
+        }
+    }
+}
+
 impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
     pub(super) fn new(codec: C) -> Self {
         Self {
@@ -244,7 +267,7 @@ pub trait Codec<T>: Clone + 'static {
     fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct StringCodec();
 
 impl<T: FromStr + ToString> Codec<T> for StringCodec {

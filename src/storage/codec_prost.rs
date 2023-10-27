@@ -2,7 +2,7 @@ use super::{Codec, UseStorageOptions};
 use base64::Engine;
 use thiserror::Error;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct ProstCodec();
 
 #[derive(Error, Debug, PartialEq)]
