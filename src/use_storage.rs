@@ -1,9 +1,10 @@
-use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions};
+use crate::{
+    core::StorageType, use_event_listener_with_options, use_window, UseEventListenerOptions,
+};
 use leptos::*;
 use std::{rc::Rc, str::FromStr};
 use thiserror::Error;
 use wasm_bindgen::JsValue;
-use web_sys::{Storage, Window};
 
 #[derive(Clone)]
 pub struct UseStorageOptions<T, C: Codec<T>> {
@@ -15,8 +16,6 @@ pub struct UseStorageOptions<T, C: Codec<T>> {
 /// Session handling errors returned by [`use_storage`].
 #[derive(Error, Debug)]
 pub enum UseStorageError<Err> {
-    #[error("window not available")]
-    WindowReturnedNone,
     #[error("storage not available")]
     StorageNotAvailable(JsValue),
     #[error("storage not returned from window")]
@@ -36,7 +35,7 @@ pub fn use_local_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>
 where
     T: Clone + Default + FromStr + PartialEq + ToString,
 {
-    use_storage_with_options(get_local_storage, key, UseStorageOptions::string_codec())
+    use_storage_with_options(StorageType::Local, key, UseStorageOptions::string_codec())
 }
 
 pub fn use_local_storage_with_options<T, C>(
@@ -47,11 +46,7 @@ where
     T: Clone + Default + PartialEq,
     C: Codec<T>,
 {
-    use_storage_with_options(|w| w.local_storage(), key, options)
-}
-
-fn get_local_storage(w: &Window) -> Result<Option<web_sys::Storage>, JsValue> {
-    w.local_storage()
+    use_storage_with_options(StorageType::Local, key, options)
 }
 
 /// Hook for using session storage. Returns a result of a signal and a setter / deleter.
@@ -59,7 +54,7 @@ pub fn use_session_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<
 where
     T: Clone + Default + FromStr + PartialEq + ToString,
 {
-    use_storage_with_options(get_session_storage, key, UseStorageOptions::string_codec())
+    use_storage_with_options(StorageType::Session, key, UseStorageOptions::string_codec())
 }
 
 pub fn use_session_storage_with_options<T, C>(
@@ -70,40 +65,12 @@ where
     T: Clone + Default + PartialEq,
     C: Codec<T>,
 {
-    use_storage_with_options(get_session_storage, key, options)
+    use_storage_with_options(StorageType::Session, key, options)
 }
 
-fn get_session_storage(w: &Window) -> Result<Option<web_sys::Storage>, JsValue> {
-    w.session_storage()
-}
-
-/// Hook for using custom storage. Returns a result of a signal and a setter / deleter.
-pub fn use_custom_storage<T>(
-    storage: impl Into<web_sys::Storage>,
-    key: impl AsRef<str>,
-) -> (Memo<T>, impl Fn(Option<T>) -> ())
-where
-    T: Clone + Default + FromStr + PartialEq + ToString,
-{
-    use_custom_storage_with_options(storage, key, UseStorageOptions::string_codec())
-}
-
-pub fn use_custom_storage_with_options<T, C>(
-    storage: impl Into<web_sys::Storage>,
-    key: impl AsRef<str>,
-    options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> ())
-where
-    T: Clone + Default + PartialEq,
-    C: Codec<T>,
-{
-    let storage = storage.into();
-    use_storage_with_options(|_| Ok(Some(storage)), key, options)
-}
-
-/// Hook for using local storage. Returns a result of a signal and a setter / deleter.
+/// Hook for using any kind of storage. Returns a result of a signal and a setter / deleter.
 fn use_storage_with_options<T, C>(
-    get_storage: impl FnOnce(&Window) -> Result<Option<web_sys::Storage>, JsValue>,
+    storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
@@ -119,15 +86,11 @@ where
     } = options;
 
     // Get storage API
-    let storage = use_window()
-        .as_ref()
-        .ok_or(UseStorageError::WindowReturnedNone)
-        .and_then(|w| {
-            get_storage(w)
-                .map_err(UseStorageError::StorageNotAvailable)
-                .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone))
-        });
-    let storage: Result<Storage, ()> = handle_error(&on_error, storage);
+    let storage = storage_type
+        .into_storage()
+        .map_err(UseStorageError::StorageNotAvailable)
+        .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone));
+    let storage = handle_error(&on_error, storage);
 
     // Fetch initial value (undecoded)
     let initial_value = storage
