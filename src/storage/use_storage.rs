@@ -2,6 +2,7 @@ use crate::{
     core::{MaybeRwSignal, StorageType},
     use_event_listener_with_options, use_window, UseEventListenerOptions,
 };
+use cfg_if::cfg_if;
 use leptos::*;
 use std::{rc::Rc, str::FromStr};
 use thiserror::Error;
@@ -80,7 +81,17 @@ where
     T: Clone + PartialEq,
     C: Codec<T>,
 {
-    // TODO ssr
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let (data, set_data) = create_signal(None);
+        let set_value = move |value: Option<T>| {
+            set_data.set(value);
+        };
+        let value = create_memo(move |_| data.get().unwrap_or_default());
+        return (value, set_value);
+    } else {
+        // Continue
+    }}
+
     let UseStorageOptions {
         codec,
         on_error,
