@@ -57,6 +57,7 @@ mod use_raf_fn;
 mod use_scroll;
 mod use_service_worker;
 mod use_sorted;
+#[cfg(feature = "storage")]
 mod use_storage;
 mod use_supported;
 mod use_throttle_fn;

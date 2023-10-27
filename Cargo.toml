@@ -13,6 +13,7 @@ repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
 [dependencies]
+base64 = { version = "0.21", optional = true }
 cfg-if = "1"
 default-struct-builder = "0.5"
 futures-util = "0.3"
@@ -22,6 +23,7 @@ lazy_static = "1"
 leptos = "0.5"
 num = { version = "0.4", optional = true }
 paste = "1"
+prost = { version = "0.11", optional = true }
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 thiserror = "1.0"
@@ -93,11 +95,10 @@ features = [
 [features]
 docs = []
 math = ["num"]
-storage = ["serde", "serde_json", "web-sys/StorageEvent"]
+storage = ["base64", "serde", "serde_json", "web-sys/StorageEvent"]
 ssr = []
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg=web_sys_unstable_apis"]
 rustc-args = ["--cfg=web_sys_unstable_apis"]
-

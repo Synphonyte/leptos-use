@@ -1,13 +1,14 @@
 use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions};
 use leptos::*;
-use std::rc::Rc;
+use std::{rc::Rc, str::FromStr};
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 use web_sys::Storage;
 
 #[derive(Clone)]
-pub struct UseStorageOptions<Err> {
-    on_error: Rc<dyn Fn(UseStorageError<Err>)>,
+pub struct UseStorageOptions<T, C: Codec<T>> {
+    codec: C,
+    on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
     listen_to_storage_changes: bool,
 }
 
@@ -26,29 +27,30 @@ pub enum UseStorageError<Err> {
     SetItemFailed(JsValue),
     #[error("failed to delete item")]
     RemoveItemFailed(JsValue),
-    #[error("failed to parse item value")]
-    ParseItemError(Err),
+    #[error("failed to encode / decode item value")]
+    ItemCodecError(Err),
 }
 
 /// Hook for using local storage. Returns a result of a signal and a setter / deleter.
 pub fn use_local_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> ())
 where
-    T: Clone + Default + PartialEq + TryFrom<String> + ToString,
-    T::Error: std::fmt::Debug,
+    T: Clone + Default + FromStr + PartialEq + ToString,
 {
-    use_local_storage_with_options(key, UseStorageOptions::default())
+    use_local_storage_with_options(key, UseStorageOptions::string_codec())
 }
 
 /// Hook for using local storage. Returns a result of a signal and a setter / deleter.
-pub fn use_local_storage_with_options<T>(
+pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
-    options: UseStorageOptions<T::Error>,
+    options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
 where
-    T: Clone + Default + PartialEq + TryFrom<String> + ToString,
+    T: Clone + Default + PartialEq,
+    C: Codec<T>,
 {
     // TODO ssr
     let UseStorageOptions {
+        codec,
         on_error,
         listen_to_storage_changes,
     } = options;
@@ -65,13 +67,14 @@ where
         })
         .unwrap_or_default();
     // Attempt to parse the item string
-    let initial_value = parse_item(initial_value, &on_error);
+    let initial_value = decode_item(&codec, initial_value, &on_error);
     let (data, set_data) = create_signal(initial_value);
 
     // Update storage value
     let set_value = {
         let storage = storage.to_owned();
         let key = key.as_ref().to_owned();
+        let codec = codec.to_owned();
         let on_error = on_error.to_owned();
         move |value: Option<T>| {
             let key = key.as_str();
@@ -79,9 +82,14 @@ where
             let _ = storage.as_ref().map(|storage| {
                 let result = match value {
                     // Update
-                    Some(ref value) => storage
-                        .set_item(key, &value.to_string())
-                        .map_err(UseStorageError::SetItemFailed),
+                    Some(ref value) => codec
+                        .encode(&value)
+                        .map_err(UseStorageError::ItemCodecError)
+                        .and_then(|enc_value| {
+                            storage
+                                .set_item(key, &enc_value)
+                                .map_err(UseStorageError::SetItemFailed)
+                        }),
                     // Remove
                     None => storage
                         .remove_item(key)
@@ -106,7 +114,7 @@ where
                 // Update storage value if our key matches
                 if let Some(k) = ev.key() {
                     if k == key {
-                        let value = parse_item(ev.new_value(), &on_error);
+                        let value = decode_item(&codec, ev.new_value(), &on_error);
                         set_data.set(value)
                     }
                 } else {
@@ -139,12 +147,13 @@ fn handle_error<T, Err>(
     result.or_else(|err| Err((on_error)(err)))
 }
 
-fn parse_item<T: Default + TryFrom<String>>(
+fn decode_item<T, C: Codec<T>>(
+    codec: &C,
     str: Option<String>,
-    on_error: &Rc<dyn Fn(UseStorageError<T::Error>)>,
+    on_error: &Rc<dyn Fn(UseStorageError<C::Error>)>,
 ) -> Option<T> {
     str.map(|str| {
-        let result = T::try_from(str).map_err(UseStorageError::ParseItemError);
+        let result = codec.decode(str).map_err(UseStorageError::ItemCodecError);
         handle_error(&on_error, result)
     })
     .transpose()
@@ -152,17 +161,16 @@ fn parse_item<T: Default + TryFrom<String>>(
     .unwrap_or_default()
 }
 
-impl<Err: std::fmt::Debug> Default for UseStorageOptions<Err> {
-    fn default() -> Self {
+impl<T, C: Codec<T>> UseStorageOptions<T, C> {
+    fn new(codec: C) -> Self {
         Self {
+            codec,
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
         }
     }
-}
 
-impl<Err> UseStorageOptions<Err> {
-    pub fn on_error(self, on_error: impl Fn(UseStorageError<Err>) + 'static) -> Self {
+    pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
         Self {
             on_error: Rc::new(on_error),
             ..self
@@ -174,5 +182,134 @@ impl<Err> UseStorageOptions<Err> {
             listen_to_storage_changes,
             ..self
         }
+    }
+}
+
+pub trait Codec<T>: Clone + 'static {
+    type Error;
+    fn encode(&self, val: &T) -> Result<String, Self::Error>;
+    fn decode(&self, str: String) -> Result<T, Self::Error>;
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StringCodec();
+
+impl<T: FromStr + ToString> Codec<T> for StringCodec {
+    type Error = T::Err;
+
+    fn encode(&self, val: &T) -> Result<String, Self::Error> {
+        Ok(val.to_string())
+    }
+
+    fn decode(&self, str: String) -> Result<T, Self::Error> {
+        T::from_str(&str)
+    }
+}
+
+impl<T: FromStr + ToString> UseStorageOptions<T, StringCodec> {
+    pub fn string_codec() -> Self {
+        Self::new(StringCodec())
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct ProstCodec();
+
+#[derive(Error, Debug, PartialEq)]
+pub enum ProstCodecError {
+    #[error("failed to decode base64")]
+    DecodeBase64(base64::DecodeError),
+    #[error("failed to decode protobuf")]
+    DecodeProst(#[from] prost::DecodeError),
+}
+
+use base64::Engine;
+impl<T: Default + prost::Message> Codec<T> for ProstCodec {
+    type Error = ProstCodecError;
+
+    fn encode(&self, val: &T) -> Result<String, Self::Error> {
+        let buf = val.encode_to_vec();
+        Ok(base64::engine::general_purpose::STANDARD.encode(&buf))
+    }
+
+    fn decode(&self, str: String) -> Result<T, Self::Error> {
+        let buf = base64::engine::general_purpose::STANDARD
+            .decode(str)
+            .map_err(ProstCodecError::DecodeBase64)?;
+        T::decode(buf.as_slice()).map_err(ProstCodecError::DecodeProst)
+    }
+}
+
+impl<T: Default + prost::Message> UseStorageOptions<T, ProstCodec> {
+    pub fn prost_codec() -> Self {
+        Self::new(ProstCodec())
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct JsonCodec();
+
+impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
+    type Error = serde_json::Error;
+
+    fn encode(&self, val: &T) -> Result<String, Self::Error> {
+        serde_json::to_string(val)
+    }
+
+    fn decode(&self, str: String) -> Result<T, Self::Error> {
+        serde_json::from_str(&str)
+    }
+}
+
+impl<T: serde::Serialize + serde::de::DeserializeOwned> UseStorageOptions<T, JsonCodec> {
+    pub fn json_codec() -> Self {
+        Self::new(JsonCodec())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_string_codec() {
+        let s = String::from("party time 🎉");
+        let codec = StringCodec();
+        assert_eq!(codec.encode(&s), Ok(s.clone()));
+        assert_eq!(codec.decode(s.clone()), Ok(s));
+    }
+
+    #[test]
+    fn test_prost_codec() {
+        #[derive(Clone, PartialEq, prost::Message)]
+        struct Test {
+            #[prost(string, tag = "1")]
+            s: String,
+            #[prost(int32, tag = "2")]
+            i: i32,
+        }
+        let t = Test {
+            s: String::from("party time 🎉"),
+            i: 42,
+        };
+        let codec = ProstCodec();
+        assert_eq!(codec.decode(codec.encode(&t).unwrap()), Ok(t));
+    }
+
+    #[test]
+    fn test_json_codec() {
+        #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+        struct Test {
+            s: String,
+            i: i32,
+        }
+        let t = Test {
+            s: String::from("party time 🎉"),
+            i: 42,
+        };
+        let codec = JsonCodec();
+        let enc = codec.encode(&t).unwrap();
+        let dec: Test = codec.decode(enc).unwrap();
+        assert_eq!(dec, t);
     }
 }
