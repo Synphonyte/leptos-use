@@ -96,6 +96,8 @@ features = [
 [features]
 docs = []
 math = ["num"]
+prost = ["base64", "dep:prost"]
+serde = ["dep:serde", "serde_json"]
 ssr = []
 
 [package.metadata.docs.rs]

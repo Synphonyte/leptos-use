@@ -196,7 +196,7 @@ fn decode_item<T, C: Codec<T>>(
 }
 
 impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
-    fn new(codec: C) -> Self {
+    pub(super) fn new(codec: C) -> Self {
         Self {
             codec,
             on_error: Rc::new(|_err| ()),
@@ -254,63 +254,6 @@ impl<T: Clone + Default + FromStr + ToString> UseStorageOptions<T, StringCodec> 
     }
 }
 
-#[derive(Clone, PartialEq)]
-pub struct ProstCodec();
-
-#[derive(Error, Debug, PartialEq)]
-pub enum ProstCodecError {
-    #[error("failed to decode base64")]
-    DecodeBase64(base64::DecodeError),
-    #[error("failed to decode protobuf")]
-    DecodeProst(#[from] prost::DecodeError),
-}
-
-use base64::Engine;
-impl<T: Default + prost::Message> Codec<T> for ProstCodec {
-    type Error = ProstCodecError;
-
-    fn encode(&self, val: &T) -> Result<String, Self::Error> {
-        let buf = val.encode_to_vec();
-        Ok(base64::engine::general_purpose::STANDARD.encode(&buf))
-    }
-
-    fn decode(&self, str: String) -> Result<T, Self::Error> {
-        let buf = base64::engine::general_purpose::STANDARD
-            .decode(str)
-            .map_err(ProstCodecError::DecodeBase64)?;
-        T::decode(buf.as_slice()).map_err(ProstCodecError::DecodeProst)
-    }
-}
-
-impl<T: Clone + Default + prost::Message> UseStorageOptions<T, ProstCodec> {
-    pub fn prost_codec() -> Self {
-        Self::new(ProstCodec())
-    }
-}
-
-#[derive(Clone, PartialEq)]
-pub struct JsonCodec();
-
-impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
-    type Error = serde_json::Error;
-
-    fn encode(&self, val: &T) -> Result<String, Self::Error> {
-        serde_json::to_string(val)
-    }
-
-    fn decode(&self, str: String) -> Result<T, Self::Error> {
-        serde_json::from_str(&str)
-    }
-}
-
-impl<T: Clone + Default + serde::Serialize + serde::de::DeserializeOwned>
-    UseStorageOptions<T, JsonCodec>
-{
-    pub fn json_codec() -> Self {
-        Self::new(JsonCodec())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -321,39 +264,5 @@ mod tests {
         let codec = StringCodec();
         assert_eq!(codec.encode(&s), Ok(s.clone()));
         assert_eq!(codec.decode(s.clone()), Ok(s));
-    }
-
-    #[test]
-    fn test_prost_codec() {
-        #[derive(Clone, PartialEq, prost::Message)]
-        struct Test {
-            #[prost(string, tag = "1")]
-            s: String,
-            #[prost(int32, tag = "2")]
-            i: i32,
-        }
-        let t = Test {
-            s: String::from("party time 🎉"),
-            i: 42,
-        };
-        let codec = ProstCodec();
-        assert_eq!(codec.decode(codec.encode(&t).unwrap()), Ok(t));
-    }
-
-    #[test]
-    fn test_json_codec() {
-        #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
-        struct Test {
-            s: String,
-            i: i32,
-        }
-        let t = Test {
-            s: String::from("party time 🎉"),
-            i: 42,
-        };
-        let codec = JsonCodec();
-        let enc = codec.encode(&t).unwrap();
-        let dec: Test = codec.decode(enc).unwrap();
-        assert_eq!(dec, t);
     }
 }
