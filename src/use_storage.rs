@@ -3,7 +3,7 @@ use leptos::*;
 use std::{rc::Rc, str::FromStr};
 use thiserror::Error;
 use wasm_bindgen::JsValue;
-use web_sys::Storage;
+use web_sys::{Storage, Window};
 
 #[derive(Clone)]
 pub struct UseStorageOptions<T, C: Codec<T>> {
@@ -36,11 +36,74 @@ pub fn use_local_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>
 where
     T: Clone + Default + FromStr + PartialEq + ToString,
 {
-    use_local_storage_with_options(key, UseStorageOptions::string_codec())
+    use_storage_with_options(get_local_storage, key, UseStorageOptions::string_codec())
+}
+
+pub fn use_local_storage_with_options<T, C>(
+    key: impl AsRef<str>,
+    options: UseStorageOptions<T, C>,
+) -> (Memo<T>, impl Fn(Option<T>) -> ())
+where
+    T: Clone + Default + PartialEq,
+    C: Codec<T>,
+{
+    use_storage_with_options(|w| w.local_storage(), key, options)
+}
+
+fn get_local_storage(w: &Window) -> Result<Option<web_sys::Storage>, JsValue> {
+    w.local_storage()
+}
+
+/// Hook for using session storage. Returns a result of a signal and a setter / deleter.
+pub fn use_session_storage<T>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> ())
+where
+    T: Clone + Default + FromStr + PartialEq + ToString,
+{
+    use_storage_with_options(get_session_storage, key, UseStorageOptions::string_codec())
+}
+
+pub fn use_session_storage_with_options<T, C>(
+    key: impl AsRef<str>,
+    options: UseStorageOptions<T, C>,
+) -> (Memo<T>, impl Fn(Option<T>) -> ())
+where
+    T: Clone + Default + PartialEq,
+    C: Codec<T>,
+{
+    use_storage_with_options(get_session_storage, key, options)
+}
+
+fn get_session_storage(w: &Window) -> Result<Option<web_sys::Storage>, JsValue> {
+    w.session_storage()
+}
+
+/// Hook for using custom storage. Returns a result of a signal and a setter / deleter.
+pub fn use_custom_storage<T>(
+    storage: impl Into<web_sys::Storage>,
+    key: impl AsRef<str>,
+) -> (Memo<T>, impl Fn(Option<T>) -> ())
+where
+    T: Clone + Default + FromStr + PartialEq + ToString,
+{
+    use_custom_storage_with_options(storage, key, UseStorageOptions::string_codec())
+}
+
+pub fn use_custom_storage_with_options<T, C>(
+    storage: impl Into<web_sys::Storage>,
+    key: impl AsRef<str>,
+    options: UseStorageOptions<T, C>,
+) -> (Memo<T>, impl Fn(Option<T>) -> ())
+where
+    T: Clone + Default + PartialEq,
+    C: Codec<T>,
+{
+    let storage = storage.into();
+    use_storage_with_options(|_| Ok(Some(storage)), key, options)
 }
 
 /// Hook for using local storage. Returns a result of a signal and a setter / deleter.
-pub fn use_local_storage_with_options<T, C>(
+fn use_storage_with_options<T, C>(
+    get_storage: impl FnOnce(&Window) -> Result<Option<web_sys::Storage>, JsValue>,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
@@ -54,11 +117,22 @@ where
         on_error,
         listen_to_storage_changes,
     } = options;
-    let storage: Result<Storage, ()> = handle_error(&on_error, try_storage());
 
+    // Get storage API
+    let storage = use_window()
+        .as_ref()
+        .ok_or(UseStorageError::WindowReturnedNone)
+        .and_then(|w| {
+            get_storage(w)
+                .map_err(UseStorageError::StorageNotAvailable)
+                .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone))
+        });
+    let storage: Result<Storage, ()> = handle_error(&on_error, storage);
+
+    // Fetch initial value (undecoded)
     let initial_value = storage
         .to_owned()
-        // Get initial item from storage
+        // Pull from storage
         .and_then(|s| {
             let result = s
                 .get_item(key.as_ref())
@@ -66,8 +140,9 @@ where
             handle_error(&on_error, result)
         })
         .unwrap_or_default();
-    // Attempt to parse the item string
+    // Decode initial value
     let initial_value = decode_item(&codec, initial_value, &on_error);
+
     let (data, set_data) = create_signal(initial_value);
 
     // Update storage value
@@ -128,15 +203,6 @@ where
 
     let value = create_memo(move |_| data.get().unwrap_or_default());
     (value, set_value)
-}
-
-fn try_storage<Err>() -> Result<Storage, UseStorageError<Err>> {
-    use_window()
-        .as_ref()
-        .ok_or_else(|| UseStorageError::WindowReturnedNone)?
-        .local_storage()
-        .map_err(|err| UseStorageError::StorageNotAvailable(err))?
-        .ok_or_else(|| UseStorageError::StorageReturnedNone)
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
