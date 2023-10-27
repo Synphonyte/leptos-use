@@ -8,7 +8,6 @@ pub mod core;
 pub mod docs;
 #[cfg(feature = "math")]
 pub mod math;
-#[cfg(feature = "storage")]
 pub mod storage;
 pub mod utils;
 
@@ -57,8 +56,6 @@ mod use_raf_fn;
 mod use_scroll;
 mod use_service_worker;
 mod use_sorted;
-#[cfg(feature = "storage")]
-mod use_storage;
 mod use_supported;
 mod use_throttle_fn;
 mod use_timestamp;
@@ -111,7 +108,6 @@ pub use use_raf_fn::*;
 pub use use_scroll::*;
 pub use use_service_worker::*;
 pub use use_sorted::*;
-pub use use_storage::*;
 pub use use_supported::*;
 pub use use_throttle_fn::*;
 pub use use_timestamp::*;
