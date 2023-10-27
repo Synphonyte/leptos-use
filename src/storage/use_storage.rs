@@ -1,5 +1,6 @@
 use crate::{
-    core::StorageType, use_event_listener_with_options, use_window, UseEventListenerOptions,
+    core::{MaybeRwSignal, StorageType},
+    use_event_listener_with_options, use_window, UseEventListenerOptions,
 };
 use leptos::*;
 use std::{rc::Rc, str::FromStr};
@@ -7,10 +8,11 @@ use thiserror::Error;
 use wasm_bindgen::JsValue;
 
 #[derive(Clone)]
-pub struct UseStorageOptions<T, C: Codec<T>> {
+pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     codec: C,
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
     listen_to_storage_changes: bool,
+    default_value: MaybeSignal<T>,
 }
 
 /// Session handling errors returned by [`use_storage`].
@@ -43,7 +45,7 @@ pub fn use_local_storage_with_options<T, C>(
     options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
 where
-    T: Clone + Default + PartialEq,
+    T: Clone + PartialEq,
     C: Codec<T>,
 {
     use_storage_with_options(StorageType::Local, key, options)
@@ -62,7 +64,7 @@ pub fn use_session_storage_with_options<T, C>(
     options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
 where
-    T: Clone + Default + PartialEq,
+    T: Clone + PartialEq,
     C: Codec<T>,
 {
     use_storage_with_options(StorageType::Session, key, options)
@@ -75,7 +77,7 @@ fn use_storage_with_options<T, C>(
     options: UseStorageOptions<T, C>,
 ) -> (Memo<T>, impl Fn(Option<T>) -> ())
 where
-    T: Clone + Default + PartialEq,
+    T: Clone + PartialEq,
     C: Codec<T>,
 {
     // TODO ssr
@@ -83,6 +85,7 @@ where
         codec,
         on_error,
         listen_to_storage_changes,
+        default_value,
     } = options;
 
     // Get storage API
@@ -164,7 +167,9 @@ where
         );
     };
 
-    let value = create_memo(move |_| data.get().unwrap_or_default());
+    // Apply default value
+    let value = create_memo(move |_| data.get().unwrap_or_else(|| default_value.get()));
+
     (value, set_value)
 }
 
@@ -190,12 +195,13 @@ fn decode_item<T, C: Codec<T>>(
     .unwrap_or_default()
 }
 
-impl<T, C: Codec<T>> UseStorageOptions<T, C> {
+impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
     fn new(codec: C) -> Self {
         Self {
             codec,
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
+            default_value: MaybeSignal::default(),
         }
     }
 
@@ -209,6 +215,13 @@ impl<T, C: Codec<T>> UseStorageOptions<T, C> {
     pub fn listen_to_storage_changes(self, listen_to_storage_changes: bool) -> Self {
         Self {
             listen_to_storage_changes,
+            ..self
+        }
+    }
+
+    pub fn default_value(self, values: impl Into<MaybeRwSignal<T>>) -> Self {
+        Self {
+            default_value: values.into().into_signal().0.into(),
             ..self
         }
     }
@@ -235,7 +248,7 @@ impl<T: FromStr + ToString> Codec<T> for StringCodec {
     }
 }
 
-impl<T: FromStr + ToString> UseStorageOptions<T, StringCodec> {
+impl<T: Clone + Default + FromStr + ToString> UseStorageOptions<T, StringCodec> {
     pub fn string_codec() -> Self {
         Self::new(StringCodec())
     }
@@ -269,7 +282,7 @@ impl<T: Default + prost::Message> Codec<T> for ProstCodec {
     }
 }
 
-impl<T: Default + prost::Message> UseStorageOptions<T, ProstCodec> {
+impl<T: Clone + Default + prost::Message> UseStorageOptions<T, ProstCodec> {
     pub fn prost_codec() -> Self {
         Self::new(ProstCodec())
     }
@@ -290,7 +303,9 @@ impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
     }
 }
 
-impl<T: serde::Serialize + serde::de::DeserializeOwned> UseStorageOptions<T, JsonCodec> {
+impl<T: Clone + Default + serde::Serialize + serde::de::DeserializeOwned>
+    UseStorageOptions<T, JsonCodec>
+{
     pub fn json_codec() -> Self {
         Self::new(JsonCodec())
     }
