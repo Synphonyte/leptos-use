@@ -1,6 +1,7 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 use crate::core::StorageType;
 use crate::use_preferred_dark;
@@ -263,13 +264,14 @@ fn get_store_signal(
         let (store, set_store) = storage_signal.split();
         (store.into(), set_store)
     } else if storage_enabled {
-        use_storage_with_options(
+        let (store, set_store, _) = use_storage_with_options(
+            storage,
             storage_key,
-            initial_value,
-            UseStorageOptions::default()
+            UseStorageOptions::string_codec()
                 .listen_to_storage_changes(listen_to_storage_changes)
-                .storage_type(storage),
-        )
+                .default_value(initial_value),
+        );
+        (store, set_store)
     } else {
         initial_value.into_signal()
     }
@@ -303,6 +305,14 @@ impl From<&str> for ColorMode {
 impl From<String> for ColorMode {
     fn from(s: String) -> Self {
         ColorMode::from(s.as_str())
+    }
+}
+
+impl FromStr for ColorMode {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(ColorMode::from(s))
     }
 }
 
