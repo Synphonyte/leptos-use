@@ -71,7 +71,7 @@ where
 }
 
 /// Hook for using any kind of storage. Returns a result of a signal and a setter / deleter.
-fn use_storage_with_options<T, C>(
+pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
