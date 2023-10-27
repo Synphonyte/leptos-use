@@ -13,7 +13,7 @@ pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     codec: C,
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
     listen_to_storage_changes: bool,
-    default_value: MaybeSignal<T>,
+    default_value: MaybeRwSignal<T>,
 }
 
 /// Session handling errors returned by [`use_storage`].
@@ -34,7 +34,9 @@ pub enum UseStorageError<Err> {
 }
 
 /// Hook for using local storage. Returns a result of a signal and a setter / deleter.
-pub fn use_local_storage<T, C>(key: impl AsRef<str>) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
+pub fn use_local_storage<T, C>(
+    key: impl AsRef<str>,
+) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
 where
     T: Clone + Default + PartialEq,
     C: Codec<T> + Default,
@@ -49,7 +51,7 @@ where
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -60,7 +62,7 @@ where
 /// Hook for using session storage. Returns a result of a signal and a setter / deleter.
 pub fn use_session_storage<T, C>(
     key: impl AsRef<str>,
-) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
 where
     T: Clone + Default + PartialEq,
     C: Codec<T> + Default,
@@ -75,7 +77,7 @@ where
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -88,7 +90,7 @@ pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Memo<T>, impl Fn(Option<T>) -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -99,7 +101,7 @@ where
             set_data.set(value);
         };
         let value = create_memo(move |_| data.get().unwrap_or_default());
-        return (value, set_value);
+        return (value, set_value, || ());
     } else {
         // Continue
     }}
@@ -118,7 +120,7 @@ where
         .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone));
     let storage = handle_error(&on_error, storage);
 
-    // Fetch initial value (undecoded)
+    // Fetch initial value
     let initial_value = storage
         .to_owned()
         // Pull from storage
@@ -129,71 +131,95 @@ where
             handle_error(&on_error, result)
         })
         .unwrap_or_default();
-    // Decode initial value
     let initial_value = decode_item(&codec, initial_value, &on_error);
 
-    let (data, set_data) = create_signal(initial_value);
+    // Data signal: use initial value or falls back to default value.
+    let (default_value, set_default_value) = default_value.into_signal();
+    let (data, set_data) = match initial_value {
+        Some(initial_value) => {
+            let (data, set_data) = create_signal(initial_value);
+            (data.into(), set_data)
+        }
+        None => (default_value, set_default_value),
+    };
 
-    // Update storage value
-    let set_value = {
+    // If data is removed from browser storage, revert to default value
+    let revert_data = move || {
+        set_data.set(default_value.get_untracked());
+    };
+
+    // Update storage value on change
+    {
         let storage = storage.to_owned();
-        let key = key.as_ref().to_owned();
         let codec = codec.to_owned();
+        let key = key.as_ref().to_owned();
         let on_error = on_error.to_owned();
-        move |value: Option<T>| {
-            let key = key.as_str();
-            // Attempt to update storage
-            let _ = storage.as_ref().map(|storage| {
-                let result = match value {
-                    // Update
-                    Some(ref value) => codec
+        let _ = watch(
+            move || data.get(),
+            move |value, _, _| {
+                let key = key.as_str();
+                if let Ok(storage) = &storage {
+                    let result = codec
                         .encode(&value)
                         .map_err(UseStorageError::ItemCodecError)
                         .and_then(|enc_value| {
+                            // Set storage -- this sends an event to other pages
                             storage
                                 .set_item(key, &enc_value)
                                 .map_err(UseStorageError::SetItemFailed)
-                        }),
-                    // Remove
-                    None => storage
-                        .remove_item(key)
-                        .map_err(UseStorageError::RemoveItemFailed),
-                };
-                handle_error(&on_error, result)
-            });
-
-            // Notify signal of change
-            set_data.set(value);
-        }
+                        });
+                    let _ = handle_error(&on_error, result);
+                }
+            },
+            false,
+        );
     };
 
     // Listen for storage events
     // Note: we only receive events from other tabs / windows, not from internal updates.
     if listen_to_storage_changes {
         let key = key.as_ref().to_owned();
+        let on_error = on_error.to_owned();
         let _ = use_event_listener_with_options(
             use_window(),
             leptos::ev::storage,
             move |ev| {
+                let mut deleted = false;
                 // Update storage value if our key matches
                 if let Some(k) = ev.key() {
                     if k == key {
-                        let value = decode_item(&codec, ev.new_value(), &on_error);
-                        set_data.set(value)
+                        match decode_item(&codec, ev.new_value(), &on_error) {
+                            Some(value) => set_data.set(value),
+                            None => deleted = true,
+                        }
                     }
                 } else {
                     // All keys deleted
-                    set_data.set(None)
+                    deleted = true;
+                }
+                if deleted {
+                    revert_data();
                 }
             },
             UseEventListenerOptions::default().passive(true),
         );
     };
 
-    // Apply default value
-    let value = create_memo(move |_| data.get().unwrap_or_else(|| default_value.get()));
+    // Remove from storage fn
+    let remove = {
+        let key = key.as_ref().to_owned();
+        move || {
+            let _ = storage.as_ref().map(|storage| {
+                let result = storage
+                    .remove_item(key.as_ref())
+                    .map_err(UseStorageError::RemoveItemFailed);
+                let _ = handle_error(&on_error, result);
+                revert_data();
+            });
+        }
+    };
 
-    (value, set_value)
+    (data, set_data, remove)
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
@@ -224,7 +250,7 @@ impl<T: Default + 'static, C: Codec<T> + Default> Default for UseStorageOptions<
             codec: C::default(),
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
-            default_value: MaybeSignal::default(),
+            default_value: MaybeRwSignal::default(),
         }
     }
 }
@@ -235,7 +261,7 @@ impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
             codec,
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
-            default_value: MaybeSignal::default(),
+            default_value: MaybeRwSignal::default(),
         }
     }
 
@@ -255,7 +281,7 @@ impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
 
     pub fn default_value(self, values: impl Into<MaybeRwSignal<T>>) -> Self {
         Self {
-            default_value: values.into().into_signal().0.into(),
+            default_value: values.into(),
             ..self
         }
     }
