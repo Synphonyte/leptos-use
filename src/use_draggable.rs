@@ -87,7 +87,7 @@ where
         ..
     } = options;
 
-    let target = (target).into();
+    let target = target.into();
 
     let dragging_handle = if let Some(handle) = handle {
         let handle = (handle).into();

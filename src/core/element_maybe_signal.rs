@@ -1,4 +1,5 @@
 use crate::{UseDocument, UseWindow};
+use cfg_if::cfg_if;
 use leptos::html::ElementDescriptor;
 use leptos::*;
 use std::marker::PhantomData;
@@ -177,7 +178,11 @@ where
     E: From<web_sys::Element> + 'static,
 {
     fn from(target: &'a str) -> Self {
-        Self::Static(document().query_selector(target).unwrap_or_default())
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            Self::Static(None)
+        } else {
+            Self::Static(document().query_selector(target).unwrap_or_default())
+        }}
     }
 }
 
@@ -186,7 +191,7 @@ where
     E: From<web_sys::Element> + 'static,
 {
     fn from(target: String) -> Self {
-        Self::Static(document().query_selector(&target).unwrap_or_default())
+        Self::from(target.as_str())
     }
 }
 
@@ -195,10 +200,14 @@ where
     E: From<web_sys::Element> + 'static,
 {
     fn from(signal: Signal<String>) -> Self {
-        Self::Dynamic(
-            create_memo(move |_| document().query_selector(&signal.get()).unwrap_or_default())
-                .into(),
-        )
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            Self::Dynamic(Signal::derive(|| None))
+        } else {
+            Self::Dynamic(
+                create_memo(move |_| document().query_selector(&signal.get()).unwrap_or_default())
+                    .into(),
+            )
+        }}
     }
 }
 

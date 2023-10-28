@@ -124,7 +124,7 @@ where
             }
         };
 
-        let targets = (target).into();
+        let targets = target.into();
         let root = root.map(|root| (root).into());
 
         let stop_watch = {

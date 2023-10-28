@@ -132,7 +132,7 @@ where
 
         let event_name = event.name();
 
-        let signal = (target).into();
+        let signal = target.into();
 
         let prev_element = Rc::new(RefCell::new(None::<web_sys::EventTarget>));
 
