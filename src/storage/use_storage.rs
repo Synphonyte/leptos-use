@@ -4,11 +4,17 @@ use crate::{
 };
 use cfg_if::cfg_if;
 use leptos::*;
-use std::{rc::Rc, str::FromStr};
+use std::rc::Rc;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
 const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
+
+pub trait Codec<T>: Clone + 'static {
+    type Error;
+    fn encode(&self, val: &T) -> Result<String, Self::Error>;
+    fn decode(&self, str: String) -> Result<T, Self::Error>;
+}
 
 #[derive(Clone)]
 pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
@@ -322,45 +328,5 @@ impl<T: Clone + Default, C: Codec<T>> UseStorageOptions<T, C> {
             default_value: values.into(),
             ..self
         }
-    }
-}
-
-pub trait Codec<T>: Clone + 'static {
-    type Error;
-    fn encode(&self, val: &T) -> Result<String, Self::Error>;
-    fn decode(&self, str: String) -> Result<T, Self::Error>;
-}
-
-#[derive(Clone, Default, PartialEq)]
-pub struct StringCodec();
-
-impl<T: FromStr + ToString> Codec<T> for StringCodec {
-    type Error = T::Err;
-
-    fn encode(&self, val: &T) -> Result<String, Self::Error> {
-        Ok(val.to_string())
-    }
-
-    fn decode(&self, str: String) -> Result<T, Self::Error> {
-        T::from_str(&str)
-    }
-}
-
-impl<T: Clone + Default + FromStr + ToString> UseStorageOptions<T, StringCodec> {
-    pub fn string_codec() -> Self {
-        Self::new(StringCodec())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_string_codec() {
-        let s = String::from("party time 🎉");
-        let codec = StringCodec();
-        assert_eq!(codec.encode(&s), Ok(s.clone()));
-        assert_eq!(codec.decode(s.clone()), Ok(s));
     }
 }
