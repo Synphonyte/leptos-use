@@ -1,12 +1,14 @@
 use crate::{
     core::{MaybeRwSignal, StorageType},
-    use_event_listener_with_options, use_window, UseEventListenerOptions,
+    use_event_listener, use_window,
 };
 use cfg_if::cfg_if;
 use leptos::*;
 use std::{rc::Rc, str::FromStr};
 use thiserror::Error;
 use wasm_bindgen::JsValue;
+
+const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
 #[derive(Clone)]
 pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
@@ -29,6 +31,8 @@ pub enum UseStorageError<Err> {
     SetItemFailed(JsValue),
     #[error("failed to delete item")]
     RemoveItemFailed(JsValue),
+    #[error("failed to notify item changed")]
+    NotifyItemChangedFailed(JsValue),
     #[error("failed to encode / decode item value")]
     ItemCodecError(Err),
 }
@@ -120,88 +124,134 @@ where
         .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone));
     let storage = handle_error(&on_error, storage);
 
-    // Fetch initial value
-    let initial_value = storage
-        .to_owned()
-        // Pull from storage
-        .and_then(|s| {
-            let result = s
-                .get_item(key.as_ref())
-                .map_err(UseStorageError::GetItemFailed);
-            handle_error(&on_error, result)
-        })
-        .unwrap_or_default();
-    let initial_value = decode_item(&codec, initial_value, &on_error);
-
-    // Data signal: use initial value or falls back to default value.
-    let (default_value, set_default_value) = default_value.into_signal();
-    let (data, set_data) = match initial_value {
-        Some(initial_value) => {
-            let (data, set_data) = create_signal(initial_value);
-            (data.into(), set_data)
+    // Schedules a storage event microtask. Uses a queue to avoid re-entering the runtime
+    let dispatch_storage_event = {
+        let key = key.as_ref().to_owned();
+        let on_error = on_error.to_owned();
+        move || {
+            let key = key.to_owned();
+            let on_error = on_error.to_owned();
+            queue_microtask(move || {
+                // Note: we cannot construct a full StorageEvent so we _must_ rely on a custom event
+                let mut custom = web_sys::CustomEventInit::new();
+                custom.detail(&JsValue::from_str(&key));
+                let result = window()
+                    .dispatch_event(
+                        &web_sys::CustomEvent::new_with_event_init_dict(
+                            INTERNAL_STORAGE_EVENT,
+                            &custom,
+                        )
+                        .expect("failed to create custom storage event"),
+                    )
+                    .map_err(UseStorageError::NotifyItemChangedFailed);
+                let _ = handle_error(&on_error, result);
+            })
         }
-        None => (default_value, set_default_value),
     };
 
-    // If data is removed from browser storage, revert to default value
-    let revert_data = move || {
-        set_data.set(default_value.get_untracked());
+    // Fires when storage needs to be updated
+    let notify = create_trigger();
+
+    // Keeps track of how many times we've been notified. Does not increment for calls to set_data
+    let notify_id = create_memo::<usize>(move |prev| {
+        notify.track();
+        prev.map(|prev| prev + 1).unwrap_or_default()
+    });
+
+    // Fetch from storage and falls back to the default (possibly a signal) if deleted
+    let fetcher = {
+        let storage = storage.to_owned();
+        let codec = codec.to_owned();
+        let key = key.as_ref().to_owned();
+        let on_error = on_error.to_owned();
+        let (default, _) = default_value.into_signal();
+        create_memo(move |_| {
+            notify.track();
+            storage
+                .to_owned()
+                .and_then(|storage| {
+                    // Get directly from storage
+                    let result = storage
+                        .get_item(&key)
+                        .map_err(UseStorageError::GetItemFailed);
+                    handle_error(&on_error, result)
+                })
+                .unwrap_or_default() // Drop handled Err(())
+                .map(|encoded| {
+                    // Decode item
+                    let result = codec
+                        .decode(encoded)
+                        .map_err(UseStorageError::ItemCodecError);
+                    handle_error(&on_error, result)
+                })
+                .transpose()
+                .unwrap_or_default() // Drop handled Err(())
+                // Fallback to default
+                .unwrap_or_else(move || default.get())
+        })
     };
 
-    // Update storage value on change
+    // Create mutable data signal from our fetcher
+    let (data, set_data) = MaybeRwSignal::<T>::from(fetcher).into_signal();
+    let data = create_memo(move |_| data.get());
+
+    // Set storage value on data change
     {
         let storage = storage.to_owned();
         let codec = codec.to_owned();
         let key = key.as_ref().to_owned();
         let on_error = on_error.to_owned();
+        let dispatch_storage_event = dispatch_storage_event.to_owned();
         let _ = watch(
-            move || data.get(),
-            move |value, _, _| {
-                let key = key.as_str();
+            move || (notify_id.get(), data.get()),
+            move |(id, value), prev, _| {
+                // Skip setting storage on changes from external events. The ID will change on external events.
+                if prev.map(|(prev_id, _)| *prev_id != *id).unwrap_or_default() {
+                    return;
+                }
+
                 if let Ok(storage) = &storage {
+                    // Encode value
                     let result = codec
-                        .encode(&value)
+                        .encode(value)
                         .map_err(UseStorageError::ItemCodecError)
                         .and_then(|enc_value| {
-                            // Set storage -- this sends an event to other pages
+                            // Set storage -- sends a global event
                             storage
-                                .set_item(key, &enc_value)
+                                .set_item(&key, &enc_value)
                                 .map_err(UseStorageError::SetItemFailed)
                         });
-                    let _ = handle_error(&on_error, result);
+                    let result = handle_error(&on_error, result);
+                    // Send internal storage event
+                    if result.is_ok() {
+                        dispatch_storage_event();
+                    }
                 }
             },
             false,
         );
     };
 
-    // Listen for storage events
-    // Note: we only receive events from other tabs / windows, not from internal updates.
     if listen_to_storage_changes {
-        let key = key.as_ref().to_owned();
-        let on_error = on_error.to_owned();
-        let _ = use_event_listener_with_options(
+        let check_key = key.as_ref().to_owned();
+        // Listen to global storage events
+        let _ = use_event_listener(use_window(), leptos::ev::storage, move |ev| {
+            let ev_key = ev.key();
+            // Key matches or all keys deleted (None)
+            if ev_key == Some(check_key.clone()) || ev_key.is_none() {
+                notify.notify()
+            }
+        });
+        // Listen to internal storage events
+        let check_key = key.as_ref().to_owned();
+        let _ = use_event_listener(
             use_window(),
-            leptos::ev::storage,
-            move |ev| {
-                let mut deleted = false;
-                // Update storage value if our key matches
-                if let Some(k) = ev.key() {
-                    if k == key {
-                        match decode_item(&codec, ev.new_value(), &on_error) {
-                            Some(value) => set_data.set(value),
-                            None => deleted = true,
-                        }
-                    }
-                } else {
-                    // All keys deleted
-                    deleted = true;
-                }
-                if deleted {
-                    revert_data();
+            ev::Custom::new(INTERNAL_STORAGE_EVENT),
+            move |ev: web_sys::CustomEvent| {
+                if Some(check_key.clone()) == ev.detail().as_string() {
+                    notify.notify()
                 }
             },
-            UseEventListenerOptions::default().passive(true),
         );
     };
 
@@ -210,16 +260,18 @@ where
         let key = key.as_ref().to_owned();
         move || {
             let _ = storage.as_ref().map(|storage| {
+                // Delete directly from storage
                 let result = storage
-                    .remove_item(key.as_ref())
+                    .remove_item(&key)
                     .map_err(UseStorageError::RemoveItemFailed);
                 let _ = handle_error(&on_error, result);
-                revert_data();
+                notify.notify();
+                dispatch_storage_event();
             });
         }
     };
 
-    (data, set_data, remove)
+    (data.into(), set_data, remove)
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
@@ -228,20 +280,6 @@ fn handle_error<T, Err>(
     result: Result<T, UseStorageError<Err>>,
 ) -> Result<T, ()> {
     result.or_else(|err| Err((on_error)(err)))
-}
-
-fn decode_item<T, C: Codec<T>>(
-    codec: &C,
-    str: Option<String>,
-    on_error: &Rc<dyn Fn(UseStorageError<C::Error>)>,
-) -> Option<T> {
-    str.map(|str| {
-        let result = codec.decode(str).map_err(UseStorageError::ItemCodecError);
-        handle_error(&on_error, result)
-    })
-    .transpose()
-    // We've sent our error so unwrap to drop () error
-    .unwrap_or_default()
 }
 
 impl<T: Default + 'static, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
