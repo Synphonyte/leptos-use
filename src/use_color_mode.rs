@@ -1,5 +1,5 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
-use crate::storage::{use_storage_with_options, UseStorageOptions};
+use crate::storage::{use_storage_with_options, StringCodec, UseStorageOptions};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -264,10 +264,10 @@ fn get_store_signal(
         let (store, set_store) = storage_signal.split();
         (store.into(), set_store)
     } else if storage_enabled {
-        let (store, set_store, _) = use_storage_with_options(
+        let (store, set_store, _) = use_storage_with_options::<ColorMode, StringCodec>(
             storage,
             storage_key,
-            UseStorageOptions::string_codec()
+            UseStorageOptions::default()
                 .listen_to_storage_changes(listen_to_storage_changes)
                 .default_value(initial_value),
         );

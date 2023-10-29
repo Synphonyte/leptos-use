@@ -1,4 +1,4 @@
-use super::{Codec, UseStorageOptions};
+use super::Codec;
 use std::str::FromStr;
 
 /// A codec for strings that relies on [`FromStr`] and [`ToString`] to parse.
@@ -28,13 +28,6 @@ impl<T: FromStr + ToString> Codec<T> for StringCodec {
 
     fn decode(&self, str: String) -> Result<T, Self::Error> {
         T::from_str(&str)
-    }
-}
-
-impl<T: Default + FromStr + ToString> UseStorageOptions<T, StringCodec> {
-    /// Constructs a new `UseStorageOptions` with a [`StringCodec`] relying on [`FromStr`] to parse.
-    pub fn string_codec() -> Self {
-        Self::new(StringCodec())
     }
 }
 

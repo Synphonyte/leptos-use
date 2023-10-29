@@ -1,4 +1,4 @@
-use super::{Codec, UseStorageOptions};
+use super::Codec;
 
 /// A codec for storing JSON messages that relies on [`serde_json`] to parse.
 ///
@@ -33,15 +33,6 @@ impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
 
     fn decode(&self, str: String) -> Result<T, Self::Error> {
         serde_json::from_str(&str)
-    }
-}
-
-impl<T: Clone + Default + serde::Serialize + serde::de::DeserializeOwned>
-    UseStorageOptions<T, JsonCodec>
-{
-    /// Constructs a new `UseStorageOptions` with a [`JsonCodec`] for JSON messages.
-    pub fn json_codec() -> Self {
-        Self::new(JsonCodec())
     }
 }
 

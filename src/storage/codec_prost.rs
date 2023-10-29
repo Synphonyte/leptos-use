@@ -1,4 +1,4 @@
-use super::{Codec, UseStorageOptions};
+use super::Codec;
 use base64::Engine;
 use thiserror::Error;
 
@@ -54,13 +54,6 @@ impl<T: Default + prost::Message> Codec<T> for ProstCodec {
             .decode(str)
             .map_err(ProstCodecError::DecodeBase64)?;
         T::decode(buf.as_slice()).map_err(ProstCodecError::DecodeProst)
-    }
-}
-
-impl<T: Clone + Default + prost::Message> UseStorageOptions<T, ProstCodec> {
-    /// Constructs a new `UseStorageOptions` with a [`ProstCodec`] for ProtoBuf messages.
-    pub fn prost_codec() -> Self {
-        Self::new(ProstCodec())
     }
 }
 

@@ -371,21 +371,17 @@ fn handle_error<T, Err>(
 
 impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
     fn default() -> Self {
-        Self::new(C::default())
-    }
-}
-
-impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
-    pub(super) fn new(codec: C) -> Self {
         Self {
-            codec,
+            codec: C::default(),
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
             default_value: MaybeRwSignal::default(),
             filter: FilterOptions::default(),
         }
     }
+}
 
+impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
     /// Optional callback whenever an error occurs.
     pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
         Self {
