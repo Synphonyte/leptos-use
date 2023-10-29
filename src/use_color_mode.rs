@@ -361,7 +361,7 @@ where
 
     /// If the color mode should be persisted. If `true` this required the
     /// *create feature* **`storage`** to be enabled.
-    /// Defaults to `true` and is forced to `false` if the feature **`storage`** is not enabled.
+    /// Defaults to `true`.
     storage_enabled: bool,
 
     /// Emit `auto` mode from state
