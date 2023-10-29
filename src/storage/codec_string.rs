@@ -1,6 +1,21 @@
 use super::{Codec, UseStorageOptions};
 use std::str::FromStr;
 
+/// A codec for strings that relies on [`FromStr`] and [`ToString`] to parse.
+///
+/// This makes simple key / value easy to use for primitive types. It is also useful for encoding simple data structures without depending on serde.
+///
+/// ## Example
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # pub fn Demo() -> impl IntoView {
+/// let (get, set, remove) = use_local_storage::<i32, StringCodec>("my-key");
+/// #    view! { }
+/// # }
+/// ```
 #[derive(Clone, Default, PartialEq)]
 pub struct StringCodec();
 
@@ -16,7 +31,8 @@ impl<T: FromStr + ToString> Codec<T> for StringCodec {
     }
 }
 
-impl<T: Clone + Default + FromStr + ToString> UseStorageOptions<T, StringCodec> {
+impl<T: Default + FromStr + ToString> UseStorageOptions<T, StringCodec> {
+    /// Constructs a new `UseStorageOptions` with a [`StringCodec`] relying on [`FromStr`] to parse.
     pub fn string_codec() -> Self {
         Self::new(StringCodec())
     }

@@ -2,6 +2,34 @@ use super::{Codec, UseStorageOptions};
 use base64::Engine;
 use thiserror::Error;
 
+/// A codec for storing ProtoBuf messages that relies on [`prost`] to parse.
+///
+/// [Protocol buffers](https://protobuf.dev/overview/) is a serialisation format useful for long-term storage. It provides semantics for versioning that are not present in JSON or other formats. [`prost`] is a Rust implementation of Protocol Buffers.
+///
+/// This codec uses [`prost`] to encode the message and then [`base64`](https://docs.rs/base64) to represent the bytes as a string.
+///
+/// ## Example
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # pub fn Demo() -> impl IntoView {
+/// // Primitive types:
+/// let (get, set, remove) = use_local_storage::<i32, ProstCodec>("my-key");
+///
+/// // Structs:
+/// #[derive(Clone, PartialEq, prost::Message)]
+/// pub struct MyState {
+///     #[prost(string, tag = "1")]
+///     pub hello: String,
+/// }
+/// let (get, set, remove) = use_local_storage::<MyState, ProstCodec>("my-struct-key");
+/// #    view! { }
+/// # }
+/// ```
+///
+/// Note: we've defined and used the `prost` attribute here for brevity. Alternate usage would be to describe the message in a .proto file and use [`prost_build`](https://docs.rs/prost-build) to auto-generate the Rust code.
 #[derive(Clone, Default, PartialEq)]
 pub struct ProstCodec();
 
@@ -30,6 +58,7 @@ impl<T: Default + prost::Message> Codec<T> for ProstCodec {
 }
 
 impl<T: Clone + Default + prost::Message> UseStorageOptions<T, ProstCodec> {
+    /// Constructs a new `UseStorageOptions` with a [`ProstCodec`] for ProtoBuf messages.
     pub fn prost_codec() -> Self {
         Self::new(ProstCodec())
     }

@@ -12,12 +12,17 @@ use wasm_bindgen::JsValue;
 
 const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
+/// A codec for encoding and decoding values to and from UTF-16 strings. These strings are then stored in browser storage.
 pub trait Codec<T>: Clone + 'static {
+    /// The error type returned when encoding or decoding fails.
     type Error;
+    /// Encodes a value to a UTF-16 string.
     fn encode(&self, val: &T) -> Result<String, Self::Error>;
+    /// Decodes a UTF-16 string to a value. Should be able to decode any string encoded by [`encode`].
     fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
+/// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
 pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     codec: C,
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
@@ -45,7 +50,13 @@ pub enum UseStorageError<Err> {
     ItemCodecError(Err),
 }
 
-/// Hook for using local storage. Returns a result of a signal and a setter / deleter.
+/// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
+///
+/// LocalStorage stores data in the browser with no expiration time. Access is given to all pages from the same origin (e.g., all pages from "https://example.com" share the same origin). While data doesn't expire the user can view, modify and delete all data stored. Browsers allow 5MB of data to be stored.
+///
+/// This is contrast to [`use_session_storage`] which clears data when the page session ends and is not shared.
+///
+/// See [`use_storage_with_options`] for more details on how to use.
 pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
@@ -60,6 +71,7 @@ where
     )
 }
 
+/// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
@@ -71,7 +83,13 @@ where
     use_storage_with_options(StorageType::Local, key, options)
 }
 
-/// Hook for using session storage. Returns a result of a signal and a setter / deleter.
+/// Reactive [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
+///
+/// SessionStorages stores data in the browser that is deleted when the page session ends. A page session ends when the browser closes the tab. Data is not shared between pages. While data doesn't expire the user can view, modify and delete all data stored. Browsers allow 5MB of data to be stored.
+///
+/// Use [`use_local_storage`] to store data that is shared amongst all pages with the same origin and persists between page sessions.
+///
+/// See [`use_storage_with_options`] for more details on how to use.
 pub fn use_session_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
@@ -86,6 +104,7 @@ where
     )
 }
 
+/// Accepts [`UseStorageOptions`]. See [`use_session_storage`] for details.
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
@@ -97,7 +116,65 @@ where
     use_storage_with_options(StorageType::Session, key, options)
 }
 
-/// Hook for using any kind of storage. Returns a result of a signal and a setter / deleter.
+/// Reactive [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
+///
+/// * [See a demo](https://leptos-use.rs/storage/use_storage.html)
+/// * [See a full example](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_storage)
+///
+/// ## Usage
+///
+/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`].Finally, see [`UseStorageOptions`] to see how behaviour can be further customised.
+///
+/// Returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
+///
+/// Signals work as expected and can be used to read and write to storage. The `delete_from_storage_fn` can be called to delete the item from storage. Once deleted the signals will revert back to the default value.
+///
+/// ## Example
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # pub fn Demo() -> impl IntoView {
+/// // Binds a struct:
+/// let (state, set_state, _) = use_local_storage::<MyState, JsonCodec>("my-state");
+///
+/// // Binds a bool, stored as a string:
+/// let (flag, set_flag, remove_flag) = use_session_storage::<bool, StringCodec>("my-flag");
+///
+/// // Binds a number, stored as a string:
+/// let (count, set_count, _) = use_session_storage::<i32, StringCodec>("my-count");
+/// // Binds a number, stored in JSON:
+/// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
+///
+/// // Bind string with SessionStorage stored in ProtoBuf format:
+/// let (id, set_id, _) = use_storage_with_options::<String, ProstCodec>(
+///     StorageType::Session,
+///     "my-id",
+///     UseStorageOptions::prost_codec(),
+/// );
+/// #    view! { }
+/// # }
+///
+/// // Data stored in JSON must implement Serialize, Deserialize:
+/// #[derive(Serialize, Deserialize, Clone, PartialEq)]
+/// pub struct MyState {
+///     pub hello: String,
+///     pub greeting: String,
+/// }
+///
+/// // Default can be used to implement intial or deleted values.
+/// // You can also use a signal via UseStorageOptions::default_value`
+/// impl Default for MyState {
+///     fn default() -> Self {
+///         Self {
+///             hello: "hi".to_string(),
+///             greeting: "Hello".to_string()
+///         }
+///     }
+/// }
+/// ```
 pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
@@ -107,6 +184,7 @@ where
     T: Clone + PartialEq,
     C: Codec<T>,
 {
+    /*
     cfg_if! { if #[cfg(feature = "ssr")] {
         let (data, set_data) = create_signal(None);
         let set_value = move |value: Option<T>| {
@@ -116,7 +194,7 @@ where
         return (value, set_value, || ());
     } else {
         // Continue
-    }}
+    }}*/
 
     let UseStorageOptions {
         codec,
@@ -308,6 +386,7 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
         }
     }
 
+    /// Optional callback whenever an error occurs.
     pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
         Self {
             on_error: Rc::new(on_error),
@@ -315,6 +394,7 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
         }
     }
 
+    /// Listen to changes to this storage key from browser and page events. Defaults to true.
     pub fn listen_to_storage_changes(self, listen_to_storage_changes: bool) -> Self {
         Self {
             listen_to_storage_changes,
@@ -322,6 +402,7 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
         }
     }
 
+    /// Default value to use when the storage key is not set. Accepts a signal.
     pub fn default_value(self, values: impl Into<MaybeRwSignal<T>>) -> Self {
         Self {
             default_value: values.into(),
@@ -329,6 +410,7 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
         }
     }
 
+    /// Debounce or throttle the writing to storage whenever the value changes.
     pub fn filter(self, filter: impl Into<FilterOptions>) -> Self {
         Self {
             filter: filter.into(),

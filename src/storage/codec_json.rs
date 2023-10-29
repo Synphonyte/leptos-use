@@ -1,5 +1,26 @@
 use super::{Codec, UseStorageOptions};
 
+/// A codec for storing JSON messages that relies on [`serde_json`] to parse.
+///
+/// ## Example
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # pub fn Demo() -> impl IntoView {
+/// // Primitive types:
+/// let (get, set, remove) = use_local_storage::<i32, JsonCodec>("my-key");
+///
+/// // Structs:
+/// #[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
+/// pub struct MyState {
+///     pub hello: String,
+/// }
+/// let (get, set, remove) = use_local_storage::<MyState, JsonCodec>("my-struct-key");
+/// #    view! { }
+/// # }
+/// ```
 #[derive(Clone, Default, PartialEq)]
 pub struct JsonCodec();
 
@@ -18,6 +39,7 @@ impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
 impl<T: Clone + Default + serde::Serialize + serde::de::DeserializeOwned>
     UseStorageOptions<T, JsonCodec>
 {
+    /// Constructs a new `UseStorageOptions` with a [`JsonCodec`] for JSON messages.
     pub fn json_codec() -> Self {
         Self::new(JsonCodec())
     }
