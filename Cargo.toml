@@ -23,7 +23,7 @@ lazy_static = "1"
 leptos = "0.5"
 num = { version = "0.4", optional = true }
 paste = "1"
-prost = { version = "0.11", optional = true }
+prost = { version = "0.12", optional = true }
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 thiserror = "1.0"
