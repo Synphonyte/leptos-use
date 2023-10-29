@@ -13,9 +13,6 @@ use wasm_bindgen::JsCast;
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
 ///
-/// > Data persistence is only enabled when the crate feature **`storage`** is enabled. You
-/// can use the function without it but the mode won't be persisted.
-///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_color_mode)
@@ -55,7 +52,7 @@ use wasm_bindgen::JsCast;
 /// #
 /// mode.get(); // ColorMode::Dark or ColorMode::Light
 ///
-/// set_mode.set(ColorMode::Dark); // change to dark mode and persist (with feature `storage`)
+/// set_mode.set(ColorMode::Dark); // change to dark mode and persist
 ///
 /// set_mode.set(ColorMode::Auto); // change to auto mode
 /// #
