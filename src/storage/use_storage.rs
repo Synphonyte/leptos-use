@@ -382,6 +382,14 @@ impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
 }
 
 impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
+    /// Sets the codec to use for encoding and decoding values to and from UTF-16 strings.
+    pub fn codec(self, codec: impl Into<C>) -> Self {
+        Self {
+            codec: codec.into(),
+            ..self
+        }
+    }
+
     /// Optional callback whenever an error occurs.
     pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
         Self {
