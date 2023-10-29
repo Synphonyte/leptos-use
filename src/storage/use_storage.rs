@@ -1,6 +1,8 @@
 use crate::{
     core::{MaybeRwSignal, StorageType},
     use_event_listener, use_window,
+    utils::FilterOptions,
+    watch_with_options, WatchOptions,
 };
 use cfg_if::cfg_if;
 use leptos::*;
@@ -16,12 +18,12 @@ pub trait Codec<T>: Clone + 'static {
     fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
-#[derive(Clone)]
 pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     codec: C,
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
     listen_to_storage_changes: bool,
     default_value: MaybeRwSignal<T>,
+    filter: FilterOptions,
 }
 
 /// Session handling errors returned by [`use_storage`].
@@ -121,6 +123,7 @@ where
         on_error,
         listen_to_storage_changes,
         default_value,
+        filter,
     } = options;
 
     // Get storage API
@@ -208,7 +211,7 @@ where
         let key = key.as_ref().to_owned();
         let on_error = on_error.to_owned();
         let dispatch_storage_event = dispatch_storage_event.to_owned();
-        let _ = watch(
+        let _ = watch_with_options(
             move || (notify_id.get(), data.get()),
             move |(id, value), prev, _| {
                 // Skip setting storage on changes from external events. The ID will change on external events.
@@ -234,7 +237,7 @@ where
                     }
                 }
             },
-            false,
+            WatchOptions::default().filter(filter),
         );
     };
 
@@ -301,6 +304,7 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
             default_value: MaybeRwSignal::default(),
+            filter: FilterOptions::default(),
         }
     }
 
@@ -321,6 +325,13 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
     pub fn default_value(self, values: impl Into<MaybeRwSignal<T>>) -> Self {
         Self {
             default_value: values.into(),
+            ..self
+        }
+    }
+
+    pub fn filter(self, filter: impl Into<FilterOptions>) -> Self {
+        Self {
+            filter: filter.into(),
             ..self
         }
     }
