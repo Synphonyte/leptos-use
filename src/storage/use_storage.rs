@@ -31,7 +31,7 @@ pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     filter: FilterOptions,
 }
 
-/// Session handling errors returned by [`use_storage`].
+/// Session handling errors returned by [`use_storage_with_options`].
 #[derive(Error, Debug)]
 pub enum UseStorageError<Err> {
     #[error("storage not available")]
