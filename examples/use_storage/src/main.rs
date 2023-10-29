@@ -71,7 +71,7 @@ fn Demo() -> impl IntoView {
         <pre>{move || format!("{:#?}", state2.get())}</pre>
 
         <Note>
-            "The values are persistent. When you reload the page the values will be the same."
+            "The values are persistent. When you reload the page or open a second window, the values will be the same."
         </Note>
     }
 }

@@ -123,11 +123,9 @@ where
 ///
 /// ## Usage
 ///
-/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`].Finally, see [`UseStorageOptions`] to see how behaviour can be further customised.
+/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using the same key on the smae page and across tabs for local storage. See [`UseStorageOptions`] to see how behaviour can be further customised.
 ///
 /// Returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
-///
-/// Signals work as expected and can be used to read and write to storage. The `delete_from_storage_fn` can be called to delete the item from storage. Once deleted the signals will revert back to the default value.
 ///
 /// ## Example
 ///
