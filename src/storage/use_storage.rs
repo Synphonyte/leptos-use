@@ -152,7 +152,7 @@ where
 /// let (id, set_id, _) = use_storage_with_options::<String, ProstCodec>(
 ///     StorageType::Session,
 ///     "my-id",
-///     UseStorageOptions::prost_codec(),
+///     UseStorageOptions::default(),
 /// );
 /// #    view! { }
 /// # }
