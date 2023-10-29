@@ -114,7 +114,7 @@ where
             }
         };
 
-        let targets = (target).into();
+        let targets = target.into();
 
         let stop_watch = {
             let cleanup = cleanup.clone();

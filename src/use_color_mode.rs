@@ -157,7 +157,7 @@ where
         }
     });
 
-    let target = (target).into();
+    let target = target.into();
 
     let update_html_attrs = {
         move |target: ElementMaybeSignal<T, web_sys::Element>,
