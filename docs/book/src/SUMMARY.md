@@ -10,7 +10,7 @@
 
 - [use_local_storage](storage/use_local_storage.md)
 - [use_session_storage](storage/use_session_storage.md)
-- [use_storage](storage/use_storage.md)
+- [use_storage_with_options](storage/use_storage_with_options.md)
 
 # Elements
 
