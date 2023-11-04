@@ -5,7 +5,7 @@ use super::Codec;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, JsonCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # pub fn Demo() -> impl IntoView {
