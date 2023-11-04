@@ -189,12 +189,13 @@ where
         default_value,
         filter,
     } = options;
-    let (default, _) = default_value.into_signal();
+
+    let (data, set_data) = default_value.into_signal();
+    let default = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
-        let (data, set_data) = create_signal(default.get_untracked());
         let remove = move || {
-            set_data.set(default.get_untracked());
+            set_data.set(default.clone());
         };
         (data.into(), set_data, remove)
     } else {
@@ -230,24 +231,14 @@ where
             }
         };
 
-        // Fires when storage needs to be updated
-        let notify = create_trigger();
-
-        // Keeps track of how many times we've been notified. Does not increment for calls to set_data
-        let notify_id = create_memo::<usize>(move |prev| {
-            notify.track();
-            prev.map(|prev| prev + 1).unwrap_or_default()
-        });
-
-        // Fetch from storage and falls back to the default (possibly a signal) if deleted
-        let fetcher = {
+        // Fetches direct from browser storage and fills set_data if changed (memo)
+        let fetch_from_storage = {
             let storage = storage.to_owned();
             let codec = codec.to_owned();
             let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
-            create_memo(move |_| {
-                notify.track();
-                storage
+            move || {
+                let fetched = storage
                     .to_owned()
                     .and_then(|storage| {
                         // Get directly from storage
@@ -265,17 +256,41 @@ where
                         handle_error(&on_error, result)
                     })
                     .transpose()
-                    .unwrap_or_default() // Drop handled Err(())
-                    // Fallback to default
-                    .unwrap_or_else(move || default.get())
-            })
+                    .unwrap_or_default(); // Drop handled Err(())
+
+                match fetched {
+                    Some(value) => {
+                        // Replace data if changed
+                        if value != data.get_untracked() {
+                            set_data.set(value)
+                        }
+                    }
+
+                    // Revert to default
+                    None => set_data.set(default.clone()),
+                };
+            }
         };
 
-        // Create mutable data signal from our fetcher
-        let (data, set_data) = MaybeRwSignal::<T>::from(fetcher).into_signal();
-        let data = create_memo(move |_| data.get());
+        // Fetch initial value
+        fetch_from_storage();
 
-        // Set storage value on data change
+        // Fires when storage needs to be fetched
+        let notify = create_trigger();
+
+        // Refetch from storage. Keeps track of how many times we've been notified. Does not increment for calls to set_data
+        let notify_id = create_memo::<usize>(move |prev| {
+            notify.track();
+            match prev {
+                None => 1, // Avoid async fetch of initial value
+                Some(prev) => {
+                    fetch_from_storage();
+                    prev + 1
+                }
+            }
+        });
+
+        // Set item on internal (non-event) page changes to the data signal
         {
             let storage = storage.to_owned();
             let codec = codec.to_owned();
@@ -310,7 +325,7 @@ where
                 },
                 WatchOptions::default().filter(filter),
             );
-        };
+        }
 
         if listen_to_storage_changes {
             let check_key = key.as_ref().to_owned();
