@@ -27,7 +27,7 @@ pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     codec: C,
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
     listen_to_storage_changes: bool,
-    default_value: MaybeRwSignal<T>,
+    initial_value: MaybeRwSignal<T>,
     filter: FilterOptions,
 }
 
@@ -186,11 +186,11 @@ where
         codec,
         on_error,
         listen_to_storage_changes,
-        default_value,
+        initial_value,
         filter,
     } = options;
 
-    let (data, set_data) = default_value.into_signal();
+    let (data, set_data) = initial_value.into_signal();
     let default = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
@@ -384,7 +384,7 @@ impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
             codec: C::default(),
             on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
-            default_value: MaybeRwSignal::default(),
+            initial_value: MaybeRwSignal::default(),
             filter: FilterOptions::default(),
         }
     }
@@ -415,10 +415,10 @@ impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
         }
     }
 
-    /// Default value to use when the storage key is not set. Accepts a signal.
-    pub fn default_value(self, values: impl Into<MaybeRwSignal<T>>) -> Self {
+    /// Initial value to use when the storage key is not set. Note that this value is read once on creation of the storage hook and not updated again. Accepts a signal and defaults to `T::default()`.
+    pub fn initial_value(self, initial: impl Into<MaybeRwSignal<T>>) -> Self {
         Self {
-            default_value: values.into(),
+            initial_value: initial.into(),
             ..self
         }
     }

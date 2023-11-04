@@ -266,7 +266,7 @@ fn get_store_signal(
             storage_key,
             UseStorageOptions::default()
                 .listen_to_storage_changes(listen_to_storage_changes)
-                .default_value(initial_value),
+                .initial_value(initial_value),
         );
         (store, set_store)
     } else {
