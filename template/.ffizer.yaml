@@ -3,10 +3,6 @@ variables:
     ask: Name of the function
   - name: category
     ask: Documentation category (lower case)
-  - name: unstable_apis
-    default_value: "false"
-    ask: Does the function require `--cfg=web_sys_unstable_apis` to be activated?
-    select_in_values: ["true", "false"]
   - name: module
     default_value: ""
     ask: Module [optional]

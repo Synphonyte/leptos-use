@@ -12,9 +12,6 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 
 /// Reactive size of an HTML element.
 ///
-/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
-///
 /// Please refer to [ResizeObserver on MDN](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
 /// for more details.
 ///
@@ -25,12 +22,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::{html::Div, *};
 /// # use leptos_use::{use_element_size, UseElementSizeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref();
+/// let el = create_node_ref::<Div>();
 ///
 /// let UseElementSizeReturn { width, height } = use_element_size(el);
 ///
