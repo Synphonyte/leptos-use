@@ -1,8 +1,8 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::core::now;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use js_sys::Date;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
 use std::cell::{Cell, RefCell};
@@ -51,7 +51,7 @@ where
 
     move |mut _invoke: Rc<dyn Fn() -> R>| {
         let duration = ms.get_untracked();
-        let elapsed = Date::now() - last_exec.get();
+        let elapsed = now() - last_exec.get();
 
         let last_return_val = Rc::clone(&last_return_value);
         let invoke = move || {
@@ -65,13 +65,13 @@ where
         clear();
 
         if duration <= 0.0 {
-            last_exec.set(Date::now());
+            last_exec.set(now());
             invoke();
             return Rc::clone(&last_return_value);
         }
 
         if elapsed > duration && (options.leading || !is_leading.get()) {
-            last_exec.set(Date::now());
+            last_exec.set(now());
             invoke();
         } else if options.trailing {
             cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -80,7 +80,7 @@ where
                 timer.set(
                     set_timeout_with_handle(
                         move || {
-                            last_exec.set(Date::now());
+                            last_exec.set(now());
                             is_leading.set(true);
                             invoke();
                             clear();

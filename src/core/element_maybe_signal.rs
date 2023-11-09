@@ -179,6 +179,7 @@ where
 {
     fn from(target: &'a str) -> Self {
         cfg_if! { if #[cfg(feature = "ssr")] {
+            let _ = target;
             Self::Static(None)
         } else {
             Self::Static(document().query_selector(target).unwrap_or_default())
@@ -201,6 +202,7 @@ where
 {
     fn from(signal: Signal<String>) -> Self {
         cfg_if! { if #[cfg(feature = "ssr")] {
+            let _ = signal;
             Self::Dynamic(Signal::derive(|| None))
         } else {
             Self::Dynamic(

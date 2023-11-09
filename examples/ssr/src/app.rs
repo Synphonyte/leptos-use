@@ -5,8 +5,8 @@ use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::use_local_storage;
 use leptos_use::{
-    use_color_mode, use_debounce_fn, use_event_listener, use_intl_number_format, use_window,
-    ColorMode, UseColorModeReturn, UseIntlNumberFormatOptions,
+    use_color_mode, use_debounce_fn, use_event_listener, use_intl_number_format, use_timestamp,
+    use_window, ColorMode, UseColorModeReturn, UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -65,6 +65,8 @@ fn HomePage() -> impl IntoView {
 
     let UseColorModeReturn { mode, set_mode, .. } = use_color_mode();
 
+    let timestamp = use_timestamp();
+
     view! {
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
@@ -75,5 +77,6 @@ fn HomePage() -> impl IntoView {
         <button on:click=move |_| set_mode.set(ColorMode::Light)>Change to Light</button>
         <button on:click=move |_| set_mode.set(ColorMode::Dark)>Change to Dark</button>
         <button on:click=move |_| set_mode.set(ColorMode::Auto)>Change to Auto</button>
+        <p>{timestamp}</p>
     }
 }
