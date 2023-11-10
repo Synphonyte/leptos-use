@@ -172,7 +172,7 @@ where
     }
 }
 
-#[derive(DefaultBuilder)]
+#[derive(DefaultBuilder, Default)]
 /// Options for [`use_element_size_with_options`].
 pub struct UseElementSizeOptions {
     /// Initial size returned before any measurements on the `target` are done. Also the value reported
@@ -182,15 +182,6 @@ pub struct UseElementSizeOptions {
     /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
     #[builder(into)]
     pub box_: Option<web_sys::ResizeObserverBoxOptions>,
-}
-
-impl Default for UseElementSizeOptions {
-    fn default() -> Self {
-        Self {
-            initial_size: Size::default(),
-            box_: None,
-        }
-    }
 }
 
 /// The return value of [`use_element_size`].
