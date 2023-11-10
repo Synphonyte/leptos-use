@@ -12,9 +12,6 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 
 /// Reactive size of an HTML element.
 ///
-/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
-///
 /// Please refer to [ResizeObserver on MDN](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
 /// for more details.
 ///
@@ -25,12 +22,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::{html::Div, *};
 /// # use leptos_use::{use_element_size, UseElementSizeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref();
+/// let el = create_node_ref::<Div>();
 ///
 /// let UseElementSizeReturn { width, height } = use_element_size(el);
 ///
@@ -175,7 +172,7 @@ where
     }
 }
 
-#[derive(DefaultBuilder)]
+#[derive(DefaultBuilder, Default)]
 /// Options for [`use_element_size_with_options`].
 pub struct UseElementSizeOptions {
     /// Initial size returned before any measurements on the `target` are done. Also the value reported
@@ -185,15 +182,6 @@ pub struct UseElementSizeOptions {
     /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
     #[builder(into)]
     pub box_: Option<web_sys::ResizeObserverBoxOptions>,
-}
-
-impl Default for UseElementSizeOptions {
-    fn default() -> Self {
-        Self {
-            initial_size: Size::default(),
-            box_: None,
-        }
-    }
 }
 
 /// The return value of [`use_element_size`].

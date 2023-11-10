@@ -1,8 +1,6 @@
 // #![feature(doc_cfg)]
 //! Collection of essential Leptos utilities inspired by SolidJS USE / VueUse
 
-use cfg_if::cfg_if;
-
 pub mod core;
 #[cfg(feature = "docs")]
 pub mod docs;
@@ -11,14 +9,6 @@ pub mod math;
 #[cfg(feature = "storage")]
 pub mod storage;
 pub mod utils;
-
-cfg_if! { if #[cfg(web_sys_unstable_apis)] {
-    mod use_element_size;
-    mod use_resize_observer;
-
-    pub use use_element_size::*;
-    pub use use_resize_observer::*;
-}}
 
 mod is_err;
 mod is_none;
@@ -38,6 +28,7 @@ mod use_document_visibility;
 mod use_draggable;
 mod use_drop_zone;
 mod use_element_hover;
+mod use_element_size;
 mod use_element_visibility;
 mod use_event_listener;
 mod use_favicon;
@@ -54,6 +45,7 @@ mod use_mutation_observer;
 mod use_preferred_contrast;
 mod use_preferred_dark;
 mod use_raf_fn;
+mod use_resize_observer;
 mod use_scroll;
 mod use_service_worker;
 mod use_sorted;
@@ -90,6 +82,7 @@ pub use use_document_visibility::*;
 pub use use_draggable::*;
 pub use use_drop_zone::*;
 pub use use_element_hover::*;
+pub use use_element_size::*;
 pub use use_element_visibility::*;
 pub use use_event_listener::*;
 pub use use_favicon::*;
@@ -106,6 +99,7 @@ pub use use_mutation_observer::*;
 pub use use_preferred_contrast::*;
 pub use use_preferred_dark::*;
 pub use use_raf_fn::*;
+pub use use_resize_observer::*;
 pub use use_scroll::*;
 pub use use_service_worker::*;
 pub use use_sorted::*;
