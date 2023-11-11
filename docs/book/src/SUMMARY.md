@@ -6,7 +6,7 @@
 [Changelog](changelog.md)
 [Functions](functions.md)
 
-# @Storage
+# Storage
 
 - [use_local_storage](storage/use_local_storage.md)
 - [use_session_storage](storage/use_session_storage.md)
