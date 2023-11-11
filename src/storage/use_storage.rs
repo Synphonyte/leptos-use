@@ -38,10 +38,15 @@ pub trait Codec<T>: Clone + 'static {
 
 /// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
 pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
+    // Translates to and from UTF-16 strings
     codec: C,
+    // Callback for when an error occurs
     on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
+    // Whether to continuously listen to changes from browser storage
     listen_to_storage_changes: bool,
+    // Initial value to use when the storage key is not set
     initial_value: MaybeRwSignal<T>,
+    // Debounce or throttle the writing to storage whenever the value changes
     filter: FilterOptions,
 }
 
