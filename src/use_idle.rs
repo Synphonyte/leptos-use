@@ -1,8 +1,10 @@
+use crate::core::now;
 use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
 use crate::{
     filter_builder_methods, use_document, use_event_listener, use_event_listener_with_options,
     UseEventListenerOptions,
 };
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{visibilitychange, Custom};
 use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -54,6 +56,18 @@ use std::time::Duration;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server this will always return static signals
+///
+/// ```ignore
+/// UseIdleReturn{
+///     idle: Signal(initial_state),
+///     last_active: Signal(now),
+///     reset: || {}
+/// }
+/// ```
 pub fn use_idle(timeout: u64) -> UseIdleReturn<impl Fn() + Clone> {
     use_idle_with_options(timeout, UseIdleOptions::default())
 }
@@ -71,57 +85,65 @@ pub fn use_idle_with_options(
     } = options;
 
     let (idle, set_idle) = create_signal(initial_state);
-    let (last_active, set_last_active) = create_signal(js_sys::Date::now());
+    let (last_active, set_last_active) = create_signal(now());
 
-    let reset = {
-        let timer = Cell::new(None::<TimeoutHandle>);
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let reset = || ();
+        let _ = timeout;
+        let _ = events;
+        let _ = listen_for_visibility_change;
+        let _ = filter;
+    } else {
+        let reset = {
+            let timer = Cell::new(None::<TimeoutHandle>);
 
-        move || {
-            set_idle.set(false);
-            if let Some(timer) = timer.take() {
-                timer.clear();
+            move || {
+                set_idle.set(false);
+                if let Some(timer) = timer.take() {
+                    timer.clear();
+                }
+                timer.replace(
+                    set_timeout_with_handle(move || set_idle.set(true), Duration::from_millis(timeout))
+                        .ok(),
+                );
             }
-            timer.replace(
-                set_timeout_with_handle(move || set_idle.set(true), Duration::from_millis(timeout))
-                    .ok(),
+        };
+
+        let on_event = {
+            let reset = reset.clone();
+
+            let filtered_callback = create_filter_wrapper(filter.filter_fn(), move || {
+                set_last_active.set(js_sys::Date::now());
+                reset();
+            });
+
+            move |_: web_sys::Event| {
+                filtered_callback();
+            }
+        };
+
+        let listener_options = UseEventListenerOptions::default().passive(true);
+        for event in events {
+            let _ = use_event_listener_with_options(
+                use_document(),
+                Custom::new(event),
+                on_event.clone(),
+                listener_options,
             );
         }
-    };
 
-    let on_event = {
-        let reset = reset.clone();
+        if listen_for_visibility_change {
+            let on_event = on_event.clone();
 
-        let filtered_callback = create_filter_wrapper(filter.filter_fn(), move || {
-            set_last_active.set(js_sys::Date::now());
-            reset();
-        });
-
-        move |_: web_sys::Event| {
-            filtered_callback();
+            let _ = use_event_listener(use_document(), visibilitychange, move |evt| {
+                if !document().hidden() {
+                    on_event(evt);
+                }
+            });
         }
-    };
 
-    let listener_options = UseEventListenerOptions::default().passive(true);
-    for event in events {
-        let _ = use_event_listener_with_options(
-            use_document(),
-            Custom::new(event),
-            on_event.clone(),
-            listener_options,
-        );
-    }
-
-    if listen_for_visibility_change {
-        let on_event = on_event.clone();
-
-        let _ = use_event_listener(use_document(), visibilitychange, move |evt| {
-            if !document().hidden() {
-                on_event(evt);
-            }
-        });
-    }
-
-    reset.clone()();
+        reset.clone()();
+    }}
 
     UseIdleReturn {
         idle: idle.into(),

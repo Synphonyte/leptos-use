@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.8.1"
+version = "0.8.2"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -27,7 +27,7 @@ prost = { version = "0.12", optional = true }
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 thiserror = "1.0"
-wasm-bindgen = "0.2"
+wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4"
 
 [dependencies.web-sys]
@@ -102,5 +102,3 @@ ssr = []
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg=web_sys_unstable_apis"]
-rustc-args = ["--cfg=web_sys_unstable_apis"]

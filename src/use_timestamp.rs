@@ -1,3 +1,4 @@
+use crate::core::now;
 use crate::utils::Pausable;
 use crate::{
     use_interval_fn_with_options, use_raf_fn_with_options, UseIntervalFnOptions, UseRafFnOptions,
@@ -47,7 +48,8 @@ use std::rc::Rc;
 ///
 /// ## Server-Side Rendering
 ///
-/// On the server this function will simply be ignored.
+/// On the server this function will return a signal with the milliseconds since the Unix epoch.
+/// But the signal will never update (as there's no `request_animation_frame` on the server).
 pub fn use_timestamp() -> Signal<f64> {
     use_timestamp_with_controls().timestamp
 }
@@ -71,10 +73,10 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
         callback,
     } = options;
 
-    let (ts, set_ts) = create_signal(js_sys::Date::now() + offset);
+    let (ts, set_ts) = create_signal(now() + offset);
 
     let update = move || {
-        set_ts.set(js_sys::Date::now() + offset);
+        set_ts.set(now() + offset);
     };
 
     let cb = {
