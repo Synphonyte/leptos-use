@@ -12,129 +12,6 @@ use wasm_bindgen::JsValue;
 
 const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
-/// A codec for encoding and decoding values to and from UTF-16 strings. These strings are intended to be stored in browser storage.
-///
-/// ## Versioning
-///
-/// Versioning is the process of handling long-term data that can outlive our code.
-///
-/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
-///
-/// How best to handle versioning depends on the codec involved:
-///
-/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
-///
-/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
-///
-/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
-pub trait Codec<T>: Clone + 'static {
-    /// The error type returned when encoding or decoding fails.
-    type Error;
-    /// Encodes a value to a UTF-16 string.
-    fn encode(&self, val: &T) -> Result<String, Self::Error>;
-    /// Decodes a UTF-16 string to a value. Should be able to decode any string encoded by [`encode`].
-    fn decode(&self, str: String) -> Result<T, Self::Error>;
-}
-
-/// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
-pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
-    // Translates to and from UTF-16 strings
-    codec: C,
-    // Callback for when an error occurs
-    on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
-    // Whether to continuously listen to changes from browser storage
-    listen_to_storage_changes: bool,
-    // Initial value to use when the storage key is not set
-    initial_value: MaybeRwSignal<T>,
-    // Debounce or throttle the writing to storage whenever the value changes
-    filter: FilterOptions,
-}
-
-/// Session handling errors returned by [`use_storage_with_options`].
-#[derive(Error, Debug)]
-pub enum UseStorageError<Err> {
-    #[error("storage not available")]
-    StorageNotAvailable(JsValue),
-    #[error("storage not returned from window")]
-    StorageReturnedNone,
-    #[error("failed to get item")]
-    GetItemFailed(JsValue),
-    #[error("failed to set item")]
-    SetItemFailed(JsValue),
-    #[error("failed to delete item")]
-    RemoveItemFailed(JsValue),
-    #[error("failed to notify item changed")]
-    NotifyItemChangedFailed(JsValue),
-    #[error("failed to encode / decode item value")]
-    ItemCodecError(Err),
-}
-
-/// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
-///
-/// LocalStorage stores data in the browser with no expiration time. Access is given to all pages from the same origin (e.g., all pages from "https://example.com" share the same origin). While data doesn't expire the user can view, modify and delete all data stored. Browsers allow 5MB of data to be stored.
-///
-/// This is contrast to [`use_session_storage`] which clears data when the page session ends and is not shared.
-///
-/// See [`use_storage_with_options`] for more details on how to use.
-pub fn use_local_storage<T, C>(
-    key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    T: Clone + Default + PartialEq,
-    C: Codec<T> + Default,
-{
-    use_storage_with_options(
-        StorageType::Local,
-        key,
-        UseStorageOptions::<T, C>::default(),
-    )
-}
-
-/// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
-pub fn use_local_storage_with_options<T, C>(
-    key: impl AsRef<str>,
-    options: UseStorageOptions<T, C>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    T: Clone + PartialEq,
-    C: Codec<T>,
-{
-    use_storage_with_options(StorageType::Local, key, options)
-}
-
-/// Reactive [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
-///
-/// SessionStorages stores data in the browser that is deleted when the page session ends. A page session ends when the browser closes the tab. Data is not shared between pages. While data doesn't expire the user can view, modify and delete all data stored. Browsers allow 5MB of data to be stored.
-///
-/// Use [`use_local_storage`] to store data that is shared amongst all pages with the same origin and persists between page sessions.
-///
-/// See [`use_storage_with_options`] for more details on how to use.
-pub fn use_session_storage<T, C>(
-    key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    T: Clone + Default + PartialEq,
-    C: Codec<T> + Default,
-{
-    use_storage_with_options(
-        StorageType::Session,
-        key,
-        UseStorageOptions::<T, C>::default(),
-    )
-}
-
-/// Accepts [`UseStorageOptions`]. See [`use_session_storage`] for details.
-pub fn use_session_storage_with_options<T, C>(
-    key: impl AsRef<str>,
-    options: UseStorageOptions<T, C>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    T: Clone + PartialEq,
-    C: Codec<T>,
-{
-    use_storage_with_options(StorageType::Session, key, options)
-}
-
 /// Reactive [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
 ///
 /// * [See a demo](https://leptos-use.rs/storage/use_storage.html)
@@ -389,6 +266,63 @@ where
 
         (data, set_data, remove)
     }}
+}
+
+/// Session handling errors returned by [`use_storage_with_options`].
+#[derive(Error, Debug)]
+pub enum UseStorageError<Err> {
+    #[error("storage not available")]
+    StorageNotAvailable(JsValue),
+    #[error("storage not returned from window")]
+    StorageReturnedNone,
+    #[error("failed to get item")]
+    GetItemFailed(JsValue),
+    #[error("failed to set item")]
+    SetItemFailed(JsValue),
+    #[error("failed to delete item")]
+    RemoveItemFailed(JsValue),
+    #[error("failed to notify item changed")]
+    NotifyItemChangedFailed(JsValue),
+    #[error("failed to encode / decode item value")]
+    ItemCodecError(Err),
+}
+
+/// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
+pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
+    // Translates to and from UTF-16 strings
+    codec: C,
+    // Callback for when an error occurs
+    on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
+    // Whether to continuously listen to changes from browser storage
+    listen_to_storage_changes: bool,
+    // Initial value to use when the storage key is not set
+    initial_value: MaybeRwSignal<T>,
+    // Debounce or throttle the writing to storage whenever the value changes
+    filter: FilterOptions,
+}
+
+/// A codec for encoding and decoding values to and from UTF-16 strings. These strings are intended to be stored in browser storage.
+///
+/// ## Versioning
+///
+/// Versioning is the process of handling long-term data that can outlive our code.
+///
+/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
+///
+/// How best to handle versioning depends on the codec involved:
+///
+/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
+///
+/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
+///
+/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
+pub trait Codec<T>: Clone + 'static {
+    /// The error type returned when encoding or decoding fails.
+    type Error;
+    /// Encodes a value to a UTF-16 string.
+    fn encode(&self, val: &T) -> Result<String, Self::Error>;
+    /// Decodes a UTF-16 string to a value. Should be able to decode any string encoded by [`encode`].
+    fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
