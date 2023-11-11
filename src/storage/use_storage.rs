@@ -73,7 +73,7 @@ pub enum UseStorageError<Err> {
 /// See [`use_storage_with_options`] for more details on how to use.
 pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + Default + PartialEq,
     C: Codec<T> + Default,
@@ -89,7 +89,7 @@ where
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -106,7 +106,7 @@ where
 /// See [`use_storage_with_options`] for more details on how to use.
 pub fn use_session_storage<T, C>(
     key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + Default + PartialEq,
     C: Codec<T> + Default,
@@ -122,7 +122,7 @@ where
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -193,7 +193,7 @@ pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, C>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() -> () + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
     C: Codec<T>,
@@ -382,7 +382,7 @@ where
             }
         };
 
-        (data.into(), set_data, remove)
+        (data, set_data, remove)
     }}
 }
 
@@ -391,7 +391,7 @@ fn handle_error<T, Err>(
     on_error: &Rc<dyn Fn(UseStorageError<Err>)>,
     result: Result<T, UseStorageError<Err>>,
 ) -> Result<T, ()> {
-    result.or_else(|err| Err((on_error)(err)))
+    result.map_err(|err| (on_error)(err))
 }
 
 impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
