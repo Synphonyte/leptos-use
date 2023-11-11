@@ -45,7 +45,7 @@ impl<T: Default + prost::Message> Codec<T> for ProstCodec {
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {
         let buf = val.encode_to_vec();
-        Ok(base64::engine::general_purpose::STANDARD.encode(&buf))
+        Ok(base64::engine::general_purpose::STANDARD.encode(buf))
     }
 
     fn decode(&self, str: String) -> Result<T, Self::Error> {
