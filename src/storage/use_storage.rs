@@ -14,8 +14,9 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
 /// Reactive [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
 ///
-/// * [See a demo](https://leptos-use.rs/storage/use_storage.html)
-/// * [See a full example](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_storage)
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_storage)
 ///
 /// ## Usage
 ///
