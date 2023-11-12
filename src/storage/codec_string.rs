@@ -8,7 +8,7 @@ use std::str::FromStr;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, StringCodec};
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// let (get, set, remove) = use_local_storage::<i32, StringCodec>("my-key");

@@ -11,7 +11,7 @@ use thiserror::Error;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, ProstCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, ProstCodec};
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// // Primitive types:

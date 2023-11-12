@@ -5,7 +5,7 @@ use super::Codec;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, JsonCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -34,7 +34,7 @@ use super::Codec;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, Codec, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, Codec, JsonCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -75,7 +75,7 @@ use super::Codec;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, Codec, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, Codec, JsonCodec};
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// #

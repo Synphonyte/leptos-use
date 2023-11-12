@@ -29,7 +29,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -71,6 +71,19 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///     }
 /// }
 /// ```
+#[inline(always)]
+pub fn use_storage<T, C>(
+    storage_type: StorageType,
+    key: impl AsRef<str>,
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+where
+    T: Clone + PartialEq,
+    C: Codec<T>,
+{
+    use_storage_with_options(storage_type, key, UseStorageOptions::default())
+}
+
+/// Version of [`use_storage`] that accepts [`UseStorageOptions`].
 pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,

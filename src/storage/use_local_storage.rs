@@ -1,4 +1,4 @@
-use super::{use_storage_with_options, Codec, StorageType, UseStorageOptions};
+use super::{use_storage, Codec, StorageType, UseStorageOptions};
 use leptos::signal_prelude::*;
 
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
@@ -8,7 +8,7 @@ use leptos::signal_prelude::*;
 /// This is contrast to [`use_session_storage`] which clears data when the page session ends and is not shared.
 ///
 /// ## Usage
-/// See [`use_storage_with_options`] for more details on how to use.
+/// See [`use_storage`] for more details on how to use.
 pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
