@@ -1,13 +1,10 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
-#[cfg(feature = "storage")]
-use crate::storage::{use_storage_with_options, UseStorageOptions};
-#[cfg(feature = "storage")]
-use serde::{Deserialize, Serialize};
+use crate::storage::{use_storage, StringCodec, UseStorageOptions};
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 use crate::core::StorageType;
 use crate::use_preferred_dark;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::marker::PhantomData;
@@ -15,9 +12,6 @@ use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
-///
-/// > Data persistence is only enabled when the crate feature **`storage`** is enabled. You
-/// can use the function without it but the mode won't be persisted.
 ///
 /// ## Demo
 ///
@@ -58,7 +52,7 @@ use wasm_bindgen::JsCast;
 /// #
 /// mode.get(); // ColorMode::Dark or ColorMode::Light
 ///
-/// set_mode.set(ColorMode::Dark); // change to dark mode and persist (with feature `storage`)
+/// set_mode.set(ColorMode::Dark); // change to dark mode and persist
 ///
 /// set_mode.set(ColorMode::Auto); // change to auto mode
 /// #
@@ -255,49 +249,30 @@ pub enum ColorMode {
     Custom(String),
 }
 
-cfg_if! { if #[cfg(feature = "storage")] {
-    fn get_store_signal(
-        initial_value: MaybeRwSignal<ColorMode>,
-        storage_signal: Option<RwSignal<ColorMode>>,
-        storage_key: &str,
-        storage_enabled: bool,
-        storage: StorageType,
-        listen_to_storage_changes: bool,
-    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-        if let Some(storage_signal) = storage_signal {
-            let (store, set_store) = storage_signal.split();
-            (store.into(), set_store)
-        } else if storage_enabled {
-            let (store, set_store, _) = use_storage_with_options(
-                storage_key,
-                initial_value,
-                UseStorageOptions::default()
-                    .listen_to_storage_changes(listen_to_storage_changes)
-                    .storage_type(storage),
-            );
-
-            (store, set_store)
-        } else {
-            initial_value.into_signal()
-        }
+fn get_store_signal(
+    initial_value: MaybeRwSignal<ColorMode>,
+    storage_signal: Option<RwSignal<ColorMode>>,
+    storage_key: &str,
+    storage_enabled: bool,
+    storage: StorageType,
+    listen_to_storage_changes: bool,
+) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
+    if let Some(storage_signal) = storage_signal {
+        let (store, set_store) = storage_signal.split();
+        (store.into(), set_store)
+    } else if storage_enabled {
+        let (store, set_store, _) = use_storage_with_options::<ColorMode, StringCodec>(
+            storage,
+            storage_key,
+            UseStorageOptions::default()
+                .listen_to_storage_changes(listen_to_storage_changes)
+                .initial_value(initial_value),
+        );
+        (store, set_store)
+    } else {
+        initial_value.into_signal()
     }
-} else {
-    fn get_store_signal(
-        initial_value: MaybeRwSignal<ColorMode>,
-        storage_signal: Option<RwSignal<ColorMode>>,
-        _storage_key: &str,
-        _storage_enabled: bool,
-        _storage: StorageType,
-        _listen_to_storage_changes: bool,
-    ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-        if let Some(storage_signal) = storage_signal {
-            let (store, set_store) = storage_signal.split();
-            (store.into(), set_store)
-        } else {
-            initial_value.into_signal()
-        }
-    }
-}}
+}
 
 impl Display for ColorMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -327,6 +302,14 @@ impl From<&str> for ColorMode {
 impl From<String> for ColorMode {
     fn from(s: String) -> Self {
         ColorMode::from(s.as_str())
+    }
+}
+
+impl FromStr for ColorMode {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(ColorMode::from(s))
     }
 }
 
@@ -378,7 +361,7 @@ where
 
     /// If the color mode should be persisted. If `true` this required the
     /// *create feature* **`storage`** to be enabled.
-    /// Defaults to `true` and is forced to `false` if the feature **`storage`** is not enabled.
+    /// Defaults to `true`.
     storage_enabled: bool,
 
     /// Emit `auto` mode from state

@@ -6,7 +6,6 @@ pub mod core;
 pub mod docs;
 #[cfg(feature = "math")]
 pub mod math;
-#[cfg(feature = "storage")]
 pub mod storage;
 pub mod utils;
 

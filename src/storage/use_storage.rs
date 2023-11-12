@@ -1,26 +1,18 @@
-#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
-
-use crate::core::MaybeRwSignal;
-use crate::utils::FilterOptions;
 use crate::{
-    filter_builder_methods, use_event_listener, watch_pausable_with_options, DebounceOptions,
-    ThrottleOptions, WatchOptions, WatchPausableReturn,
+    core::{MaybeRwSignal, StorageType},
+    use_event_listener, use_window,
+    utils::FilterOptions,
+    watch_with_options, WatchOptions,
 };
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
-use js_sys::Reflect;
 use leptos::*;
-use serde::{Deserialize, Serialize};
-use serde_json::Error;
 use std::rc::Rc;
-use std::time::Duration;
-use wasm_bindgen::{JsCast, JsValue};
+use thiserror::Error;
+use wasm_bindgen::JsValue;
 
-pub use crate::core::StorageType;
+const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
-const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
-
-/// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) / [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
+/// Reactive [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
 ///
 /// ## Demo
 ///
@@ -28,471 +20,383 @@ const CUSTOM_STORAGE_EVENT_NAME: &str = "leptos-use-storage";
 ///
 /// ## Usage
 ///
-/// It returns a triplet `(read_signal, write_signal, delete_from_storage_func)` of type `(ReadSignal<T>, WriteSignal<T>, Fn())`.
+/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using the same key on the smae page and across tabs for local storage. See [`UseStorageOptions`] to see how behaviour can be further customised.
 ///
-/// Values are (de-)serialized to/from JSON using [`serde`](https://serde.rs/).
+/// See [`Codec`] for more details on how to handle versioning--dealing with data that can outlast your code.
+///
+/// Returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
+///
+/// ## Example
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_storage, use_storage_with_options, UseStorageOptions};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
-/// #[derive(Serialize, Deserialize, Clone)]
-/// pub struct MyState {
-///     pub hello: String,
-///     pub greeting: String,
-/// }
-///
 /// # pub fn Demo() -> impl IntoView {
-/// // bind struct. Must be serializable.
-/// let (state, set_state, _) = use_storage(
-///     "my-state",
-///     MyState {
-///         hello: "hi".to_string(),
-///         greeting: "Hello".to_string()
-///     },
-/// ); // returns Signal<MyState>
+/// // Binds a struct:
+/// let (state, set_state, _) = use_local_storage::<MyState, JsonCodec>("my-state");
 ///
-/// // bind bool.
-/// let (flag, set_flag, remove_flag) = use_storage("my-flag", true); // returns Signal<bool>
+/// // Binds a bool, stored as a string:
+/// let (flag, set_flag, remove_flag) = use_session_storage::<bool, StringCodec>("my-flag");
 ///
-/// // bind number
-/// let (count, set_count, _) = use_storage("my-count", 0); // returns Signal<i32>
+/// // Binds a number, stored as a string:
+/// let (count, set_count, _) = use_session_storage::<i32, StringCodec>("my-count");
+/// // Binds a number, stored in JSON:
+/// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
 ///
-/// // bind string with SessionStorage
-/// let (id, set_id, _) = use_storage_with_options(
+/// // Bind string with SessionStorage stored in ProtoBuf format:
+/// let (id, set_id, _) = use_storage_with_options::<String, ProstCodec>(
+///     StorageType::Session,
 ///     "my-id",
-///     "some_string_id".to_string(),
-///     UseStorageOptions::default().storage_type(StorageType::Session),
+///     UseStorageOptions::default(),
 /// );
 /// #    view! { }
 /// # }
-/// ```
 ///
-/// ## Merge Defaults
-///
-/// By default, [`use_storage`] will use the value from storage if it is present and ignores the default value.
-/// Be aware that when you add more properties to the default value, the key might be `None`
-/// (in the case of an `Option<T>` field) if client's storage does not have that key
-/// or deserialization might fail altogether.
-///
-/// Let's say you had a struct `MyState` that has been saved to storage
-///
-/// ```ignore
-/// #[derive(Serialize, Deserialize, Clone)]
-/// struct MyState {
-///     hello: String,
-/// }
-///
-/// let (state, .. ) = use_storage("my-state", MyState { hello: "hello" });
-/// ```
-///
-/// Now, in a newer version you added a field `greeting` to `MyState`.
-///
-/// ```ignore
-/// #[derive(Serialize, Deserialize, Clone)]
-/// struct MyState {
-///     hello: String,
-///     greeting: String,
-/// }
-///
-/// let (state, .. ) = use_storage(
-///     "my-state",
-///     MyState { hello: "hi", greeting: "whatsup" },
-/// ); // fails to deserialize -> default value
-/// ```
-///
-/// This will fail to deserialize the stored string `{"hello": "hello"}` because it has no field `greeting`.
-/// Hence it just uses the new default value provided and the previously saved value is lost.
-///
-/// To mitigate that you can provide a `merge_defaults` option. This is a pure function pointer
-/// that takes the serialized (to json) stored value and the default value as arguments
-/// and should return the serialized merged value.
-///
-/// ```
-/// # use leptos::*;
-/// # use leptos_use::storage::{use_storage_with_options, UseStorageOptions};
-/// # use serde::{Deserialize, Serialize};
-/// #
-/// #[derive(Serialize, Deserialize, Clone)]
+/// // Data stored in JSON must implement Serialize, Deserialize:
+/// #[derive(Serialize, Deserialize, Clone, PartialEq)]
 /// pub struct MyState {
 ///     pub hello: String,
 ///     pub greeting: String,
 /// }
-/// #
-/// # pub fn Demo() -> impl IntoView {
-/// let (state, set_state, _) = use_storage_with_options(
-///     "my-state",
-///     MyState {
-///         hello: "hi".to_string(),
-///         greeting: "Hello".to_string()
-///     },
-///     UseStorageOptions::<MyState>::default().merge_defaults(|stored_value, default_value| {
-///         if stored_value.contains(r#""greeting":"#) {
-///             stored_value.to_string()
-///         } else {
-///             // add "greeting": "Hello" to the string
-///             stored_value.replace("}", &format!(r#""greeting": "{}"}}"#, default_value.greeting))
+///
+/// // Default can be used to implement intial or deleted values.
+/// // You can also use a signal via UseStorageOptions::default_value`
+/// impl Default for MyState {
+///     fn default() -> Self {
+///         Self {
+///             hello: "hi".to_string(),
+///             greeting: "Hello".to_string()
 ///         }
-///     }),
-/// );
-/// #
-/// #    view! { }
-/// # }
+///     }
+/// }
 /// ```
-///
-/// ## Filter Storage Write
-///
-/// You can specify `debounce` or `throttle` options for limiting writes to storage.
-///
-/// ## Server-Side Rendering
-///
-/// On the server this falls back to a `create_signal(default)` and an empty remove function.
-///
-/// ## See also
-///
-/// * [`use_local_storage`]
-/// * [`use_session_storage`]
-// #[doc(cfg(feature = "storage"))]
-pub fn use_storage<T, D>(key: &str, defaults: D) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-    D: Into<MaybeRwSignal<T>>,
-    T: Clone,
-{
-    use_storage_with_options(key, defaults, UseStorageOptions::default())
-}
-
-/// Version of [`use_storage`] that accepts [`UseStorageOptions`]. See [`use_storage`] for how to use.
-// #[doc(cfg(feature = "storage"))]
-pub fn use_storage_with_options<T, D>(
-    key: &str,
-    defaults: D,
-    options: UseStorageOptions<T>,
+#[inline(always)]
+pub fn use_storage<T, C>(
+    storage_type: StorageType,
+    key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    for<'de> T: Serialize + Deserialize<'de> + Clone + 'static,
-    D: Into<MaybeRwSignal<T>>,
-    T: Clone,
+    T: Clone + PartialEq,
+    C: Codec<T>,
 {
-    let defaults = defaults.into();
+    use_storage_with_options(storage_type, key, UseStorageOptions::default())
+}
 
+/// Version of [`use_storage`] that accepts [`UseStorageOptions`].
+pub fn use_storage_with_options<T, C>(
+    storage_type: StorageType,
+    key: impl AsRef<str>,
+    options: UseStorageOptions<T, C>,
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+where
+    T: Clone + PartialEq,
+    C: Codec<T>,
+{
     let UseStorageOptions {
-        storage_type,
-        listen_to_storage_changes,
-        write_defaults,
-        merge_defaults,
+        codec,
         on_error,
+        listen_to_storage_changes,
+        initial_value,
         filter,
     } = options;
 
-    let (data, set_data) = defaults.into_signal();
-
-    let raw_init = data.get_untracked();
+    let (data, set_data) = initial_value.into_signal();
+    let default = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
-        let remove: Rc<dyn Fn()> = Rc::new(|| {});
+        let remove = move || {
+            set_data.set(default.clone());
+        };
+        (data.into(), set_data, remove)
     } else {
-        let storage = storage_type.into_storage();
+        // Get storage API
+        let storage = storage_type
+            .into_storage()
+            .map_err(UseStorageError::StorageNotAvailable)
+            .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone));
+        let storage = handle_error(&on_error, storage);
 
-        let remove: Rc<dyn Fn()> = match storage {
-            Ok(Some(storage)) => {
-                let write = {
-                    let on_error = on_error.clone();
-                    let storage = storage.clone();
-                    let key = key.to_string();
-
-                    Rc::new(move |v: &T| {
-                        match serde_json::to_string(&v) {
-                            Ok(ref serialized) => match storage.get_item(&key) {
-                                Ok(old_value) => {
-                                    if old_value.as_ref() != Some(serialized) {
-                                        if let Err(e) = storage.set_item(&key, serialized) {
-                                            on_error(UseStorageError::StorageAccessError(e));
-                                        } else {
-                                            let mut event_init = web_sys::CustomEventInit::new();
-                                            event_init.detail(
-                                                &StorageEventDetail {
-                                                    key: Some(key.clone()),
-                                                    old_value,
-                                                    new_value: Some(serialized.clone()),
-                                                    storage_area: Some(storage.clone()),
-                                                }
-                                                .into(),
-                                            );
-
-                                            // importantly this should _not_ be a StorageEvent since those cannot
-                                            // be constructed with a non-built-in storage area
-                                            let _ = window().dispatch_event(
-                                                &web_sys::CustomEvent::new_with_event_init_dict(
-                                                    CUSTOM_STORAGE_EVENT_NAME,
-                                                    &event_init,
-                                                )
-                                                .expect("Failed to create CustomEvent"),
-                                            );
-                                        }
-                                    }
-                                }
-                                Err(e) => {
-                                    on_error.clone()(UseStorageError::StorageAccessError(e));
-                                }
-                            },
-                            Err(e) => {
-                                on_error.clone()(UseStorageError::SerializationError(e));
-                            }
-                        }
-                    })
-                };
-
-                let read = {
-                    let storage = storage.clone();
-                    let on_error = on_error.clone();
-                    let key = key.to_string();
-                    let raw_init = raw_init.clone();
-
-                    Rc::new(
-                        move |event_detail: Option<StorageEventDetail>| -> Option<T> {
-                            let serialized_init = match serde_json::to_string(&raw_init) {
-                                Ok(serialized) => Some(serialized),
-                                Err(e) => {
-                                    on_error.clone()(UseStorageError::DefaultSerializationError(e));
-                                    None
-                                }
-                            };
-
-                            let raw_value = if let Some(event_detail) = event_detail {
-                                event_detail.new_value
-                            } else {
-                                match storage.get_item(&key) {
-                                    Ok(raw_value) => match raw_value {
-                                        Some(raw_value) => Some(merge_defaults(&raw_value, &raw_init)),
-                                        None => serialized_init.clone(),
-                                    },
-                                    Err(e) => {
-                                        on_error.clone()(UseStorageError::StorageAccessError(e));
-                                        None
-                                    }
-                                }
-                            };
-
-                            match raw_value {
-                                Some(raw_value) => match serde_json::from_str(&raw_value) {
-                                    Ok(v) => Some(v),
-                                    Err(e) => {
-                                        on_error.clone()(UseStorageError::SerializationError(e));
-                                        None
-                                    }
-                                },
-                                None => {
-                                    if let Some(serialized_init) = &serialized_init {
-                                        if write_defaults {
-                                            if let Err(e) = storage.set_item(&key, serialized_init) {
-                                                on_error(UseStorageError::StorageAccessError(e));
-                                            }
-                                        }
-                                    }
-
-                                    Some(raw_init.clone())
-                                }
-                            }
-                        },
-                    )
-                };
-
-                let WatchPausableReturn {
-                    pause: pause_watch,
-                    resume: resume_watch,
-                    ..
-                } = watch_pausable_with_options(
-                    move || data.get(),
-                    move |data, _, _| Rc::clone(&write)(data),
-                    WatchOptions::default().filter(filter),
-                );
-
-                let update = {
-                    let key = key.to_string();
-                    let storage = storage.clone();
-                    let raw_init = raw_init.clone();
-
-                    Rc::new(move |event_detail: Option<StorageEventDetail>| {
-                        if let Some(event_detail) = &event_detail {
-                            if event_detail.storage_area != Some(storage.clone()) {
-                                return;
-                            }
-
-                            match &event_detail.key {
-                                None => {
-                                    set_data.set(raw_init.clone());
-                                    return;
-                                }
-                                Some(event_key) => {
-                                    if event_key != &key {
-                                        return;
-                                    }
-                                }
-                            };
-                        }
-
-                        pause_watch();
-
-                        if let Some(value) = read(event_detail.clone()) {
-                            set_data.set(value);
-                        }
-
-                        if event_detail.is_some() {
-                            // use timeout to avoid infinite loop
-                            let resume = resume_watch.clone();
-                            let _ = set_timeout_with_handle(resume, Duration::ZERO);
-                        } else {
-                            resume_watch();
-                        }
-                    })
-                };
-
-                let update_from_custom_event = {
-                    let update = Rc::clone(&update);
-
-                    move |event: web_sys::CustomEvent| {
-                        let update = Rc::clone(&update);
-                        queue_microtask(move || update(Some(event.into())))
-                    }
-                };
-
-                let update_from_storage_event = {
-                    let update = Rc::clone(&update);
-
-                    move |event: web_sys::StorageEvent| update(Some(event.into()))
-                };
-
-                if listen_to_storage_changes {
-                    let _ = use_event_listener(window(), ev::storage, update_from_storage_event);
-                    let _ = use_event_listener(
-                        window(),
-                        ev::Custom::new(CUSTOM_STORAGE_EVENT_NAME),
-                        update_from_custom_event,
-                    );
-                }
-
-                update(None);
-
-                let k = key.to_string();
-
-                Rc::new(move || {
-                    let _ = storage.remove_item(&k);
+        // Schedules a storage event microtask. Uses a queue to avoid re-entering the runtime
+        let dispatch_storage_event = {
+            let key = key.as_ref().to_owned();
+            let on_error = on_error.to_owned();
+            move || {
+                let key = key.to_owned();
+                let on_error = on_error.to_owned();
+                queue_microtask(move || {
+                    // Note: we cannot construct a full StorageEvent so we _must_ rely on a custom event
+                    let mut custom = web_sys::CustomEventInit::new();
+                    custom.detail(&JsValue::from_str(&key));
+                    let result = window()
+                        .dispatch_event(
+                            &web_sys::CustomEvent::new_with_event_init_dict(
+                                INTERNAL_STORAGE_EVENT,
+                                &custom,
+                            )
+                            .expect("failed to create custom storage event"),
+                        )
+                        .map_err(UseStorageError::NotifyItemChangedFailed);
+                    let _ = handle_error(&on_error, result);
                 })
             }
-            Err(e) => {
-                on_error(UseStorageError::NoStorage(e));
-                Rc::new(move || {})
-            }
-            _ => {
-                // do nothing
-                Rc::new(move || {})
+        };
+
+        // Fetches direct from browser storage and fills set_data if changed (memo)
+        let fetch_from_storage = {
+            let storage = storage.to_owned();
+            let codec = codec.to_owned();
+            let key = key.as_ref().to_owned();
+            let on_error = on_error.to_owned();
+            move || {
+                let fetched = storage
+                    .to_owned()
+                    .and_then(|storage| {
+                        // Get directly from storage
+                        let result = storage
+                            .get_item(&key)
+                            .map_err(UseStorageError::GetItemFailed);
+                        handle_error(&on_error, result)
+                    })
+                    .unwrap_or_default() // Drop handled Err(())
+                    .map(|encoded| {
+                        // Decode item
+                        let result = codec
+                            .decode(encoded)
+                            .map_err(UseStorageError::ItemCodecError);
+                        handle_error(&on_error, result)
+                    })
+                    .transpose()
+                    .unwrap_or_default(); // Drop handled Err(())
+
+                match fetched {
+                    Some(value) => {
+                        // Replace data if changed
+                        if value != data.get_untracked() {
+                            set_data.set(value)
+                        }
+                    }
+
+                    // Revert to default
+                    None => set_data.set(default.clone()),
+                };
             }
         };
+
+        // Fetch initial value
+        fetch_from_storage();
+
+        // Fires when storage needs to be fetched
+        let notify = create_trigger();
+
+        // Refetch from storage. Keeps track of how many times we've been notified. Does not increment for calls to set_data
+        let notify_id = create_memo::<usize>(move |prev| {
+            notify.track();
+            match prev {
+                None => 1, // Avoid async fetch of initial value
+                Some(prev) => {
+                    fetch_from_storage();
+                    prev + 1
+                }
+            }
+        });
+
+        // Set item on internal (non-event) page changes to the data signal
+        {
+            let storage = storage.to_owned();
+            let codec = codec.to_owned();
+            let key = key.as_ref().to_owned();
+            let on_error = on_error.to_owned();
+            let dispatch_storage_event = dispatch_storage_event.to_owned();
+            let _ = watch_with_options(
+                move || (notify_id.get(), data.get()),
+                move |(id, value), prev, _| {
+                    // Skip setting storage on changes from external events. The ID will change on external events.
+                    if prev.map(|(prev_id, _)| *prev_id != *id).unwrap_or_default() {
+                        return;
+                    }
+
+                    if let Ok(storage) = &storage {
+                        // Encode value
+                        let result = codec
+                            .encode(value)
+                            .map_err(UseStorageError::ItemCodecError)
+                            .and_then(|enc_value| {
+                                // Set storage -- sends a global event
+                                storage
+                                    .set_item(&key, &enc_value)
+                                    .map_err(UseStorageError::SetItemFailed)
+                            });
+                        let result = handle_error(&on_error, result);
+                        // Send internal storage event
+                        if result.is_ok() {
+                            dispatch_storage_event();
+                        }
+                    }
+                },
+                WatchOptions::default().filter(filter),
+            );
+        }
+
+        if listen_to_storage_changes {
+            let check_key = key.as_ref().to_owned();
+            // Listen to global storage events
+            let _ = use_event_listener(use_window(), leptos::ev::storage, move |ev| {
+                let ev_key = ev.key();
+                // Key matches or all keys deleted (None)
+                if ev_key == Some(check_key.clone()) || ev_key.is_none() {
+                    notify.notify()
+                }
+            });
+            // Listen to internal storage events
+            let check_key = key.as_ref().to_owned();
+            let _ = use_event_listener(
+                use_window(),
+                ev::Custom::new(INTERNAL_STORAGE_EVENT),
+                move |ev: web_sys::CustomEvent| {
+                    if Some(check_key.clone()) == ev.detail().as_string() {
+                        notify.notify()
+                    }
+                },
+            );
+        };
+
+        // Remove from storage fn
+        let remove = {
+            let key = key.as_ref().to_owned();
+            move || {
+                let _ = storage.as_ref().map(|storage| {
+                    // Delete directly from storage
+                    let result = storage
+                        .remove_item(&key)
+                        .map_err(UseStorageError::RemoveItemFailed);
+                    let _ = handle_error(&on_error, result);
+                    notify.notify();
+                    dispatch_storage_event();
+                });
+            }
+        };
+
+        (data, set_data, remove)
     }}
-
-    (data, set_data, move || remove())
 }
 
-#[derive(Clone)]
-pub struct StorageEventDetail {
-    pub key: Option<String>,
-    pub old_value: Option<String>,
-    pub new_value: Option<String>,
-    pub storage_area: Option<web_sys::Storage>,
+/// Session handling errors returned by [`use_storage_with_options`].
+#[derive(Error, Debug)]
+pub enum UseStorageError<Err> {
+    #[error("storage not available")]
+    StorageNotAvailable(JsValue),
+    #[error("storage not returned from window")]
+    StorageReturnedNone,
+    #[error("failed to get item")]
+    GetItemFailed(JsValue),
+    #[error("failed to set item")]
+    SetItemFailed(JsValue),
+    #[error("failed to delete item")]
+    RemoveItemFailed(JsValue),
+    #[error("failed to notify item changed")]
+    NotifyItemChangedFailed(JsValue),
+    #[error("failed to encode / decode item value")]
+    ItemCodecError(Err),
 }
 
-impl From<web_sys::StorageEvent> for StorageEventDetail {
-    fn from(event: web_sys::StorageEvent) -> Self {
-        Self {
-            key: event.key(),
-            old_value: event.old_value(),
-            new_value: event.new_value(),
-            storage_area: event.storage_area(),
-        }
-    }
+/// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
+pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
+    // Translates to and from UTF-16 strings
+    codec: C,
+    // Callback for when an error occurs
+    on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
+    // Whether to continuously listen to changes from browser storage
+    listen_to_storage_changes: bool,
+    // Initial value to use when the storage key is not set
+    initial_value: MaybeRwSignal<T>,
+    // Debounce or throttle the writing to storage whenever the value changes
+    filter: FilterOptions,
 }
 
-impl From<web_sys::CustomEvent> for StorageEventDetail {
-    fn from(event: web_sys::CustomEvent) -> Self {
-        let detail = event.detail();
-        Self {
-            key: get_optional_string(&detail, "key"),
-            old_value: get_optional_string(&detail, "oldValue"),
-            new_value: get_optional_string(&detail, "newValue"),
-            storage_area: Reflect::get(&detail, &"storageArea".into())
-                .map(|v| v.dyn_into::<web_sys::Storage>().ok())
-                .unwrap_or_default(),
-        }
-    }
+/// A codec for encoding and decoding values to and from UTF-16 strings. These strings are intended to be stored in browser storage.
+///
+/// ## Versioning
+///
+/// Versioning is the process of handling long-term data that can outlive our code.
+///
+/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
+///
+/// How best to handle versioning depends on the codec involved:
+///
+/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
+///
+/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
+///
+/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
+pub trait Codec<T>: Clone + 'static {
+    /// The error type returned when encoding or decoding fails.
+    type Error;
+    /// Encodes a value to a UTF-16 string.
+    fn encode(&self, val: &T) -> Result<String, Self::Error>;
+    /// Decodes a UTF-16 string to a value. Should be able to decode any string encoded by [`encode`].
+    fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
-impl From<StorageEventDetail> for JsValue {
-    fn from(event: StorageEventDetail) -> Self {
-        let obj = js_sys::Object::new();
-
-        let _ = Reflect::set(&obj, &"key".into(), &event.key.into());
-        let _ = Reflect::set(&obj, &"oldValue".into(), &event.old_value.into());
-        let _ = Reflect::set(&obj, &"newValue".into(), &event.new_value.into());
-        let _ = Reflect::set(&obj, &"storageArea".into(), &event.storage_area.into());
-
-        obj.into()
-    }
+/// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
+fn handle_error<T, Err>(
+    on_error: &Rc<dyn Fn(UseStorageError<Err>)>,
+    result: Result<T, UseStorageError<Err>>,
+) -> Result<T, ()> {
+    result.map_err(|err| (on_error)(err))
 }
 
-fn get_optional_string(v: &JsValue, key: &str) -> Option<String> {
-    Reflect::get(v, &key.into())
-        .map(|v| v.as_string())
-        .unwrap_or_default()
-}
-
-/// Error type for use_storage_with_options
-// #[doc(cfg(feature = "storage"))]
-pub enum UseStorageError<E = ()> {
-    NoStorage(JsValue),
-    StorageAccessError(JsValue),
-    CustomStorageAccessError(E),
-    SerializationError(Error),
-    DefaultSerializationError(Error),
-}
-
-/// Options for [`use_storage_with_options`].
-// #[doc(cfg(feature = "storage"))]
-#[derive(DefaultBuilder)]
-pub struct UseStorageOptions<T> {
-    /// Type of storage. Can be `Local` (default), `Session` or `Custom(web_sys::Storage)`
-    pub(crate) storage_type: StorageType,
-    /// Listen to changes to this storage key from somewhere else. Defaults to true.
-    pub(crate) listen_to_storage_changes: bool,
-    /// If no value for the give key is found in the storage, write it. Defaults to true.
-    pub(crate) write_defaults: bool,
-    /// Takes the serialized (json) stored value and the default value and returns a merged version.
-    /// Defaults to simply returning the stored value.
-    pub(crate) merge_defaults: fn(&str, &T) -> String,
-    /// Optional callback whenever an error occurs. The callback takes an argument of type [`UseStorageError`].
-    pub(crate) on_error: Rc<dyn Fn(UseStorageError)>,
-
-    /// Debounce or throttle the writing to storage whenever the value changes.
-    pub(crate) filter: FilterOptions,
-}
-
-impl<T> Default for UseStorageOptions<T> {
+impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
     fn default() -> Self {
         Self {
-            storage_type: Default::default(),
+            codec: C::default(),
+            on_error: Rc::new(|_err| ()),
             listen_to_storage_changes: true,
-            write_defaults: true,
-            merge_defaults: |stored_value, _default_value| stored_value.to_string(),
-            on_error: Rc::new(|_| ()),
-            filter: Default::default(),
+            initial_value: MaybeRwSignal::default(),
+            filter: FilterOptions::default(),
         }
     }
 }
 
-impl<T> UseStorageOptions<T> {
-    filter_builder_methods!(
-        /// the serializing and storing into storage
-        filter
-    );
+impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
+    /// Sets the codec to use for encoding and decoding values to and from UTF-16 strings.
+    pub fn codec(self, codec: impl Into<C>) -> Self {
+        Self {
+            codec: codec.into(),
+            ..self
+        }
+    }
+
+    /// Optional callback whenever an error occurs.
+    pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
+        Self {
+            on_error: Rc::new(on_error),
+            ..self
+        }
+    }
+
+    /// Listen to changes to this storage key from browser and page events. Defaults to true.
+    pub fn listen_to_storage_changes(self, listen_to_storage_changes: bool) -> Self {
+        Self {
+            listen_to_storage_changes,
+            ..self
+        }
+    }
+
+    /// Initial value to use when the storage key is not set. Note that this value is read once on creation of the storage hook and not updated again. Accepts a signal and defaults to `T::default()`.
+    pub fn initial_value(self, initial: impl Into<MaybeRwSignal<T>>) -> Self {
+        Self {
+            initial_value: initial.into(),
+            ..self
+        }
+    }
+
+    /// Debounce or throttle the writing to storage whenever the value changes.
+    pub fn filter(self, filter: impl Into<FilterOptions>) -> Self {
+        Self {
+            filter: filter.into(),
+            ..self
+        }
+    }
 }
