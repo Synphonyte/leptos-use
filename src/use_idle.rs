@@ -1,16 +1,9 @@
 use crate::core::now;
-use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
-use crate::{
-    filter_builder_methods, use_document, use_event_listener, use_event_listener_with_options,
-    UseEventListenerOptions,
-};
+use crate::filter_builder_methods;
+use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::{visibilitychange, Custom};
-use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::*;
-use std::cell::Cell;
-use std::time::Duration;
 
 ///
 ///
@@ -93,7 +86,16 @@ pub fn use_idle_with_options(
         let _ = events;
         let _ = listen_for_visibility_change;
         let _ = filter;
+        let _ = set_last_active;
+        let _ = set_idle;
     } else {
+        use crate::utils::create_filter_wrapper;
+        use crate::{use_document, use_event_listener, use_event_listener_with_options,UseEventListenerOptions};
+        use leptos::ev::{visibilitychange, Custom};
+        use leptos::leptos_dom::helpers::TimeoutHandle;
+        use std::cell::Cell;
+        use std::time::Duration;
+
         let reset = {
             let timer = Cell::new(None::<TimeoutHandle>);
 

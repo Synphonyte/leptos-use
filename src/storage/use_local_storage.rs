@@ -1,4 +1,4 @@
-use super::{use_storage, Codec, StorageType, UseStorageOptions};
+use super::{use_storage_with_options, Codec, StorageType, UseStorageOptions};
 use leptos::signal_prelude::*;
 
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).

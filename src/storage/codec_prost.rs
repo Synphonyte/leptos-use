@@ -30,7 +30,7 @@ use thiserror::Error;
 ///
 /// Note: we've defined and used the `prost` attribute here for brevity. Alternate usage would be to describe the message in a .proto file and use [`prost_build`](https://docs.rs/prost-build) to auto-generate the Rust code.
 #[derive(Clone, Default, PartialEq)]
-pub struct ProstCodec();
+pub struct ProstCodec;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ProstCodecError {
@@ -73,7 +73,7 @@ mod tests {
             s: String::from("party time 🎉"),
             i: 42,
         };
-        let codec = ProstCodec();
+        let codec = ProstCodec;
         assert_eq!(codec.decode(codec.encode(&t).unwrap()), Ok(t));
     }
 }

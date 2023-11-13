@@ -1,5 +1,5 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
-use crate::storage::{use_storage, StringCodec, UseStorageOptions};
+use crate::storage::{use_storage_with_options, StringCodec, UseStorageOptions};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 

@@ -1,8 +1,7 @@
+use crate::storage::StringCodec;
 use crate::{
     core::{MaybeRwSignal, StorageType},
-    use_event_listener, use_window,
     utils::FilterOptions,
-    watch_with_options, WatchOptions,
 };
 use cfg_if::cfg_if;
 use leptos::*;
@@ -30,7 +29,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # pub fn Demo() -> impl IntoView {
@@ -73,15 +72,11 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// }
 /// ```
 #[inline(always)]
-pub fn use_storage<T, C>(
+pub fn use_storage(
     storage_type: StorageType,
     key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
-where
-    T: Clone + PartialEq,
-    C: Codec<T>,
-{
-    use_storage_with_options(storage_type, key, UseStorageOptions::default())
+) -> (Signal<String>, WriteSignal<String>, impl Fn() + Clone) {
+    use_storage_with_options::<String, StringCodec>(storage_type, key, UseStorageOptions::default())
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`].
@@ -106,11 +101,23 @@ where
     let default = data.get_untracked();
 
     cfg_if! { if #[cfg(feature = "ssr")] {
+        let _ = codec;
+        let _ = on_error;
+        let _ = listen_to_storage_changes;
+        let _ = filter;
+        let _ = storage_type;
+        let _ = key;
+        let _ = INTERNAL_STORAGE_EVENT;
+
+
         let remove = move || {
             set_data.set(default.clone());
         };
+
         (data.into(), set_data, remove)
     } else {
+        use crate::{use_event_listener, use_window, watch_with_options, WatchOptions};
+
         // Get storage API
         let storage = storage_type
             .into_storage()
@@ -340,6 +347,7 @@ pub trait Codec<T>: Clone + 'static {
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
+#[cfg(not(feature = "ssr"))]
 fn handle_error<T, Err>(
     on_error: &Rc<dyn Fn(UseStorageError<Err>)>,
     result: Result<T, UseStorageError<Err>>,

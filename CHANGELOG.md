@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking Changes 🛠
+
+- (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always requiring `serde`.
+  - This also removes the feature `storage`
+  - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
+  - If you want to use `JsonCodec` you have to enable the feature `serde`
+  - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
+- (@feral-dot-io) The Rust flag `--cfg=web_sys_unstable_apis` is not needed anymore since relevant `web_sys` APIs are now stable. 
+  This affects in particular
+  - `use_element_size`
+  - `use_resize_observer`
+
+
 ## [0.8.2] - 2023-11-09
 
 ### Fixes 🍕

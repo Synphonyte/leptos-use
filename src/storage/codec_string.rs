@@ -16,7 +16,7 @@ use std::str::FromStr;
 /// # }
 /// ```
 #[derive(Clone, Default, PartialEq)]
-pub struct StringCodec();
+pub struct StringCodec;
 
 impl<T: FromStr + ToString> Codec<T> for StringCodec {
     type Error = T::Err;
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn test_string_codec() {
         let s = String::from("party time 🎉");
-        let codec = StringCodec();
+        let codec = StringCodec;
         assert_eq!(codec.encode(&s), Ok(s.clone()));
         assert_eq!(codec.decode(s.clone()), Ok(s));
     }

@@ -114,7 +114,7 @@ use super::Codec;
 /// # }
 /// ```
 #[derive(Clone, Default, PartialEq)]
-pub struct JsonCodec();
+pub struct JsonCodec;
 
 impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
     type Error = serde_json::Error;
@@ -143,7 +143,7 @@ mod tests {
             s: String::from("party time 🎉"),
             i: 42,
         };
-        let codec = JsonCodec();
+        let codec = JsonCodec;
         let enc = codec.encode(&t).unwrap();
         let dec: Test = codec.decode(enc).unwrap();
         assert_eq!(dec, t);
