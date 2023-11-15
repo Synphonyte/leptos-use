@@ -7,36 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes 🛠
 
-- (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always requiring `serde`.
-  - This also removes the feature `storage`
-  - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
-  - If you want to use `JsonCodec` you have to enable the feature `serde`
-  - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
-- (@feral-dot-io) The Rust flag `--cfg=web_sys_unstable_apis` is not needed anymore since relevant `web_sys` APIs are now stable. 
+- (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always
+  requiring `serde`.
+    - This also removes the feature `storage`
+    - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
+    - If you want to use `JsonCodec` you have to enable the feature `serde`
+    - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
+- (@feral-dot-io) The Rust flag `--cfg=web_sys_unstable_apis` is not needed anymore since relevant `web_sys` APIs are
+  now stable.
   This affects in particular
-  - `use_element_size`
-  - `use_resize_observer`
+    - `use_element_size`
+    - `use_resize_observer`
 
 ### Fixes 🍕
 
 - `use_raf_fn` and `use_timestamp` no longer spam warnings because of `get`ting signals outside of reactive contexts.
 - `use_infinite_scroll` no longer calls the callback twice for the same event
+- `use_scroll` now uses `try_get_untracked` in the debounced callback to avoid panics if the context has been destroyed
+  while the callback was waiting to be called.
 
 ## [0.8.2] - 2023-11-09
 
 ### Fixes 🍕
 
 - Fixed SSR for
-  - use_timestamp
-  - use_raf_fn
-  - use_idle
+    - use_timestamp
+    - use_raf_fn
+    - use_idle
 
 ## [0.8.1] - 2023-10-28
 
 ### Fixes 🍕
 
 - Using strings for `ElementMaybeSignal` and `ElementsMaybeSignal` is now SSR safe.
-  - This fixes specifically `use_color_mode` to work on the server.
+    - This fixes specifically `use_color_mode` to work on the server.
 
 ## [0.8.0] - 2023-10-24
 
@@ -58,10 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes 🍕
 
--  Some functions still used `window()` which could lead to panics in SSR. This is now fixed.
+- Some functions still used `window()` which could lead to panics in SSR. This is now fixed.
   Specifically for `use_draggable`.
 
-## [0.7.1] - 2023-10-02 
+## [0.7.1] - 2023-10-02
 
 ### New Function 🚀
 
