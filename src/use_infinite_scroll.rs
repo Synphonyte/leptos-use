@@ -186,7 +186,13 @@ where
 
     let _ = watch(
         move || state.arrived_state.get().get_direction(direction),
-        move |_, _, _| {
+        move |arrived, prev_arrived, _| {
+            if let Some(prev_arrived) = prev_arrived {
+                if prev_arrived == arrived {
+                    return;
+                }
+            }
+
             check_and_load
                 .get_value()
                 .expect("check_and_load is set above")()

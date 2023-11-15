@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - `use_raf_fn` and `use_timestamp` no longer spam warnings because of `get`ting signals outside of reactive contexts.
+- `use_infinite_scroll` no longer calls the callback twice for the same event
 
 ## [0.8.2] - 2023-11-09
 
