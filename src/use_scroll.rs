@@ -257,7 +257,7 @@ where
             let on_stop = Rc::clone(&options.on_stop);
 
             move |e| {
-                if !is_scrolling.get_untracked() {
+                if !is_scrolling.try_get_untracked().unwrap_or_default() {
                     return;
                 }
 
@@ -390,12 +390,7 @@ where
                 Signal<Option<web_sys::EventTarget>>,
                 web_sys::EventTarget,
                 _,
-            >(
-                target,
-                ev::scroll,
-                handler,
-                options.event_listener_options,
-            );
+            >(target, ev::scroll, handler, options.event_listener_options);
         } else {
             let _ = use_event_listener_with_options::<
                 _,
