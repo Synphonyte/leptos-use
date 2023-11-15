@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `use_element_size`
   - `use_resize_observer`
 
+### Fixes 🍕
+
+- `use_raf_fn` and `use_timestamp` no longer spam warnings because of `get`ting signals outside of reactive contexts.
 
 ## [0.8.2] - 2023-11-09
 
