@@ -84,7 +84,7 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
 
         move || {
             update();
-            callback(ts.get());
+            callback(ts.get_untracked());
         }
     };
 

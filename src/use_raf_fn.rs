@@ -89,7 +89,7 @@ pub fn use_raf_fn_with_options(
         let previous_frame_timestamp = Cell::new(0.0_f64);
 
         move |timestamp: f64| {
-            if !is_active.get() {
+            if !is_active.get_untracked() {
                 return;
             }
 
@@ -111,7 +111,7 @@ pub fn use_raf_fn_with_options(
     let _ = loop_ref.replace(Box::new(loop_fn));
 
     let resume = move || {
-        if !is_active.get() {
+        if !is_active.get_untracked() {
             set_active.set(true);
             request_next_frame();
         }
