@@ -212,7 +212,6 @@ pub fn use_websocket_with_options(
     impl Fn(Vec<u8>) + Clone,
 > {
     let url = normalize_url(url);
-    logging::log!("{}", url);
     let UseWebSocketOptions {
         on_open,
         on_message,
