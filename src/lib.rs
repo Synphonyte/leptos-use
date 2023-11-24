@@ -69,6 +69,7 @@ pub use is_none::*;
 pub use is_ok::*;
 pub use is_some::*;
 pub use on_click_outside::*;
+pub use use_display_media::*;
 pub use signal_debounced::*;
 pub use signal_throttled::*;
 pub use use_active_element::*;

@@ -14,6 +14,7 @@ members = [
     "use_cycle_list",
     "use_debounce_fn",
     "use_display_media",
+    "use_display_media",
     "use_document_visibility",
     "use_draggable",
     "use_drop_zone",

@@ -19,6 +19,25 @@ async fn create_media(opts: Option<DisplayMediaStreamConstraints>) -> Result<Med
 
 type UseDisplayReturn = Resource<Option<DisplayMediaStreamConstraints>, Result<MediaStream, JsValue>>;
 
+///
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_display_media)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::use_display_media;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// use_display_media();
+/// #
+/// # view! { }
+/// # }
+/// ```
 pub fn use_display_media<S>(options: S) -> UseDisplayReturn
 where
     S: Into<MaybeSignal<Option<DisplayMediaStreamConstraints>>>,

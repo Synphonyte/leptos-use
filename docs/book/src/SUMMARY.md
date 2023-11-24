@@ -33,6 +33,7 @@
 - [use_breakpoints](browser/use_breakpoints.md)
 - [use_color_mode](browser/use_color_mode.md)
 - [use_css_var](browser/use_css_var.md)
+- [use_display_media](browser/use_display_media.md)
 - [use_event_listener](browser/use_event_listener.md)
 - [use_favicon](browser/use_favicon.md)
 - [use_media_query](browser/use_media_query.md)

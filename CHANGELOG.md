@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### New Functions 🚀
+
+- `use_display_media`
+
 ### Breaking Changes 🛠
 
 - (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always
