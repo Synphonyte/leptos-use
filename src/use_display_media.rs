@@ -4,7 +4,7 @@ use web_sys::{DisplayMediaStreamConstraints, MediaStream};
 use crate::use_window::use_window;
 
 
-/// Get a media stream from the user's display.
+/// Get a Resource containing a media stream from the user's display.
 ///
 /// ## Demo
 ///
