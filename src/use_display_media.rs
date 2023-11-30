@@ -18,9 +18,19 @@ use crate::use_window::use_window;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// use_display_media();
+/// #   let stream = use_display_media(None);
 /// #
-/// # view! { }
+/// #  let video_ref = create_node_ref::<leptos::html::Video>();
+/// #    create_effect(move |_| match stream.get() {
+/// #        Some(Ok(s)) => {
+/// #            video_ref.get().expect("video element ref not created").set_src_object(Some(&s));
+/// #            video_ref.get().map(|v| v.play());
+/// #        }
+/// #        Some(Err(e)) => log::error!("Failed to get media stream: {:?}", e),
+/// #        None => log::debug!("No stream yet"),
+/// #    });
+/// #
+/// #    view! { <video _ref=video_ref controls=true autoplay=true muted=true></video> }
 /// # }
 /// ```
 pub fn use_display_media<S>(options: S) -> UseDisplayReturn
