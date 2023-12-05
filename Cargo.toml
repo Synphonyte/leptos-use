@@ -62,6 +62,7 @@ features = [
   "MediaDevices",
   "MediaQueryList",
   "MediaStream",
+  "MediaStreamTrack",
   "MouseEvent",
   "MutationObserver",
   "MutationObserverInit",

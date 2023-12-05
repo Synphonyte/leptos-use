@@ -1,22 +1,50 @@
 use leptos::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::use_display_media;
+use leptos_use::docs::demo_or_body;
+use leptos_use::{use_display_media, UseDisplayMediaReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let stream = use_display_media(None);
     let video_ref = create_node_ref::<leptos::html::Video>();
 
-    create_effect(move |_| match stream.get() {
-        Some(Ok(s)) => {
-            video_ref.get().expect("video element ref not created").set_src_object(Some(&s));
-            video_ref.get().map(|v| v.play());
+    let UseDisplayMediaReturn {
+        stream,
+        enabled,
+        set_enabled,
+        ..
+    } = use_display_media();
+
+    create_effect(move |_| {
+        match stream.get() {
+            Some(Ok(s)) => {
+                video_ref.get().map(|v| v.set_src_object(Some(&s)));
+                return;
+            }
+            Some(Err(e)) => logging::error!("Failed to get media stream: {:?}", e),
+            None => logging::log!("No stream yet"),
         }
-        Some(Err(e)) => log::error!("Failed to get media stream: {:?}", e),
-        None => log::debug!("No stream yet"),
+
+        video_ref.get().map(|v| v.set_src_object(None));
     });
 
-    view! { <video _ref=video_ref controls=true autoplay=true muted=true></video> }
+    view! {
+        <div class="flex flex-col gap-4 text-center">
+            <div>
+                <button on:click=move |_| set_enabled(
+                    !enabled(),
+                )>{move || if enabled() { "Stop" } else { "Start" }} sharing my screen</button>
+            </div>
+
+            <div>
+                <video
+                    node_ref=video_ref
+                    controls=false
+                    autoplay=true
+                    muted=true
+                    class="h-96 w-auto"
+                ></video>
+            </div>
+        </div>
+    }
 }
 
 fn main() {
@@ -27,4 +55,3 @@ fn main() {
         view! { <Demo/> }
     })
 }
-

@@ -1,4 +1,5 @@
 use leptos::*;
+use std::fmt::Debug;
 
 pub enum MaybeRwSignal<T>
 where
@@ -30,6 +31,16 @@ impl<T> From<T> for MaybeRwSignal<T> {
 impl<T: Default> Default for MaybeRwSignal<T> {
     fn default() -> Self {
         Self::Static(T::default())
+    }
+}
+
+impl<T: Debug> Debug for MaybeRwSignal<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Static(t) => f.debug_tuple("Static").field(t).finish(),
+            Self::DynamicRw(r, w) => f.debug_tuple("DynamicRw").field(r).field(w).finish(),
+            Self::DynamicRead(s) => f.debug_tuple("DynamicRead").field(s).finish(),
+        }
     }
 }
 

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
-- `use_display_media`
+- `use_display_media` (thanks to @seanaye)
 
 ### Breaking Changes 🛠
 
