@@ -90,24 +90,28 @@ pub fn use_idle_with_options(
         let _ = set_idle;
     } else {
         use crate::utils::create_filter_wrapper;
-        use crate::{use_document, use_event_listener, use_event_listener_with_options,UseEventListenerOptions};
+        use crate::{
+            use_document, use_event_listener, use_event_listener_with_options, UseEventListenerOptions,
+        };
         use leptos::ev::{visibilitychange, Custom};
         use leptos::leptos_dom::helpers::TimeoutHandle;
         use std::cell::Cell;
+        use std::rc::Rc;
         use std::time::Duration;
 
+        let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
+
         let reset = {
-            let timer = Cell::new(None::<TimeoutHandle>);
+            let timer = Rc::clone(&timer);
 
             move || {
                 set_idle.set(false);
-                if let Some(timer) = timer.take() {
-                    timer.clear();
-                }
-                timer.replace(
+                if let Some(timer) = timer.replace(
                     set_timeout_with_handle(move || set_idle.set(true), Duration::from_millis(timeout))
                         .ok(),
-                );
+                ) {
+                    timer.clear();
+                }
             }
         };
 
