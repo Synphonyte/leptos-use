@@ -36,6 +36,10 @@ use std::rc::Rc;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// This function is basically ignored on the server. You can safely call `show` but it will do nothing.
 pub fn use_web_notification(
 ) -> UseWebNotificationReturn<impl Fn(ShowOptions) + Clone, impl Fn() + Clone> {
     use_web_notification_with_options(UseWebNotificationOptions::default())
