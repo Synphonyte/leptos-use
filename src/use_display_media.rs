@@ -1,10 +1,8 @@
 use crate::core::MaybeRwSignal;
-use crate::use_window::use_window;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{DisplayMediaStreamConstraints, MediaStream};
 
 /// Reactive [`mediaDevices.getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) streaming.
 ///
@@ -56,7 +54,7 @@ pub fn use_display_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = create_signal(None::<Result<MediaStream, JsValue>>);
+    let (stream, set_stream) = create_signal(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -67,6 +65,8 @@ pub fn use_display_media_with_options(
             let stream = create_media(audio).await;
 
             set_stream.update(|s| *s = Some(stream));
+        } else {
+            let _ = audio;
         }}
     };
 
@@ -122,13 +122,15 @@ pub fn use_display_media_with_options(
 }
 
 #[cfg(not(feature = "ssr"))]
-async fn create_media(audio: bool) -> Result<MediaStream, JsValue> {
+async fn create_media(audio: bool) -> Result<web_sys::MediaStream, JsValue> {
+    use crate::use_window::use_window;
+
     let media = use_window()
         .navigator()
         .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
         .and_then(|n| n.media_devices())?;
 
-    let mut constraints = DisplayMediaStreamConstraints::new();
+    let mut constraints = web_sys::DisplayMediaStreamConstraints::new();
     if audio {
         constraints.audio(&JsValue::from(true));
     }
@@ -136,7 +138,7 @@ async fn create_media(audio: bool) -> Result<MediaStream, JsValue> {
     let promise = media.get_display_media_with_constraints(&constraints)?;
     let res = wasm_bindgen_futures::JsFuture::from(promise).await?;
 
-    Ok::<_, JsValue>(MediaStream::unchecked_from_js(res))
+    Ok::<_, JsValue>(web_sys::MediaStream::unchecked_from_js(res))
 }
 
 // NOTE: there's no video value because it has to be `true`. Otherwise the stream would always resolve to an Error.
@@ -172,7 +174,7 @@ where
     /// Initially this is `None` until `start` resolved successfully.
     /// In case the stream couldn't be started, for example because the user didn't grant permission,
     /// this has the value `Some(Err(...))`.
-    pub stream: Signal<Option<Result<MediaStream, JsValue>>>,
+    pub stream: Signal<Option<Result<web_sys::MediaStream, JsValue>>>,
 
     /// Starts the screen streaming. Triggers the ask for permission if not already granted.
     pub start: StartFn,

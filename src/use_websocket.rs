@@ -485,7 +485,7 @@ pub struct UseWebSocketOptions {
     /// If `false` you have to manually call the `open` function.
     /// Defaults to `true`.
     immediate: bool,
-    /// Sub protocols
+    /// Sub protocols. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket#protocols).
     protocols: Option<Vec<String>>,
 }
 

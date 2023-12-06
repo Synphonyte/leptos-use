@@ -33,6 +33,10 @@ use crate::use_window;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// This function does **not** support SSR. Call it inside a `create_effect`.
 pub fn use_service_worker() -> UseServiceWorkerReturn<impl Fn() + Clone, impl Fn() + Clone> {
     use_service_worker_with_options(UseServiceWorkerOptions::default())
 }
