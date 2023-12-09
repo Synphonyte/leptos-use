@@ -21,7 +21,7 @@ use wasm_bindgen::JsCast;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos_use::{use_color_mode, UseColorModeReturn};
+/// # use leptos_use::{use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -44,7 +44,7 @@ use wasm_bindgen::JsCast;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos_use::{ColorMode, use_color_mode, UseColorModeReturn};
+/// # use leptos_use::{ColorMode, use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
