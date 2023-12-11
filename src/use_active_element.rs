@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::{use_document, use_event_listener_with_options, UseEventListenerOptions};
+use crate::{use_document, use_event_listener_with_options, use_window, UseEventListenerOptions};
 use leptos::ev::{blur, focus};
 use leptos::html::{AnyElement, ToHtmlElement};
 use leptos::*;
@@ -45,7 +45,7 @@ pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
     let listener_options = UseEventListenerOptions::default().capture(true);
 
     let _ = use_event_listener_with_options(
-        window(),
+        use_window(),
         blur,
         move |event| {
             if event.related_target().is_some() {
@@ -58,7 +58,7 @@ pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
     );
 
     let _ = use_event_listener_with_options(
-        window(),
+        use_window(),
         focus,
         move |_| {
             set_active_element.update(|el| *el = get_active_element());

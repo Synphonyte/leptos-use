@@ -105,7 +105,7 @@ where
     let (variable, set_variable) = create_signal(initial_value.clone());
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let el_signal = (target).into();
+        let el_signal = target.into();
         let prop = prop.into();
 
         let update_css_var = {

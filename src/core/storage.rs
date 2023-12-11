@@ -2,7 +2,6 @@ use leptos::window;
 use wasm_bindgen::JsValue;
 
 /// Local or session storage or a custom store that is a `web_sys::Storage`.
-// #[doc(cfg(feature = "storage"))]
 #[derive(Default)]
 pub enum StorageType {
     #[default]

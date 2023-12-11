@@ -1,5 +1,6 @@
 use crate::core::ElementMaybeSignal;
 use crate::{UseDocument, UseWindow};
+use cfg_if::cfg_if;
 use leptos::html::ElementDescriptor;
 use leptos::*;
 use std::marker::PhantomData;
@@ -178,17 +179,31 @@ where
     E: From<web_sys::Node> + 'static,
 {
     fn from(target: &'a str) -> Self {
-        if let Ok(node_list) = document().query_selector_all(target) {
-            let mut list = Vec::with_capacity(node_list.length() as usize);
-            for i in 0..node_list.length() {
-                let node = node_list.get(i).expect("checked the range");
-                list.push(Some(node));
-            }
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            if let Ok(node_list) = document().query_selector_all(target) {
+                let mut list = Vec::with_capacity(node_list.length() as usize);
+                for i in 0..node_list.length() {
+                    let node = node_list.get(i).expect("checked the range");
+                    list.push(Some(node));
+                }
 
-            Self::Static(list)
+                Self::Static(list)
+            } else {
+                Self::Static(vec![])
+            }
         } else {
+            let _ = target;
             Self::Static(vec![])
-        }
+        }}
+    }
+}
+
+impl<E> From<String> for ElementsMaybeSignal<web_sys::Node, E>
+where
+    E: From<web_sys::Node> + 'static,
+{
+    fn from(target: String) -> Self {
+        Self::from(target.as_str())
     }
 }
 
@@ -197,21 +212,26 @@ where
     E: From<web_sys::Node> + 'static,
 {
     fn from(signal: Signal<String>) -> Self {
-        Self::Dynamic(
-            create_memo(move |_| {
-                if let Ok(node_list) = document().query_selector_all(&signal.get()) {
-                    let mut list = Vec::with_capacity(node_list.length() as usize);
-                    for i in 0..node_list.length() {
-                        let node = node_list.get(i).expect("checked the range");
-                        list.push(Some(node));
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            Self::Dynamic(
+                create_memo(move |_| {
+                    if let Ok(node_list) = document().query_selector_all(&signal.get()) {
+                        let mut list = Vec::with_capacity(node_list.length() as usize);
+                        for i in 0..node_list.length() {
+                            let node = node_list.get(i).expect("checked the range");
+                            list.push(Some(node));
+                        }
+                        list
+                    } else {
+                        vec![]
                     }
-                    list
-                } else {
-                    vec![]
-                }
-            })
-            .into(),
-        )
+                })
+                .into(),
+            )
+        } else {
+            let _ = signal;
+            Self::Dynamic(Signal::derive(Vec::new))
+        }}
     }
 }
 

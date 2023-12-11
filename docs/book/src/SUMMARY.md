@@ -6,7 +6,7 @@
 [Changelog](changelog.md)
 [Functions](functions.md)
 
-# @Storage
+# Storage
 
 - [use_local_storage](storage/use_local_storage.md)
 - [use_session_storage](storage/use_session_storage.md)
@@ -33,11 +33,14 @@
 - [use_breakpoints](browser/use_breakpoints.md)
 - [use_color_mode](browser/use_color_mode.md)
 - [use_css_var](browser/use_css_var.md)
+- [use_display_media](browser/use_display_media.md)
 - [use_event_listener](browser/use_event_listener.md)
 - [use_favicon](browser/use_favicon.md)
 - [use_media_query](browser/use_media_query.md)
 - [use_preferred_contrast](browser/use_preferred_contrast.md)
 - [use_preferred_dark](browser/use_preferred_dark.md)
+- [use_service_worker](browser/use_service_worker.md)
+- [use_web_notification](browser/use_web_notification.md)
 
 # Sensors
 
@@ -45,6 +48,7 @@
 - [use_element_hover](sensors/use_element_hover.md)
 - [use_geolocation](sensors/use_geolocation.md)
 - [use_idle](sensors/use_idle.md)
+- [use_infinite_scroll](sensors/use_infinite_scroll.md)
 - [use_mouse](sensors/use_mouse.md)
 - [use_scroll](sensors/use_scroll.md)
 
@@ -73,8 +77,11 @@
 - [signal_debounced](reactivity/signal_debounced.md)
 - [signal_throttled](reactivity/signal_throttled.md)
 
-# Utilities
+# Iterable
 
+- [use_sorted](iterable/use_sorted.md)
+
+# Utilities
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)

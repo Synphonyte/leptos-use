@@ -1,28 +1,31 @@
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::storage::use_storage;
+use leptos_use::storage::{use_local_storage, JsonCodec};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct BananaState {
     pub name: String,
-    pub color: String,
-    pub size: String,
+    pub wearing: String,
+    pub descending: String,
     pub count: u32,
+}
+
+impl Default for BananaState {
+    fn default() -> Self {
+        Self {
+            name: "Bananas".to_string(),
+            wearing: "pyjamas".to_string(),
+            descending: "stairs".to_string(),
+            count: 2,
+        }
+    }
 }
 
 #[component]
 fn Demo() -> impl IntoView {
-    let the_default = BananaState {
-        name: "Banana".to_string(),
-        color: "Yellow".to_string(),
-        size: "Medium".to_string(),
-        count: 0,
-    };
-
-    let (state, set_state, _) = use_storage("banana-state", the_default.clone());
-
-    let (state2, ..) = use_storage("banana-state", the_default.clone());
+    let (state, set_state, reset) = use_local_storage::<BananaState, JsonCodec>("banana-state");
+    let (state2, _, _) = use_local_storage::<BananaState, JsonCodec>("banana-state");
 
     view! {
         <input
@@ -33,14 +36,14 @@ fn Demo() -> impl IntoView {
         />
         <input
             class="block"
-            prop:value=move || state.get().color
-            on:input=move |e| set_state.update(|s| s.color = event_target_value(&e))
+            prop:value=move || state.get().wearing
+            on:input=move |e| set_state.update(|s| s.wearing = event_target_value(&e))
             type="text"
         />
         <input
             class="block"
-            prop:value=move || state.get().size
-            on:input=move |e| set_state.update(|s| s.size = event_target_value(&e))
+            prop:value=move || state.get().descending
+            on:input=move |e| set_state.update(|s| s.descending = event_target_value(&e))
             type="text"
         />
         <input
@@ -57,6 +60,7 @@ fn Demo() -> impl IntoView {
             step="1"
             max="1000"
         />
+        <button on:click=move |_| reset()>"Delete from storage"</button>
 
         <p>
             "Second " <b>
@@ -67,7 +71,9 @@ fn Demo() -> impl IntoView {
         <pre>{move || format!("{:#?}", state2.get())}</pre>
 
         <Note>
-            "The values are persistent. When you reload the page the values will be the same."
+            "The values are persistent. When you reload the page or "
+            <a href="#" target="_blank">"open a second window"</a>
+            ", the values will be the same."
         </Note>
     }
 }

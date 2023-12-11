@@ -3,10 +3,10 @@ use leptos::ev::{keypress, KeyboardEvent};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use leptos_use::storage::use_local_storage;
+use leptos_use::storage::{use_local_storage, StringCodec};
 use leptos_use::{
-    use_debounce_fn, use_event_listener, use_intl_number_format, use_window,
-    UseIntlNumberFormatOptions,
+    use_color_mode, use_debounce_fn, use_event_listener, use_intl_number_format, use_timestamp,
+    use_window, ColorMode, UseColorModeReturn, UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -37,7 +37,7 @@ pub fn App() -> impl IntoView {
 #[component]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
-    let (count, set_count, _) = use_local_storage("count-state", 0);
+    let (count, set_count, _) = use_local_storage::<i32, StringCodec>("count-state");
     let on_click = move |_| set_count.update(|count| *count += 1);
 
     let nf = use_intl_number_format(
@@ -63,25 +63,20 @@ fn HomePage() -> impl IntoView {
     );
     debounced_fn();
 
+    let UseColorModeReturn { mode, set_mode, .. } = use_color_mode();
+
+    let timestamp = use_timestamp();
+
     view! {
-        <h1>
-            Leptos-Use SSR Example
-        </h1>
-        <button on:click=on_click>
-            Click Me:
-            {count}
-        </button>
-        <p>
-            Locale zh-Hans-CN-u-nu-hanidec:
-            {zh_count}
-        </p>
-        <p>
-            Press any key:
-            {key}
-        </p>
-        <p>
-            Debounced called:
-            {debounce_value}
-        </p>
+        <h1>Leptos-Use SSR Example</h1>
+        <button on:click=on_click>Click Me: {count}</button>
+        <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
+        <p>Press any key: {key}</p>
+        <p>Debounced called: {debounce_value}</p>
+        <p>Color mode: {move || format!("{:?}", mode.get())}</p>
+        <button on:click=move |_| set_mode.set(ColorMode::Light)>Change to Light</button>
+        <button on:click=move |_| set_mode.set(ColorMode::Dark)>Change to Dark</button>
+        <button on:click=move |_| set_mode.set(ColorMode::Auto)>Change to Auto</button>
+        <p>{timestamp}</p>
     }
 }

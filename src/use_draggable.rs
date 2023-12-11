@@ -1,5 +1,5 @@
 use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
-use crate::{use_event_listener_with_options, UseEventListenerOptions};
+use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::*;
@@ -52,8 +52,8 @@ where
     use_draggable_with_options::<
         El,
         T,
-        web_sys::EventTarget,
-        web_sys::EventTarget,
+        UseWindow,
+        web_sys::Window,
         web_sys::EventTarget,
         web_sys::EventTarget,
     >(target, UseDraggableOptions::default())
@@ -87,7 +87,7 @@ where
         ..
     } = options;
 
-    let target = (target).into();
+    let target = target.into();
 
     let dragging_handle = if let Some(handle) = handle {
         let handle = (handle).into();
@@ -267,19 +267,14 @@ where
 }
 
 impl Default
-    for UseDraggableOptions<
-        web_sys::EventTarget,
-        web_sys::EventTarget,
-        web_sys::EventTarget,
-        web_sys::EventTarget,
-    >
+    for UseDraggableOptions<UseWindow, web_sys::Window, web_sys::EventTarget, web_sys::EventTarget>
 {
     fn default() -> Self {
         Self {
             exact: MaybeSignal::default(),
             prevent_default: MaybeSignal::default(),
             stop_propagation: MaybeSignal::default(),
-            dragging_element: window().into(),
+            dragging_element: use_window(),
             handle: None,
             pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],
             initial_value: MaybeRwSignal::default(),

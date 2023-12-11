@@ -2,13 +2,16 @@ use leptos::html::Div;
 use leptos::*;
 use leptos_use::core::Position;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
+use leptos_use::{use_draggable_with_options, use_window, UseDraggableOptions, UseDraggableReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Div>();
 
-    let inner_width = window().inner_width().unwrap().as_f64().unwrap();
+    let inner_width = use_window()
+        .as_ref()
+        .map(|w| w.inner_width().unwrap().as_f64().unwrap())
+        .unwrap_or(0.0);
 
     let UseDraggableReturn { x, y, style, .. } = use_draggable_with_options(
         el,
@@ -21,20 +24,14 @@ fn Demo() -> impl IntoView {
     );
 
     view! {
-        <p class="italic op50 text-center">
-            Check the floating box
-        </p>
+        <p class="italic op50 text-center">Check the floating box</p>
         <div
             node_ref=el
             class="px-4 py-2 border border-gray-400/30 rounded shadow hover:shadow-lg fixed bg-[--bg] select-none cursor-move z-24"
             style=move || format!("touch-action: none; {}", style())
         >
             "👋 Drag me!"
-            <div class="text-sm opacity-50">
-                I am
-                {move || x().round()},
-                {move || y().round()}
-            </div>
+            <div class="text-sm opacity-50">I am {move || x().round()} , {move || y().round()}</div>
         </div>
     }
 }

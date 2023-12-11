@@ -16,20 +16,10 @@ fn Demo() -> impl IntoView {
     document().body().unwrap().append_child(&div).unwrap();
 
     view! {
-        <div>
-            See scroll values in the lower right corner of the screen.
-        </div>
+        <div>See scroll values in the lower right corner of the screen.</div>
         <div class="float m-5 area shadow-lg">
-            <Note class="mb-2">
-                Scroll value
-            </Note>
-            <div>
-                x:
-                {move || format!("{:.1}", x())}
-                <br/>
-                y:
-                {move || format!("{:.1}", y())}
-            </div>
+            <Note class="mb-2">Scroll value</Note>
+            <div>x: {move || format!("{:.1}", x())} <br/> y: {move || format!("{:.1}", y())}</div>
         </div>
     }
 }

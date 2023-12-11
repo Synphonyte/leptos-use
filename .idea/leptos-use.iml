@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_display_media/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_scroll/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_resize_observer/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_mouse/src" isTestSource="false" />
@@ -56,6 +57,10 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_geolocation/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_idle/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_timestamp/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_sorted/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_service_worker/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_infinite_scroll/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_web_notification/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/client/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_webtransport_with_server/server/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
@@ -65,7 +70,9 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_throttle_fn/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_display_media/dist" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_debounce_fn/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/use_display_media/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_scroll/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_resize_observer/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_mouse/target" />

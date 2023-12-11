@@ -1,4 +1,4 @@
-use crate::use_media_query;
+use crate::{use_media_query, use_window};
 use leptos::logging::error;
 use leptos::*;
 use paste::paste;
@@ -185,7 +185,7 @@ macro_rules! impl_cmp_reactively {
 
 impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
     fn match_(query: &str) -> bool {
-        if let Ok(Some(query_list)) = window().match_media(query) {
+        if let Ok(Some(query_list)) = use_window().match_media(query) {
             return query_list.matches();
         }
 

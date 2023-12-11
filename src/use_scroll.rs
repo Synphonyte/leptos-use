@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::{Direction, Directions, ElementMaybeSignal};
 use crate::UseEventListenerOptions;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
@@ -174,7 +174,9 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// ## Server-Side Rendering
 ///
 /// On the server this returns signals that don't change and setters that are noops.
-pub fn use_scroll<El, T>(element: El) -> UseScrollReturn
+pub fn use_scroll<El, T>(
+    element: El,
+) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
 where
     El: Clone,
     El: Into<ElementMaybeSignal<T, web_sys::Element>>,
@@ -185,7 +187,10 @@ where
 
 /// Version of [`use_scroll`] with options. See [`use_scroll`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_scroll_with_options<El, T>(element: El, options: UseScrollOptions) -> UseScrollReturn
+pub fn use_scroll_with_options<El, T>(
+    element: El,
+    options: UseScrollOptions,
+) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
 where
     El: Clone,
     El: Into<ElementMaybeSignal<T, web_sys::Element>>,
@@ -210,9 +215,9 @@ where
     });
 
     cfg_if! { if #[cfg(feature = "ssr")] {
-        let set_x = Box::new(|_| {});
-        let set_y = Box::new(|_| {});
-        let measure = Box::new(|| {});
+        let set_x = |_| {};
+        let set_y = |_| {};
+        let measure = || {};
     } else {
         let signal = element.into();
         let behavior = options.behavior;
@@ -243,16 +248,16 @@ where
 
         let set_x = {
             let scroll_to = scroll_to.clone();
-            Box::new(move |x| scroll_to(Some(x), None))
+            move |x| scroll_to(Some(x), None)
         };
 
-        let set_y = Box::new(move |y| scroll_to(None, Some(y)));
+        let set_y = move |y| scroll_to(None, Some(y));
 
         let on_scroll_end = {
             let on_stop = Rc::clone(&options.on_stop);
 
             move |e| {
-                if !is_scrolling.get_untracked() {
+                if !is_scrolling.try_get_untracked().unwrap_or_default() {
                     return;
                 }
 
@@ -385,12 +390,7 @@ where
                 Signal<Option<web_sys::EventTarget>>,
                 web_sys::EventTarget,
                 _,
-            >(
-                target,
-                ev::scroll,
-                handler,
-                options.event_listener_options,
-            );
+            >(target, ev::scroll, handler, options.event_listener_options);
         } else {
             let _ = use_event_listener_with_options::<
                 _,
@@ -417,13 +417,12 @@ where
             options.event_listener_options,
         );
 
-        let measure = Box::new(move || {
-            let el = signal.get_untracked();
-            if let Some(el) = el {
+        let measure = move || {
+            if let Some(el) = signal.get_untracked() {
                 let el = el.into();
                 set_arrived_state(el);
             }
-        });
+        };
     }}
 
     UseScrollReturn {
@@ -501,30 +500,57 @@ impl From<ScrollBehavior> for web_sys::ScrollBehavior {
 }
 
 /// The return value of [`use_scroll`].
-pub struct UseScrollReturn {
+pub struct UseScrollReturn<SetXFn, SetYFn, MFn>
+where
+    SetXFn: Fn(f64) + Clone,
+    SetYFn: Fn(f64) + Clone,
+    MFn: Fn() + Clone,
+{
+    /// X coordinate of scroll position
     pub x: Signal<f64>,
-    pub set_x: Box<dyn Fn(f64)>,
+
+    /// Sets the value of `x`. This does also scroll the element.
+    pub set_x: SetXFn,
+
+    /// Y coordinate of scroll position
     pub y: Signal<f64>,
-    pub set_y: Box<dyn Fn(f64)>,
+
+    /// Sets the value of `y`. This does also scroll the element.
+    pub set_y: SetYFn,
+
+    /// Is true while the element is being scrolled.
     pub is_scrolling: Signal<bool>,
+
+    /// Sets the field that represents a direction to true if the
+    /// element is scrolled all the way to that side.
     pub arrived_state: Signal<Directions>,
+
+    /// The directions in which the element is being scrolled are set to true.
     pub directions: Signal<Directions>,
-    pub measure: Box<dyn Fn()>,
+
+    /// Re-evaluates the `arrived_state`.
+    pub measure: MFn,
 }
 
-#[derive(Copy, Clone)]
-pub struct Directions {
-    pub left: bool,
-    pub right: bool,
-    pub top: bool,
-    pub bottom: bool,
-}
-
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Copy, Clone, Debug)]
 /// Threshold in pixels when we consider a side to have arrived (`UseScrollReturn::arrived_state`).
 pub struct ScrollOffset {
     pub left: f64,
     pub top: f64,
     pub right: f64,
     pub bottom: f64,
+}
+
+impl ScrollOffset {
+    /// Sets the value of the provided direction
+    pub fn set_direction(mut self, direction: Direction, value: f64) -> Self {
+        match direction {
+            Direction::Top => self.top = value,
+            Direction::Bottom => self.bottom = value,
+            Direction::Left => self.left = value,
+            Direction::Right => self.right = value,
+        }
+
+        self
+    }
 }

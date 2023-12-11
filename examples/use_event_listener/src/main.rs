@@ -2,11 +2,11 @@ use leptos::ev::{click, keydown};
 use leptos::html::A;
 use leptos::logging::log;
 use leptos::*;
-use leptos_use::use_event_listener;
+use leptos_use::{use_event_listener, use_window};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let _ = use_event_listener(window(), keydown, |evt| {
+    let _ = use_event_listener(use_window(), keydown, |evt| {
         log!("window keydown: '{}'", evt.key());
     });
 

@@ -125,7 +125,7 @@ where
             })
         };
 
-        let target = (target).into();
+        let target = target.into();
 
         let listener = {
             let should_listen = Rc::clone(&should_listen);

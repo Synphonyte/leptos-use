@@ -6,12 +6,7 @@ use leptos_use::use_timestamp;
 fn Demo() -> impl IntoView {
     let timestamp = use_timestamp();
 
-    view! {
-        <div>
-            Timestamp:
-            {timestamp}
-        </div>
-    }
+    view! { <div>Timestamp: {timestamp}</div> }
 }
 
 fn main() {

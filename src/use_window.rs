@@ -1,3 +1,4 @@
+use crate::core::impl_ssr_safe_method;
 use crate::{use_document, UseDocument};
 use cfg_if::cfg_if;
 use std::ops::Deref;
@@ -48,14 +49,20 @@ impl Deref for UseWindow {
 }
 
 impl UseWindow {
-    /// Returns the `Some(Navigator)` in the Browser. `None` otherwise.
-    pub fn navigator(&self) -> Option<web_sys::Navigator> {
-        self.0.as_ref().map(|w| w.navigator())
-    }
+    impl_ssr_safe_method!(
+        /// Returns `Some(Navigator)` in the Browser. `None` otherwise.
+        navigator(&self) -> Option<web_sys::Navigator>
+    );
 
     /// Returns the same as [`use_document`].
     #[inline(always)]
     pub fn document(&self) -> UseDocument {
         use_document()
     }
+
+    impl_ssr_safe_method!(
+        /// Returns the same as `window().match_media()` in the Browser. `Ok(None)` otherwise.
+        match_media(&self, query: &str) -> Result<Option<web_sys::MediaQueryList>, wasm_bindgen::JsValue>;
+        .unwrap_or(Ok(None))
+    );
 }

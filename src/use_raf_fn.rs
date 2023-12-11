@@ -1,10 +1,9 @@
 use crate::utils::Pausable;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
 
 /// Call function on every requestAnimationFrame.
 /// With controls of pausing and resuming.
@@ -34,6 +33,10 @@ use wasm_bindgen::JsCast;
 ///
 /// You can use `use_raf_fn_with_options` and set `immediate` to `false`. In that case
 /// you have to call `resume()` before the `callback` is executed.
+///
+/// ## Server-Side Rendering
+///
+/// On the server this does basically nothing. The provided closure will never be called.
 pub fn use_raf_fn(
     callback: impl Fn(UseRafFnCallbackArgs) + 'static,
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
@@ -54,24 +57,31 @@ pub fn use_raf_fn_with_options(
     let loop_ref = Rc::new(RefCell::new(Box::new(|_: f64| {}) as Box<dyn Fn(f64)>));
 
     let request_next_frame = {
-        let loop_ref = Rc::clone(&loop_ref);
-        let raf_handle = Rc::clone(&raf_handle);
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            move || ()
+        } else {
+            use wasm_bindgen::JsCast;
+            use wasm_bindgen::closure::Closure;
 
-        move || {
             let loop_ref = Rc::clone(&loop_ref);
+            let raf_handle = Rc::clone(&raf_handle);
 
-            raf_handle.set(
-                window()
-                    .request_animation_frame(
-                        Closure::once_into_js(move |timestamp: f64| {
-                            loop_ref.borrow()(timestamp);
-                        })
-                        .as_ref()
-                        .unchecked_ref(),
-                    )
-                    .ok(),
-            );
-        }
+            move || {
+                let loop_ref = Rc::clone(&loop_ref);
+
+                raf_handle.set(
+                    window()
+                        .request_animation_frame(
+                            Closure::once_into_js(move |timestamp: f64| {
+                                loop_ref.borrow()(timestamp);
+                            })
+                            .as_ref()
+                            .unchecked_ref(),
+                        )
+                        .ok(),
+                );
+            }
+        }}
     };
 
     let loop_fn = {
@@ -79,7 +89,7 @@ pub fn use_raf_fn_with_options(
         let previous_frame_timestamp = Cell::new(0.0_f64);
 
         move |timestamp: f64| {
-            if !is_active.get() {
+            if !is_active.get_untracked() {
                 return;
             }
 
@@ -101,7 +111,7 @@ pub fn use_raf_fn_with_options(
     let _ = loop_ref.replace(Box::new(loop_fn));
 
     let resume = move || {
-        if !is_active.get() {
+        if !is_active.get_untracked() {
             set_active.set(true);
             request_next_frame();
         }

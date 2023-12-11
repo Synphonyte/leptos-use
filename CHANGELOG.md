@@ -3,6 +3,80 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2023-12-06
+
+### New Functions 🚀
+
+- `use_display_media` (thanks to @seanaye)
+
+### Breaking Changes 🛠
+
+- (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always
+  requiring `serde`.
+    - This also removes the feature `storage`
+    - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
+    - If you want to use `JsonCodec` you have to enable the feature `serde`
+    - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
+- (@feral-dot-io) The Rust flag `--cfg=web_sys_unstable_apis` is not needed anymore since relevant `web_sys` APIs are
+  now stable.
+  This affects in particular
+    - `use_element_size`
+    - `use_resize_observer`
+
+### Fixes 🍕
+
+- `use_raf_fn` and `use_timestamp` no longer spam warnings because of `get`ting signals outside of reactive contexts.
+- `use_infinite_scroll` no longer calls the callback twice for the same event
+- `use_scroll` now uses `try_get_untracked` in the debounced callback to avoid panics if the context has been destroyed
+  while the callback was waiting to be called.
+- `use_idle` works properly now (no more idles too early).
+- `use_web_notification`  doesn't panic on the server anymore.
+
+## [0.8.2] - 2023-11-09
+
+### Fixes 🍕
+
+- Fixed SSR for
+    - use_timestamp
+    - use_raf_fn
+    - use_idle
+
+## [0.8.1] - 2023-10-28
+
+### Fixes 🍕
+
+- Using strings for `ElementMaybeSignal` and `ElementsMaybeSignal` is now SSR safe.
+    - This fixes specifically `use_color_mode` to work on the server.
+
+## [0.8.0] - 2023-10-24
+
+### New Functions 🚀
+
+- `use_web_notification` (thanks to @centershocks44)
+- `use_infinite_scroll`
+- `use_service_worker` (thanks to @lpotthast)
+
+### Breaking Changes 🛠
+
+- `use_scroll` returns `impl Fn(T) + Clone` instead of `Box<dyn Fn(T)>`.
+
+### Other Changes 🔥
+
+- `UseScrollReturn` is now documented
+
+## [0.7.2] - 2023-10-21
+
+### Fixes 🍕
+
+- Some functions still used `window()` which could lead to panics in SSR. This is now fixed.
+  Specifically for `use_draggable`.
+
+## [0.7.1] - 2023-10-02
+
+### New Function 🚀
+
+- `use_sorted`
+
 ## [0.7.0] - 2023-09-30
 
 ### New Functions 🚀

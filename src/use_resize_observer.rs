@@ -12,9 +12,6 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 
 /// Reports changes to the dimensions of an Element's content or the border-box.
 ///
-/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
-///
 /// Please refer to [ResizeObserver on MDN](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
 /// for more details.
 ///
@@ -25,12 +22,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::{html::Div, *};
 /// # use leptos_use::use_resize_observer;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref();
+/// let el = create_node_ref::<Div>();
 /// let (text, set_text) = create_signal("".to_string());
 ///
 /// use_resize_observer(
@@ -114,7 +111,7 @@ where
             }
         };
 
-        let targets = (target).into();
+        let targets = target.into();
 
         let stop_watch = {
             let cleanup = cleanup.clone();

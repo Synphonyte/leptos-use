@@ -15,10 +15,7 @@ fn Demo() -> impl IntoView {
     });
 
     view! {
-        <div>
-            Count:
-            {count}
-        </div>
+        <div>Count: {count}</div>
         <button on:click=move |_| pause() disabled=move || !is_active()>
             Pause
         </button>
