@@ -1,4 +1,4 @@
-use super::Codec;
+use super::StringCodec;
 use std::str::FromStr;
 
 /// A codec for strings that relies on [`FromStr`] and [`ToString`] to parse.
@@ -15,10 +15,10 @@ use std::str::FromStr;
 /// #    view! { }
 /// # }
 /// ```
-#[derive(Clone, Default, PartialEq)]
-pub struct StringCodec;
+#[derive(Copy, Clone, Default, PartialEq)]
+pub struct FromToStringCodec;
 
-impl<T: FromStr + ToString> Codec<T> for StringCodec {
+impl<T: FromStr + ToString> StringCodec<T> for FromToStringCodec {
     type Error = T::Err;
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn test_string_codec() {
         let s = String::from("party time 🎉");
-        let codec = StringCodec;
+        let codec = FromToStringCodec;
         assert_eq!(codec.encode(&s), Ok(s.clone()));
         assert_eq!(codec.decode(s.clone()), Ok(s));
     }

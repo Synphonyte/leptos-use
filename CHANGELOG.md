@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### New Functions 🚀
+
+- `use_webtransport`
+
+### Breaking Changes 🛠
+
+- The trait `Codec` has been renamed to `StringCodec` and has been moved to `util::StringCodec`.
+  - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
+  - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
+
 ## [0.9.0] - 2023-12-06
 
 ### New Functions 🚀
@@ -86,7 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_document`
 - `use_window`
 - `use_geolocation`
-- `use_webtransport`
 - `signal_debounced`
 - `signal_throttled`
 

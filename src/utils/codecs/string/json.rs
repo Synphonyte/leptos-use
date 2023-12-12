@@ -1,4 +1,4 @@
-use super::Codec;
+use super::StringCodec;
 
 /// A codec for storing JSON messages that relies on [`serde_json`] to parse.
 ///
@@ -113,10 +113,10 @@ use super::Codec;
 /// #    view! { }
 /// # }
 /// ```
-#[derive(Clone, Default, PartialEq)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub struct JsonCodec;
 
-impl<T: serde::Serialize + serde::de::DeserializeOwned> Codec<T> for JsonCodec {
+impl<T: serde::Serialize + serde::de::DeserializeOwned> StringCodec<T> for JsonCodec {
     type Error = serde_json::Error;
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {

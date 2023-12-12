@@ -1,7 +1,6 @@
-use crate::storage::StringCodec;
 use crate::{
     core::{MaybeRwSignal, StorageType},
-    utils::FilterOptions,
+    utils::{FilterOptions, StringCodec},
 };
 use cfg_if::cfg_if;
 use leptos::*;
@@ -71,6 +70,20 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///     }
 /// }
 /// ```
+///
+/// ## Versioning
+///
+/// Versioning is the process of handling long-term data that can outlive our code.
+///
+/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
+///
+/// How best to handle versioning depends on the codec involved:
+///
+/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
+///
+/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
+///
+/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
 #[inline(always)]
 pub fn use_storage(
     storage_type: StorageType,
@@ -320,30 +333,6 @@ pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
     initial_value: MaybeRwSignal<T>,
     // Debounce or throttle the writing to storage whenever the value changes
     filter: FilterOptions,
-}
-
-/// A codec for encoding and decoding values to and from UTF-16 strings. These strings are intended to be stored in browser storage.
-///
-/// ## Versioning
-///
-/// Versioning is the process of handling long-term data that can outlive our code.
-///
-/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
-///
-/// How best to handle versioning depends on the codec involved:
-///
-/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
-///
-/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
-///
-/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
-pub trait Codec<T>: Clone + 'static {
-    /// The error type returned when encoding or decoding fails.
-    type Error;
-    /// Encodes a value to a UTF-16 string.
-    fn encode(&self, val: &T) -> Result<String, Self::Error>;
-    /// Decodes a UTF-16 string to a value. Should be able to decode any string encoded by [`encode`].
-    fn decode(&self, str: String) -> Result<T, Self::Error>;
 }
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.

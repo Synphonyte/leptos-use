@@ -1,4 +1,4 @@
-use super::Codec;
+use super::StringCodec;
 use base64::Engine;
 use thiserror::Error;
 
@@ -29,7 +29,7 @@ use thiserror::Error;
 /// ```
 ///
 /// Note: we've defined and used the `prost` attribute here for brevity. Alternate usage would be to describe the message in a .proto file and use [`prost_build`](https://docs.rs/prost-build) to auto-generate the Rust code.
-#[derive(Clone, Default, PartialEq)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub struct ProstCodec;
 
 #[derive(Error, Debug, PartialEq)]
@@ -40,7 +40,7 @@ pub enum ProstCodecError {
     DecodeProst(#[from] prost::DecodeError),
 }
 
-impl<T: Default + prost::Message> Codec<T> for ProstCodec {
+impl<T: Default + prost::Message> StringCodec<T> for ProstCodec {
     type Error = ProstCodecError;
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {

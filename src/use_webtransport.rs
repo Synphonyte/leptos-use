@@ -424,6 +424,7 @@ impl Default for UseWebTransportOptions {
 pub enum StreamState {
     Open,
     Closed,
+    ClosedWithError(WebTransportError),
 }
 
 #[async_trait(?Send)]
@@ -592,14 +593,20 @@ macro_rules! impl_closable_stream {
 
             #[inline(always)]
             fn close(&self) {
-                let _ = self.writer.close();
-                self.set_state.set(StreamState::Closed);
+                spawn_local(async {
+                    self.close_async().await.ok();
+                })
             }
 
             async fn close_async(&self) -> Result<(), WebTransportError> {
-                let _ = JsFuture::from(self.writer.close())
-                    .await
-                    .map_err(|e| WebTransportError::OnCloseWriter(e))?;
+                let _ = JsFuture::from(self.writer.close()).await.map_err(|e| {
+                    let error = WebTransportError::FailedToCloseStream(e);
+                    self.set_state
+                        .set(StreamState::ClosedWithError(error.clone()));
+                    error
+                })?;
+
+                self.set_state.set(StreamState::Closed);
 
                 Ok(())
             }
@@ -740,7 +747,7 @@ fn create_bidir_stream(
 }
 
 /// Error enum for [`UseWebTransportOptions::on_error`]
-#[derive(Debug)]
+#[derive(Debug, Clone, Error)]
 pub enum WebTransportError {
     /// The `WebTransport` is not connected yet. Call `open` first.
     NotConnected,
@@ -774,7 +781,7 @@ pub enum SendError {
 pub enum ReceiveError {
     #[cfg(feature = "bincode")]
     #[error("Serialization failed: {0}")]
-    SerializationFailed(#[from] bincode::Error),
+    DeserializationFailed(#[from] bincode::Error),
 
     #[cfg(feature = "msgpack")]
     #[error("Serialization failed: {0}")]
