@@ -17,6 +17,7 @@ members = [
     "use_document_visibility",
     "use_draggable",
     "use_drop_zone",
+    "use_element_bounding",
     "use_element_hover",
     "use_element_size",
     "use_element_visibility",

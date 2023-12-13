@@ -19,6 +19,7 @@
 - [use_document_visibility](elements/use_document_visibility.md)
 - [use_draggable](elements/use_draggable.md)
 - [use_drop_zone](elements/use_drop_zone.md)
+- [use_element_bounding](elements/use_element_bounding.md)
 - [use_element_size](elements/use_element_size.md)
 - [use_element_visibility](elements/use_element_visibility.md)
 - [use_intersection_observer](elements/use_intersection_observer.md)
