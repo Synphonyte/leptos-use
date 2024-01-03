@@ -34,6 +34,7 @@ members = [
     "use_intl_number_format",
     "use_media_query",
     "use_mouse",
+    "use_mouse_in_element",
     "use_mutation_observer",
     "use_raf_fn",
     "use_resize_observer",

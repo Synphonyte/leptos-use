@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_mouse_in_element`
 - `use_device_pixel_ratio` (thanks to @mondeja)
 - `use_element_bounding`
+
+### Changes 🔥
+
+- The `UseMouseReturn` signals `x`, `y`, and `source_type` are now of type `Signal<f64>` instead of `ReadSignal<f64>`.
 
 ## [0.9.0] - 2023-12-06
 
