@@ -49,8 +49,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// - [`use_resize_observer`]
 pub fn use_element_size<El, T>(target: El) -> UseElementSizeReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     use_element_size_with_options(target, UseElementSizeOptions::default())
@@ -63,8 +62,7 @@ pub fn use_element_size_with_options<El, T>(
     options: UseElementSizeOptions,
 ) -> UseElementSizeReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     let UseElementSizeOptions { box_, initial_size } = options;
