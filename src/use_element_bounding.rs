@@ -1,9 +1,6 @@
 use crate::core::ElementMaybeSignal;
-use crate::{
-    use_event_listener_with_options, use_resize_observer, use_window, UseEventListenerOptions,
-};
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::ev::{resize, scroll};
 use leptos::*;
 
 /// Reactive [bounding box](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) of an HTML element
@@ -29,6 +26,9 @@ use leptos::*;
 /// view! { <div node_ref=el></div> }
 /// # }
 /// ```
+/// ## Server-Side Rendering
+///
+/// On the server the returned signals always are `0.0` and `update` is a no-op.
 pub fn use_element_bounding<El, T>(target: El) -> UseElementBoundingReturn<impl Fn() + Clone>
 where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
@@ -46,13 +46,6 @@ where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    let UseElementBoundingOptions {
-        reset,
-        window_resize,
-        window_scroll,
-        immediate,
-    } = options;
-
     let (height, set_height) = create_signal(0.0);
     let (width, set_width) = create_signal(0.0);
     let (left, set_left) = create_signal(0.0);
@@ -62,86 +55,114 @@ where
     let (x, set_x) = create_signal(0.0);
     let (y, set_y) = create_signal(0.0);
 
-    let target = target.into();
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let _ = target;
+        let _ = options;
 
-    let update = {
-        let target = target.clone();
+        let _ = set_height;
+        let _ = set_width;
+        let _ = set_left;
+        let _ = set_right;
+        let _ = set_top;
+        let _ = set_bottom;
+        let _ = set_x;
+        let _ = set_y;
 
-        move || {
-            let el = target.get_untracked();
+        let update = move || ();
+    } else {
+        use leptos::ev::{resize, scroll};
+        use crate::{
+            use_event_listener_with_options, use_resize_observer, use_window, UseEventListenerOptions,
+        };
 
-            if let Some(el) = el {
-                let rect = el.into().get_bounding_client_rect();
+        let UseElementBoundingOptions {
+            reset,
+            window_resize,
+            window_scroll,
+            immediate,
+        } = options;
 
-                set_height.set(rect.height());
-                set_width.set(rect.width());
-                set_left.set(rect.x());
-                set_right.set(rect.x() + rect.width());
-                set_top.set(rect.y());
-                set_bottom.set(rect.y() + rect.height());
-                set_x.set(rect.x());
-                set_y.set(rect.y());
-            } else if reset {
-                set_height.set(0.0);
-                set_width.set(0.0);
-                set_left.set(0.0);
-                set_right.set(0.0);
-                set_top.set(0.0);
-                set_bottom.set(0.0);
-                set_x.set(0.0);
-                set_y.set(0.0);
+        let target = target.into();
+
+        let update = {
+            let target = target.clone();
+
+            move || {
+                let el = target.get_untracked();
+
+                if let Some(el) = el {
+                    let rect = el.into().get_bounding_client_rect();
+
+                    set_height.set(rect.height());
+                    set_width.set(rect.width());
+                    set_left.set(rect.x());
+                    set_right.set(rect.x() + rect.width());
+                    set_top.set(rect.y());
+                    set_bottom.set(rect.y() + rect.height());
+                    set_x.set(rect.x());
+                    set_y.set(rect.y());
+                } else if reset {
+                    set_height.set(0.0);
+                    set_width.set(0.0);
+                    set_left.set(0.0);
+                    set_right.set(0.0);
+                    set_top.set(0.0);
+                    set_bottom.set(0.0);
+                    set_x.set(0.0);
+                    set_y.set(0.0);
+                }
             }
-        }
-    };
+        };
 
-    use_resize_observer(target.clone(), {
-        let update = update.clone();
-
-        move |_, _| {
-            update();
-        }
-    });
-
-    let _ = watch(
-        move || target.get(),
-        {
+        use_resize_observer(target.clone(), {
             let update = update.clone();
-            move |_, _, _| {
+
+            move |_, _| {
                 update();
             }
-        },
-        false,
-    );
+        });
 
-    if window_scroll {
-        let _ = use_event_listener_with_options(
-            use_window(),
-            scroll,
+        let _ = watch(
+            move || target.get(),
             {
                 let update = update.clone();
-                move |_| update()
+                move |_, _, _| {
+                    update();
+                }
             },
-            UseEventListenerOptions::default()
-                .capture(true)
-                .passive(true),
+            false,
         );
-    }
 
-    if window_resize {
-        let _ = use_event_listener_with_options(
-            use_window(),
-            resize,
-            {
-                let update = update.clone();
-                move |_| update()
-            },
-            UseEventListenerOptions::default().passive(true),
-        );
-    }
+        if window_scroll {
+            let _ = use_event_listener_with_options(
+                use_window(),
+                scroll,
+                {
+                    let update = update.clone();
+                    move |_| update()
+                },
+                UseEventListenerOptions::default()
+                    .capture(true)
+                    .passive(true),
+            );
+        }
 
-    if immediate {
-        update();
-    }
+        if window_resize {
+            let _ = use_event_listener_with_options(
+                use_window(),
+                resize,
+                {
+                    let update = update.clone();
+                    move |_| update()
+                },
+                UseEventListenerOptions::default().passive(true),
+            );
+        }
+
+        if immediate {
+            update();
+        }
+    }}
 
     UseElementBoundingReturn {
         height: height.into(),
