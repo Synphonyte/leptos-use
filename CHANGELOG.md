@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_device_pixel_ratio` (thanks to @mondeja)
 - `use_element_bounding`
 
 ## [0.9.0] - 2023-12-06
