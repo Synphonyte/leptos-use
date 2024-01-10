@@ -2,6 +2,7 @@
 
 [Introduction](introduction.md)
 [Get Started](get_started.md)
+[Element Parameters](element_parameters.md)
 [Server-Side Rendering](server_side_rendering.md)
 [Changelog](changelog.md)
 [Functions](functions.md)

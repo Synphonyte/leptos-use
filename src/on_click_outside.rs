@@ -27,7 +27,6 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos::ev::resize;
 /// # use leptos::logging::log;
 /// # use leptos::html::Div;
 /// # use leptos_use::on_click_outside;
@@ -49,6 +48,33 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// which is **not** supported by IE 11, Edge 18 and below.
 /// If you are targeting these browsers, we recommend you to include
 /// [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
+///
+/// ## Excluding Elements
+///
+/// Use this to ignore clicks on certain elements.
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos::logging::log;
+/// # use leptos::html::Div;
+/// # use leptos_use::{on_click_outside_with_options, OnClickOutsideOptions};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// # let target = create_node_ref::<Div>();
+/// #
+/// on_click_outside_with_options(
+///     target,
+///     move |event| { log!("{:?}", event); },
+///     OnClickOutsideOptions::default().ignore(["input", "#some-id"]),
+/// );
+/// #
+/// # view! {
+/// #     <div node_ref=target>"Hello World"</div>
+/// # }
+/// # }
+///
+/// ```
 ///
 /// ## Server-Side Rendering
 ///
@@ -230,12 +256,13 @@ where
 
 /// Options for [`on_click_outside_with_options`].
 #[derive(Clone, DefaultBuilder)]
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct OnClickOutsideOptions<T>
 where
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     /// List of elementss that should not trigger the callback. Defaults to `[]`.
-    #[cfg_attr(feature = "ssr", allow(dead_code))]
+    #[builder(skip)]
     ignore: ElementsMaybeSignal<T, web_sys::EventTarget>,
 
     /// Use capturing phase for internal event listener. Defaults to `true`.
@@ -254,6 +281,20 @@ where
             ignore: Default::default(),
             capture: true,
             detect_iframes: false,
+        }
+    }
+}
+
+impl<T> OnClickOutsideOptions<T>
+where
+    T: Into<web_sys::EventTarget> + Clone + 'static,
+{
+    /// List of elementss that should not trigger the callback. Defaults to `[]`.
+    #[cfg_attr(feature = "ssr", allow(dead_code))]
+    pub fn ignore(self, ignore: impl Into<ElementsMaybeSignal<T, web_sys::EventTarget>>) -> Self {
+        Self {
+            ignore: ignore.into(),
+            ..self
         }
     }
 }

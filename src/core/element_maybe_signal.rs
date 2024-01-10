@@ -1,6 +1,6 @@
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
-use leptos::html::ElementDescriptor;
+use leptos::html::{ElementDescriptor, HtmlElement};
 use leptos::*;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -196,22 +196,36 @@ where
     }
 }
 
-impl<E> From<Signal<String>> for ElementMaybeSignal<web_sys::Element, E>
-where
-    E: From<web_sys::Element> + 'static,
-{
-    fn from(signal: Signal<String>) -> Self {
-        cfg_if! { if #[cfg(feature = "ssr")] {
-            let _ = signal;
-            Self::Dynamic(Signal::derive(|| None))
-        } else {
-            Self::Dynamic(
-                create_memo(move |_| document().query_selector(&signal.get()).unwrap_or_default())
-                    .into(),
-            )
-        }}
-    }
+macro_rules! impl_from_signal_string {
+    ($ty:ty) => {
+        impl<E> From<$ty> for ElementMaybeSignal<web_sys::Element, E>
+        where
+            E: From<web_sys::Element> + 'static,
+        {
+            fn from(signal: $ty) -> Self {
+                cfg_if! { if #[cfg(feature = "ssr")] {
+                    let _ = signal;
+                    Self::Dynamic(Signal::derive(|| None))
+                } else {
+                    Self::Dynamic(
+                        create_memo(move |_| document().query_selector(&signal.get()).unwrap_or_default())
+                            .into(),
+                    )
+                }}
+            }
+        }
+    };
 }
+
+impl_from_signal_string!(Signal<String>);
+impl_from_signal_string!(ReadSignal<String>);
+impl_from_signal_string!(RwSignal<String>);
+impl_from_signal_string!(Memo<String>);
+
+impl_from_signal_string!(Signal<&str>);
+impl_from_signal_string!(ReadSignal<&str>);
+impl_from_signal_string!(RwSignal<&str>);
+impl_from_signal_string!(Memo<&str>);
 
 // From signal ///////////////////////////////////////////////////////////////
 
@@ -274,3 +288,22 @@ macro_rules! impl_from_node_ref {
 
 impl_from_node_ref!(web_sys::EventTarget);
 impl_from_node_ref!(web_sys::Element);
+
+// From leptos::html::HTMLElement ///////////////////////////////////////////////
+
+macro_rules! impl_from_html_element {
+    ($ty:ty) => {
+        impl<HtmlEl> From<HtmlElement<HtmlEl>> for ElementMaybeSignal<$ty, $ty>
+        where
+            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
+        {
+            fn from(value: HtmlElement<HtmlEl>) -> Self {
+                let el: &$ty = value.deref();
+                Self::Static(Some(el.clone()))
+            }
+        }
+    };
+}
+
+impl_from_html_element!(web_sys::EventTarget);
+impl_from_html_element!(web_sys::Element);
