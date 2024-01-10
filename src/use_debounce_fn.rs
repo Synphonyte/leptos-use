@@ -33,6 +33,8 @@ use std::rc::Rc;
 /// # }
 /// ```
 ///
+/// Please note that if the current component is cleaned up before the throttled callback is called, the throttled callback will not be called.
+///
 /// You can also pass options to [`use_debounce_fn_with_options`] with a maximum wait time, similar to
 /// [lodash debounce](https://lodash.com/docs/#debounce).
 ///

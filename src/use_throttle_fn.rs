@@ -36,6 +36,8 @@ pub use crate::utils::ThrottleOptions;
 /// # }
 /// ```
 ///
+/// Please note that if the current component is cleaned up before the throttled callback is called, the throttled callback will not be called.
+///
 /// You can provide options when you use [`use_throttle_fn_with_options`].
 ///
 /// ```

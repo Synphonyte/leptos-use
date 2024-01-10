@@ -4,7 +4,7 @@ use crate::core::now;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
+use leptos::{on_cleanup, set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
 use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::rc::Rc;
@@ -46,6 +46,8 @@ where
             t.set(None);
         }
     };
+
+    on_cleanup(clear.clone());
 
     let ms = ms.into();
 

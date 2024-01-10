@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `UseMouseReturn` signals `x`, `y`, and `source_type` are now of type `Signal<f64>` instead of `ReadSignal<f64>`.
 - You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot easier to use in directives.
 - There's now a chapter in the book especially for `Element(s)MaybeSignal`.
+- Throttled or debounced callbacks (in watch_* or *_fn) no longer are called after the containing scope was cleaned up.
 
 ## [0.9.0] - 2023-12-06
 
