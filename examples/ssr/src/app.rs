@@ -6,8 +6,8 @@ use leptos_router::*;
 use leptos_use::storage::{use_local_storage, StringCodec};
 use leptos_use::{
     use_color_mode, use_debounce_fn, use_event_listener, use_interval, use_intl_number_format,
-    use_timestamp, use_window, ColorMode, UseColorModeReturn, UseIntervalReturn,
-    UseIntlNumberFormatOptions,
+    use_preferred_dark, use_timestamp, use_window, ColorMode, UseColorModeReturn,
+    UseIntervalReturn, UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -68,6 +68,8 @@ fn HomePage() -> impl IntoView {
 
     let timestamp = use_timestamp();
 
+    let is_dark_preferred = use_preferred_dark();
+
     view! {
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
@@ -79,6 +81,7 @@ fn HomePage() -> impl IntoView {
         <button on:click=move |_| set_mode.set(ColorMode::Dark)>Change to Dark</button>
         <button on:click=move |_| set_mode.set(ColorMode::Auto)>Change to Auto</button>
         <p>{timestamp}</p>
+        <p>Dark preferred: {is_dark_preferred}</p>
         <LocalStorageTest/>
     }
 }
