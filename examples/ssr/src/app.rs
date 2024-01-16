@@ -5,8 +5,9 @@ use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::{use_local_storage, StringCodec};
 use leptos_use::{
-    use_color_mode, use_debounce_fn, use_event_listener, use_intl_number_format, use_timestamp,
-    use_window, ColorMode, UseColorModeReturn, UseIntlNumberFormatOptions,
+    use_color_mode, use_debounce_fn, use_event_listener, use_interval, use_intl_number_format,
+    use_timestamp, use_window, ColorMode, UseColorModeReturn, UseIntervalReturn,
+    UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -78,5 +79,23 @@ fn HomePage() -> impl IntoView {
         <button on:click=move |_| set_mode.set(ColorMode::Dark)>Change to Dark</button>
         <button on:click=move |_| set_mode.set(ColorMode::Auto)>Change to Auto</button>
         <p>{timestamp}</p>
+        <LocalStorageTest/>
+    }
+}
+
+#[component]
+pub fn LocalStorageTest() -> impl IntoView {
+    let UseIntervalReturn { counter, .. } = use_interval(1000);
+    logging::log!("test log");
+    let (state, set_state, ..) = use_local_storage::<String, StringCodec>("test-state");
+
+    view! {
+        <p>{counter}</p>
+         <input
+            class="block"
+            prop:value=move || state.get()
+            on:input=move |e| set_state.update(|s| *s = event_target_value(&e))
+            type="text"
+        />
     }
 }
