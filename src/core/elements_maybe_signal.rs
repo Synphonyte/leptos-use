@@ -398,6 +398,8 @@ macro_rules! impl_from_strings_inner {
                         let _ = sel;
                         None
                     } else {
+                        use wasm_bindgen::JsCast;
+
                         if let Ok(node_list) = document().query_selector_all(sel) {
                             let mut list = Vec::with_capacity(node_list.length() as usize);
                             for i in 0..node_list.length() {

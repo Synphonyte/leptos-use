@@ -34,8 +34,12 @@ where
         }
     };
 
-    on_cleanup(move || {
-        clear_timeout(&timer);
+    on_cleanup({
+        let timer = Rc::clone(&timer);
+
+        move || {
+            clear_timeout(&timer);
+        }
     });
 
     let ms = ms.into();
