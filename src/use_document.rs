@@ -4,6 +4,8 @@ use std::ops::Deref;
 use crate::core::impl_ssr_safe_method;
 #[cfg(not(feature = "ssr"))]
 use leptos::*;
+use wasm_bindgen::JsValue;
+use web_sys::NodeList;
 
 /// SSR safe `document()`.
 /// This returns just a new-type wrapper around `Option<Document>`.
@@ -57,5 +59,14 @@ impl UseDocument {
         /// Returns the active (focused) `Some(web_sys::Element)` in the Browser. `None` otherwise.
         active_element(&self) -> Option<web_sys::Element>;
         .unwrap_or_default()
+    );
+
+    impl_ssr_safe_method!(
+        query_selector(&self, selector: &str) -> Result<Option<web_sys::Element>, JsValue>;
+        .unwrap_or(Ok(None))
+    );
+
+    impl_ssr_safe_method!(
+        query_selector_all(&self, selectors: &str) -> Option<Result<NodeList, JsValue>>
     );
 }

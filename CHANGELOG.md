@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot easier to use in directives.
 - There's now a chapter in the book especially for `Element(s)MaybeSignal`.
 - Throttled or debounced callbacks (in watch_* or *_fn) no longer are called after the containing scope was cleaned up.
+- The document returned from `use_document` now supports the methods `query_selector` and `query_selector_all`.
 
 ## [0.9.0] - 2023-12-06
 
