@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - Fixed `use_geolocation` SSR compile issue
+- Fixed `use_intl_number_format` maximum fraction digits option
 
 ### Changes 🔥
 
