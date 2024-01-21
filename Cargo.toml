@@ -1,24 +1,25 @@
 [package]
-name = "leptos-use"
-version = "0.9.0"
-edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
 description = "Collection of essential Leptos utilities inspired by SolidJS USE / VueUse"
+edition = "2021"
 exclude = ["examples/", "tests/"]
+homepage = "https://leptos-use.rs"
 keywords = ["leptos", "utilities"]
 license = "MIT OR Apache-2.0"
+name = "leptos-use"
 readme = "README.md"
 repository = "https://github.com/Synphonyte/leptos-use"
-homepage = "https://leptos-use.rs"
+version = "0.9.0"
 
 [dependencies]
 base64 = { version = "0.21", optional = true }
 cfg-if = "1"
+cookie = { version = "0.18", features = ["percent-encode"] }
 default-struct-builder = "0.5"
 futures-util = "0.3"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
-gloo-utils = { version = "0.2.0"}
+gloo-utils = { version = "0.2.0" }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.5"
@@ -32,78 +33,82 @@ wasm-bindgen = "0.2.88"
 wasm-bindgen-futures = "0.4"
 
 [dependencies.web-sys]
-version = "0.3.65"
 features = [
-  "AddEventListenerOptions",
-  "BinaryType",
-  "Coordinates",
-  "CloseEvent",
-  "CssStyleDeclaration",
-  "CustomEvent",
-  "CustomEventInit",
-  "DisplayMediaStreamConstraints",
-  "DomRect",
-  "DomRectReadOnly",
-  "DataTransfer",
-  "DragEvent",
-  "Element",
-  "EventListener",
-  "EventListenerOptions",
-  "EventTarget",
-  "File",
-  "FileList",
-  "Geolocation",
-  "HtmlElement",
-  "HtmlLinkElement",
-  "HtmlStyleElement",
-  "IntersectionObserver",
-  "IntersectionObserverInit",
-  "IntersectionObserverEntry",
-  "MediaDevices",
-  "MediaQueryList",
-  "MediaStream",
-  "MediaStreamTrack",
-  "MouseEvent",
-  "MutationObserver",
-  "MutationObserverInit",
-  "MutationRecord",
-  "Navigator",
-  "NodeList",
-  "Notification",
-  "NotificationDirection",
-  "NotificationOptions",
-  "NotificationPermission",
-  "PointerEvent",
-  "Position",
-  "PositionError",
-  "PositionOptions",
-  "ResizeObserver",
-  "ResizeObserverBoxOptions",
-  "ResizeObserverEntry",
-  "ResizeObserverOptions",
-  "ResizeObserverSize",
-  "ScrollBehavior",
-  "ScrollToOptions",
-  "ServiceWorker",
-  "ServiceWorkerContainer",
-  "ServiceWorkerRegistration",
-  "ServiceWorkerState",
-  "Storage",
-  "StorageEvent",
-  "Touch",
-  "TouchEvent",
-  "TouchList",
-  "VisibilityState",
-  "WebSocket",
-  "Window",
+    "AddEventListenerOptions",
+    "BinaryType",
+    "Coordinates",
+    "CloseEvent",
+    "CssStyleDeclaration",
+    "CustomEvent",
+    "CustomEventInit",
+    "DisplayMediaStreamConstraints",
+    "DomRect",
+    "DomRectReadOnly",
+    "DataTransfer",
+    "DragEvent",
+    "Element",
+    "EventListener",
+    "EventListenerOptions",
+    "EventTarget",
+    "File",
+    "FileList",
+    "Geolocation",
+    "HtmlDocument",
+    "HtmlElement",
+    "HtmlLinkElement",
+    "HtmlStyleElement",
+    "IntersectionObserver",
+    "IntersectionObserverInit",
+    "IntersectionObserverEntry",
+    "MediaDevices",
+    "MediaQueryList",
+    "MediaStream",
+    "MediaStreamTrack",
+    "MouseEvent",
+    "MutationObserver",
+    "MutationObserverInit",
+    "MutationRecord",
+    "Navigator",
+    "NodeList",
+    "Notification",
+    "NotificationDirection",
+    "NotificationOptions",
+    "NotificationPermission",
+    "PointerEvent",
+    "Position",
+    "PositionError",
+    "PositionOptions",
+    "ResizeObserver",
+    "ResizeObserverBoxOptions",
+    "ResizeObserverEntry",
+    "ResizeObserverOptions",
+    "ResizeObserverSize",
+    "ScrollBehavior",
+    "ScrollToOptions",
+    "ServiceWorker",
+    "ServiceWorkerContainer",
+    "ServiceWorkerRegistration",
+    "ServiceWorkerState",
+    "Storage",
+    "StorageEvent",
+    "Touch",
+    "TouchEvent",
+    "TouchList",
+    "VisibilityState",
+    "WebSocket",
+    "Window",
 ]
+version = "0.3"
 
 [features]
+actix = ["actix-web/cookies"]
+axum = ["axum-extra/cookie", "leptos_axum"]
 docs = []
 math = ["num"]
 prost = ["base64", "dep:prost"]
 serde = ["dep:serde", "serde_json"]
 ssr = []
+storage = ["serde", "serde_json", "web-sys/StorageEvent"]
 
 [package.metadata.docs.rs]
 all-features = true
