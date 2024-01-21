@@ -307,3 +307,63 @@ macro_rules! impl_from_html_element {
 
 impl_from_html_element!(web_sys::EventTarget);
 impl_from_html_element!(web_sys::Element);
+
+// From Signal<leptos::html::HTMLElement> /////////////////////////////////////////
+
+macro_rules! impl_from_signal_html_element {
+    ($signal:ty, $ty:ty) => {
+        impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
+        where
+            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
+        {
+            fn from(value: $signal) -> Self {
+                Self::Dynamic(Signal::derive(move || {
+                    let value = value.get();
+                    let el: &$ty = value.deref();
+                    Some(el.clone())
+                }))
+            }
+        }
+    };
+}
+
+impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+
+impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::Element);
+impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::Element);
+impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::Element);
+impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::Element);
+
+// From Signal<Option<leptos::html::HTMLElement>> /////////////////////////////////////////
+
+macro_rules! impl_from_signal_html_element {
+    ($signal:ty, $ty:ty) => {
+        impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
+        where
+            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
+        {
+            fn from(value: $signal) -> Self {
+                Self::Dynamic(Signal::derive(move || {
+                    let el: Option<$ty> = value.get().map(|el| el.deref().clone());
+                    el
+                }))
+            }
+        }
+    };
+}
+
+impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+impl_from_signal_html_element!(
+    ReadSignal<Option<HtmlElement<HtmlEl>>>,
+    web_sys::EventTarget
+);
+impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+
+impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+impl_from_signal_html_element!(ReadSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::Element);

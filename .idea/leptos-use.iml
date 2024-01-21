@@ -61,6 +61,9 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_service_worker/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_infinite_scroll/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_web_notification/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_device_pixel_ratio/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_element_bounding/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_mouse_in_element/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

@@ -75,12 +75,16 @@ where
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
-    cfg_if! { if #[cfg(feature = "ssr")] {
+    #[cfg(feature = "ssr")]
+    {
         UseResizeObserverReturn {
             is_supported: Signal::derive(|| true),
-            stop: || {}
+            stop: || {},
         }
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 callback(
@@ -121,20 +125,20 @@ where
                 move |targets, _, _| {
                     cleanup();
 
-                    if is_supported.get() && !targets.is_empty() {
-                        let obs =
-                            web_sys::ResizeObserver::new(closure_js.clone().as_ref().unchecked_ref())
-                                .expect("failed to create ResizeObserver");
+                    if is_supported.get_untracked() && !targets.is_empty() {
+                        let obs = web_sys::ResizeObserver::new(
+                            closure_js.clone().as_ref().unchecked_ref(),
+                        )
+                        .expect("failed to create ResizeObserver");
 
                         for target in targets.iter().flatten() {
                             let target: web_sys::Element = target.clone().into();
                             obs.observe_with_options(&target, &options.clone().into());
                         }
-
                         observer.replace(Some(obs));
                     }
                 },
-                false,
+                true,
             )
         };
 
@@ -146,7 +150,7 @@ where
         on_cleanup(stop.clone());
 
         UseResizeObserverReturn { is_supported, stop }
-    }}
+    }
 }
 
 /// Options for [`use_resize_observer_with_options`].
