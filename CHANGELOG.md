@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_cookie`
 - `use_mouse_in_element`
 - `use_device_pixel_ratio` (thanks to @mondeja)
 - `use_element_bounding`
