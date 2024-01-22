@@ -1,6 +1,6 @@
 use cookie::Cookie;
 
-///
+/// Get a cookie by name, for both SSR and CSR
 ///
 /// ## Demo
 ///
