@@ -5,17 +5,11 @@ use leptos_use::use_cookie;
 #[component]
 fn Demo() -> impl IntoView {
     if let Some(cookie) = use_cookie("auth") {
-        view! { 
-            <div>
-                format!("'auth' cookie set to `{}`", cookie.value())
-            </div>
-        }.into_view()
+        view! { <div>"'auth' cookie set to " <code>"`" {cookie.value().to_string()} "`"</code></div> }
+        .into_view()
     } else {
-        view! { 
-            <div>
-                "No 'auth' cookie set" 
-            </div>
-        }.into_view()
+        view! { <div>"No 'auth' cookie set"</div> }
+        .into_view()
     }
 }
 
