@@ -37,8 +37,8 @@ use cookie::Cookie;
 /// This works equally well on the server or the client.
 /// On the server this function gets the cookie from the HTTP request header.
 ///
-/// If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
-/// In case it's `actix-web` enable the feature `"actix"`.
+/// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
+/// > In case it's `actix-web` enable the feature `"actix"`.
 pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
     let cookies;
     #[cfg(feature = "ssr")]
