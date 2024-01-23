@@ -87,8 +87,10 @@ This will create the function file in the src directory, scaffold an example dir
 
 ## Leptos compatibility
 
-| Crate version  | Compatible Leptos version |
-|----------------|---------------------------|
-| <= 0.3         | 0.3                       |
-| 0.4, 0.5, 0.6  | 0.4                       |
-| 0.7, 0.8, 0.9  | 0.5                       |
+| Crate version | Compatible Leptos version |
+|---------------|---------------------------|
+| <= 0.3        | 0.3                       |
+| 0.4, 0.5, 0.6 | 0.4                       |
+| 0.7, 0.8, 0.9 | 0.5                       |
+| main          | 0.6.0-beta                |
+
