@@ -79,7 +79,6 @@ pub use use_active_element::*;
 pub use use_breakpoints::*;
 pub use use_color_mode::*;
 pub use use_cookie::*;
-pub use use_cookie::*;
 pub use use_css_var::*;
 pub use use_cycle_list::*;
 pub use use_debounce_fn::*;

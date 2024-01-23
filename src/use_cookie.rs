@@ -53,7 +53,7 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
         }
         #[cfg(feature = "axum")]
         {
-            headers = expect_context::<leptos_axum::RequestParts>().headers;
+            headers = expect_context::<http::request::Parts>().headers;
         }
         cookies = headers
             .get(http::header::COOKIE)

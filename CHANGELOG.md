@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_device_pixel_ratio` (thanks to @mondeja)
 - `use_element_bounding`
 
+### Breaking Changes 🛠
+
+- The `leptos` version is now 0.6
+
 ### Fixes 🍕
 
 - Fixed `use_geolocation` SSR compile issue
