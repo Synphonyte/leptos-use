@@ -32,7 +32,7 @@ use cookie::Cookie;
 /// # }
 /// ```
 ///
-/// Server-Side Rendering
+/// ## Server-Side Rendering
 ///
 /// This works equally well on the server or the client.
 /// On the server this function gets the cookie from the HTTP request header.
