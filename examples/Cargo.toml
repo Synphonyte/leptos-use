@@ -10,6 +10,7 @@ members = [
     "use_breakpoints",
     "use_ceil",
     "use_color_mode",
+    "use_cookie",
     "use_css_var",
     "use_cycle_list",
     "use_debounce_fn",

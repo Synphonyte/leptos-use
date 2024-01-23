@@ -13,15 +13,19 @@ repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
 [dependencies]
+actix-web = { version = "4", optional = true, default-features = false }
 base64 = { version = "0.21", optional = true }
 cfg-if = "1"
+cookie = { version = "0.18", features = ["percent-encode"] }
 default-struct-builder = "0.5"
 futures-util = "0.3"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
-gloo-utils = { version = "0.2.0"}
+gloo-utils = { version = "0.2.0" }
+http = { version = "0.2", optional = true }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.5"
+leptos_axum = { version = "0.5", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 prost = { version = "0.12", optional = true }
@@ -53,6 +57,7 @@ features = [
   "File",
   "FileList",
   "Geolocation",
+  "HtmlDocument",
   "HtmlElement",
   "HtmlLinkElement",
   "HtmlStyleElement",
@@ -99,11 +104,12 @@ features = [
 ]
 
 [features]
+axum = ["dep:leptos_axum"]
 docs = []
 math = ["num"]
 prost = ["base64", "dep:prost"]
 serde = ["dep:serde", "serde_json"]
-ssr = []
+ssr = ["dep:http"]
 
 [package.metadata.docs.rs]
 all-features = true
