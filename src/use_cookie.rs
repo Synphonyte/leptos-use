@@ -16,21 +16,29 @@ use cookie::Cookie;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-///    if let Some(cookie) = use_cookie("auth") {
-///        view! {
-///            <div>
-///                format!("'auth' cookie set to `{}`", cookie.value())
-///            </div>
-///        }.into_view()
-///    } else {
-///        view! {
-///            <div>
-///                "No 'auth' cookie set"
-///            </div>
-///        }.into_view()
-///    }
+/// if let Some(cookie) = use_cookie("auth") {
+///     view! {
+///         <div>
+///             format!("'auth' cookie set to `{}`", cookie.value())
+///         </div>
+///     }.into_view()
+/// } else {
+///     view! {
+///         <div>
+///             "No 'auth' cookie set"
+///         </div>
+///     }.into_view()
+/// }
 /// # }
 /// ```
+///
+/// Server-Side Rendering
+///
+/// This works equally well on the server or the client.
+/// On the server this function gets the cookie from the HTTP request header.
+///
+/// If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
+/// In case it's `actix-web` enable the feature `"actix"`.
 pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
     let cookies;
     #[cfg(feature = "ssr")]
@@ -39,7 +47,7 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
         use leptos::expect_context;
 
         let headers;
-        #[cfg(not(feature = "axum"))]
+        #[cfg(feature = "actix")]
         {
             headers = expect_context::<actix_web::HttpRequest>().headers().clone();
         }

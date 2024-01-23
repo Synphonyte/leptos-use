@@ -104,6 +104,7 @@ features = [
 ]
 
 [features]
+actix = ["dep:actix-web"]
 axum = ["dep:leptos_axum"]
 docs = []
 math = ["num"]
