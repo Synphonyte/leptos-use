@@ -43,8 +43,17 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
     let cookies;
     #[cfg(feature = "ssr")]
     {
-        use http::HeaderValue;
         use leptos::expect_context;
+        
+        #[cfg(feature = "actix")]
+        const COOKIE: http0_2::HeaderValue = http0_2::header::COOKIE;
+        #[cfg(feature = "axum")]
+        const COOKIE: http1::HeaderValue = http1::header::COOKIE;
+
+        #[cfg(feature = "actix")]
+        type HeaderValue = http0_2::HeaderValue;
+        #[cfg(feature = "axum")]
+        type HeaderValue = http1::HeaderValue;
 
         let headers;
         #[cfg(feature = "actix")]
@@ -53,10 +62,10 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
         }
         #[cfg(feature = "axum")]
         {
-            headers = expect_context::<http::request::Parts>().headers;
+            headers = expect_context::<http1::request::Parts>().headers;
         }
         cookies = headers
-            .get(http::header::COOKIE)
+            .get(COOKIE)
             .cloned()
             .unwrap_or_else(|| HeaderValue::from_static(""))
             .to_str()

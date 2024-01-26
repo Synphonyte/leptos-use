@@ -21,7 +21,8 @@ default-struct-builder = "0.5"
 futures-util = "0.3"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 gloo-utils = { version = "0.2.0" }
-http = { version = "1", optional = true }
+http1 = { version = "1", optional = true, package = "http" }
+http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.6"
@@ -104,13 +105,13 @@ features = [
 ]
 
 [features]
-actix = ["dep:actix-web"]
-axum = ["dep:leptos_axum"]
+actix = ["dep:actix-web", "dep:http0_2"]
+axum = ["dep:leptos_axum", "dep:http1"]
 docs = []
 math = ["num"]
 prost = ["base64", "dep:prost"]
 serde = ["dep:serde", "serde_json"]
-ssr = ["dep:http"]
+ssr = []
 
 [package.metadata.docs.rs]
 all-features = true
