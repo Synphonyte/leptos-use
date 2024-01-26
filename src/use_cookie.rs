@@ -46,9 +46,9 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
         use leptos::expect_context;
 
         #[cfg(feature = "actix")]
-        const COOKIE: http0_2::HeaderValue = http0_2::header::COOKIE;
+        const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
         #[cfg(feature = "axum")]
-        const COOKIE: http1::HeaderValue = http1::header::COOKIE;
+        const COOKIE: http1::HeaderName = http1::header::COOKIE;
 
         #[cfg(feature = "actix")]
         type HeaderValue = http0_2::HeaderValue;
