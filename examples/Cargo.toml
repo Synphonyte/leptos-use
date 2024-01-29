@@ -8,6 +8,7 @@ members = [
     "use_abs",
     "use_active_element",
     "use_breakpoints",
+    "use_broadcast_channel",
     "use_ceil",
     "use_color_mode",
     "use_cookie",

@@ -65,6 +65,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_element_bounding/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_mouse_in_element/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_cookie/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_broadcast_channel/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

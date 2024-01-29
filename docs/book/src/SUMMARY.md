@@ -34,6 +34,7 @@
 # Browser
 
 - [use_breakpoints](browser/use_breakpoints.md)
+- [use_broadcast_channel](browser/use_broadcast_channel.md)
 - [use_color_mode](browser/use_color_mode.md)
 - [use_cookie](browser/use_cookie.md)
 - [use_css_var](browser/use_css_var.md)

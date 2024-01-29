@@ -41,6 +41,7 @@ version = "0.3"
 features = [
   "AddEventListenerOptions",
   "BinaryType",
+  "BroadcastChannel",
   "Coordinates",
   "CloseEvent",
   "CssStyleDeclaration",
@@ -69,6 +70,7 @@ features = [
   "MediaQueryList",
   "MediaStream",
   "MediaStreamTrack",
+  "MessageEvent",
   "MouseEvent",
   "MutationObserver",
   "MutationObserverInit",
