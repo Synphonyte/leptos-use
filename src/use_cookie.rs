@@ -1,4 +1,6 @@
 use cookie::Cookie;
+use default_struct_builder::DefaultBuilder;
+use std::rc::Rc;
 
 /// Get a cookie by name, for both SSR and CSR
 ///
@@ -39,39 +41,43 @@ use cookie::Cookie;
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`.
+///
+/// ### Bring your own header
+///
+/// In case you're neither using Axum nor Actix, or the default implementation is not to your liking,
+/// you can provide your own way of reading the cookie header value.
+///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// use_cookie_with_options("auth", UseCookieOptions::default().ssr_cookies_header_getter(|| {
+///     #[cfg(feature = "ssr")]
+///     {
+///         "Somehow get the value of the cookie header as a string".to_owned()
+///     }
+/// }));
+/// # view! {}
+/// # }
+/// ```
 pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
+    use_cookie_with_options(cookie_name, UseCookieOptions::default())
+}
+
+/// Version of [`use_cookie`] that takes [`UseCookieOptions`].
+pub fn use_cookie_with_options(
+    cookie_name: &str,
+    options: UseCookieOptions,
+) -> Option<Cookie<'static>> {
     let cookies;
+
     #[cfg(feature = "ssr")]
     {
-        use leptos::expect_context;
-
-        #[cfg(feature = "actix")]
-        const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
-        #[cfg(feature = "axum")]
-        const COOKIE: http1::HeaderName = http1::header::COOKIE;
-
-        #[cfg(feature = "actix")]
-        type HeaderValue = http0_2::HeaderValue;
-        #[cfg(feature = "axum")]
-        type HeaderValue = http1::HeaderValue;
-
-        let headers;
-        #[cfg(feature = "actix")]
-        {
-            headers = expect_context::<actix_web::HttpRequest>().headers().clone();
-        }
-        #[cfg(feature = "axum")]
-        {
-            headers = expect_context::<http1::request::Parts>().headers;
-        }
-        cookies = headers
-            .get(COOKIE)
-            .cloned()
-            .unwrap_or_else(|| HeaderValue::from_static(""))
-            .to_str()
-            .unwrap_or_default()
-            .to_owned();
+        cookies = (options.ssr_cookies_header_getter)();
     }
+
     #[cfg(not(feature = "ssr"))]
     {
         use wasm_bindgen::JsCast;
@@ -85,4 +91,66 @@ pub fn use_cookie(cookie_name: &str) -> Option<Cookie<'static>> {
         .filter_map(|cookie| cookie.ok())
         .find(|cookie| cookie.name() == cookie_name)
         .map(|cookie| cookie.into_owned())
+}
+
+/// Options for [`use_cookie_with_options`].
+#[derive(Clone, DefaultBuilder)]
+pub struct UseCookieOptions {
+    /// Getter function to return the string value of the cookie header.
+    /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
+    ssr_cookies_header_getter: Rc<dyn Fn() -> String>,
+}
+
+impl Default for UseCookieOptions {
+    #[allow(dead_code)]
+    fn default() -> Self {
+        Self {
+            ssr_cookies_header_getter: Rc::new(move || {
+                #[cfg(feature = "ssr")]
+                {
+                    #[cfg(any(feature = "axum", feature = "actix"))]
+                    use leptos::expect_context;
+
+                    #[cfg(all(feature = "actix", feature = "axum"))]
+                    compile_error!("You cannot enable only one of features \"actix\" and \"axum\" at the same time");
+
+                    #[cfg(feature = "actix")]
+                    const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
+                    #[cfg(feature = "axum")]
+                    const COOKIE: http1::HeaderName = http1::header::COOKIE;
+
+                    #[cfg(feature = "actix")]
+                    type HeaderValue = http0_2::HeaderValue;
+                    #[cfg(feature = "axum")]
+                    type HeaderValue = http1::HeaderValue;
+
+                    #[cfg(any(feature = "axum", feature = "actix"))]
+                    let headers;
+                    #[cfg(feature = "actix")]
+                    {
+                        headers = expect_context::<actix_web::HttpRequest>().headers().clone();
+                    }
+                    #[cfg(feature = "axum")]
+                    {
+                        headers = expect_context::<http1::request::Parts>().headers;
+                    }
+
+                    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
+                    {
+                        leptos::logging::warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_cookies_header_getter`");
+                        "".to_owned()
+                    }
+
+                    #[cfg(any(feature = "axum", feature = "actix"))]
+                    headers
+                        .get(COOKIE)
+                        .cloned()
+                        .unwrap_or_else(|| HeaderValue::from_static(""))
+                        .to_str()
+                        .unwrap_or_default()
+                        .to_owned()
+                }
+            }),
+        }
+    }
 }
