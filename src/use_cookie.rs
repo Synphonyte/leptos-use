@@ -140,6 +140,8 @@ impl Default for UseCookieOptions {
                         .unwrap_or_default()
                         .to_owned()
                 }
+                #[cfg(not(feature = "ssr"))]
+                "".to_owned()
             }),
         }
     }
