@@ -11,7 +11,7 @@ axum = { version = "0.6.4", optional = true }
 console_error_panic_hook = "0.1"
 console_log = "1"
 cfg-if = "1"
-leptos = { version = "0.6.0-beta", features = ["nightly"] }
+leptos = { version = "0.6", features = ["nightly"] }
 leptos_axum = { version = "0.5", optional = true }
 leptos_meta = { version = "0.5", features = ["nightly"] }
 leptos_router = { version = "0.5", features = ["nightly"] }
