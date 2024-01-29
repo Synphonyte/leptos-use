@@ -1,14 +1,14 @@
-use crate::core::{ElementMaybeSignal, MaybeRwSignal};
-use crate::storage::{use_storage_with_options, StringCodec, UseStorageOptions};
-use std::fmt::{Display, Formatter};
-use std::str::FromStr;
-
 use crate::core::StorageType;
+use crate::core::{ElementMaybeSignal, MaybeRwSignal};
+use crate::storage::{use_storage_with_options, UseStorageOptions};
 use crate::use_preferred_dark;
+use crate::utils::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
+use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::str::FromStr;
 use wasm_bindgen::JsCast;
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
@@ -261,7 +261,7 @@ fn get_store_signal(
         let (store, set_store) = storage_signal.split();
         (store.into(), set_store)
     } else if storage_enabled {
-        let (store, set_store, _) = use_storage_with_options::<ColorMode, StringCodec>(
+        let (store, set_store, _) = use_storage_with_options::<ColorMode, FromToStringCodec>(
             storage,
             storage_key,
             UseStorageOptions::default()

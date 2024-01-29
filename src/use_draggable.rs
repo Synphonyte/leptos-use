@@ -18,9 +18,9 @@ use web_sys::PointerEvent;
 ///
 /// ```
 /// # use leptos::*;
-/// use leptos::html::Div;
+/// # use leptos::html::Div;
 /// # use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
-/// use leptos_use::core::Position;
+/// # use leptos_use::core::Position;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {

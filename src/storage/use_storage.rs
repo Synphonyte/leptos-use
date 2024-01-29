@@ -1,3 +1,4 @@
+use crate::utils::FromToStringCodec;
 use crate::{
     core::{MaybeRwSignal, StorageType},
     utils::{FilterOptions, StringCodec},
@@ -28,18 +29,19 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions, StringCodec, JsonCodec, ProstCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
+/// # use leptos_use::utils::{FromToStringCodec, JsonCodec, ProstCodec};
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// // Binds a struct:
 /// let (state, set_state, _) = use_local_storage::<MyState, JsonCodec>("my-state");
 ///
 /// // Binds a bool, stored as a string:
-/// let (flag, set_flag, remove_flag) = use_session_storage::<bool, StringCodec>("my-flag");
+/// let (flag, set_flag, remove_flag) = use_session_storage::<bool, FromToStringCodec>("my-flag");
 ///
 /// // Binds a number, stored as a string:
-/// let (count, set_count, _) = use_session_storage::<i32, StringCodec>("my-count");
+/// let (count, set_count, _) = use_session_storage::<i32, FromToStringCodec>("my-count");
 /// // Binds a number, stored in JSON:
 /// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
 ///
@@ -89,7 +91,11 @@ pub fn use_storage(
     storage_type: StorageType,
     key: impl AsRef<str>,
 ) -> (Signal<String>, WriteSignal<String>, impl Fn() + Clone) {
-    use_storage_with_options::<String, StringCodec>(storage_type, key, UseStorageOptions::default())
+    use_storage_with_options::<String, FromToStringCodec>(
+        storage_type,
+        key,
+        UseStorageOptions::default(),
+    )
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`].
@@ -100,7 +106,7 @@ pub fn use_storage_with_options<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: Codec<T>,
+    C: StringCodec<T>,
 {
     let UseStorageOptions {
         codec,
@@ -322,7 +328,7 @@ pub enum UseStorageError<Err> {
 }
 
 /// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
-pub struct UseStorageOptions<T: 'static, C: Codec<T>> {
+pub struct UseStorageOptions<T: 'static, C: StringCodec<T>> {
     // Translates to and from UTF-16 strings
     codec: C,
     // Callback for when an error occurs
@@ -344,7 +350,7 @@ fn handle_error<T, Err>(
     result.map_err(|err| (on_error)(err))
 }
 
-impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
+impl<T: Default, C: StringCodec<T> + Default> Default for UseStorageOptions<T, C> {
     fn default() -> Self {
         Self {
             codec: C::default(),
@@ -356,7 +362,7 @@ impl<T: Default, C: Codec<T> + Default> Default for UseStorageOptions<T, C> {
     }
 }
 
-impl<T: Default, C: Codec<T>> UseStorageOptions<T, C> {
+impl<T: Default, C: StringCodec<T>> UseStorageOptions<T, C> {
     /// Sets the codec to use for encoding and decoding values to and from UTF-16 strings.
     pub fn codec(self, codec: impl Into<C>) -> Self {
         Self {

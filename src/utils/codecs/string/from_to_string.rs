@@ -8,10 +8,11 @@ use std::str::FromStr;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, StringCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
+/// # use leptos_use::utils::FromToStringCodec;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// let (get, set, remove) = use_local_storage::<i32, StringCodec>("my-key");
+/// let (get, set, remove) = use_local_storage::<i32, FromToStringCodec>("my-key");
 /// #    view! { }
 /// # }
 /// ```

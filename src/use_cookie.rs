@@ -1,6 +1,5 @@
 use cookie::Cookie;
 use default_struct_builder::DefaultBuilder;
-use std::rc::Rc;
 
 /// Get a cookie by name, for both SSR and CSR
 ///
@@ -75,7 +74,7 @@ pub fn use_cookie_with_options(
         ssr_cookies_header_getter,
     } = options;
 
-    let cookie = read_cookies_string(ssr_cookies_header_getter);
+    let cookies = read_cookies_string(ssr_cookies_header_getter);
 
     Cookie::split_parse_encoded(cookies)
         .filter_map(|cookie| cookie.ok())
@@ -84,7 +83,7 @@ pub fn use_cookie_with_options(
 }
 
 /// Options for [`use_cookie_with_options`].
-#[derive(Clone, DefaultBuilder)]
+#[derive(DefaultBuilder)]
 pub struct UseCookieOptions {
     /// Getter function to return the string value of the cookie header.
     /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
@@ -148,15 +147,23 @@ impl Default for UseCookieOptions {
 }
 
 fn read_cookies_string(ssr_cookies_header_getter: Box<dyn Fn() -> String>) -> String {
+    let cookies;
+
     #[cfg(feature = "ssr")]
-    ssr_cookies_header_getter();
+    {
+        cookies = ssr_cookies_header_getter();
+    }
 
     #[cfg(not(feature = "ssr"))]
     {
         use wasm_bindgen::JsCast;
 
+        let _ = ssr_cookies_header_getter;
+
         let js_value: wasm_bindgen::JsValue = leptos::document().into();
         let document: web_sys::HtmlDocument = js_value.unchecked_into();
-        document.cookie().unwrap_or_default()
+        cookies = document.cookie().unwrap_or_default();
     }
+
+    cookies
 }

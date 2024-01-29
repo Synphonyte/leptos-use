@@ -1,9 +1,10 @@
 use super::BinCodec;
+use thiserror::Error;
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub struct FromToBytesCodec;
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug)]
 pub enum FromToBytesCodecError {
     #[error("failed to convert byte slice to byte array")]
     InvalidByteSlice(#[from] std::array::TryFromSliceError),

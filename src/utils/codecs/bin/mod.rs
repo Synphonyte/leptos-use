@@ -1,5 +1,6 @@
 mod from_to_bytes;
 
+#[allow(unused_imports)]
 pub use from_to_bytes::*;
 
 /// A codec for encoding and decoding values to and from strings.

@@ -5,8 +5,9 @@ use super::StringCodec;
 /// ## Example
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
+/// # use leptos_use::utils::JsonCodec;
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// // Primitive types:
@@ -34,8 +35,9 @@ use super::StringCodec;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, Codec, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
+/// # use leptos_use::utils::StringCodec;
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// #[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
@@ -46,7 +48,7 @@ use super::StringCodec;
 ///
 /// #[derive(Clone, Default)]
 /// pub struct MyStateCodec();
-/// impl Codec<MyState> for MyStateCodec {
+/// impl StringCodec<MyState> for MyStateCodec {
 ///     type Error = serde_json::Error;
 ///
 ///     fn encode(&self, val: &MyState) -> Result<String, Self::Error> {
@@ -75,9 +77,10 @@ use super::StringCodec;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions, Codec, JsonCodec};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
+/// # use leptos_use::utils::StringCodec;
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// #[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
@@ -88,7 +91,7 @@ use super::StringCodec;
 ///
 /// #[derive(Clone, Default)]
 /// pub struct MyStateCodec();
-/// impl Codec<MyState> for MyStateCodec {
+/// impl StringCodec<MyState> for MyStateCodec {
 ///     type Error = serde_json::Error;
 ///
 ///     fn encode(&self, val: &MyState) -> Result<String, Self::Error> {

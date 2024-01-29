@@ -1,4 +1,5 @@
-use super::{use_storage_with_options, Codec, StorageType, UseStorageOptions};
+use super::{use_storage_with_options, StorageType, UseStorageOptions};
+use crate::utils::StringCodec;
 use leptos::signal_prelude::*;
 
 /// Reactive [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
@@ -14,7 +15,7 @@ pub fn use_session_storage<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + Default + PartialEq,
-    C: Codec<T> + Default,
+    C: StringCodec<T> + Default,
 {
     use_storage_with_options(
         StorageType::Session,
@@ -30,7 +31,7 @@ pub fn use_session_storage_with_options<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: Codec<T>,
+    C: StringCodec<T>,
 {
     use_storage_with_options(StorageType::Session, key, options)
 }

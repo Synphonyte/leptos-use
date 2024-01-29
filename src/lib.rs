@@ -9,21 +9,21 @@ pub mod math;
 pub mod storage;
 pub mod utils;
 
-cfg_if! { if #[cfg(web_sys_unstable_apis)] {
-    mod use_webtransport;
-    pub use use_webtransport::*;
-}}
+#[cfg(web_sys_unstable_apis)]
+mod use_webtransport;
+#[cfg(web_sys_unstable_apis)]
+pub use use_webtransport::*;
 
 mod is_err;
 mod is_none;
 mod is_ok;
 mod is_some;
 mod on_click_outside;
-mod use_broadcast_channel;
 mod signal_debounced;
 mod signal_throttled;
 mod use_active_element;
 mod use_breakpoints;
+mod use_broadcast_channel;
 mod use_color_mode;
 mod use_cookie;
 mod use_css_var;
@@ -79,11 +79,11 @@ pub use is_none::*;
 pub use is_ok::*;
 pub use is_some::*;
 pub use on_click_outside::*;
-pub use use_broadcast_channel::*;
 pub use signal_debounced::*;
 pub use signal_throttled::*;
 pub use use_active_element::*;
 pub use use_breakpoints::*;
+pub use use_broadcast_channel::*;
 pub use use_color_mode::*;
 pub use use_cookie::*;
 pub use use_css_var::*;
@@ -125,7 +125,6 @@ pub use use_timestamp::*;
 pub use use_to_string::*;
 pub use use_web_notification::*;
 pub use use_websocket::*;
-pub use use_webtransport::*;
 pub use use_window::*;
 pub use use_window_focus::*;
 pub use use_window_scroll::*;
