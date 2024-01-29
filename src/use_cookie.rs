@@ -71,21 +71,11 @@ pub fn use_cookie_with_options(
     cookie_name: &str,
     options: UseCookieOptions,
 ) -> Option<Cookie<'static>> {
-    let cookies;
+    let UseCookieOptions {
+        ssr_cookies_header_getter,
+    } = options;
 
-    #[cfg(feature = "ssr")]
-    {
-        cookies = (options.ssr_cookies_header_getter)();
-    }
-
-    #[cfg(not(feature = "ssr"))]
-    {
-        use wasm_bindgen::JsCast;
-
-        let js_value: wasm_bindgen::JsValue = leptos::document().into();
-        let document: web_sys::HtmlDocument = js_value.unchecked_into();
-        cookies = document.cookie().unwrap_or_default();
-    }
+    let cookie = read_cookies_string(ssr_cookies_header_getter);
 
     Cookie::split_parse_encoded(cookies)
         .filter_map(|cookie| cookie.ok())
@@ -98,14 +88,14 @@ pub fn use_cookie_with_options(
 pub struct UseCookieOptions {
     /// Getter function to return the string value of the cookie header.
     /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
-    ssr_cookies_header_getter: Rc<dyn Fn() -> String>,
+    ssr_cookies_header_getter: Box<dyn Fn() -> String>,
 }
 
 impl Default for UseCookieOptions {
     #[allow(dead_code)]
     fn default() -> Self {
         Self {
-            ssr_cookies_header_getter: Rc::new(move || {
+            ssr_cookies_header_getter: Box::new(move || {
                 #[cfg(feature = "ssr")]
                 {
                     #[cfg(any(feature = "axum", feature = "actix"))]
@@ -152,5 +142,19 @@ impl Default for UseCookieOptions {
                 }
             }),
         }
+    }
+}
+
+fn read_cookies_string(ssr_cookies_header_getter: Box<dyn Fn() -> String>) -> String {
+    #[cfg(feature = "ssr")]
+    ssr_cookies_header_getter();
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        use wasm_bindgen::JsCast;
+
+        let js_value: wasm_bindgen::JsValue = leptos::document().into();
+        let document: web_sys::HtmlDocument = js_value.unchecked_into();
+        document.cookie().unwrap_or_default()
     }
 }
