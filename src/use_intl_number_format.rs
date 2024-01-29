@@ -659,10 +659,12 @@ pub struct UseIntlNumberFormatOptions {
     maximum_fraction_digits: Option<u8>,
 
     /// The minimum number of significant digits to use. Possible values are from 1 to 21; the default is 1.
-    minimum_significant_digits: u8,
+    #[builder(into)]
+    minimum_significant_digits: Option<u8>,
 
     /// The maximum number of significant digits to use. Possible values are from 1 to 21; the default is 21.
-    maximum_significant_digits: u8,
+    #[builder(into)]
+    maximum_significant_digits: Option<u8>,
 }
 
 impl UseIntlNumberFormatOptions {
@@ -700,8 +702,8 @@ impl Default for UseIntlNumberFormatOptions {
             minimum_integer_digits: 1,
             minimum_fraction_digits: None,
             maximum_fraction_digits: None,
-            minimum_significant_digits: 1,
-            maximum_significant_digits: 21,
+            minimum_significant_digits: None,
+            maximum_significant_digits: None,
         }
     }
 }
@@ -785,16 +787,20 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
             );
         }
 
-        let _ = Reflect::set(
-            &obj,
-            &"minimumSignificantDigits".into(),
-            &options.minimum_significant_digits.into(),
-        );
-        let _ = Reflect::set(
-            &obj,
-            &"maximumSignificantDigits".into(),
-            &options.maximum_significant_digits.into(),
-        );
+        if let Some(minimum_significant_digits) = options.minimum_significant_digits {
+            let _ = Reflect::set(
+                &obj,
+                &"minimumSignificantDigits".into(),
+                &minimum_significant_digits.into(),
+            );
+        }
+        if let Some(maximum_significant_digits) = options.maximum_significant_digits {
+            let _ = Reflect::set(
+                &obj,
+                &"maximumSignificantDigits".into(),
+                &maximum_significant_digits.into(),
+            );
+        }
 
         obj
     }

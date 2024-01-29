@@ -2,6 +2,7 @@
 
 [Introduction](introduction.md)
 [Get Started](get_started.md)
+[Element Parameters](element_parameters.md)
 [Server-Side Rendering](server_side_rendering.md)
 [Changelog](changelog.md)
 [Functions](functions.md)
@@ -19,9 +20,11 @@
 - [use_document_visibility](elements/use_document_visibility.md)
 - [use_draggable](elements/use_draggable.md)
 - [use_drop_zone](elements/use_drop_zone.md)
+- [use_element_bounding](elements/use_element_bounding.md)
 - [use_element_size](elements/use_element_size.md)
 - [use_element_visibility](elements/use_element_visibility.md)
 - [use_intersection_observer](elements/use_intersection_observer.md)
+- [use_mouse_in_element](elements/use_mouse_in_element.md)
 - [use_mutation_observer](elements/use_mutation_observer.md)
 - [use_resize_observer](elements/use_resize_observer.md)
 - [use_window](elements/use_window.md)
@@ -31,7 +34,9 @@
 # Browser
 
 - [use_breakpoints](browser/use_breakpoints.md)
+- [use_broadcast_channel](browser/use_broadcast_channel.md)
 - [use_color_mode](browser/use_color_mode.md)
+- [use_cookie](browser/use_cookie.md)
 - [use_css_var](browser/use_css_var.md)
 - [use_display_media](browser/use_display_media.md)
 - [use_event_listener](browser/use_event_listener.md)
@@ -45,6 +50,7 @@
 # Sensors
 
 - [on_click_outside](sensors/on_click_outside.md)
+- [use_device_pixel_ratio](sensors/use_device_pixel_ratio.md)
 - [use_element_hover](sensors/use_element_hover.md)
 - [use_geolocation](sensors/use_geolocation.md)
 - [use_idle](sensors/use_idle.md)

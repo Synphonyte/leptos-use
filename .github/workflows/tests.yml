@@ -24,5 +24,9 @@ jobs:
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --features prost,serde,docs,math --tests -- -D warnings
-      - name: Run tests
-        run: cargo test --all-features
+      - name: Run tests (general)
+        run: cargo test --features math,docs,ssr,prost,serde
+      - name: Run tests (axum)
+        run: cargo test --features math,docs,ssr,prost,serde,axum --doc use_cookie::use_cookie
+      - name: Run tests (actix)
+        run: cargo test --features math,docs,ssr,prost,serde,actix --doc use_cookie::use_cookie

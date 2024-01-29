@@ -1,9 +1,6 @@
-use crate::use_window;
+use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use std::cell::Cell;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
 
 /// Reactive [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API).
 /// It allows the user to provide their location to web applications if they so desire. For privacy reasons,
@@ -32,6 +29,10 @@ use wasm_bindgen::prelude::*;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server all signals returns will always contain `None` and the functions do nothing.
 pub fn use_geolocation() -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
     use_geolocation_with_options(UseGeolocationOptions::default())
 }
@@ -44,74 +45,89 @@ pub fn use_geolocation_with_options(
     let (error, set_error) = create_signal(None::<web_sys::PositionError>);
     let (coords, set_coords) = create_signal(None::<web_sys::Coordinates>);
 
-    let update_position = move |position: web_sys::Position| {
-        set_located_at.set(Some(position.timestamp()));
-        set_coords.set(Some(position.coords()));
-        set_error.set(None);
-    };
+    cfg_if! { if #[cfg(feature = "ssr")] {
+        let resume = || ();
+        let pause = || ();
 
-    let on_error = move |err: web_sys::PositionError| {
-        set_error.set(Some(err));
-    };
+        let _ = options;
+        let _ = set_located_at;
+        let _ = set_error;
+        let _ = set_coords;
+    } else {
+        use crate::use_window;
+        use std::cell::Cell;
+        use std::rc::Rc;
+        use wasm_bindgen::prelude::*;
 
-    let watch_handle = Rc::new(Cell::new(None::<i32>));
+        let update_position = move |position: web_sys::Position| {
+            set_located_at.set(Some(position.timestamp()));
+            set_coords.set(Some(position.coords()));
+            set_error.set(None);
+        };
 
-    let resume = {
-        let watch_handle = Rc::clone(&watch_handle);
-        let position_options = options.as_position_options();
+        let on_error = move |err: web_sys::PositionError| {
+            set_error.set(Some(err));
+        };
 
-        move || {
-            let navigator = use_window().navigator();
-            if let Some(navigator) = navigator {
-                if let Ok(geolocation) = navigator.geolocation() {
-                    let update_position =
-                        Closure::wrap(Box::new(update_position) as Box<dyn Fn(web_sys::Position)>);
-                    let on_error =
-                        Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
+        let watch_handle = Rc::new(Cell::new(None::<i32>));
 
-                    watch_handle.replace(
-                        geolocation
-                            .watch_position_with_error_callback_and_options(
-                                update_position.as_ref().unchecked_ref(),
-                                Some(on_error.as_ref().unchecked_ref()),
-                                &position_options,
-                            )
-                            .ok(),
-                    );
+        let resume = {
+            let watch_handle = Rc::clone(&watch_handle);
+            let position_options = options.as_position_options();
 
-                    update_position.forget();
-                    on_error.forget();
-                }
-            }
-        }
-    };
-
-    if options.immediate {
-        resume();
-    }
-
-    let pause = {
-        let watch_handle = Rc::clone(&watch_handle);
-
-        move || {
-            let navigator = use_window().navigator();
-            if let Some(navigator) = navigator {
-                if let Some(handle) = watch_handle.take() {
+            move || {
+                let navigator = use_window().navigator();
+                if let Some(navigator) = navigator {
                     if let Ok(geolocation) = navigator.geolocation() {
-                        geolocation.clear_watch(handle);
+                        let update_position =
+                            Closure::wrap(Box::new(update_position) as Box<dyn Fn(web_sys::Position)>);
+                        let on_error =
+                            Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
+
+                        watch_handle.replace(
+                            geolocation
+                                .watch_position_with_error_callback_and_options(
+                                    update_position.as_ref().unchecked_ref(),
+                                    Some(on_error.as_ref().unchecked_ref()),
+                                    &position_options,
+                                )
+                                .ok(),
+                        );
+
+                        update_position.forget();
+                        on_error.forget();
                     }
                 }
             }
-        }
-    };
+        };
 
-    on_cleanup({
-        let pause = pause.clone();
-
-        move || {
-            pause();
+        if options.immediate {
+            resume();
         }
-    });
+
+        let pause = {
+            let watch_handle = Rc::clone(&watch_handle);
+
+            move || {
+                let navigator = use_window().navigator();
+                if let Some(navigator) = navigator {
+                    if let Some(handle) = watch_handle.take() {
+                        if let Ok(geolocation) = navigator.geolocation() {
+                            geolocation.clear_watch(handle);
+                        }
+                    }
+                }
+            }
+        };
+
+        on_cleanup({
+            let pause = pause.clone();
+
+            move || {
+                pause();
+            }
+        });
+    }}
 
     UseGeolocationReturn {
         coords: coords.into(),
@@ -123,7 +139,8 @@ pub fn use_geolocation_with_options(
 }
 
 /// Options for [`use_geolocation_with_options`].
-#[derive(DefaultBuilder)]
+#[derive(DefaultBuilder, Clone)]
+#[allow(dead_code)]
 pub struct UseGeolocationOptions {
     /// If `true` the geolocation watch is started when this function is called.
     /// If `false` you have to call `resume` manually to start it. Defaults to `true`.
@@ -159,6 +176,7 @@ impl Default for UseGeolocationOptions {
     }
 }
 
+#[cfg(not(feature = "ssr"))]
 impl UseGeolocationOptions {
     fn as_position_options(&self) -> web_sys::PositionOptions {
         let UseGeolocationOptions {

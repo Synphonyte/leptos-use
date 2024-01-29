@@ -94,8 +94,7 @@ pub fn use_mouse() -> UseMouseReturn {
 /// Variant of [`use_mouse`] that accepts options. Please see [`use_mouse`] for how to use.
 pub fn use_mouse_with_options<El, T, Ex>(options: UseMouseOptions<El, T, Ex>) -> UseMouseReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
+    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>> + Clone,
     T: Into<web_sys::EventTarget> + Clone + 'static,
     Ex: UseMouseEventExtractor + Clone + 'static,
 {
@@ -196,11 +195,11 @@ where
     }}
 
     UseMouseReturn {
-        x,
-        y,
+        x: x.into(),
+        y: y.into(),
         set_x,
         set_y,
-        source_type,
+        source_type: source_type.into(),
     }
 }
 
@@ -306,15 +305,15 @@ impl UseMouseEventExtractor for UseMouseEventExtractorDefault {}
 /// Return type of [`use_mouse`].
 pub struct UseMouseReturn {
     /// X coordinate of the mouse pointer / touch
-    pub x: ReadSignal<f64>,
+    pub x: Signal<f64>,
     /// Y coordinate of the mouse pointer / touch
-    pub y: ReadSignal<f64>,
+    pub y: Signal<f64>,
     /// Sets the value of `x`. This does not actually move the mouse cursor.
     pub set_x: WriteSignal<f64>,
     /// Sets the value of `y`. This does not actually move the mouse cursor.
     pub set_y: WriteSignal<f64>,
     /// Identifies the source of the reported coordinates
-    pub source_type: ReadSignal<UseMouseSourceType>,
+    pub source_type: Signal<UseMouseSourceType>,
 }
 
 /// Identifies the source of the reported coordinates

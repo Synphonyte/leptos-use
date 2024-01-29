@@ -49,8 +49,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// - [`use_resize_observer`]
 pub fn use_element_size<El, T>(target: El) -> UseElementSizeReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     use_element_size_with_options(target, UseElementSizeOptions::default())
@@ -63,8 +62,7 @@ pub fn use_element_size_with_options<El, T>(
     options: UseElementSizeOptions,
 ) -> UseElementSizeReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
+    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
     let UseElementSizeOptions { box_, initial_size } = options;
@@ -72,8 +70,8 @@ where
     let (width, set_width) = create_signal(initial_size.width);
     let (height, set_height) = create_signal(initial_size.height);
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
-
+    #[cfg(not(feature = "ssr"))]
+    {
         let box_ = box_.unwrap_or(web_sys::ResizeObserverBoxOptions::ContentBox);
 
         let target = target.into();
@@ -128,7 +126,10 @@ where
                                 );
                             }
                         }
-                    } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
+                    } else if !box_size.is_null()
+                        && !box_size.is_undefined()
+                        && box_size.length() > 0
+                    {
                         let format_box_size = if box_size.is_array() {
                             box_size.to_vec()
                         } else {
@@ -164,7 +165,7 @@ where
             },
             WatchOptions::default().immediate(false),
         );
-    }}
+    }
 
     UseElementSizeReturn {
         width: width.into(),

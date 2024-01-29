@@ -31,10 +31,14 @@ jobs:
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --features prost,serde,docs,math --tests -- -D warnings
-      - name: Run tests
-        run: cargo test --all-features
+      - name: Run tests (general)
+        run: cargo test --features math,docs,ssr,prost,serde
+      - name: Run tests (axum)
+        run: cargo test --features math,docs,ssr,prost,serde,axum --doc use_cookie::use_cookie
+      - name: Run tests (actix)
+        run: cargo test --features math,docs,ssr,prost,serde,actix --doc use_cookie::use_cookie
 
-#### mdbook
+      #### mdbook
       - name: Install mdbook I
         uses: taiki-e/install-action@v2
         with:
@@ -59,7 +63,7 @@ jobs:
       - name: Deploy book to github pages
         id: deployment
         uses: actions/deploy-pages@v2
-##### mdbook end
+      ##### mdbook end
 
       - name: Publish crate leptos-use
         uses: katyo/publish-crates@v2
@@ -76,38 +80,3 @@ jobs:
           -F RELEASE.md
           -t "Version $RELEASE_VERSION"
           ${GITHUB_REF#refs/*/}
-
-#  coverage:
-#    name: Coverage
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout sources
-#        uses: actions/checkout@v2
-#
-#      - name: Install rust
-#        uses: actions-rs/toolchain@v1
-#        with:
-#          toolchain: stable
-#          profile: minimal
-#          override: true
-#
-#      - name: Cache
-#        uses: Swatinem/rust-cache@v1
-#
-#      - name: Install cargo-tarpaulin
-#        uses: actions-rs/cargo@v1
-#        with:
-#          command: install
-#          args: cargo-tarpaulin
-#
-#      - name: Run cargo tarpaulin
-#        uses: actions-rs/cargo@v1
-#        with:
-#          command: tarpaulin
-#          args: --output-dir coverage --out Lcov
-#
-#      - name: Publish to Coveralls
-#        uses: coverallsapp/github-action@master
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}

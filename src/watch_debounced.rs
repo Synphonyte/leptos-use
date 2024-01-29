@@ -32,6 +32,8 @@ use leptos::*;
 ///
 /// This really is only shorthand shorthand for `watch_with_options(deps, callback, WatchOptions::default().debounce(ms))`.
 ///
+/// Please note that if the current component is cleaned up before the debounced callback is called, the debounced callback will not be called.
+///
 /// There's also `watch_debounced_with_options` where you can specify the other watch options (except `filter`).
 ///
 /// ```

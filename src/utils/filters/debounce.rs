@@ -3,7 +3,7 @@
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::{set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
+use leptos::{on_cleanup, set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -33,6 +33,14 @@ where
             timer.set(None);
         }
     };
+
+    on_cleanup({
+        let timer = Rc::clone(&timer);
+
+        move || {
+            clear_timeout(&timer);
+        }
+    });
 
     let ms = ms.into();
     let max_wait_signal = options.max_wait;
