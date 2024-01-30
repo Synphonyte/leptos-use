@@ -30,7 +30,7 @@ jobs:
       - name: Install mdbook II
         run: |
           cargo binstall -y mdbook-cmdrun
-          cargo binstall -y trunk
+          cargo binstall -y trunk@0.17.5
           rustup target add wasm32-unknown-unknown
       - name: Setup Pages
         id: pages
