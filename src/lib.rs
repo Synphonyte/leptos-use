@@ -9,10 +9,10 @@ pub mod math;
 pub mod storage;
 pub mod utils;
 
-#[cfg(web_sys_unstable_apis)]
-mod use_webtransport;
-#[cfg(web_sys_unstable_apis)]
-pub use use_webtransport::*;
+// #[cfg(web_sys_unstable_apis)]
+// mod use_webtransport;
+// #[cfg(web_sys_unstable_apis)]
+// pub use use_webtransport::*;
 
 mod is_err;
 mod is_none;

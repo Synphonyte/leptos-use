@@ -424,7 +424,6 @@ impl Default for UseWebTransportOptions {
 pub enum StreamState {
     Open,
     Closed,
-    ClosedWithError(WebTransportError),
 }
 
 #[async_trait(?Send)]
@@ -600,9 +599,8 @@ macro_rules! impl_closable_stream {
 
             async fn close_async(&self) -> Result<(), WebTransportError> {
                 let _ = JsFuture::from(self.writer.close()).await.map_err(|e| {
-                    let error = WebTransportError::FailedToCloseStream(e);
-                    self.set_state
-                        .set(StreamState::ClosedWithError(error.clone()));
+                    let error = WebTransportError::OnCloseWriter(e);
+                    self.set_state.set(StreamState::Closed);
                     error
                 })?;
 
@@ -749,13 +747,19 @@ fn create_bidir_stream(
 /// Error enum for [`UseWebTransportOptions::on_error`]
 #[derive(Debug, Clone, Error)]
 pub enum WebTransportError {
-    /// The `WebTransport` is not connected yet. Call `open` first.
+    #[error("The `WebTransport` is not connected yet. Call `open` first.")]
     NotConnected,
+    #[error("Failed to open stream: {0:?}")]
     FailedToOpenStream(JsValue),
+    #[error("Failed to open writer: {0:?}")]
     FailedToOpenWriter(JsValue),
+    #[error("Failed to open reader: {0:?}")]
     FailedToOpenReader(JsValue),
+    #[error("Failed to read from stream: {0:?}")]
     FailedToRead(JsValue),
+    #[error("Failed to close writer: {0:?}")]
     OnCloseWriter(JsValue),
+    #[error("Failed to close reader: {0:?}")]
     OnCloseReader(JsValue),
 }
 
