@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_broadcast_channel`
 - `use_cookie` (thanks to @rakshith-ravi)
 - `use_mouse_in_element`
+- `use_device_orientation` (thanks to @mondeja)
 - `use_device_pixel_ratio` (thanks to @mondeja)
 - `use_element_bounding`
 

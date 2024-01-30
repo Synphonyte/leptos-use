@@ -15,6 +15,7 @@ members = [
     "use_css_var",
     "use_cycle_list",
     "use_debounce_fn",
+    "use_device_orientation",
     "use_device_pixel_ratio",
     "use_display_media",
     "use_document_visibility",
