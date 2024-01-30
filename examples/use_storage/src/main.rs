@@ -1,6 +1,7 @@
 use leptos::*;
 use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::storage::{use_local_storage, JsonCodec};
+use leptos_use::storage::use_local_storage;
+use leptos_use::utils::JsonCodec;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
