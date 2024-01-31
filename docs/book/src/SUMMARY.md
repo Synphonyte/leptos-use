@@ -50,6 +50,7 @@
 # Sensors
 
 - [on_click_outside](sensors/on_click_outside.md)
+- [use_device_orientation](sensors/use_device_orientation.md)
 - [use_device_pixel_ratio](sensors/use_device_pixel_ratio.md)
 - [use_element_hover](sensors/use_element_hover.md)
 - [use_geolocation](sensors/use_geolocation.md)
