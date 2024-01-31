@@ -103,8 +103,6 @@ where
     };
 
     let close = {
-        let channel = channel.clone();
-
         move || {
             if let Some(channel) = channel.get_untracked() {
                 channel.close();
@@ -153,7 +151,7 @@ where
         close();
     });
 
-    return UseBroadcastChannelReturn {
+    UseBroadcastChannelReturn {
         is_supported,
         channel: channel.into(),
         message: message.into(),
@@ -161,7 +159,7 @@ where
         close,
         error: error.into(),
         is_closed: is_closed.into(),
-    };
+    }
 }
 
 /// Return type of [`use_broadcast_channel`].
