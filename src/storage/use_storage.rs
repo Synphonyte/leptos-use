@@ -21,7 +21,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using the same key on the smae page and across tabs for local storage. See [`UseStorageOptions`] to see how behaviour can be further customised.
 ///
-/// See [`Codec`] for more details on how to handle versioning--dealing with data that can outlast your code.
+/// See [`StringCodec`] for more details on how to handle versioning — dealing with data that can outlast your code.
 ///
 /// Returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
 ///
@@ -46,10 +46,9 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
 ///
 /// // Bind string with SessionStorage stored in ProtoBuf format:
-/// let (id, set_id, _) = use_storage_with_options::<String, ProstCodec>(
+/// let (id, set_id, _) = use_storage_with::<String, ProstCodec>(
 ///     StorageType::Session,
 ///     "my-id",
-///     UseStorageOptions::default(),
 /// );
 /// #    view! { }
 /// # }
@@ -73,19 +72,9 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// }
 /// ```
 ///
-/// ## Versioning
+/// ## Create Your Own Custom Codec
 ///
-/// Versioning is the process of handling long-term data that can outlive our code.
-///
-/// For example we could have a settings struct whose members change over time. We might eventually add timezone support and we might then remove support for a thousand separator on numbers. Each change results in a new possible version of the stored data. If we stored these settings in browser storage we would need to handle all possible versions of the data format that can occur. If we don't offer versioning then all settings could revert to the default every time we encounter an old format.
-///
-/// How best to handle versioning depends on the codec involved:
-///
-/// - The [`StringCodec`](super::StringCodec) can avoid versioning entirely by keeping to privimitive types. In our example above, we could have decomposed the settings struct into separate timezone and number separator fields. These would be encoded as strings and stored as two separate key-value fields in the browser rather than a single field. If a field is missing then the value intentionally would fallback to the default without interfering with the other field.
-///
-/// - The [`ProstCodec`](super::ProstCodec) uses [Protocol buffers](https://protobuf.dev/overview/) designed to solve the problem of long-term storage. It provides semantics for versioning that are not present in JSON or other formats.
-///
-/// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
+/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 #[inline(always)]
 pub fn use_storage(
     storage_type: StorageType,
