@@ -1,4 +1,3 @@
-use crate::utils::FromToStringCodec;
 use crate::{
     core::{MaybeRwSignal, StorageType},
     utils::{FilterOptions, StringCodec},
@@ -29,7 +28,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage_with_options, UseStorageOptions};
+/// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage};
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::utils::{FromToStringCodec, JsonCodec, ProstCodec};
 /// #
@@ -46,7 +45,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
 ///
 /// // Bind string with SessionStorage stored in ProtoBuf format:
-/// let (id, set_id, _) = use_storage_with::<String, ProstCodec>(
+/// let (id, set_id, _) = use_storage::<String, ProstCodec>(
 ///     StorageType::Session,
 ///     "my-id",
 /// );
@@ -76,15 +75,15 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 #[inline(always)]
-pub fn use_storage(
+pub fn use_storage<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
-) -> (Signal<String>, WriteSignal<String>, impl Fn() + Clone) {
-    use_storage_with_options::<String, FromToStringCodec>(
-        storage_type,
-        key,
-        UseStorageOptions::default(),
-    )
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+where
+    T: Default + Clone + PartialEq,
+    C: StringCodec<T> + Default,
+{
+    use_storage_with_options::<T, C>(storage_type, key, UseStorageOptions::default())
 }
 
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`].
@@ -95,7 +94,7 @@ pub fn use_storage_with_options<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: StringCodec<T>,
+    C: StringCodec<T> + Default,
 {
     let UseStorageOptions {
         codec,

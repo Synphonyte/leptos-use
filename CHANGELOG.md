@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The trait `Codec` has been renamed to `StringCodec` and has been moved to `util::StringCodec`.
   - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
   - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
+- The function `use_storage` now requires type parameters for the stored type and the codec like all the other
+  `...storage...` functions.
 
 ### Fixes 🍕
 

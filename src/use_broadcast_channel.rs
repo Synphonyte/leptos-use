@@ -65,6 +65,10 @@ use wasm_bindgen::JsValue;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Create Your Own Custom Codec
+///
+/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_broadcast_channel<T, C>(
     name: &str,
 ) -> UseBroadcastChannelReturn<T, impl Fn(&T) + Clone, impl Fn() + Clone, C::Error>

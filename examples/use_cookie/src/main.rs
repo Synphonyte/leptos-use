@@ -1,15 +1,27 @@
 use leptos::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_cookie;
+use leptos_use::utils::FromToStringCodec;
+use rand::prelude::*;
 
 #[component]
 fn Demo() -> impl IntoView {
-    if let Some(cookie) = use_cookie("auth") {
-        view! { <div>"'auth' cookie set to " <code>"`" {cookie.value().to_string()} "`"</code></div> }
-        .into_view()
-    } else {
-        view! { <div>"No 'auth' cookie set"</div> }
-        .into_view()
+    let (counter, set_counter) = use_cookie::<u32, FromToStringCodec>("counter");
+
+    let reset = move || set_counter(Some(random()));
+
+    if counter().is_none() {
+        reset();
+    }
+
+    let increase = move || {
+        set_counter(counter().map(|c| c + 1));
+    };
+
+    view! {
+        <p>Counter: {move || counter().map(|c| c.to_string()).unwrap_or("—".to_string())}</p>
+        <button on:click=move |_| reset()>Reset</button>
+        <button on:click=move |_| increase()>+</button>
     }
 }
 

@@ -28,6 +28,7 @@ js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.6"
 leptos_axum = { version = "0.6", optional = true }
+leptos_actix = { version = "0.6", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 prost = { version = "0.12", optional = true }
@@ -44,7 +45,7 @@ features = [
     "AddEventListenerOptions",
     "BinaryType",
     "BroadcastChannel",
-  "Coordinates",
+    "Coordinates",
     "CloseEvent",
     "CssStyleDeclaration",
     "CustomEvent",
@@ -62,7 +63,7 @@ features = [
     "FileList",
     "Geolocation",
     "HtmlDocument",
-  "HtmlElement",
+    "HtmlElement",
     "HtmlLinkElement",
     "HtmlStyleElement",
     "IntersectionObserver",
@@ -72,7 +73,7 @@ features = [
     "MediaQueryList",
     "MediaStream",
     "MediaStreamTrack",
-  "MessageEvent",
+    "MessageEvent",
     "MouseEvent",
     "MutationObserver",
     "MutationObserverInit",
@@ -120,8 +121,12 @@ features = [
     "WritableStreamDefaultWriter",
 ]
 
+[dev-dependencies]
+rand = "0.8"
+getrandom = { version = "0.2", features = ["js"] }
+
 [features]
-actix = ["dep:actix-web", "dep:http0_2"]
+actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = []
 math = ["num"]

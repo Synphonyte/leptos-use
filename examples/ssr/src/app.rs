@@ -3,17 +3,23 @@ use leptos::ev::{keypress, KeyboardEvent};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use leptos_use::storage::{use_local_storage, StringCodec};
+use leptos_use::storage::use_local_storage;
+use leptos_use::utils::FromToStringCodec;
 use leptos_use::{
-    use_color_mode, use_debounce_fn, use_event_listener, use_interval, use_intl_number_format,
-    use_preferred_dark, use_timestamp, use_window, ColorMode, UseColorModeReturn,
-    UseIntervalReturn, UseIntlNumberFormatOptions,
+    use_color_mode, use_cookie_with_options, use_debounce_fn, use_event_listener, use_interval,
+    use_intl_number_format, use_preferred_dark, use_timestamp, use_window, ColorMode,
+    UseColorModeReturn, UseCookieOptions, UseIntervalReturn, UseIntlNumberFormatOptions,
 };
 
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
+
+    #[cfg(feature = "ssr")]
+    {
+        expect_context::<http::request::Parts>();
+    }
 
     view! {
         <Stylesheet id="leptos" href="/pkg/start-axum.css"/>
@@ -38,7 +44,7 @@ pub fn App() -> impl IntoView {
 #[component]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
-    let (count, set_count, _) = use_local_storage::<i32, StringCodec>("count-state");
+    let (count, set_count, _) = use_local_storage::<i32, FromToStringCodec>("count-state");
     let on_click = move |_| set_count.update(|count| *count += 1);
 
     let nf = use_intl_number_format(
@@ -70,6 +76,13 @@ fn HomePage() -> impl IntoView {
 
     let is_dark_preferred = use_preferred_dark();
 
+    let (session_cookie, _) = use_cookie_with_options::<String, FromToStringCodec>(
+        "session",
+        UseCookieOptions::<String, _>::default()
+            .max_age(3600)
+            .default_value(Some("Bogus session string".to_owned())),
+    );
+
     view! {
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
@@ -83,6 +96,7 @@ fn HomePage() -> impl IntoView {
         <p>{timestamp}</p>
         <p>Dark preferred: {is_dark_preferred}</p>
         <LocalStorageTest/>
+        <p>Session cookie: {session_cookie}</p>
     }
 }
 
@@ -90,7 +104,7 @@ fn HomePage() -> impl IntoView {
 pub fn LocalStorageTest() -> impl IntoView {
     let UseIntervalReturn { counter, .. } = use_interval(1000);
     logging::log!("test log");
-    let (state, set_state, ..) = use_local_storage::<String, StringCodec>("test-state");
+    let (state, set_state, ..) = use_local_storage::<String, FromToStringCodec>("test-state");
 
     view! {
         <p>{counter}</p>

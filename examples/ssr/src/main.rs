@@ -27,11 +27,9 @@ async fn main() {
         .fallback(file_and_error_handler)
         .with_state(leptos_options);
 
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     log!("listening on http://{}", &addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
 }

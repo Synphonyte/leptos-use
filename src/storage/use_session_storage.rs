@@ -31,7 +31,7 @@ pub fn use_session_storage_with_options<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: StringCodec<T>,
+    C: StringCodec<T> + Default,
 {
     use_storage_with_options(StorageType::Session, key, options)
 }
