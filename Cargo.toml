@@ -136,4 +136,4 @@ ssr = []
 msgpack = ["dep:rmp-serde", "dep:serde"]
 
 [package.metadata.docs.rs]
-all-features = true
+features = ["math", "docs", "ssr", "prost", "serde"]
