@@ -93,4 +93,3 @@ This will create the function file in the src directory, scaffold an example dir
 | 0.4, 0.5, 0.6 | 0.4                       |
 | 0.7, 0.8, 0.9 | 0.5                       |
 | 0.10          | 0.6                       |
-
