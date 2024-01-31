@@ -16,11 +16,6 @@ pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
-    #[cfg(feature = "ssr")]
-    {
-        expect_context::<http::request::Parts>();
-    }
-
     view! {
         <Stylesheet id="leptos" href="/pkg/start-axum.css"/>
 
@@ -76,11 +71,11 @@ fn HomePage() -> impl IntoView {
 
     let is_dark_preferred = use_preferred_dark();
 
-    let (session_cookie, _) = use_cookie_with_options::<String, FromToStringCodec>(
-        "session",
+    let (test_cookie, _) = use_cookie_with_options::<String, FromToStringCodec>(
+        "test-cookie",
         UseCookieOptions::<String, _>::default()
-            .max_age(3600)
-            .default_value(Some("Bogus session string".to_owned())),
+            .max_age(3000)
+            .default_value(Some("Bogus string".to_owned())),
     );
 
     view! {
@@ -96,7 +91,7 @@ fn HomePage() -> impl IntoView {
         <p>{timestamp}</p>
         <p>Dark preferred: {is_dark_preferred}</p>
         <LocalStorageTest/>
-        <p>Session cookie: {session_cookie}</p>
+        <p>Test cookie: {move || test_cookie().unwrap_or("<Expired>".to_string())}</p>
     }
 }
 

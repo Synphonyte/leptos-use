@@ -10,6 +10,13 @@ use std::rc::Rc;
 
 /// SSR-friendly and reactive cookie access.
 ///
+/// You can use this function multiple times in your for the same cookie and they're signals will synchronize
+/// (even across windows/tabs). But there is no way to listen to changes to `document.cookie` directly so in case
+/// something outside of this function changes the cookie, the signal will **not** be updated.
+///
+/// When the options `max_age` or `expire` is given then the returned signal will
+/// automatically turn to `None` after that time.
+///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_cookie)
@@ -109,7 +116,7 @@ use std::rc::Rc;
 ///         .ssr_cookies_header_getter(|| {
 ///             #[cfg(feature = "ssr")]
 ///             {
-///                 "Somehow get the value of the cookie header as a string".to_owned()
+///                 Some("Somehow get the value of the cookie header as a string".to_owned())
 ///             }
 ///         })
 ///         .ssr_set_cookie(|cookie: &Cookie| {
@@ -159,7 +166,7 @@ where
     } = options;
 
     let delay = if let Some(max_age) = max_age {
-        Some(max_age * 1000)
+        Some(max_age)
     } else {
         expires.map(|expires| expires * 1000 - now() as i64)
     };
@@ -179,18 +186,20 @@ where
         let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
 
         jar.update_value(|jar| {
-            *jar = load_and_parse_cookie_jar(ssr_cookies_header_getter);
+            if let Some(new_jar) = load_and_parse_cookie_jar(ssr_cookies_header_getter) {
+                *jar = new_jar;
 
-            set_cookie.set(
-                jar.get(cookie_name)
-                    .and_then(|c| {
-                        codec
-                            .decode(c.value().to_string())
-                            .map_err(|err| on_error(err))
-                            .ok()
-                    })
-                    .or(default_value),
-            );
+                set_cookie.set(
+                    jar.get(cookie_name)
+                        .and_then(|c| {
+                            codec
+                                .decode(c.value().to_string())
+                                .map_err(|err| on_error(err))
+                                .ok()
+                        })
+                        .or(default_value),
+                );
+            }
         });
 
         handle_expiration(delay, set_cookie);
@@ -433,7 +442,7 @@ pub struct UseCookieOptions<T, Err> {
 
     /// Getter function to return the string value of the cookie header.
     /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
-    ssr_cookies_header_getter: Rc<dyn Fn() -> String>,
+    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
 
     /// Function to add a set cookie header to the response on the server.
     /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
@@ -476,30 +485,33 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     let headers;
                     #[cfg(feature = "actix")]
                     {
-                        headers = expect_context::<actix_web::HttpRequest>().headers().clone();
+                        headers = use_context::<actix_web::HttpRequest>()
+                            .map(|req| req.headers().clone());
                     }
                     #[cfg(feature = "axum")]
                     {
-                        headers = expect_context::<http1::request::Parts>().headers;
+                        headers = use_context::<http1::request::Parts>().map(|parts| parts.headers);
                     }
 
                     #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
                     {
                         leptos::logging::warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_cookies_header_getter`");
-                        "".to_owned()
+                        None
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
-                    headers
-                        .get(COOKIE)
-                        .cloned()
-                        .unwrap_or_else(|| HeaderValue::from_static(""))
-                        .to_str()
-                        .unwrap_or_default()
-                        .to_owned()
+                    headers.map(|headers| {
+                        headers
+                            .get(COOKIE)
+                            .cloned()
+                            .unwrap_or_else(|| HeaderValue::from_static(""))
+                            .to_str()
+                            .unwrap_or_default()
+                            .to_owned()
+                    })
                 }
                 #[cfg(not(feature = "ssr"))]
-                "".to_owned()
+                None
             }),
             ssr_set_cookie: Rc::new(|cookie: &Cookie| {
                 #[cfg(feature = "ssr")]
@@ -527,12 +539,12 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
                     {
-                        let response_options = expect_context::<ResponseOptions>();
-
-                        if let Ok(header_value) =
-                            HeaderValue::from_str(&cookie.encoded().to_string())
-                        {
-                            response_options.insert_header(SET_COOKIE, header_value);
+                        if let Some(response_options) = use_context::<ResponseOptions>() {
+                            if let Ok(header_value) =
+                                HeaderValue::from_str(&cookie.encoded().to_string())
+                            {
+                                response_options.insert_header(SET_COOKIE, header_value);
+                            }
                         }
                     }
                 }
@@ -546,7 +558,9 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
     }
 }
 
-fn read_cookies_string(ssr_cookies_header_getter: Rc<dyn Fn() -> String>) -> String {
+fn read_cookies_string(
+    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+) -> Option<String> {
     let cookies;
 
     #[cfg(feature = "ssr")]
@@ -562,7 +576,7 @@ fn read_cookies_string(ssr_cookies_header_getter: Rc<dyn Fn() -> String>) -> Str
 
         let js_value: wasm_bindgen::JsValue = leptos::document().into();
         let document: web_sys::HtmlDocument = js_value.unchecked_into();
-        cookies = document.cookie().unwrap_or_default();
+        cookies = Some(document.cookie().unwrap_or_default());
     }
 
     cookies
@@ -657,7 +671,7 @@ fn write_client_cookie(
     same_site: Option<SameSite>,
     secure: bool,
     http_only: bool,
-    ssr_cookies_header_getter: Rc<dyn Fn() -> String>,
+    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
 ) {
     use wasm_bindgen::JsCast;
 
@@ -693,18 +707,19 @@ fn update_client_cookie_jar(
     same_site: Option<SameSite>,
     secure: bool,
     http_only: bool,
-    ssr_cookies_header_getter: Rc<dyn Fn() -> String>,
+    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
 ) {
-    *jar = load_and_parse_cookie_jar(ssr_cookies_header_getter);
+    if let Some(new_jar) = load_and_parse_cookie_jar(ssr_cookies_header_getter) {
+        *jar = new_jar;
+        if let Some(value) = value {
+            let cookie = build_cookie_from_options(
+                name, max_age, expires, http_only, secure, path, same_site, domain, value,
+            );
 
-    if let Some(value) = value {
-        let cookie = build_cookie_from_options(
-            name, max_age, expires, http_only, secure, path, same_site, domain, value,
-        );
-
-        jar.add_original(cookie);
-    } else {
-        jar.force_remove(name);
+            jar.add_original(cookie);
+        } else {
+            jar.force_remove(name);
+        }
     }
 }
 
@@ -791,15 +806,17 @@ fn write_server_cookie(
     }
 }
 
-fn load_and_parse_cookie_jar(ssr_cookies_header_getter: Rc<dyn Fn() -> String>) -> CookieJar {
-    let mut jar = CookieJar::new();
-    let cookies = read_cookies_string(ssr_cookies_header_getter);
+fn load_and_parse_cookie_jar(
+    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+) -> Option<CookieJar> {
+    read_cookies_string(ssr_cookies_header_getter).map(|cookies| {
+        let mut jar = CookieJar::new();
+        for cookie in Cookie::split_parse_encoded(cookies).flatten() {
+            jar.add_original(cookie);
+        }
 
-    for cookie in Cookie::split_parse_encoded(cookies).flatten() {
-        jar.add_original(cookie);
-    }
-
-    jar
+        jar
+    })
 }
 
 #[derive(Default, Copy, Clone)]

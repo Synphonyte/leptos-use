@@ -41,11 +41,11 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         let beta = || None;
         let gamma = || None;
     } else {
-        use crate::{use_event_listener_with_options, UseEventListenerOptions};
+        use crate::{use_event_listener_with_options, UseEventListenerOptions, use_supported};
         use leptos::ev::deviceorientation;
         use wasm_bindgen::JsValue;
 
-        let is_supported = Signal::derive(|| js_sys::Reflect::has(
+        let is_supported = use_supported(|| js_sys::Reflect::has(
             &window(),
             &JsValue::from_str("DeviceOrientationEvent"),
         ).unwrap_or(false));
@@ -54,7 +54,7 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         let (beta, set_beta) = create_signal(None);
         let (gamma, set_gamma) = create_signal(None);
 
-        if is_supported.get() {
+        if is_supported.get_untracked() {
             let cleanup = use_event_listener_with_options(
                 window(),
                 deviceorientation,
