@@ -81,12 +81,11 @@ where
 {
     let iterable = iterable.into();
 
-    create_memo(move |_| {
+    Signal::derive(move || {
         let mut iterable = iterable.get();
         iterable.sort();
         iterable
     })
-    .into()
 }
 
 /// Version of [`use_sorted`] with a compare function.
@@ -98,12 +97,11 @@ where
 {
     let iterable = iterable.into();
 
-    create_memo(move |_| {
+    Signal::derive(move || {
         let mut iterable = iterable.get();
         iterable.sort_by(cmp_fn.clone());
         iterable
     })
-    .into()
 }
 
 /// Version of [`use_sorted`] by key.
@@ -116,10 +114,9 @@ where
 {
     let iterable = iterable.into();
 
-    create_memo(move |_| {
+    Signal::derive(move || {
         let mut iterable = iterable.get();
         iterable.sort_by_key(key_fn.clone());
         iterable
     })
-    .into()
 }

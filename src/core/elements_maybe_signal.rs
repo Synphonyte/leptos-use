@@ -216,7 +216,7 @@ macro_rules! impl_from_signal_string {
             fn from(signal: $ty) -> Self {
                 cfg_if! { if #[cfg(feature = "ssr")] {
                     Self::Dynamic(
-                        create_memo(move |_| {
+                        Signal::derive(move || {
                             if let Ok(node_list) = document().query_selector_all(&signal.get()) {
                                 let mut list = Vec::with_capacity(node_list.length() as usize);
                                 for i in 0..node_list.length() {
@@ -227,8 +227,7 @@ macro_rules! impl_from_signal_string {
                             } else {
                                 vec![]
                             }
-                        })
-                        .into(),
+                        }),
                     )
                 } else {
                     let _ = signal;

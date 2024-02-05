@@ -264,14 +264,13 @@ impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
 
         let signals: Vec<_> = keys.iter().map(ge.clone()).collect();
 
-        create_memo(move |_| {
+        Signal::derive(move || {
             keys.iter()
                 .cloned()
                 .zip(signals.iter().cloned())
                 .filter_map(|(key, signal)| signal.get().then_some(key))
                 .collect::<Vec<_>>()
         })
-        .into()
     }
 }
 

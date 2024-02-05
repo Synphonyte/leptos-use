@@ -108,7 +108,7 @@ where
     let (is_loading, set_loading) = create_signal(false);
 
     let el = el.into();
-    let observed_element = create_memo(move |_| {
+    let observed_element = Signal::derive(move || {
         let el = el.get();
 
         el.map(|el| {
