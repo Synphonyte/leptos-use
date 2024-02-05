@@ -12,17 +12,24 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 
 /// Reactive [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
 ///
+/// The function returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
+///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_storage)
 ///
 /// ## Usage
 ///
-/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use. The specified key is where data is stored. All values are stored as UTF-16 strings which is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using the same key on the smae page and across tabs for local storage. See [`UseStorageOptions`] to see how behaviour can be further customised.
+/// Pass a [`StorageType`] to determine the kind of key-value browser storage to use.
+/// The specified key is where data is stored. All values are stored as UTF-16 strings which
+/// is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using
+/// the same key on the smae page and across tabs for local storage.
+/// See [`UseStorageOptions`] to see how behaviour can be further customised.
 ///
 /// See [`StringCodec`] for more details on how to handle versioning — dealing with data that can outlast your code.
 ///
-/// Returns a triplet `(read_signal, write_signal, delete_from_storage_fn)`.
+/// > To use the [`JsonCodec`], you will need to add the `"serde"` feature to your project's `Cargo.toml`.
+/// > To use [`ProstCodec`], add the feature `"prost"`.
 ///
 /// ## Example
 ///
@@ -52,7 +59,8 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// #    view! { }
 /// # }
 ///
-/// // Data stored in JSON must implement Serialize, Deserialize:
+/// // Data stored in JSON must implement Serialize, Deserialize.
+/// // And you have to add the feature "serde" to your project's Cargo.toml
 /// #[derive(Serialize, Deserialize, Clone, PartialEq)]
 /// pub struct MyState {
 ///     pub hello: String,
@@ -74,6 +82,10 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// ## Create Your Own Custom Codec
 ///
 /// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
+///
+/// ## Server-Side Rendering
+///
+/// On the server the returned signals will just read/manipulate the `initial_value` without persistence.
 #[inline(always)]
 pub fn use_storage<T, C>(
     storage_type: StorageType,
