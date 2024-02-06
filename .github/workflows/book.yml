@@ -21,8 +21,6 @@ jobs:
           profile: minimal
           override: true
           components: rust-src
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
       - name: Install mdbook I
         uses: taiki-e/install-action@v2
         with:
@@ -32,6 +30,8 @@ jobs:
           cargo binstall -y mdbook-cmdrun
           cargo binstall -y trunk@0.17.5
           rustup target add wasm32-unknown-unknown
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
@@ -46,4 +46,5 @@ jobs:
           path: ./docs/book/book
       - name: Deploy book to github pages
         id: deployment
+        if: github.event_name != 'pull_request'
         uses: actions/deploy-pages@v2
