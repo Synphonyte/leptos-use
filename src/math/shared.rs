@@ -13,7 +13,7 @@ macro_rules! use_partial_cmp {
         {
             let container = container.into();
 
-            create_memo(move |_| {
+            Signal::derive(move || {
                 container.with(|container| {
                     if container.into_iter().count() == 0 {
                         return None;
@@ -34,7 +34,6 @@ macro_rules! use_partial_cmp {
                         .cloned()
                 })
             })
-            .into()
         }
     };
 }

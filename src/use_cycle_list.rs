@@ -86,7 +86,7 @@ where
     let index = {
         let list = list.clone();
 
-        create_memo(move |_| {
+        Signal::derive(move || {
             list.with(|list| {
                 let index = get_position(&state.get(), list);
 
@@ -161,7 +161,7 @@ where
     UseCycleListReturn {
         state,
         set_state,
-        index: index.into(),
+        index,
         set_index: set,
         next,
         prev,
