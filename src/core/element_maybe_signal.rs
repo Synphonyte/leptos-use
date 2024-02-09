@@ -208,8 +208,7 @@ macro_rules! impl_from_signal_string {
                     Self::Dynamic(Signal::derive(|| None))
                 } else {
                     Self::Dynamic(
-                        create_memo(move |_| document().query_selector(&signal.get()).unwrap_or_default())
-                            .into(),
+                        Signal::derive(move || document().query_selector(&signal.get()).unwrap_or_default()),
                     )
                 }}
             }
