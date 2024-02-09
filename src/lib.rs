@@ -14,11 +14,17 @@ pub mod utils;
 // #[cfg(web_sys_unstable_apis)]
 // pub use use_webtransport::*;
 
+#[cfg(web_sys_unstable_apis)]
+mod use_clipboard;
+#[cfg(web_sys_unstable_apis)]
+pub use use_clipboard::*;
+
 mod is_err;
 mod is_none;
 mod is_ok;
 mod is_some;
 mod on_click_outside;
+mod use_permission;
 mod signal_debounced;
 mod signal_throttled;
 mod use_active_element;
@@ -62,6 +68,7 @@ mod use_service_worker;
 mod use_sorted;
 mod use_supported;
 mod use_throttle_fn;
+mod use_timeout_fn;
 mod use_timestamp;
 mod use_to_string;
 mod use_web_notification;
@@ -80,6 +87,7 @@ pub use is_none::*;
 pub use is_ok::*;
 pub use is_some::*;
 pub use on_click_outside::*;
+pub use use_permission::*;
 pub use signal_debounced::*;
 pub use signal_throttled::*;
 pub use use_active_element::*;
@@ -123,6 +131,7 @@ pub use use_service_worker::*;
 pub use use_sorted::*;
 pub use use_supported::*;
 pub use use_throttle_fn::*;
+pub use use_timeout_fn::*;
 pub use use_timestamp::*;
 pub use use_to_string::*;
 pub use use_web_notification::*;

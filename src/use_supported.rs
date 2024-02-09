@@ -6,12 +6,12 @@ use leptos::*;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::use_supported;
+/// # use leptos_use::{use_supported, js};
 /// # use wasm_bindgen::JsValue;
 /// #
 /// # pub fn Demo() -> impl IntoView {
 /// let is_supported = use_supported(
-///     || JsValue::from("getBattery").js_in(&window().navigator())
+///     || js!("getBattery" in &window().navigator())
 /// );
 ///
 /// if is_supported.get() {
@@ -21,5 +21,14 @@ use leptos::*;
 /// # }
 /// ```
 pub fn use_supported(callback: impl Fn() -> bool + 'static) -> Signal<bool> {
-    Signal::derive(callback)
+    #[cfg(feature = "ssr")]
+    {
+        let _ = callback;
+        Signal::derive(|| false)
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        Signal::derive(callback)
+    }
 }

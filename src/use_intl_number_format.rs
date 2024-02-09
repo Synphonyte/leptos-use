@@ -1,9 +1,9 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
+use crate::js;
 use crate::utils::js_value_from_to_string;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use js_sys::Reflect;
 use leptos::*;
 use std::fmt::Display;
 use wasm_bindgen::{JsCast, JsValue};
@@ -712,94 +712,48 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
     fn from(options: UseIntlNumberFormatOptions) -> Self {
         let obj = Self::new();
 
-        let _ = Reflect::set(
-            &obj,
-            &"compactDisplay".into(),
-            &options.compact_display.into(),
-        );
+        js!(obj["compactDisplay"] = options.compact_display);
 
         if let Some(currency) = options.currency {
-            let _ = Reflect::set(&obj, &"currency".into(), &currency.into());
+            js!(obj["currency"] = currency);
         }
 
-        let _ = Reflect::set(
-            &obj,
-            &"currencyDisplay".into(),
-            &options.currency_display.into(),
-        );
-
-        let _ = Reflect::set(&obj, &"currencySign".into(), &options.currency_sign.into());
-        let _ = Reflect::set(
-            &obj,
-            &"localeMatcher".into(),
-            &options.locale_matcher.into(),
-        );
-        let _ = Reflect::set(&obj, &"notation".into(), &options.notation.into());
+        js!(obj["currencyDisplay"] = options.currency_display);
+        js!(obj["currencySign"] = options.currency_sign);
+        js!(obj["localeMatcher"] = options.locale_matcher);
+        js!(obj["notation"] = options.notation);
 
         if let Some(numbering_system) = options.numbering_system {
-            let _ = Reflect::set(&obj, &"numberingSystem".into(), &numbering_system.into());
+            js!(obj["numberingSystem"] = numbering_system);
         }
 
-        let _ = Reflect::set(&obj, &"signDisplay".into(), &options.sign_display.into());
-        let _ = Reflect::set(&obj, &"style".into(), &options.style.into());
+        js!(obj["signDisplay"] = options.sign_display);
+        js!(obj["style"] = options.style);
 
         if let Some(unit) = options.unit {
-            let _ = Reflect::set(&obj, &"unit".into(), &unit.into());
+            js!(obj["unit"] = unit);
         }
 
-        let _ = Reflect::set(&obj, &"unitDisplay".into(), &options.unit_display.into());
-        let _ = Reflect::set(&obj, &"useGrouping".into(), &options.use_grouping.into());
+        js!(obj["unitDisplay"] = options.unit_display);
+        js!(obj["useGrouping"] = options.use_grouping);
+        js!(obj["roundingMode"] = options.rounding_mode);
+        js!(obj["roundingPriority"] = options.rounding_priority);
+        js!(obj["roundingIncrement"] = options.rounding_increment);
+        js!(obj["trailingZeroDisplay"] = options.trailing_zero_display);
+        js!(obj["minimumIntegerDigits"] = options.minimum_integer_digits);
 
-        let _ = Reflect::set(&obj, &"roundingMode".into(), &options.rounding_mode.into());
-        let _ = Reflect::set(
-            &obj,
-            &"roundingPriority".into(),
-            &options.rounding_priority.into(),
-        );
-        let _ = Reflect::set(
-            &obj,
-            &"roundingIncrement".into(),
-            &options.rounding_increment.into(),
-        );
-        let _ = Reflect::set(
-            &obj,
-            &"trailingZeroDisplay".into(),
-            &options.trailing_zero_display.into(),
-        );
-
-        let _ = Reflect::set(
-            &obj,
-            &"minimumIntegerDigits".into(),
-            &options.minimum_integer_digits.into(),
-        );
         if let Some(minimum_fraction_digits) = options.minimum_fraction_digits {
-            let _ = Reflect::set(
-                &obj,
-                &"minimumFractionDigits".into(),
-                &minimum_fraction_digits.into(),
-            );
+            js!(obj["minimumFractionDigits"] = minimum_fraction_digits);
         }
         if let Some(maximum_fraction_digits) = options.maximum_fraction_digits {
-            let _ = Reflect::set(
-                &obj,
-                &"maximumFractionDigits".into(),
-                &maximum_fraction_digits.into(),
-            );
+            js!(obj["maximumFractionDigits"] = maximum_fraction_digits);
         }
 
         if let Some(minimum_significant_digits) = options.minimum_significant_digits {
-            let _ = Reflect::set(
-                &obj,
-                &"minimumSignificantDigits".into(),
-                &minimum_significant_digits.into(),
-            );
+            js!(obj["minimumSignificantDigits"] = minimum_significant_digits);
         }
         if let Some(maximum_significant_digits) = options.maximum_significant_digits {
-            let _ = Reflect::set(
-                &obj,
-                &"maximumSignificantDigits".into(),
-                &maximum_significant_digits.into(),
-            );
+            js!(obj["maximumSignificantDigits"] = maximum_significant_digits);
         }
 
         obj
@@ -915,7 +869,7 @@ impl UseIntlNumberFormatReturn {
             let number_format = self.js_intl_number_format.clone();
 
             Signal::derive(move || {
-                if let Ok(function) = Reflect::get(&number_format, &"formatRange".into()) {
+                if let Ok(function) = js!(number_format["formatRange"]) {
                     let function = function.unchecked_into::<js_sys::Function>();
 
                     if let Ok(result) = function.call2(

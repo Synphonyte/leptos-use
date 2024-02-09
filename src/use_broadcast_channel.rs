@@ -1,6 +1,6 @@
 use crate::utils::StringCodec;
 use crate::{
-    use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
+    js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
 };
 use leptos::*;
 use thiserror::Error;
@@ -75,7 +75,7 @@ pub fn use_broadcast_channel<T, C>(
 where
     C: StringCodec<T> + Default + Clone,
 {
-    let is_supported = use_supported(|| JsValue::from("BroadcastChannel").js_in(&window()));
+    let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
     let (is_closed, set_closed) = create_signal(false);
     let (channel, set_channel) = create_signal(None::<web_sys::BroadcastChannel>);

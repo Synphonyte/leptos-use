@@ -1,6 +1,7 @@
 mod codecs;
 mod filters;
 mod is;
+mod js;
 mod js_value_from_to_string;
 mod pausable;
 mod signal_filtered;

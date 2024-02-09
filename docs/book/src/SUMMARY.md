@@ -35,6 +35,7 @@
 
 - [use_breakpoints](browser/use_breakpoints.md)
 - [use_broadcast_channel](browser/use_broadcast_channel.md)
+- [use_clipboard](browser/use_clipboard.md)
 - [use_color_mode](browser/use_color_mode.md)
 - [use_cookie](browser/use_cookie.md)
 - [use_css_var](browser/use_css_var.md)
@@ -42,6 +43,7 @@
 - [use_event_listener](browser/use_event_listener.md)
 - [use_favicon](browser/use_favicon.md)
 - [use_media_query](browser/use_media_query.md)
+- [use_permission](browser/use_permission.md)
 - [use_preferred_contrast](browser/use_preferred_contrast.md)
 - [use_preferred_dark](browser/use_preferred_dark.md)
 - [use_service_worker](browser/use_service_worker.md)
@@ -69,6 +71,7 @@
 - [use_interval](animation/use_interval.md)
 - [use_interval_fn](animation/use_interval_fn.md)
 - [use_raf_fn](animation/use_raf_fn.md)
+- [use_timeout_fn](animation/use_timeout_fn.md)
 - [use_timestamp](animation/use_timestamp.md)
 
 # Watch

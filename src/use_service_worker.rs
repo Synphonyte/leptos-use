@@ -4,7 +4,7 @@ use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::ServiceWorkerRegistration;
 
-use crate::use_window;
+use crate::{js_fut, use_window};
 
 /// Reactive [ServiceWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API).
 ///
@@ -239,7 +239,7 @@ fn create_action_update(
         let registration = registration.clone();
         async move {
             match registration.update() {
-                Ok(promise) => wasm_bindgen_futures::JsFuture::from(promise)
+                Ok(promise) => js_fut!(promise)
                     .await
                     .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>()),
                 Err(err) => Err(err),
@@ -255,8 +255,7 @@ fn create_action_create_or_update_registration(
         let script_url = script_url.0.to_owned();
         async move {
             if let Some(navigator) = use_window().navigator() {
-                let promise = navigator.service_worker().register(script_url.as_str());
-                wasm_bindgen_futures::JsFuture::from(promise)
+                js_fut!(navigator.service_worker().register(script_url.as_str()))
                     .await
                     .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
             } else {
@@ -270,8 +269,7 @@ fn create_action_create_or_update_registration(
 fn create_action_get_registration() -> Action<(), Result<ServiceWorkerRegistration, JsValue>> {
     create_action(move |(): &()| async move {
         if let Some(navigator) = use_window().navigator() {
-            let promise = navigator.service_worker().get_registration();
-            wasm_bindgen_futures::JsFuture::from(promise)
+            js_fut!(navigator.service_worker().get_registration())
                 .await
                 .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
         } else {

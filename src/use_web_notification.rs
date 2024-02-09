@@ -435,7 +435,7 @@ impl From<web_sys::NotificationPermission> for NotificationPermission {
 #[cfg(not(feature = "ssr"))]
 async fn request_web_notification_permission() -> NotificationPermission {
     if let Ok(notification_permission) = web_sys::Notification::request_permission() {
-        let _ = wasm_bindgen_futures::JsFuture::from(notification_permission).await;
+        let _ = crate::js_fut!(notification_permission).await;
     }
 
     web_sys::Notification::permission().into()

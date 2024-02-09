@@ -123,6 +123,7 @@ pub fn use_display_media_with_options(
 
 #[cfg(not(feature = "ssr"))]
 async fn create_media(audio: bool) -> Result<web_sys::MediaStream, JsValue> {
+    use crate::js_fut;
     use crate::use_window::use_window;
 
     let media = use_window()
@@ -136,7 +137,7 @@ async fn create_media(audio: bool) -> Result<web_sys::MediaStream, JsValue> {
     }
 
     let promise = media.get_display_media_with_constraints(&constraints)?;
-    let res = wasm_bindgen_futures::JsFuture::from(promise).await?;
+    let res = js_fut!(promise).await?;
 
     Ok::<_, JsValue>(web_sys::MediaStream::unchecked_from_js(res))
 }

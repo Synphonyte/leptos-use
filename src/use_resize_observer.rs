@@ -85,6 +85,8 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        use crate::js;
+
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 callback(
@@ -101,7 +103,7 @@ where
 
         let observer: Rc<RefCell<Option<web_sys::ResizeObserver>>> = Rc::new(RefCell::new(None));
 
-        let is_supported = use_supported(|| JsValue::from("ResizeObserver").js_in(&window()));
+        let is_supported = use_supported(|| js!("ResizeObserver" in &window()));
 
         let cleanup = {
             let observer = Rc::clone(&observer);

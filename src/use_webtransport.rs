@@ -130,7 +130,7 @@ pub fn use_webtransport_with_options(
                     let transport = transport.borrow();
                     let transport = transport.as_ref().expect("Transport should be set");
 
-                    match JsFuture::from(transport.ready()).await {
+                    match js_fut!(transport.ready()).await {
                         Ok(_) => {
                             set_ready_state.set(ConnectionReadyState::Open);
                             on_open();
@@ -213,7 +213,7 @@ pub fn use_webtransport_with_options(
                 set_ready_state.set(ConnectionReadyState::Closing);
 
                 spawn_local(async move {
-                    let result = JsFuture::from(transport.closed()).await;
+                    let result = js_fut!(transport.closed()).await;
                     set_ready_state.set(ConnectionReadyState::Closed);
 
                     on_closed();
@@ -345,10 +345,10 @@ fn listen_to_stream(
 
     spawn_local(async move {
         loop {
-            let result = JsFuture::from(reader.read()).await;
+            let result = js_fut!(reader.read()).await;
             match result {
                 Ok(result) => {
-                    let done = Reflect::get(&result, &"done".into())
+                    let done = js!(result["done"])
                         .expect("done should always be there")
                         .as_bool()
                         .unwrap_or(true);
@@ -358,8 +358,7 @@ fn listen_to_stream(
                         break;
                     }
 
-                    let value = Reflect::get(&result, &"value".into())
-                        .expect("if not done there should be a value");
+                    let value = js!(result["value"]).expect("if not done there should be a value");
 
                     on_value(value);
                 }
@@ -460,7 +459,7 @@ pub trait SendableStream: CloseableStream {
         }
 
         let arr = js_sys::Uint8Array::from(data);
-        let _ = JsFuture::from(self.writer().write_with_chunk(&arr))
+        let _ = js_fut!(self.writer().write_with_chunk(&arr))
             .await
             .map_err(|e| SendError::FailedToWrite(e));
 
@@ -598,7 +597,7 @@ macro_rules! impl_closable_stream {
             }
 
             async fn close_async(&self) -> Result<(), WebTransportError> {
-                let _ = JsFuture::from(self.writer.close()).await.map_err(|e| {
+                let _ = js_fut!(self.writer.close()).await.map_err(|e| {
                     let error = WebTransportError::OnCloseWriter(e);
                     self.set_state.set(StreamState::Closed);
                     error
@@ -650,7 +649,7 @@ impl UseWebTransportReturn {
     /// Open a unidirectional send stream
     pub async fn open_send_stream(&self) -> Result<SendStream, WebTransportError> {
         if let Some(transport) = self.transport.borrow().as_ref() {
-            let result = JsFuture::from(transport.create_unidirectional_stream())
+            let result = js_fut!(transport.create_unidirectional_stream())
                 .await
                 .map_err(|e| WebTransportError::FailedToOpenStream(e))?;
             let stream: web_sys::WritableStream = result.unchecked_into();
@@ -673,7 +672,7 @@ impl UseWebTransportReturn {
     /// Open a bidirectional stream
     pub async fn open_bidir_stream(&self) -> Result<BidirStream, WebTransportError> {
         if let Some(transport) = self.transport.borrow().as_ref() {
-            let result = JsFuture::from(transport.create_bidirectional_stream())
+            let result = js_fut!(transport.create_bidirectional_stream())
                 .await
                 .map_err(|e| WebTransportError::FailedToOpenStream(e))?;
             let stream: web_sys::WebTransportBidirectionalStream = result.unchecked_into();

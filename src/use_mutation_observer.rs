@@ -79,6 +79,8 @@ where
             stop: || {},
         }
     } else {
+        use crate::js;
+
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 callback(
@@ -95,7 +97,7 @@ where
 
         let observer: Rc<RefCell<Option<web_sys::MutationObserver>>> = Rc::new(RefCell::new(None));
 
-        let is_supported = use_supported(|| JsValue::from("MutationObserver").js_in(&window()));
+        let is_supported = use_supported(|| js!("MutationObserver" in &window()));
 
         let cleanup = {
             let observer = Rc::clone(&observer);
