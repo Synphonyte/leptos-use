@@ -240,7 +240,6 @@ where
 
 /// Color modes
 #[derive(Clone, Default, PartialEq, Eq, Hash, Debug)]
-#[cfg_attr(feature = "storage", derive(Serialize, Deserialize))]
 pub enum ColorMode {
     #[default]
     Auto,
@@ -343,24 +342,20 @@ where
     on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.
-    /// Storage requires the *create feature* **`storage`** to be enabled.
     /// Defaults to `None`.
     #[builder(into)]
     storage_signal: Option<RwSignal<ColorMode>>,
 
     /// Key to persist the data into localStorage/sessionStorage.
-    /// Storage requires the *create feature* **`storage`** to be enabled.
     /// Defaults to `"leptos-use-color-scheme"`.
     #[builder(into)]
     storage_key: String,
 
     /// Storage type, can be `Local` or `Session` or custom.
-    /// Storage requires the *create feature* **`storage`** to be enabled.
     /// Defaults to `Local`.
     storage: StorageType,
 
     /// If the color mode should be persisted. If `true` this required the
-    /// *create feature* **`storage`** to be enabled.
     /// Defaults to `true`.
     storage_enabled: bool,
 
@@ -376,7 +371,6 @@ where
     transition_enabled: bool,
 
     /// Listen to changes to this storage key from somewhere else.
-    /// Storage requires the *create feature* **`storage`** to be enabled.
     /// Defaults to true.
     listen_to_storage_changes: bool,
 
