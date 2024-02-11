@@ -152,6 +152,7 @@ where
                 let key = key.to_owned();
                 let on_error = on_error.to_owned();
                 queue_microtask(move || {
+                    // TODO : better to use a BroadcastChannel (use_broadcast_channel)?
                     // Note: we cannot construct a full StorageEvent so we _must_ rely on a custom event
                     let mut custom = web_sys::CustomEventInit::new();
                     custom.detail(&JsValue::from_str(&key));
