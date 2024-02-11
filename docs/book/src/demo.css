@@ -8,6 +8,7 @@
     top: 8px;
     font-size: 12px;
     font-weight: 500;
+    z-index: 50;
 }
 
 .demo-container > a.demo-source > i.fa {

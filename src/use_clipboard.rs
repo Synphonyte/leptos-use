@@ -25,7 +25,7 @@ use leptos::*;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let UsClipboardReturn { is_supported, text, copied, copy } = use_clipboard();
+/// let UseClipboardReturn { is_supported, text, copied, copy } = use_clipboard();
 ///
 /// view! {
 ///     <Show
