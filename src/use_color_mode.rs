@@ -1,3 +1,4 @@
+use crate::core::url;
 use crate::core::StorageType;
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
@@ -106,6 +107,7 @@ where
         target,
         attribute,
         initial_value,
+        initial_value_from_url_param,
         on_changed,
         storage_signal,
         custom_modes,
@@ -136,13 +138,26 @@ where
         }
     });
 
+    let initial_value_from_url = match initial_value_from_url_param {
+        Some(param) => match url::params::get(&param) {
+            Some(value) => match ColorMode::from_str(&value) {
+                Ok(mode) => Some(MaybeRwSignal::Static(mode)),
+                Err(_) => None,
+            },
+            None => None,
+        },
+        None => None,
+    };
+    let update_previous_value = initial_value_from_url.is_some();
+
     let (store, set_store) = get_store_signal(
-        initial_value,
+        initial_value_from_url.unwrap_or(initial_value),
         storage_signal,
         &storage_key,
         storage_enabled,
         storage,
         listen_to_storage_changes,
+        update_previous_value,
     );
 
     let state = Signal::derive(move || {
@@ -255,22 +270,34 @@ fn get_store_signal(
     storage_enabled: bool,
     storage: StorageType,
     listen_to_storage_changes: bool,
+    update_previous_value: bool,
 ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-    if let Some(storage_signal) = storage_signal {
+    let initial_value_copy = initial_value.clone();
+
+    let (store, set_store) = if let Some(storage_signal) = storage_signal {
         let (store, set_store) = storage_signal.split();
         (store.into(), set_store)
     } else if storage_enabled {
-        let (store, set_store, _) = use_storage_with_options::<ColorMode, FromToStringCodec>(
+        let (store, set_store, remove) = use_storage_with_options::<ColorMode, FromToStringCodec>(
             storage,
             storage_key,
             UseStorageOptions::default()
                 .listen_to_storage_changes(listen_to_storage_changes)
                 .initial_value(initial_value),
         );
+        if update_previous_value {
+            remove();
+        }
         (store, set_store)
     } else {
         initial_value.into_signal()
+    };
+
+    if update_previous_value {
+        set_store.set(initial_value_copy.into_signal().0.get_untracked());
     }
+
+    (store, set_store)
 }
 
 impl Display for ColorMode {
@@ -330,6 +357,10 @@ where
     #[builder(into)]
     initial_value: MaybeRwSignal<ColorMode>,
 
+    /// Discover the initial value of the color mode from an URL parameter. Defaults to `None`.
+    #[builder(into)]
+    initial_value_from_url_param: Option<String>,
+
     /// Custom modes that you plan to use as `ColorMode::Custom(x)`. Defaults to `vec![]`.
     custom_modes: Vec<String>,
 
@@ -386,6 +417,7 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             target: "html",
             attribute: "class".into(),
             initial_value: ColorMode::Auto.into(),
+            initial_value_from_url_param: None,
             custom_modes: vec![],
             on_changed: Rc::new(move |mode, default_handler| (default_handler)(mode)),
             storage_signal: None,
