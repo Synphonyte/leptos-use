@@ -59,7 +59,7 @@ pub use crate::utils::ThrottleOptions;
 /// ```
 ///
 /// If you want to throttle a function that takes an argument there are also the versions
-/// [`use_throttle_fn_with_args`] and [`use_throttle_fn_with_args_and_options`].
+/// [`use_throttle_fn_with_arg`] and [`use_throttle_fn_with_arg_and_options`].
 ///
 /// ## Recommended Reading
 ///

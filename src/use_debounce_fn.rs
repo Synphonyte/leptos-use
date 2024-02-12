@@ -63,7 +63,7 @@ use std::rc::Rc;
 /// Currently there is no way to use a function with a return value. Please open an issue if you need this.
 ///
 /// If you want to throttle a function that takes an argument there are also the versions
-/// [`use_debounce_fn_with_args`] and [`use_debounce_fn_with_args_and_options`].
+/// [`use_debounce_fn_with_arg`] and [`use_debounce_fn_with_arg_and_options`].
 ///
 /// ## Recommended Reading
 ///
