@@ -32,7 +32,10 @@ use leptos::*;
 ///         when=is_supported
 ///         fallback=move || view! { <p>Your browser does not support Clipboard API</p> }
 ///     >
-///         <button on:click=move |_| copy("Hello!")>
+///         <button on:click={
+///             let copy = copy.clone();
+///             move |_| copy("Hello!")
+///         }>
 ///             <Show when=copied fallback=move || "Copy">
 ///                 "Copied!"
 ///             </Show>
