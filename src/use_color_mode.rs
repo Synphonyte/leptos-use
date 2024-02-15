@@ -108,6 +108,7 @@ where
         attribute,
         initial_value,
         initial_value_from_url_param,
+        initial_value_from_url_param_to_storage,
         on_changed,
         storage_signal,
         custom_modes,
@@ -138,27 +139,30 @@ where
         }
     });
 
-    let initial_value_from_url = match initial_value_from_url_param {
-        Some(param) => match url::params::get(&param) {
-            Some(value) => match ColorMode::from_str(&value) {
-                Ok(mode) => Some(MaybeRwSignal::Static(mode)),
-                Err(_) => None,
-            },
-            None => None,
-        },
-        None => None,
-    };
-    let update_previous_value = initial_value_from_url.is_some();
+    let mut initial_value_from_url = None;
+    if let Some(param) = initial_value_from_url_param.as_ref() {
+        if let Some(value) = url::params::get(param) {
+            initial_value_from_url = ColorMode::from_str(&value).map(MaybeRwSignal::Static).ok()
+        }
+    }
 
     let (store, set_store) = get_store_signal(
-        initial_value_from_url.unwrap_or(initial_value),
+        initial_value_from_url.clone().unwrap_or(initial_value),
         storage_signal,
         &storage_key,
         storage_enabled,
         storage,
         listen_to_storage_changes,
-        update_previous_value,
     );
+
+    if let Some(initial_value_from_url) = initial_value_from_url {
+        let value = initial_value_from_url.into_signal().0.get_untracked();
+        if initial_value_from_url_param_to_storage {
+            set_store.set(value);
+        } else {
+            set_store.set_untracked(value);
+        }
+    }
 
     let state = Signal::derive(move || {
         let value = store.get();
@@ -270,34 +274,22 @@ fn get_store_signal(
     storage_enabled: bool,
     storage: StorageType,
     listen_to_storage_changes: bool,
-    update_previous_value: bool,
 ) -> (Signal<ColorMode>, WriteSignal<ColorMode>) {
-    let initial_value_copy = initial_value.clone();
-
-    let (store, set_store) = if let Some(storage_signal) = storage_signal {
+    if let Some(storage_signal) = storage_signal {
         let (store, set_store) = storage_signal.split();
         (store.into(), set_store)
     } else if storage_enabled {
-        let (store, set_store, remove) = use_storage_with_options::<ColorMode, FromToStringCodec>(
+        let (store, set_store, _) = use_storage_with_options::<ColorMode, FromToStringCodec>(
             storage,
             storage_key,
             UseStorageOptions::default()
                 .listen_to_storage_changes(listen_to_storage_changes)
                 .initial_value(initial_value),
         );
-        if update_previous_value {
-            remove();
-        }
         (store, set_store)
     } else {
         initial_value.into_signal()
-    };
-
-    if update_previous_value {
-        set_store.set(initial_value_copy.into_signal().0.get_untracked());
     }
-
-    (store, set_store)
 }
 
 impl Display for ColorMode {
@@ -361,6 +353,10 @@ where
     #[builder(into)]
     initial_value_from_url_param: Option<String>,
 
+    /// Update the initial value of the discovered color mode from URL parameter into storage.
+    /// Defaults to `false`.
+    initial_value_from_url_param_to_storage: bool,
+
     /// Custom modes that you plan to use as `ColorMode::Custom(x)`. Defaults to `vec![]`.
     custom_modes: Vec<String>,
 
@@ -418,6 +414,7 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             attribute: "class".into(),
             initial_value: ColorMode::Auto.into(),
             initial_value_from_url_param: None,
+            initial_value_from_url_param_to_storage: false,
             custom_modes: vec![],
             on_changed: Rc::new(move |mode, default_handler| (default_handler)(mode)),
             storage_signal: None,
