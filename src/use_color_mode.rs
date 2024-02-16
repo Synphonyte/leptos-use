@@ -1,3 +1,4 @@
+use crate::core::url;
 use crate::core::StorageType;
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
@@ -106,6 +107,8 @@ where
         target,
         attribute,
         initial_value,
+        initial_value_from_url_param,
+        initial_value_from_url_param_to_storage,
         on_changed,
         storage_signal,
         custom_modes,
@@ -136,14 +139,30 @@ where
         }
     });
 
+    let mut initial_value_from_url = None;
+    if let Some(param) = initial_value_from_url_param.as_ref() {
+        if let Some(value) = url::params::get(param) {
+            initial_value_from_url = ColorMode::from_str(&value).map(MaybeRwSignal::Static).ok()
+        }
+    }
+
     let (store, set_store) = get_store_signal(
-        initial_value,
+        initial_value_from_url.clone().unwrap_or(initial_value),
         storage_signal,
         &storage_key,
         storage_enabled,
         storage,
         listen_to_storage_changes,
     );
+
+    if let Some(initial_value_from_url) = initial_value_from_url {
+        let value = initial_value_from_url.into_signal().0.get_untracked();
+        if initial_value_from_url_param_to_storage {
+            set_store.set(value);
+        } else {
+            set_store.set_untracked(value);
+        }
+    }
 
     let state = Signal::derive(move || {
         let value = store.get();
@@ -330,6 +349,14 @@ where
     #[builder(into)]
     initial_value: MaybeRwSignal<ColorMode>,
 
+    /// Discover the initial value of the color mode from an URL parameter. Defaults to `None`.
+    #[builder(into)]
+    initial_value_from_url_param: Option<String>,
+
+    /// Update the initial value of the discovered color mode from URL parameter into storage.
+    /// Defaults to `false`.
+    initial_value_from_url_param_to_storage: bool,
+
     /// Custom modes that you plan to use as `ColorMode::Custom(x)`. Defaults to `vec![]`.
     custom_modes: Vec<String>,
 
@@ -386,6 +413,8 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             target: "html",
             attribute: "class".into(),
             initial_value: ColorMode::Auto.into(),
+            initial_value_from_url_param: None,
+            initial_value_from_url_param_to_storage: false,
             custom_modes: vec![],
             on_changed: Rc::new(move |mode, default_handler| (default_handler)(mode)),
             storage_signal: None,

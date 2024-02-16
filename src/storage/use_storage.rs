@@ -67,7 +67,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///     pub greeting: String,
 /// }
 ///
-/// // Default can be used to implement intial or deleted values.
+/// // Default can be used to implement initial or deleted values.
 /// // You can also use a signal via UseStorageOptions::default_value`
 /// impl Default for MyState {
 ///     fn default() -> Self {
