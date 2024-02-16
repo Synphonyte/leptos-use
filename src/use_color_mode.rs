@@ -353,7 +353,8 @@ where
     #[builder(into)]
     initial_value_from_url_param: Option<String>,
 
-    /// Update the initial value of the discovered color mode from URL parameter into storage.
+    /// Write the initial value of the discovered color mode from URL parameter to storage.
+    /// This only has an effect if `initial_value_from_url_param` is specified.
     /// Defaults to `false`.
     initial_value_from_url_param_to_storage: bool,
 
