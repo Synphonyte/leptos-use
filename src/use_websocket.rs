@@ -402,7 +402,7 @@ pub fn use_websocket_with_options(
     // Send text (String)
     let send = {
         Box::new(move |data: &str| {
-            if ready_state.get() == ConnectionReadyState::Open {
+            if ready_state.get_untracked() == ConnectionReadyState::Open {
                 if let Some(web_socket) = ws_ref.get_value() {
                     let _ = web_socket.send_with_str(data);
                 }
@@ -412,7 +412,7 @@ pub fn use_websocket_with_options(
 
     // Send bytes
     let send_bytes = move |data: Vec<u8>| {
-        if ready_state.get() == ConnectionReadyState::Open {
+        if ready_state.get_untracked() == ConnectionReadyState::Open {
             if let Some(web_socket) = ws_ref.get_value() {
                 let _ = web_socket.send_with_u8_array(&data);
             }

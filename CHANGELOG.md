@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 
 
+### Fix 🍕
+
+- Removed signal warnings from `use_websocket`'s `send...` methods.
+
 ### Changes 🔥
 
 - `use_color_mode` now supports detection from an url query parameter. (thanks to @mondeja)
