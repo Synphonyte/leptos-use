@@ -39,12 +39,13 @@ macro_rules! use_partial_cmp {
 }
 
 macro_rules! use_simple_math {
-    ($(#[$outer:meta])*
+    (
+        $(#[$outer:meta])*
         $fn_name:ident
-        ) => {
+    ) => {
         paste! {
             $(#[$outer])*
-            pub fn  [<use_ $fn_name>]<S, N>(x: S) -> Signal<N>
+            pub fn [<use_ $fn_name>]<S, N>(x: S) -> Signal<N>
             where
                 S: Into<MaybeSignal<N>>,
                 N: Float,
@@ -56,5 +57,27 @@ macro_rules! use_simple_math {
     };
 }
 
+macro_rules! use_binary_logic {
+    (
+        $(#[$outer:meta])*
+        $fn_name:ident
+        $op:tt
+    ) => {
+        paste! {
+            $(#[$outer])*
+            pub fn [<use_ $fn_name>]<S1, S2>(a: S1, b: S2) -> Signal<bool>
+            where
+                S1: Into<MaybeSignal<bool>>,
+                S2: Into<MaybeSignal<bool>>,
+            {
+                let a = a.into();
+                let b = b.into();
+                Signal::derive(move || a.get() $op b.get())
+            }
+        }
+    };
+}
+
+pub(crate) use use_binary_logic;
 pub(crate) use use_partial_cmp;
 pub(crate) use use_simple_math;

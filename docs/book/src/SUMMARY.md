@@ -109,8 +109,11 @@
 # @Math
 
 - [use_abs](math/use_abs.md)
+- [use_and](math/use_and.md)
 - [use_ceil](math/use_ceil.md)
 - [use_floor](math/use_floor.md)
 - [use_max](math/use_max.md)
 - [use_min](math/use_min.md)
+- [use_not](math/use_not.md)
+- [use_or](math/use_or.md)
 - [use_round](math/use_round.md)

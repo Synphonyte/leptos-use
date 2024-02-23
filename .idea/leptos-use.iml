@@ -72,6 +72,9 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_clipboard/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_permission/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_timeout_fn/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_and/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_not/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_or/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

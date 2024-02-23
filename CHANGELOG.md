@@ -3,7 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 
+## [0.10.3] - 2024-02-23
+
+### New Functions 🚀
+
+- `use_or`
+- `use_and`
+- `use_not`
 
 ### Fix 🍕
 
@@ -13,8 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `use_color_mode` now supports detection from an url query parameter. (thanks to @mondeja)
 
-
-## [0.10.2] - 2024-02-09 
+## [0.10.2] - 2024-02-09
 
 ### New Functions 🚀
 
@@ -43,8 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `leptos` version is now 0.6
 - The trait `Codec` has been renamed to `StringCodec` and has been moved to `util::StringCodec`.
-  - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
-  - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
+    - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
+    - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
 - The function `use_storage` now requires type parameters for the stored type and the codec like all the other
   `...storage...` functions.
 
@@ -56,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changes 🔥
 
 - The `UseMouseReturn` signals `x`, `y`, and `source_type` are now of type `Signal<f64>` instead of `ReadSignal<f64>`.
-- You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot easier to use in directives.
+- You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot
+  easier to use in directives.
 - There's now a chapter in the book especially for `Element(s)MaybeSignal`.
 - Throttled or debounced callbacks (in watch_* or *_fn) no longer are called after the containing scope was cleaned up.
 - The document returned from `use_document` now supports the methods `query_selector` and `query_selector_all`.
