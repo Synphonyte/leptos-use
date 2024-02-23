@@ -508,11 +508,11 @@ impl Default for UseWebSocketOptions {
 /// Return type of [`use_websocket`].
 #[derive(Clone)]
 pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
-    where
-        OpenFn: Fn() + Clone + 'static,
-        CloseFn: Fn() + Clone + 'static,
-        SendFn: Fn(&str) + Clone + 'static,
-        SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
+where
+    OpenFn: Fn() + Clone + 'static,
+    CloseFn: Fn() + Clone + 'static,
+    SendFn: Fn(&str) + Clone + 'static,
+    SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
 {
     /// The current state of the `WebSocket` connection.
     pub ready_state: Signal<ConnectionReadyState>,
