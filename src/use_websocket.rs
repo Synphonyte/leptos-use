@@ -9,7 +9,7 @@ use std::time::Duration;
 use crate::core::ConnectionReadyState;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
-use wasm_bindgen::{prelude::*, JsCast, JsValue};
+use wasm_bindgen::prelude::*;
 use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 
 /// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
@@ -508,11 +508,11 @@ impl Default for UseWebSocketOptions {
 /// Return type of [`use_websocket`].
 #[derive(Clone)]
 pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
-where
-    OpenFn: Fn() + Clone + 'static,
-    CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(&str) + Clone + 'static,
-    SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
+    where
+        OpenFn: Fn() + Clone + 'static,
+        CloseFn: Fn() + Clone + 'static,
+        SendFn: Fn(&str) + Clone + 'static,
+        SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
 {
     /// The current state of the `WebSocket` connection.
     pub ready_state: Signal<ConnectionReadyState>,

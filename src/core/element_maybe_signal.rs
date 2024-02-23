@@ -1,6 +1,6 @@
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
-use leptos::html::{ElementDescriptor, HtmlElement};
+use leptos::html::ElementDescriptor;
 use leptos::*;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -13,8 +13,8 @@ use std::ops::Deref;
 /// * a `NodeRef`
 /// into a function. Used for example in [`use_event_listener`].
 pub enum ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     Static(Option<T>),
     Dynamic(Signal<Option<T>>),
@@ -22,8 +22,8 @@ where
 }
 
 impl<T, E> Default for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     fn default() -> Self {
         Self::Static(None)
@@ -31,8 +31,8 @@ where
 }
 
 impl<T, E> Clone for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     fn clone(&self) -> Self {
         match self {
@@ -44,8 +44,8 @@ where
 }
 
 impl<T, E> SignalGet for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     type Value = Option<T>;
 
@@ -67,8 +67,8 @@ where
 }
 
 impl<T, E> SignalWith for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     type Value = Option<T>;
 
@@ -90,8 +90,8 @@ where
 }
 
 impl<T, E> SignalWithUntracked for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     type Value = Option<T>;
 
@@ -113,8 +113,8 @@ where
 }
 
 impl<T, E> SignalGetUntracked for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     type Value = Option<T>;
 
@@ -138,8 +138,8 @@ where
 // From static element //////////////////////////////////////////////////////////////
 
 impl<T, E> From<T> for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     fn from(value: T) -> Self {
         ElementMaybeSignal::Static(Some(value))
@@ -147,8 +147,8 @@ where
 }
 
 impl<T, E> From<Option<T>> for ElementMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
+    where
+        T: Into<E> + Clone + 'static,
 {
     fn from(target: Option<T>) -> Self {
         ElementMaybeSignal::Static(target)
@@ -174,8 +174,8 @@ impl_from_deref_option!(UseDocument, web_sys::Document);
 // From string (selector) ///////////////////////////////////////////////////////////////
 
 impl<'a, E> From<&'a str> for ElementMaybeSignal<web_sys::Element, E>
-where
-    E: From<web_sys::Element> + 'static,
+    where
+        E: From<web_sys::Element> + 'static,
 {
     fn from(target: &'a str) -> Self {
         cfg_if! { if #[cfg(feature = "ssr")] {
@@ -188,8 +188,8 @@ where
 }
 
 impl<E> From<String> for ElementMaybeSignal<web_sys::Element, E>
-where
-    E: From<web_sys::Element> + 'static,
+    where
+        E: From<web_sys::Element> + 'static,
 {
     fn from(target: String) -> Self {
         Self::from(target.as_str())
