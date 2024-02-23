@@ -10,7 +10,7 @@ In your Cargo.toml file add the following:
 
 [features]
 hydrate = [
-    "leptos/hydrate", 
+    "leptos/hydrate",
     ...
 ]
 ssr = [
@@ -30,6 +30,25 @@ find information about these differences in their respective docs under the sect
 If you don't find that section, it means that the function works exactly the same on both, the client
 and the server.
 
+> **Note:** do not enable `leptos-use`'s `ssr` feature directly!
+>
+> ```toml
+> [dependencies]
+> leptos-use = { version = "0.10", features = ["ssr"] }  # do not do this
+> ```
+
+The `ssr` feature is used to select which version of the functions are built.
+Effectively it means your application is built two times: with `ssr` enabled to
+build the server executable, and with `ssr` disabled to build the client's WASM
+binary module.
+
+So if you enable `leptos-use`'s `ssr` feature globally, you will get the server
+version of the functions in the client.
+
+By adding `"leptos-use/ssr"` to the `ssr` feature of your project, it will only
+be enabled when your project is built with `ssr`, and you will get the server
+functions server-side, and the client functions client-side.
+
 ## Functions with Target Elements
 
 A lot of functions like `use_resize_observer` and `use_element_size` are only useful when a target HTML/SVG element is
@@ -47,8 +66,9 @@ use leptos_use::{use_event_listener, use_window};
 
 use_event_listener(use_window(), keyup, |evt| {
     ...
-}); 
+});
 ```
 
 There are some convenience methods provided as well, like `use_document().body()` which
 just propagate a `None` on the server.
+
