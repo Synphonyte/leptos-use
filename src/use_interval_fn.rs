@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::utils::Pausable;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::*;
@@ -89,7 +88,8 @@ where
     let interval = interval.into();
 
     let resume = move || {
-        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        #[cfg(not(feature = "ssr"))]
+        {
             let interval_value = interval.get();
             if interval_value == 0 {
                 return;
@@ -97,15 +97,30 @@ where
 
             set_active.set(true);
 
+            let callback = {
+                let callback = callback.clone();
+
+                move || {
+                    #[cfg(debug_assertions)]
+                    let prev = SpecialNonReactiveZone::enter();
+
+                    callback();
+
+                    #[cfg(debug_assertions)]
+                    SpecialNonReactiveZone::exit(prev);
+                }
+            };
+
             if immediate_callback {
                 callback.clone()();
             }
             clean();
 
             timer.set(
-                set_interval_with_handle(callback.clone(), Duration::from_millis(interval_value)).ok(),
+                set_interval_with_handle(callback.clone(), Duration::from_millis(interval_value))
+                    .ok(),
             );
-        }}
+        }
     };
 
     if immediate {

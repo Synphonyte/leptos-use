@@ -4,7 +4,7 @@ use crate::core::now;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::{on_cleanup, set_timeout_with_handle, MaybeSignal, SignalGetUntracked};
+use leptos::*;
 use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::rc::Rc;
@@ -57,7 +57,13 @@ where
 
         let last_return_val = Rc::clone(&last_return_value);
         let invoke = move || {
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             let return_value = _invoke();
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
 
             let mut val_mut = last_return_val.borrow_mut();
             *val_mut = Some(return_value);

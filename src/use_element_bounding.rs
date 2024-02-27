@@ -70,10 +70,11 @@ where
 
         let update = move || ();
     } else {
-        use leptos::ev::{resize, scroll};
         use crate::{
-            use_event_listener_with_options, use_resize_observer, use_window, UseEventListenerOptions,
+            use_event_listener_with_options, use_resize_observer, use_window,
+            UseEventListenerOptions,
         };
+        use leptos::ev::{resize, scroll};
 
         let UseElementBoundingOptions {
             reset,

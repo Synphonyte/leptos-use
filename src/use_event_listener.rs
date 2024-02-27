@@ -102,7 +102,7 @@ where
 pub fn use_event_listener_with_options<Ev, El, T, F>(
     target: El,
     event: Ev,
-    handler: F,
+    mut handler: F,
     options: UseEventListenerOptions,
 ) -> impl Fn() + Clone
 where
@@ -111,11 +111,24 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
 {
-    cfg_if! { if #[cfg(feature = "ssr")] {
+    #[cfg(feature = "ssr")]
+    {
         || {}
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         let event_name = event.name();
-        let closure_js = Closure::wrap(Box::new(handler) as Box<dyn FnMut(_)>).into_js_value();
+        let closure_js = Closure::wrap(Box::new(move |e| {
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
+            handler(e);
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
+        }) as Box<dyn FnMut(_)>)
+        .into_js_value();
 
         let cleanup_fn = {
             let closure_js = closure_js.clone();
@@ -158,11 +171,12 @@ where
                     if let Some(element) = element {
                         let options = options.as_add_event_listener_options();
 
-                        _ = element.add_event_listener_with_callback_and_add_event_listener_options(
-                            &event_name,
-                            closure_js.as_ref().unchecked_ref(),
-                            &options,
-                        );
+                        _ = element
+                            .add_event_listener_with_callback_and_add_event_listener_options(
+                                &event_name,
+                                closure_js.as_ref().unchecked_ref(),
+                                &options,
+                            );
                     }
                 },
                 WatchOptions::default().immediate(true),
@@ -177,7 +191,7 @@ where
         on_cleanup(stop.clone());
 
         stop
-    }}
+    }
 }
 
 /// Options for [`use_event_listener_with_options`].

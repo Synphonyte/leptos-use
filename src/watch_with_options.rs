@@ -111,14 +111,22 @@ where
         let prev_callback_val = Rc::clone(&prev_callback_value);
 
         move || {
-            callback(
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
+            let ret = callback(
                 cur_deps_value
                     .borrow()
                     .as_ref()
                     .expect("this will not be called before there is deps value"),
                 prev_deps_value.borrow().as_ref(),
                 prev_callback_val.take(),
-            )
+            );
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
+
+            ret
         }
     };
 

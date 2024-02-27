@@ -74,7 +74,8 @@ where
     let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
     let (files, set_files) = create_signal(Vec::<web_sys::File>::new());
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    #[cfg(not(feature = "ssr"))]
+    {
         let UseDropZoneOptions {
             on_drop,
             on_enter,
@@ -105,19 +106,32 @@ where
 
             update_files(&event);
 
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             on_enter(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target.clone(), dragover, move |event| {
             event.prevent_default();
             update_files(&event);
+
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             on_over(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target.clone(), dragleave, move |event| {
@@ -129,10 +143,16 @@ where
 
             update_files(&event);
 
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             on_leave(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target, drop, move |event| {
@@ -142,12 +162,18 @@ where
 
             update_files(&event);
 
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             on_drop(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         });
-    }}
+    }
 
     UseDropZoneReturn {
         files: files.into(),

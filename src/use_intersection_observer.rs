@@ -100,6 +100,9 @@ where
     } else {
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
             move |entries: js_sys::Array, observer| {
+                #[cfg(debug_assertions)]
+                let prev = SpecialNonReactiveZone::enter();
+
                 callback(
                     entries
                         .to_vec()
@@ -108,11 +111,15 @@ where
                         .collect(),
                     observer,
                 );
+
+                #[cfg(debug_assertions)]
+                SpecialNonReactiveZone::exit(prev);
             },
         )
         .into_js_value();
 
-        let observer: Rc<RefCell<Option<web_sys::IntersectionObserver>>> = Rc::new(RefCell::new(None));
+        let observer: Rc<RefCell<Option<web_sys::IntersectionObserver>>> =
+            Rc::new(RefCell::new(None));
 
         let cleanup = {
             let obsserver = Rc::clone(&observer);

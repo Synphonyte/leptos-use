@@ -100,7 +100,13 @@ pub fn use_raf_fn_with_options(
                 0.0
             };
 
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             callback(UseRafFnCallbackArgs { delta, timestamp });
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
 
             previous_frame_timestamp.set(timestamp);
 

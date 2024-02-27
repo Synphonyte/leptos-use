@@ -107,9 +107,13 @@ where
     F: FnMut(web_sys::Event) + Clone + 'static,
     I: Into<web_sys::EventTarget> + Clone + 'static,
 {
-    cfg_if! { if #[cfg(feature = "ssr")] {
+    #[cfg(feature = "ssr")]
+    {
         || {}
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         let OnClickOutsideOptions {
             ignore,
             capture,
@@ -163,7 +167,8 @@ where
                 if let Some(el) = target.get_untracked() {
                     let el = el.into();
 
-                    if el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0) {
+                    if el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0)
+                    {
                         return;
                     }
 
@@ -176,7 +181,13 @@ where
                         return;
                     }
 
+                    #[cfg(debug_assertions)]
+                    let prev = SpecialNonReactiveZone::enter();
+
                     handler(event.into());
+
+                    #[cfg(debug_assertions)]
+                    SpecialNonReactiveZone::exit(prev);
                 }
             }
         };
@@ -251,7 +262,7 @@ where
                 f();
             }
         }
-    }}
+    }
 }
 
 /// Options for [`on_click_outside_with_options`].

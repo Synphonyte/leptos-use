@@ -50,7 +50,13 @@ pub fn use_service_worker_with_options(
     if let Some(navigator) = use_window().navigator() {
         let on_controller_change = options.on_controller_change.clone();
         let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             on_controller_change();
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         }) as Box<dyn FnMut(JsValue)>)
         .into_js_value();
         navigator

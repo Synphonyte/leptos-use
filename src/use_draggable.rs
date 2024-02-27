@@ -134,12 +134,22 @@ where
                     x: event.client_x() as f64 - rect.left(),
                     y: event.client_y() as f64 - rect.top(),
                 };
+
+                #[cfg(debug_assertions)]
+                let prev = SpecialNonReactiveZone::enter();
+
                 if !on_start(UseDraggableCallbackArgs {
                     position,
                     event: event.clone(),
                 }) {
+                    #[cfg(debug_assertions)]
+                    SpecialNonReactiveZone::exit(prev);
                     return;
                 }
+
+                #[cfg(debug_assertions)]
+                SpecialNonReactiveZone::exit(prev);
+
                 set_start_position.set(Some(position));
                 handle_event(event);
             }
@@ -159,10 +169,18 @@ where
                     y: event.client_y() as f64 - start_position.y,
                 };
                 set_position.set(position);
+
+                #[cfg(debug_assertions)]
+                let prev = SpecialNonReactiveZone::enter();
+
                 on_move(UseDraggableCallbackArgs {
                     position,
                     event: event.clone(),
                 });
+
+                #[cfg(debug_assertions)]
+                SpecialNonReactiveZone::exit(prev);
+
                 handle_event(event);
             }
         }
@@ -176,10 +194,18 @@ where
             return;
         }
         set_start_position.set(None);
+
+        #[cfg(debug_assertions)]
+        let prev = SpecialNonReactiveZone::enter();
+
         on_end(UseDraggableCallbackArgs {
             position: position.get_untracked(),
             event: event.clone(),
         });
+
+        #[cfg(debug_assertions)]
+        SpecialNonReactiveZone::exit(prev);
+
         handle_event(event);
     };
 

@@ -77,7 +77,8 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ## Relative Paths
 ///
 /// If the provided `url` is relative, it will be resolved relative to the current page.
-/// Urls will be resolved like this:
+/// Urls will be resolved like this the following. Please note that the protocol (http vs https) will
+/// be taken into account as well.
 ///
 /// | Current Page                   | Relative Url             | Resolved Url                        |
 /// |--------------------------------|--------------------------|-------------------------------------|
@@ -237,8 +238,8 @@ pub fn use_websocket_with_options(
 
     let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
-
+    #[cfg(not(feature = "ssr"))]
+    {
         let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
         reconnect_ref.set_value({
             let ws = ws_ref.get_value();
@@ -301,10 +302,17 @@ pub fn use_websocket_with_options(
                             return;
                         }
 
+                        #[cfg(debug_assertions)]
+                        let prev = SpecialNonReactiveZone::enter();
+
                         on_open(e);
 
+                        #[cfg(debug_assertions)]
+                        SpecialNonReactiveZone::exit(prev);
+
                         set_ready_state.set(ConnectionReadyState::Open);
-                    }) as Box<dyn FnMut(Event)>);
+                    })
+                        as Box<dyn FnMut(Event)>);
                     web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
                     // Forget the closure to keep it alive
                     onopen_closure.forget();
@@ -325,11 +333,21 @@ pub fn use_websocket_with_options(
                             |_| {
                                 e.data().dyn_into::<js_sys::JsString>().map_or_else(
                                     |_| {
-                                        unreachable!("message event, received Unknown: {:?}", e.data());
+                                        unreachable!(
+                                            "message event, received Unknown: {:?}",
+                                            e.data()
+                                        );
                                     },
                                     |txt| {
                                         let txt = String::from(&txt);
+
+                                        #[cfg(debug_assertions)]
+                                        let prev = SpecialNonReactiveZone::enter();
+
                                         on_message(txt.clone());
+
+                                        #[cfg(debug_assertions)]
+                                        SpecialNonReactiveZone::exit(prev);
 
                                         set_message.set(Some(txt));
                                     },
@@ -338,7 +356,14 @@ pub fn use_websocket_with_options(
                             |array_buffer| {
                                 let array = js_sys::Uint8Array::new(&array_buffer);
                                 let array = array.to_vec();
+
+                                #[cfg(debug_assertions)]
+                                let prev = SpecialNonReactiveZone::enter();
+
                                 on_message_bytes(array.clone());
+
+                                #[cfg(debug_assertions)]
+                                SpecialNonReactiveZone::exit(prev);
 
                                 set_message_bytes.set(Some(array));
                             },
@@ -363,10 +388,17 @@ pub fn use_websocket_with_options(
                             reconnect();
                         }
 
+                        #[cfg(debug_assertions)]
+                        let prev = SpecialNonReactiveZone::enter();
+
                         on_error(e);
 
+                        #[cfg(debug_assertions)]
+                        SpecialNonReactiveZone::exit(prev);
+
                         set_ready_state.set(ConnectionReadyState::Closed);
-                    }) as Box<dyn FnMut(Event)>);
+                    })
+                        as Box<dyn FnMut(Event)>);
                     web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
                     onerror_closure.forget();
                 }
@@ -385,7 +417,13 @@ pub fn use_websocket_with_options(
                             reconnect();
                         }
 
+                        #[cfg(debug_assertions)]
+                        let prev = SpecialNonReactiveZone::enter();
+
                         on_close(e);
+
+                        #[cfg(debug_assertions)]
+                        SpecialNonReactiveZone::exit(prev);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
                     })
@@ -397,7 +435,7 @@ pub fn use_websocket_with_options(
                 ws_ref.set_value(Some(web_socket));
             }))
         });
-    }}
+    }
 
     // Send text (String)
     let send = {

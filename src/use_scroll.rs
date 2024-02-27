@@ -331,7 +331,9 @@ where
 
                 let top = scroll_top_abs <= offset.top;
                 let bottom = scroll_top_abs + target.client_height() as f64
-                    >= target.scroll_height() as f64 - offset.bottom - ARRIVED_STATE_THRESHOLD_PIXELS;
+                    >= target.scroll_height() as f64
+                        - offset.bottom
+                        - ARRIVED_STATE_THRESHOLD_PIXELS;
 
                 // reverse columns and rows behave exactly the other way around,
                 // bottom is treated as top and top is treated as the negative version of bottom
@@ -357,6 +359,7 @@ where
 
                 set_arrived_state(target);
                 set_is_scrolling.set(true);
+
                 on_scroll_end_debounced.clone()(e.clone());
                 on_scroll.clone()(e);
             }

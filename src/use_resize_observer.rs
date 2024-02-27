@@ -89,6 +89,9 @@ where
 
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
             move |entries: js_sys::Array, observer| {
+                #[cfg(debug_assertions)]
+                let prev = SpecialNonReactiveZone::enter();
+
                 callback(
                     entries
                         .to_vec()
@@ -97,6 +100,9 @@ where
                         .collect(),
                     observer,
                 );
+
+                #[cfg(debug_assertions)]
+                SpecialNonReactiveZone::exit(prev);
             },
         )
         .into_js_value();

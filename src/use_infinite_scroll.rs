@@ -157,10 +157,16 @@ where
 
                     let measure = measure.clone();
                     spawn_local(async move {
+                        #[cfg(debug_assertions)]
+                        let prev = SpecialNonReactiveZone::enter();
+
                         join!(
                             on_load_more.with_value(|f| f(state)),
                             sleep(Duration::from_millis(interval as u64))
                         );
+
+                        #[cfg(debug_assertions)]
+                        SpecialNonReactiveZone::exit(prev);
 
                         set_loading.set(false);
                         sleep(Duration::ZERO).await;

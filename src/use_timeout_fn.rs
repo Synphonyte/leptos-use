@@ -81,7 +81,13 @@ where
                         set_pending.set(false);
                         timer.set(None);
 
+                        #[cfg(debug_assertions)]
+                        let prev = SpecialNonReactiveZone::enter();
+
                         callback(arg);
+
+                        #[cfg(debug_assertions)]
+                        SpecialNonReactiveZone::exit(prev);
                     }
                 },
                 Duration::from_millis(delay.get_untracked() as u64),

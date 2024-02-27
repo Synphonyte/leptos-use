@@ -84,7 +84,14 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
 
         move || {
             update();
+
+            #[cfg(debug_assertions)]
+            let prev = SpecialNonReactiveZone::enter();
+
             callback(ts.get_untracked());
+
+            #[cfg(debug_assertions)]
+            SpecialNonReactiveZone::exit(prev);
         }
     };
 

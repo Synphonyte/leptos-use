@@ -73,16 +73,23 @@ where
     T: Into<web_sys::Element> + Clone + 'static,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
 {
-    cfg_if! { if #[cfg(feature = "ssr")] {
+    #[cfg(feature = "ssr")]
+    {
         UseMutationObserverReturn {
             is_supported: Signal::derive(|| true),
             stop: || {},
         }
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         use crate::js;
 
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>::new(
             move |entries: js_sys::Array, observer| {
+                #[cfg(debug_assertions)]
+                let prev = SpecialNonReactiveZone::enter();
+
                 callback(
                     entries
                         .to_vec()
@@ -91,6 +98,9 @@ where
                         .collect(),
                     observer,
                 );
+
+                #[cfg(debug_assertions)]
+                SpecialNonReactiveZone::exit(prev);
             },
         )
         .into_js_value();
@@ -122,8 +132,9 @@ where
                     cleanup();
 
                     if is_supported.get() && !targets.is_empty() {
-                        let obs = web_sys::MutationObserver::new(closure_js.as_ref().unchecked_ref())
-                            .expect("failed to create MutationObserver");
+                        let obs =
+                            web_sys::MutationObserver::new(closure_js.as_ref().unchecked_ref())
+                                .expect("failed to create MutationObserver");
 
                         for target in targets.iter().flatten() {
                             let target: web_sys::Element = target.clone().into();
@@ -145,7 +156,7 @@ where
         on_cleanup(stop.clone());
 
         UseMutationObserverReturn { is_supported, stop }
-    }}
+    }
 }
 
 /// Options for [`use_mutation_observer_with_options`].
