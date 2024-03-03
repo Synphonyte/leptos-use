@@ -3,9 +3,12 @@
 When using together with server-side rendering (SSR) you have to enable the feature `ssr` similar to
 how you do it for `leptos`.
 
-In your Cargo.toml file add the following:
+In your Cargo.toml file enable Leptos-Use's `ssr` feature only from your project's `ssr` feature:
 
 ```toml
+[dependencies]
+leptos-use = "0.10"   # do NOT enable the "ssr" feature here
+
 ...
 
 [features]
@@ -17,24 +20,26 @@ ssr = [
     ...
     "leptos/ssr",
     ...
-    "leptos-use/ssr" # add this
+    "leptos-use/ssr" # <== add this
 ]
 
 ...
 ```
 
-Please see the `ssr` example in the examples folder for a simple working demonstration.
+Please see the [`ssr` example](https://github.com/synphonyte/leptos-use/blob/main/examples/ssr) in the examples folder
+for a simple working demonstration.
 
 Many functions work differently on the server and on the client. If that's the case you will
 find information about these differences in their respective docs under the section "Server-Side Rendering".
 If you don't find that section, it means that the function works exactly the same on both, the client
 and the server.
 
-> **Note:** do not enable `leptos-use`'s `ssr` feature directly!
+> **Do not enable the `ssr` feature directly**!
 >
+> Don't do the following.
 > ```toml
 > [dependencies]
-> leptos-use = { version = "0.10", features = ["ssr"] }  # do not do this
+> leptos-use = { version = "0.10", features = ["ssr"] }  # this is wrong
 > ```
 
 The `ssr` feature is used to select which version of the functions are built.
@@ -55,7 +60,8 @@ A lot of functions like `use_resize_observer` and `use_element_size` are only us
 available. This is not always the case on the server. If you use them with `NodeRefs` they will just work in SSR.
 But what if you want to use them with `window()` or `document()`?
 
-To enable that we provide the helper functions [`use_window()`](elements/use_window.md) and [`use_document()`](elements/use_document.md) which return
+To enable that we provide the helper functions [`use_window()`](elements/use_window.md)
+and [`use_document()`](elements/use_document.md) which return
 a new-type-wrapped `Option<web_sys::Window>` or `Option<web_sys::Document>` respectively. These can be
 used safely on the server. The following code works on both the client and the server:
 
@@ -64,8 +70,8 @@ use leptos::*;
 use leptos::ev::keyup;
 use leptos_use::{use_event_listener, use_window};
 
-use_event_listener(use_window(), keyup, |evt| {
-    ...
+use_event_listener(use_window(), keyup, | evt| {
+...
 });
 ```
 

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changes 🔥
 
 - Wrapped callbacks in a non-reactive zone to remove potential warnings.
+- Updated SSR chapter in the book to make it more clear and beginner-friendly (thanks to @flupke).
 
 ## [0.10.3] - 2024-02-23
 
