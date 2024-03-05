@@ -232,7 +232,13 @@ where
                                 Duration::from_millis(reconnect_interval),
                             );
                         } else {
+                            #[cfg(debug_assertions)]
+                            let prev = SpecialNonReactiveZone::enter();
+
                             on_failed();
+
+                            #[cfg(debug_assertions)]
+                            SpecialNonReactiveZone::exit(prev);
                         }
                     }
                 }
