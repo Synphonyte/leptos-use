@@ -63,6 +63,7 @@
 
 # Network
 
+- [use_event_source](network/use_event_source.md)
 - [use_websocket](network/use_websocket.md)
 <!-- - [use_webtransport](network/use_webtransport.md) -->
 

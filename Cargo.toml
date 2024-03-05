@@ -59,6 +59,8 @@ features = [
     "Element",
     "EventListener",
     "EventListenerOptions",
+    "EventSource",
+    "EventSourceInit",
     "EventTarget",
     "File",
     "FileList",

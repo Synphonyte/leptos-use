@@ -28,6 +28,7 @@ members = [
     "use_element_size",
     "use_element_visibility",
     "use_event_listener",
+    "use_event_source",
     "use_favicon",
     "use_floor",
     "use_geolocation",

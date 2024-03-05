@@ -99,6 +99,7 @@ where
 
 /// Version of [`use_event_listener`] that takes `web_sys::AddEventListenerOptions`. See the docs for [`use_event_listener`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
+#[allow(unused_mut)]
 pub fn use_event_listener_with_options<Ev, El, T, F>(
     target: El,
     event: Ev,

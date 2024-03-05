@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### New Functions 🚀
+
+- `use_event_source`
+
 ### Changes 🔥
 
 - Wrapped callbacks in a non-reactive zone to remove potential warnings.
