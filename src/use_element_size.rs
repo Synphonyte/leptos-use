@@ -2,7 +2,6 @@ use crate::core::{ElementMaybeSignal, Size};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use wasm_bindgen::prelude::wasm_bindgen;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
@@ -137,10 +136,18 @@ where
                         };
 
                         set_width.set(format_box_size.iter().fold(0.0, |acc, v| {
-                            acc + v.as_ref().clone().unchecked_into::<BoxSize>().inline_size()
+                            acc + v
+                                .as_ref()
+                                .clone()
+                                .unchecked_into::<web_sys::ResizeObserverSize>()
+                                .inline_size()
                         }));
                         set_height.set(format_box_size.iter().fold(0.0, |acc, v| {
-                            acc + v.as_ref().clone().unchecked_into::<BoxSize>().block_size()
+                            acc + v
+                                .as_ref()
+                                .clone()
+                                .unchecked_into::<web_sys::ResizeObserverSize>()
+                                .block_size()
                         }))
                     } else {
                         // fallback
@@ -191,15 +198,4 @@ pub struct UseElementSizeReturn {
     pub width: Signal<f64>,
     /// The height of the element.
     pub height: Signal<f64>,
-}
-
-#[wasm_bindgen]
-extern "C" {
-    type BoxSize;
-
-    #[wasm_bindgen(method, getter = blockSize)]
-    fn block_size(this: &BoxSize) -> f64;
-
-    #[wasm_bindgen(method, getter = inlineSize)]
-    fn inline_size(this: &BoxSize) -> f64;
 }
