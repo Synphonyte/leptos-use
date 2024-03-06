@@ -44,7 +44,7 @@ use thiserror::Error;
 /// # }
 /// ```
 ///
-/// ## Create Your Own Custom Codec
+/// ### Create Your Own Custom Codec
 ///
 /// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 ///
