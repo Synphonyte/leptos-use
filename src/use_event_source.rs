@@ -16,10 +16,6 @@ use thiserror::Error;
 /// instance opens a persistent connection to an HTTP server,
 /// which sends events in text/event-stream format.
 ///
-/// ## Demo
-///
-/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_event_source)
-///
 /// ## Usage
 ///
 /// Values are decoded via the given [`Codec`].
