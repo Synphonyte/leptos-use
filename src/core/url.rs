@@ -1,5 +1,6 @@
 use leptos::window;
 
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 fn get() -> web_sys::Url {
     web_sys::Url::new(
         &window()
@@ -11,10 +12,16 @@ fn get() -> web_sys::Url {
 }
 
 pub mod params {
-    use super::get as current_url;
+    use cfg_if::cfg_if;
 
     /// Get a URL param value from the URL of the browser
     pub fn get(k: &str) -> Option<String> {
-        current_url().search_params().get(k)
+        cfg_if! { if #[cfg(feature = "ssr")] {
+            _ = k;
+            None
+        } else {
+            use super::get as current_url;
+            current_url().search_params().get(k)
+        }}
     }
 }
