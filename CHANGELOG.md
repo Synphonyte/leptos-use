@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fix 🍕
 
-- Fixed SSR detection from an url query parameter for `use_color_mode`.
+- Fixed SSR detection from an url query parameter for `use_color_mode` (thanks to @mondeja).
 
 ## [0.10.4] - 2024-03-05
 
