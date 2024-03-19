@@ -373,7 +373,7 @@ where
 /// Options for [`use_cookie_with_options`].
 #[derive(DefaultBuilder)]
 pub struct UseCookieOptions<T, Err> {
-    /// [`Max-Age` of the cookie](https://tools.ietf.org/html/rfc6265#section-5.2.2) in seconds. The returned signal will turn to `None` after the max age is reached.
+    /// [`Max-Age` of the cookie](https://tools.ietf.org/html/rfc6265#section-5.2.2) in milliseconds. The returned signal will turn to `None` after the max age is reached.
     /// Default: `None`
     ///
     /// > The [cookie storage model specification](https://tools.ietf.org/html/rfc6265#section-5.3) states
