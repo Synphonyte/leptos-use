@@ -318,8 +318,22 @@ where
                         }
                     } else {
                         let cookie_name = cookie_name.clone();
+                        let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
 
                         jar.update_value(|jar| {
+                            update_client_cookie_jar(
+                                &cookie_name,
+                                &None,
+                                jar,
+                                max_age,
+                                expires,
+                                &domain,
+                                &path,
+                                same_site,
+                                secure,
+                                http_only,
+                                ssr_cookies_header_getter,
+                            );
                             jar.force_remove(cookie_name);
                         });
 
@@ -692,7 +706,7 @@ fn write_client_cookie(
     let document = document();
     let document: &web_sys::HtmlDocument = document.unchecked_ref();
 
-    document.set_cookie(&cookie_jar_to_string(jar)).ok();
+    document.set_cookie(&cookie_jar_to_string(jar, name)).ok();
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -718,17 +732,24 @@ fn update_client_cookie_jar(
 
             jar.add_original(cookie);
         } else {
-            jar.force_remove(name);
+            let max_age = Some(0);
+            let expires = Some(0);
+            let value = "";
+            let cookie = build_cookie_from_options(
+                name, max_age, expires, http_only, secure, path, same_site, domain, value,
+            );
+
+            jar.add(cookie);
         }
     }
 }
 
 #[cfg(not(feature = "ssr"))]
-fn cookie_jar_to_string(jar: &CookieJar) -> String {
-    jar.iter()
-        .map(|c| c.encoded().to_string())
-        .collect::<Vec<_>>()
-        .join("; ")
+fn cookie_jar_to_string(jar: &CookieJar, name: &str) -> String {
+    match jar.get(name) {
+        Some(c) => c.encoded().to_string(),
+        None => "".to_string(),
+    }
 }
 
 fn build_cookie_from_options(
