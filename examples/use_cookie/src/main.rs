@@ -6,22 +6,33 @@ use rand::prelude::*;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (counter, set_counter) = use_cookie::<u32, FromToStringCodec>("counter");
+    let (counter_a, set_counter_a) = use_cookie::<u32, FromToStringCodec>("counter_a");
+    let (counter_b, set_counter_b) = use_cookie::<u32, FromToStringCodec>("counter_b");
 
-    let reset = move || set_counter(Some(random()));
+    let reset_a = move || set_counter_a(Some(random()));
+    let reset_b = move || set_counter_b(Some(random()));
 
-    if counter().is_none() {
-        reset();
+    if counter_a().is_none() {
+        reset_a();
+    }
+    if counter_b().is_none() {
+        reset_b();
     }
 
-    let increase = move || {
-        set_counter(counter().map(|c| c + 1));
+    let increase_a = move || {
+        set_counter_a(counter_a().map(|c| c + 1));
+    };
+    let increase_b = move || {
+        set_counter_b(counter_b().map(|c| c + 1));
     };
 
     view! {
-        <p>Counter: {move || counter().map(|c| c.to_string()).unwrap_or("—".to_string())}</p>
-        <button on:click=move |_| reset()>Reset</button>
-        <button on:click=move |_| increase()>+</button>
+        <p>Counter A: {move || counter_a().map(|c| c.to_string()).unwrap_or("—".to_string())}</p>
+        <button on:click=move |_| reset_a()>Reset</button>
+        <button on:click=move |_| increase_a()>+</button>
+        <p>Counter B: {move || counter_b().map(|c| c.to_string()).unwrap_or("—".to_string())}</p>
+        <button on:click=move |_| reset_b()>Reset</button>
+        <button on:click=move |_| increase_b()>+</button>
     }
 }
 
