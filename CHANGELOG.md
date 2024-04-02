@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.6] - 2024-04-02
+
+### Fixes 🍕
+
+- Corrected docs of `use_cookie`'s `max-age` unit to milliseconds (thanks to @sify21).
+- Fixed setting multiple cookies in the browser (thanks to @sbking).
+
 ## [0.10.5] - 2024-03-12
 
 ### Fix 🍕
