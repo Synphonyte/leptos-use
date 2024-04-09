@@ -5,6 +5,7 @@ members = [
     "on_click_outside",
     "signal_debounced",
     "signal_throttled",
+    "sync_signal",
     "use_abs",
     "use_active_element",
     "use_and",

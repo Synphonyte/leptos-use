@@ -87,6 +87,7 @@
 
 - [signal_debounced](reactivity/signal_debounced.md)
 - [signal_throttled](reactivity/signal_throttled.md)
+- [sync_signal](reactivity/sync_signal.md)
 
 # Iterable
 
