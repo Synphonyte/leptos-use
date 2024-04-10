@@ -1,7 +1,6 @@
 use crate::core::UseRwSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use std::fmt::Debug;
 use std::rc::Rc;
 
 /// Two-way Signals synchronization.
@@ -100,6 +99,7 @@ use std::rc::Rc;
 /// ### Custom Transform
 ///
 /// You can optionally provide custom transforms between the two signals.
+///
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
@@ -126,6 +126,23 @@ use std::rc::Rc;
 /// # view! { }
 /// # }
 /// ```
+///
+/// #### Different Types
+///
+/// `SyncSignalOptions::default()` is only defined if the two signal types are identical or
+/// implement `From` for each other. Otherwise, you have to initialize the options with
+/// `with_transforms` instead of `default`.
+///
+/// ```
+/// # use leptos_use::SyncSignalOptions;
+/// # use std::str::FromStr;
+/// #
+/// let options = SyncSignalOptions::with_transforms(
+///     |left: &String| i32::from_str(left).unwrap_or_default(),
+///     |right: &i32| right.to_string(),
+/// );
+/// ```
+///
 pub fn sync_signal<T>(
     left: impl Into<UseRwSignal<T>>,
     right: impl Into<UseRwSignal<T>>,
@@ -244,15 +261,32 @@ impl<L, R> SyncSignalOptions<L, R> {
             ..self
         }
     }
+
+    /// Initializes options with transforms
+    pub fn with_transforms(
+        transform_ltr: impl Fn(&L) -> R + 'static,
+        transform_rtl: impl Fn(&R) -> L + 'static,
+    ) -> Self {
+        Self {
+            immediate: true,
+            direction: SyncDirection::Both,
+            transform_ltr: Rc::new(transform_ltr),
+            transform_rtl: Rc::new(transform_rtl),
+        }
+    }
 }
 
-impl<T: Clone> Default for SyncSignalOptions<T, T> {
+impl<L, R> Default for SyncSignalOptions<L, R>
+where
+    L: Clone + From<R>,
+    R: Clone + From<L>,
+{
     fn default() -> Self {
         Self {
             immediate: true,
             direction: SyncDirection::Both,
-            transform_ltr: Rc::new(|x| x.clone()),
-            transform_rtl: Rc::new(|x| x.clone()),
+            transform_ltr: Rc::new(|x| x.clone().into()),
+            transform_rtl: Rc::new(|x| x.clone().into()),
         }
     }
 }

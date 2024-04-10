@@ -31,10 +31,7 @@ where
 
 impl<T> Clone for UseRwSignal<T> {
     fn clone(&self) -> Self {
-        match self {
-            Self::Separate(s, w) => Self::Separate(s.clone(), w.clone()),
-            Self::Combined(s) => Self::Combined(s.clone()),
-        }
+        *self
     }
 }
 
