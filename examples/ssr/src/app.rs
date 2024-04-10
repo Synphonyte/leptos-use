@@ -6,9 +6,10 @@ use leptos_router::*;
 use leptos_use::storage::use_local_storage;
 use leptos_use::utils::FromToStringCodec;
 use leptos_use::{
-    use_color_mode, use_cookie_with_options, use_debounce_fn, use_event_listener, use_interval,
-    use_intl_number_format, use_preferred_dark, use_timestamp, use_window, ColorMode,
-    UseColorModeReturn, UseCookieOptions, UseIntervalReturn, UseIntlNumberFormatOptions,
+    use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
+    use_interval, use_intl_number_format, use_preferred_dark, use_timestamp, use_window, ColorMode,
+    UseColorModeOptions, UseColorModeReturn, UseCookieOptions, UseIntervalReturn,
+    UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -65,7 +66,8 @@ fn HomePage() -> impl IntoView {
     );
     debounced_fn();
 
-    let UseColorModeReturn { mode, set_mode, .. } = use_color_mode();
+    let UseColorModeReturn { mode, set_mode, .. } =
+        use_color_mode_with_options(UseColorModeOptions::default().cookie_enabled(true));
 
     let timestamp = use_timestamp();
 
@@ -79,6 +81,8 @@ fn HomePage() -> impl IntoView {
     );
 
     view! {
+        <Html class=move || mode.get().to_string()/>
+
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
         <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
@@ -98,12 +102,11 @@ fn HomePage() -> impl IntoView {
 #[component]
 pub fn LocalStorageTest() -> impl IntoView {
     let UseIntervalReturn { counter, .. } = use_interval(1000);
-    logging::log!("test log");
     let (state, set_state, ..) = use_local_storage::<String, FromToStringCodec>("test-state");
 
     view! {
         <p>{counter}</p>
-         <input
+        <input
             class="block"
             prop:value=move || state.get()
             on:input=move |e| set_state.update(|s| *s = event_target_value(&e))

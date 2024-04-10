@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.10.6"
+version = "0.10.7"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -131,8 +131,9 @@ features = [
 ]
 
 [dev-dependencies]
-rand = "0.8"
 getrandom = { version = "0.2", features = ["js"] }
+leptos_meta = "0.6"
+rand = "0.8"
 
 [features]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]

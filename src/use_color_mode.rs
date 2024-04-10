@@ -2,8 +2,11 @@ use crate::core::url;
 use crate::core::StorageType;
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
-use crate::use_preferred_dark;
 use crate::utils::FromToStringCodec;
+use crate::{
+    sync_signal_with_options, use_cookie_with_options, use_preferred_dark, SyncSignalOptions,
+    UseCookieOptions,
+};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::fmt::{Display, Formatter};
@@ -83,15 +86,47 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
+/// ### Cookies
+///
+/// To persist color mode in a cookie, use `use_cookie_with_options` and specify `.cookie_enabled(true)`.
+///
+/// > Note: To work with SSR you have to add the `axum` or `actix` feature as described in [`use_cookie`].
+///
+/// ```rust
+/// # use leptos::*;
+/// # use leptos_meta::*;
+/// # use leptos_use::{use_color_mode_with_options, UseColorModeOptions, UseColorModeReturn};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let UseColorModeReturn { mode, set_mode, .. } = use_color_mode_with_options(
+///     UseColorModeOptions::default()
+///         .cookie_enabled(true),
+/// );
+///
+/// // This adds the color mode class to the `<html>` element even with SSR
+/// view! {
+///     <Html class=move || mode.get().to_string()/>
+/// }
+/// # }
+/// ```
+///
+/// For a working example please check out the [ssr example](https://github.com/Synphonyte/leptos-use/blob/main/examples/ssr/src/app.rs).
+///
 /// ## Server-Side Rendering
 ///
-/// On the server this will by default return `ColorMode::Light`. Persistence is disabled, of course.
+/// On the server this will by default return `ColorMode::Light`. Persistence with storage is disabled.
+///
+/// If `cookie_enabled` is set to `true`, cookies will be used and if present this value will be used
+/// on the server as well as on the client. Please note that you have to add the `axum` or `actix`
+/// feature as described in [`use_cookie`].
 ///
 /// ## See also
 ///
 /// * [`use_dark`]
 /// * [`use_preferred_dark`]
 /// * [`use_storage`]
+/// * [`use_cookie`]
 pub fn use_color_mode() -> UseColorModeReturn {
     use_color_mode_with_options(UseColorModeOptions::default())
 }
@@ -115,6 +150,8 @@ where
         storage_key,
         storage,
         storage_enabled,
+        cookie_name,
+        cookie_enabled,
         emit_auto,
         transition_enabled,
         listen_to_storage_changes,
@@ -146,13 +183,36 @@ where
         }
     }
 
+    let initial_stored_value = initial_value_from_url.clone().unwrap_or(initial_value);
     let (store, set_store) = get_store_signal(
-        initial_value_from_url.clone().unwrap_or(initial_value),
+        initial_stored_value.clone(),
         storage_signal,
         &storage_key,
         storage_enabled,
         storage,
         listen_to_storage_changes,
+    );
+
+    let (initial_stored_value, _) = initial_stored_value.into_signal();
+    let initial_stored_value = initial_stored_value.get_untracked();
+    let (cookie, set_cookie) =
+        get_cookie_signal(initial_stored_value.clone(), &cookie_name, cookie_enabled);
+
+    let _ = sync_signal_with_options(
+        (cookie, set_cookie),
+        (store, set_store),
+        SyncSignalOptions::with_transforms(
+            {
+                let initial_stored_value = initial_stored_value.clone();
+
+                move |cookie: &Option<ColorMode>| {
+                    cookie
+                        .clone()
+                        .unwrap_or_else(|| initial_stored_value.clone())
+                }
+            },
+            move |store: &ColorMode| Some(store.clone()),
+        ),
     );
 
     if let Some(initial_value_from_url) = initial_value_from_url {
@@ -265,6 +325,22 @@ pub enum ColorMode {
     Light,
     Dark,
     Custom(String),
+}
+
+fn get_cookie_signal(
+    initial_value: ColorMode,
+    cookie_name: &str,
+    cookie_enabled: bool,
+) -> (Signal<Option<ColorMode>>, WriteSignal<Option<ColorMode>>) {
+    if cookie_enabled {
+        use_cookie_with_options::<ColorMode, FromToStringCodec>(
+            cookie_name,
+            UseCookieOptions::<ColorMode, _>::default().default_value(Some(initial_value)),
+        )
+    } else {
+        let (value, set_value) = create_signal(Some(initial_value));
+        (value.into(), set_value)
+    }
 }
 
 fn get_store_signal(
@@ -383,9 +459,18 @@ where
     /// Defaults to `Local`.
     storage: StorageType,
 
-    /// If the color mode should be persisted. If `true` this required the
+    /// If the color mode should be persisted.
     /// Defaults to `true`.
     storage_enabled: bool,
+
+    /// Name of the cookie that should be used to persist the color mode.
+    /// Defaults to `"leptos-use-color-scheme"`.
+    #[builder(into)]
+    cookie_name: String,
+
+    /// If the color mode should be persisted through a cookie.
+    /// Defaults to `false`.
+    cookie_enabled: bool,
 
     /// Emit `auto` mode from state
     ///
@@ -422,6 +507,8 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             storage_key: "leptos-use-color-scheme".into(),
             storage: StorageType::default(),
             storage_enabled: true,
+            cookie_name: "leptos-use-color-scheme".into(),
+            cookie_enabled: false,
             emit_auto: false,
             transition_enabled: false,
             listen_to_storage_changes: true,
