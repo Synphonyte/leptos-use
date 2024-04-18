@@ -485,9 +485,15 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     #[cfg(all(feature = "actix", feature = "axum"))]
                     compile_error!("You cannot enable only one of features \"actix\" and \"axum\" at the same time");
 
+                    #[cfg(all(feature = "actix", feature = "spin"))]
+                    compile_error!("You cannot enable only one of features \"actix\" and \"spin\" at the same time");
+
+                    #[cfg(all(feature = "axum", feature = "spin"))]
+                    compile_error!("You cannot enable only one of features \"axum\" and \"spin\" at the same time");
+
                     #[cfg(feature = "actix")]
                     const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
-                    #[cfg(feature = "axum")]
+                    #[cfg(any(feature = "axum", feature = "spin"))]
                     const COOKIE: http1::HeaderName = http1::header::COOKIE;
 
                     #[cfg(feature = "actix")]
@@ -495,7 +501,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     #[cfg(feature = "axum")]
                     type HeaderValue = http1::HeaderValue;
 
-                    #[cfg(any(feature = "axum", feature = "actix"))]
+                    #[cfg(any(feature = "axum", feature = "actix", feature = "spin"))]
                     let headers;
                     #[cfg(feature = "actix")]
                     {
@@ -506,23 +512,43 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     {
                         headers = use_context::<http1::request::Parts>().map(|parts| parts.headers);
                     }
-
-                    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
+                    #[cfg(feature = "spin")]
                     {
-                        leptos::logging::warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_cookies_header_getter`");
+                        headers = use_context::<leptos_spin::RequestParts>()
+                            .map(|parts| parts.headers().clone());
+                    }
+
+                    #[cfg(all(
+                        not(feature = "axum"),
+                        not(feature = "actix"),
+                        not(feature = "spin")
+                    ))]
+                    {
+                        leptos::logging::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
                         None
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
-                    headers.map(|headers| {
-                        headers
-                            .get(COOKIE)
-                            .cloned()
-                            .unwrap_or_else(|| HeaderValue::from_static(""))
-                            .to_str()
-                            .unwrap_or_default()
-                            .to_owned()
-                    })
+                    {
+                        headers.map(|headers| {
+                            headers
+                                .get(COOKIE)
+                                .cloned()
+                                .unwrap_or_else(|| HeaderValue::from_static(""))
+                                .to_str()
+                                .unwrap_or_default()
+                                .to_owned()
+                        })
+                    }
+                    #[cfg(feature = "spin")]
+                    {
+                        headers.and_then(|headers| {
+                            headers
+                                .iter()
+                                .find(|(key, _)| **key == COOKIE)
+                                .and_then(|(_, value)| String::from_utf8(value.to_vec()).ok())
+                        })
+                    }
                 }
                 #[cfg(not(feature = "ssr"))]
                 None
@@ -534,21 +560,27 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     use leptos_actix::ResponseOptions;
                     #[cfg(feature = "axum")]
                     use leptos_axum::ResponseOptions;
+                    #[cfg(feature = "spin")]
+                    use leptos_spin::ResponseOptions;
 
                     #[cfg(feature = "actix")]
                     const SET_COOKIE: http0_2::HeaderName = http0_2::header::SET_COOKIE;
-                    #[cfg(feature = "axum")]
+                    #[cfg(any(feature = "axum", feature = "spin"))]
                     const SET_COOKIE: http1::HeaderName = http1::header::SET_COOKIE;
 
                     #[cfg(feature = "actix")]
                     type HeaderValue = http0_2::HeaderValue;
-                    #[cfg(feature = "axum")]
+                    #[cfg(any(feature = "axum", feature = "spin"))]
                     type HeaderValue = http1::HeaderValue;
 
-                    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
+                    #[cfg(all(
+                        not(feature = "axum"),
+                        not(feature = "actix"),
+                        not(feature = "spin")
+                    ))]
                     {
                         let _ = cookie;
-                        leptos::logging::warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`");
+                        leptos::logging::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
@@ -559,6 +591,13 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                             {
                                 response_options.insert_header(SET_COOKIE, header_value);
                             }
+                        }
+                    }
+                    #[cfg(feature = "spin")]
+                    {
+                        if let Some(response_options) = use_context::<ResponseOptions>() {
+                            let header_value = cookie.encoded().to_string().as_bytes().to_vec();
+                            response_options.insert_header(SET_COOKIE.as_str(), header_value);
                         }
                     }
                 }
