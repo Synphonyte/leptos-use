@@ -88,7 +88,7 @@ use std::rc::Rc;
 /// The returned `WriteSignal` will not affect the cookie headers on the server.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
-/// > In case it's `actix-web` enable the feature `"actix"`.
+/// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
 ///
 /// ### Bring your own header
 ///
@@ -455,11 +455,11 @@ pub struct UseCookieOptions<T, Err> {
     readonly: bool,
 
     /// Getter function to return the string value of the cookie header.
-    /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
+    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
     ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
 
     /// Function to add a set cookie header to the response on the server.
-    /// When you use one of the features "axum" or "actix" there's a valid default implementation provided.
+    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
     ssr_set_cookie: Rc<dyn Fn(&Cookie)>,
 
     /// Callback for encoding/decoding errors. Defaults to logging the error to the console.
