@@ -3,10 +3,7 @@ use crate::core::StorageType;
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
 use crate::utils::FromToStringCodec;
-use crate::{
-    sync_signal_with_options, use_cookie_with_options, use_preferred_dark, SyncSignalOptions,
-    UseCookieOptions,
-};
+use crate::{sync_signal_with_options, use_cookie, use_preferred_dark, SyncSignalOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::fmt::{Display, Formatter};
@@ -183,9 +180,8 @@ where
         }
     }
 
-    let initial_stored_value = initial_value_from_url.clone().unwrap_or(initial_value);
     let (store, set_store) = get_store_signal(
-        initial_stored_value.clone(),
+        initial_value_from_url.clone().unwrap_or(initial_value),
         storage_signal,
         &storage_key,
         storage_enabled,
@@ -193,27 +189,20 @@ where
         listen_to_storage_changes,
     );
 
-    let (initial_stored_value, _) = initial_stored_value.into_signal();
-    let initial_stored_value = initial_stored_value.get_untracked();
-    let (cookie, set_cookie) =
-        get_cookie_signal(initial_stored_value.clone(), &cookie_name, cookie_enabled);
+    let (cookie, set_cookie) = get_cookie_signal(&cookie_name, cookie_enabled);
 
-    let _ = sync_signal_with_options(
-        (cookie, set_cookie),
-        (store, set_store),
-        SyncSignalOptions::with_transforms(
-            {
-                let initial_stored_value = initial_stored_value.clone();
-
+    if cookie_enabled {
+        let _ = sync_signal_with_options(
+            (cookie, set_cookie),
+            (store, set_store),
+            SyncSignalOptions::with_transforms(
                 move |cookie: &Option<ColorMode>| {
-                    cookie
-                        .clone()
-                        .unwrap_or_else(|| initial_stored_value.clone())
-                }
-            },
-            move |store: &ColorMode| Some(store.clone()),
-        ),
-    );
+                    cookie.clone().unwrap_or_else(|| store.get_untracked())
+                },
+                move |store: &ColorMode| Some(store.clone()),
+            ),
+        );
+    }
 
     if let Some(initial_value_from_url) = initial_value_from_url {
         let value = initial_value_from_url.into_signal().0.get_untracked();
@@ -328,17 +317,13 @@ pub enum ColorMode {
 }
 
 fn get_cookie_signal(
-    initial_value: ColorMode,
     cookie_name: &str,
     cookie_enabled: bool,
 ) -> (Signal<Option<ColorMode>>, WriteSignal<Option<ColorMode>>) {
     if cookie_enabled {
-        use_cookie_with_options::<ColorMode, FromToStringCodec>(
-            cookie_name,
-            UseCookieOptions::<ColorMode, _>::default().default_value(Some(initial_value)),
-        )
+        use_cookie::<ColorMode, FromToStringCodec>(cookie_name)
     } else {
-        let (value, set_value) = create_signal(Some(initial_value));
+        let (value, set_value) = create_signal(None);
         (value.into(), set_value)
     }
 }
