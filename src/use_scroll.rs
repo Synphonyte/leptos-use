@@ -421,7 +421,7 @@ where
         );
 
         let measure = move || {
-            if let Some(el) = signal.get_untracked() {
+            if let Some(el) = signal.try_get_untracked().flatten() {
                 let el = el.into();
                 set_arrived_state(el);
             }

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - Fixed `use_color_mode` without cookies and make cookies sync properly with local storage
+- Fixed `use_infinite_scroll` edge case bug with disposed signals
 
 ## [0.10.8] - 2024-04-19
 

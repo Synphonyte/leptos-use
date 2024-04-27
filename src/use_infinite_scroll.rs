@@ -168,10 +168,10 @@ where
                         #[cfg(debug_assertions)]
                         SpecialNonReactiveZone::exit(prev);
 
-                        set_loading.set(false);
+                        set_loading.try_set(false);
                         sleep(Duration::ZERO).await;
                         measure();
-                        if let Some(check_and_load) = check_and_load.get_value() {
+                        if let Some(check_and_load) = check_and_load.try_get_value().flatten() {
                             check_and_load();
                         }
                     });
