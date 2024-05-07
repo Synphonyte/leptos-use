@@ -1,4 +1,5 @@
 use crate::utils::use_derive_signal;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
 use_derive_signal!(

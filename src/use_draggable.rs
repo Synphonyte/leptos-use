@@ -138,19 +138,19 @@ where
                 };
 
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let zone = SpecialNonReactiveZone::enter();
 
                 if !on_start(UseDraggableCallbackArgs {
                     position,
                     event: event.clone(),
                 }) {
                     #[cfg(debug_assertions)]
-                    SpecialNonReactiveZone::exit(prev);
+                    drop(zone);
                     return;
                 }
 
                 #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
+                drop(zone);
 
                 set_start_position.set(Some(position));
                 handle_event(event);
@@ -173,7 +173,7 @@ where
                 set_position.set(position);
 
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let zone = SpecialNonReactiveZone::enter();
 
                 on_move(UseDraggableCallbackArgs {
                     position,
@@ -181,7 +181,7 @@ where
                 });
 
                 #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
+                drop(zone);
 
                 handle_event(event);
             }
@@ -198,7 +198,7 @@ where
         set_start_position.set(None);
 
         #[cfg(debug_assertions)]
-        let prev = SpecialNonReactiveZone::enter();
+        let zone = SpecialNonReactiveZone::enter();
 
         on_end(UseDraggableCallbackArgs {
             position: position.get_untracked(),
@@ -206,7 +206,7 @@ where
         });
 
         #[cfg(debug_assertions)]
-        SpecialNonReactiveZone::exit(prev);
+        drop(zone);
 
         handle_event(event);
     };

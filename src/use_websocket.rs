@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
 use cfg_if::cfg_if;
-use leptos::{leptos_dom::helpers::TimeoutHandle, *};
+use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -228,19 +228,19 @@ pub fn use_websocket_with_options(
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
     let (message_bytes, set_message_bytes) = signal(None);
-    let ws_ref: StoredValue<Option<WebSocket>> = store_value(None);
+    let ws_ref: StoredValue<Option<WebSocket>> = StoredValue::new(None);
 
-    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(None);
+    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
-    let reconnect_times_ref: StoredValue<u64> = store_value(0);
+    let reconnect_times_ref: StoredValue<u64> = StoredValue::new(0);
 
     let unmounted = Rc::new(Cell::new(false));
 
-    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
+    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = StoredValue::new(None);
 
     #[cfg(not(feature = "ssr"))]
     {
-        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
+        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = StoredValue::new(None);
         reconnect_ref.set_value({
             let ws = ws_ref.get_value();
             Some(Rc::new(move || {
@@ -303,12 +303,12 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let prev = SpecialNonReactiveZone::enter();
+                        let zone = SpecialNonReactiveZone::enter();
 
                         on_open(e);
 
                         #[cfg(debug_assertions)]
-                        SpecialNonReactiveZone::exit(prev);
+                        drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Open);
                     })
@@ -342,12 +342,12 @@ pub fn use_websocket_with_options(
                                         let txt = String::from(&txt);
 
                                         #[cfg(debug_assertions)]
-                                        let prev = SpecialNonReactiveZone::enter();
+                                        let zone = SpecialNonReactiveZone::enter();
 
                                         on_message(txt.clone());
 
                                         #[cfg(debug_assertions)]
-                                        SpecialNonReactiveZone::exit(prev);
+                                        drop(zone);
 
                                         set_message.set(Some(txt));
                                     },
@@ -358,12 +358,12 @@ pub fn use_websocket_with_options(
                                 let array = array.to_vec();
 
                                 #[cfg(debug_assertions)]
-                                let prev = SpecialNonReactiveZone::enter();
+                                let zone = SpecialNonReactiveZone::enter();
 
                                 on_message_bytes(array.clone());
 
                                 #[cfg(debug_assertions)]
-                                SpecialNonReactiveZone::exit(prev);
+                                drop(zone);
 
                                 set_message_bytes.set(Some(array));
                             },
@@ -389,12 +389,12 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let prev = SpecialNonReactiveZone::enter();
+                        let zone = SpecialNonReactiveZone::enter();
 
                         on_error(e);
 
                         #[cfg(debug_assertions)]
-                        SpecialNonReactiveZone::exit(prev);
+                        drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
                     })
@@ -418,12 +418,12 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let prev = SpecialNonReactiveZone::enter();
+                        let zone = SpecialNonReactiveZone::enter();
 
                         on_close(e);
 
                         #[cfg(debug_assertions)]
-                        SpecialNonReactiveZone::exit(prev);
+                        drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
                     })
@@ -478,7 +478,7 @@ pub fn use_websocket_with_options(
     };
 
     // Open connection (not called if option `manual` is true)
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if immediate {
             open();
         }

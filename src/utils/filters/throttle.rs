@@ -4,6 +4,7 @@ use crate::core::now;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::cmp::max;
@@ -58,12 +59,12 @@ where
         let last_return_val = Rc::clone(&last_return_value);
         let invoke = move || {
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let zone = SpecialNonReactiveZone::enter();
 
             let return_value = _invoke();
 
             #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
+            drop(zone);
 
             let mut val_mut = last_return_val.borrow_mut();
             *val_mut = Some(return_value);

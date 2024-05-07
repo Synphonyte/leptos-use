@@ -2,6 +2,7 @@ use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{watch_with_options, WatchOptions};
@@ -122,12 +123,9 @@ where
         let event_name = event.name();
         let closure_js = Closure::wrap(Box::new(move |e| {
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             handler(e);
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         }) as Box<dyn FnMut(_)>)
         .into_js_value();
 

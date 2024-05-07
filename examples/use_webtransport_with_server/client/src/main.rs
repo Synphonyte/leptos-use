@@ -16,7 +16,7 @@ fn Demo() -> impl IntoView {
     let (datagrams_log, set_datagrams_log) = signal(vec![]);
     let (bidir_streams, set_bidir_streams) = signal(vec![]);
 
-    let id = store_value(0);
+    let id = StoredValue::new(0);
 
     let transport = use_webtransport_with_options(
         "https://localhost:4433",

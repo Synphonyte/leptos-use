@@ -1,4 +1,6 @@
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::actions::Action;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
@@ -52,12 +54,9 @@ pub fn use_service_worker_with_options(
         let on_controller_change = options.on_controller_change.clone();
         let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             on_controller_change();
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         }) as Box<dyn FnMut(JsValue)>)
         .into_js_value();
         navigator
@@ -96,7 +95,7 @@ pub fn use_service_worker_with_options(
 
     // Handle a changing registration state.
     // Notify to developer if SW registration or retrieval fails.
-    create_effect(move |_| {
+    Effect::new(move |_| {
         registration.with(|reg| match reg {
             Ok(registration) => {
                 // We must be informed when an updated SW is available.
@@ -242,7 +241,7 @@ pub enum ServiceWorkerRegistrationError {
 /// A leptos action which asynchronously checks for ServiceWorker updates, given an existing ServiceWorkerRegistration.
 fn create_action_update(
 ) -> Action<ServiceWorkerRegistration, Result<ServiceWorkerRegistration, JsValue>> {
-    create_action(move |registration: &ServiceWorkerRegistration| {
+    Action::new(move |registration: &ServiceWorkerRegistration| {
         let registration = registration.clone();
         async move {
             match registration.update() {
@@ -258,7 +257,7 @@ fn create_action_update(
 /// A leptos action which asynchronously creates or updates and than retrieves the ServiceWorkerRegistration.
 fn create_action_create_or_update_registration(
 ) -> Action<ServiceWorkerScriptUrl, Result<ServiceWorkerRegistration, JsValue>> {
-    create_action(move |script_url: &ServiceWorkerScriptUrl| {
+    Action::new(move |script_url: &ServiceWorkerScriptUrl| {
         let script_url = script_url.0.to_owned();
         async move {
             if let Some(navigator) = use_window().navigator() {
@@ -274,7 +273,7 @@ fn create_action_create_or_update_registration(
 
 /// A leptos action which asynchronously fetches the current ServiceWorkerRegistration.
 fn create_action_get_registration() -> Action<(), Result<ServiceWorkerRegistration, JsValue>> {
-    create_action(move |(): &()| async move {
+    Action::new(move |(): &()| async move {
         if let Some(navigator) = use_window().navigator() {
             js_fut!(navigator.service_worker().get_registration())
                 .await

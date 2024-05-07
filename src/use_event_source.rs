@@ -173,7 +173,7 @@ where
         }
     };
 
-    let init = store_value(None::<Rc<dyn Fn()>>);
+    let init = StoredValue::new(None::<Rc<dyn Fn()>>);
 
     init.set_value(Some(Rc::new({
         let explicitly_closed = Rc::clone(&explicitly_closed);
@@ -231,12 +231,9 @@ where
                             );
                         } else {
                             #[cfg(debug_assertions)]
-                            let prev = SpecialNonReactiveZone::enter();
+                            let _z = SpecialNonReactiveZone::enter();
 
                             on_failed();
-
-                            #[cfg(debug_assertions)]
-                            SpecialNonReactiveZone::exit(prev);
                         }
                     }
                 }

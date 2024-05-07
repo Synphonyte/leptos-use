@@ -112,7 +112,7 @@ where
 
         move || {
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             let ret = callback(
                 cur_deps_value
@@ -122,9 +122,6 @@ where
                 prev_deps_value.borrow().as_ref(),
                 prev_callback_val.take(),
             );
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
 
             ret
         }

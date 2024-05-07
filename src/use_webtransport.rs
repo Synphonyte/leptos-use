@@ -73,7 +73,7 @@ pub fn use_webtransport_with_options(
 
     let unmounted = Rc::new(Cell::new(false));
 
-    let connect_ref = store_value(None::<Rc<dyn Fn()>>);
+    let connect_ref = StoredValue::new(None::<Rc<dyn Fn()>>);
 
     let reconnect = Rc::new({
         let reconnect_timer = Rc::clone(&reconnect_timer);

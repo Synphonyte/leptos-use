@@ -1,6 +1,7 @@
 use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::{Debug, Formatter};
@@ -84,7 +85,7 @@ where
             on_over,
         } = options;
 
-        let counter = store_value(0_usize);
+        let counter = StoredValue::new(0_usize);
 
         let update_files = move |event: &web_sys::DragEvent| {
             if let Some(data_transfer) = event.data_transfer() {
@@ -108,15 +109,12 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target.clone(), dragover, move |event| {
@@ -124,15 +122,12 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target.clone(), dragleave, move |event| {
@@ -145,15 +140,12 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         });
 
         let _ = use_event_listener(target, drop, move |event| {
@@ -164,15 +156,12 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let _z = SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
                 files: files.get_untracked(),
                 event,
             });
-
-            #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
         });
     }
 

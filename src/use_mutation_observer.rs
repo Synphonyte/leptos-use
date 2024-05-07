@@ -1,6 +1,8 @@
 use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use wasm_bindgen::prelude::*;
 
@@ -88,7 +90,7 @@ where
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let _z = SpecialNonReactiveZone::enter();
 
                 callback(
                     entries
@@ -98,9 +100,6 @@ where
                         .collect(),
                     observer,
                 );
-
-                #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
             },
         )
         .into_js_value();

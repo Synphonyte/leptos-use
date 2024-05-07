@@ -2,6 +2,7 @@ use crate::core::{Direction, Directions, ElementMaybeSignal};
 use crate::UseEventListenerOptions;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
 

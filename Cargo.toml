@@ -26,7 +26,7 @@ http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
-leptos = "0.7.0-preview2"
+leptos = { version = "0.7.0-preview2", path = "../leptos/leptos" }
 leptos_axum = { version = "0.7.0-preview2", optional = true }
 leptos_actix = { version = "0.6", optional = true }
 leptos-spin = { version = "0.2", optional = true }

@@ -180,7 +180,7 @@ where
 
     let (cookie, set_cookie) = signal(None::<T>);
 
-    let jar = store_value(CookieJar::new());
+    let jar = StoredValue::new(CookieJar::new());
     let codec = C::default();
 
     if !has_expired {
@@ -281,7 +281,7 @@ where
         });
 
         // listen to cookie changes from the broadcast channel
-        create_effect({
+        Effect::new({
             let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
             let cookie_name = cookie_name.to_owned();
 
@@ -525,7 +525,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                         not(feature = "spin")
                     ))]
                     {
-                        leptos::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
+                        warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
                         None
                     }
 
@@ -581,7 +581,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     ))]
                     {
                         let _ = cookie;
-                        leptos::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
+                        warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]

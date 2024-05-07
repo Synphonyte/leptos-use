@@ -1,6 +1,8 @@
 use crate::{use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
 
@@ -72,12 +74,9 @@ pub fn use_web_notification_with_options(
             let on_click = Rc::clone(&options.on_click);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let _z = SpecialNonReactiveZone::enter();
 
                 on_click(e);
-
-                #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
             }
         })
         .into_js_value();
@@ -86,12 +85,9 @@ pub fn use_web_notification_with_options(
             let on_close = Rc::clone(&options.on_close);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let _z = SpecialNonReactiveZone::enter();
 
                 on_close(e);
-
-                #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
             }
         })
         .into_js_value();
@@ -100,12 +96,9 @@ pub fn use_web_notification_with_options(
             let on_error = Rc::clone(&options.on_error);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let _z = SpecialNonReactiveZone::enter();
 
                 on_error(e);
-
-                #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
             }
         })
         .into_js_value();
@@ -114,12 +107,9 @@ pub fn use_web_notification_with_options(
             let on_show = Rc::clone(&options.on_show);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let prev = SpecialNonReactiveZone::enter();
+                let _z = SpecialNonReactiveZone::enter();
 
                 on_show(e);
-
-                #[cfg(debug_assertions)]
-                SpecialNonReactiveZone::exit(prev);
             }
         })
         .into_js_value();

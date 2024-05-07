@@ -5,6 +5,7 @@ use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 use wasm_bindgen::{JsCast, JsValue};

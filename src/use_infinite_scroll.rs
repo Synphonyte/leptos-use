@@ -81,7 +81,7 @@ where
         event_listener_options,
     } = options;
 
-    let on_load_more = store_value(on_load_more);
+    let on_load_more = StoredValue::new(on_load_more);
 
     let UseScrollReturn {
         x,
@@ -128,7 +128,7 @@ where
 
     let is_element_visible = use_element_visibility(observed_element);
 
-    let check_and_load = store_value(None::<Rc<dyn Fn()>>);
+    let check_and_load = StoredValue::new(None::<Rc<dyn Fn()>>);
 
     check_and_load.set_value(Some(Rc::new({
         let measure = measure.clone();
@@ -160,7 +160,7 @@ where
                     let measure = measure.clone();
                     spawn_local(async move {
                         #[cfg(debug_assertions)]
-                        let prev = SpecialNonReactiveZone::enter();
+                        let zone = SpecialNonReactiveZone::enter();
 
                         join!(
                             on_load_more.with_value(|f| f(state)),
@@ -168,7 +168,7 @@ where
                         );
 
                         #[cfg(debug_assertions)]
-                        SpecialNonReactiveZone::exit(prev);
+                        drop(zone);
 
                         set_loading.try_set(false);
                         sleep(Duration::ZERO).await;

@@ -1,3 +1,4 @@
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// SSR compatibe `is_supported`

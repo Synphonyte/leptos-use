@@ -1,6 +1,7 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use leptos::prelude::*;
@@ -182,12 +183,9 @@ where
                     }
 
                     #[cfg(debug_assertions)]
-                    let prev = SpecialNonReactiveZone::enter();
+                    let _z = SpecialNonReactiveZone::enter();
 
                     handler(event.into());
-
-                    #[cfg(debug_assertions)]
-                    SpecialNonReactiveZone::exit(prev);
                 }
             }
         };

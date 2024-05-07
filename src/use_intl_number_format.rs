@@ -4,6 +4,7 @@ use crate::js;
 use crate::utils::js_value_from_to_string;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::Display;
 use wasm_bindgen::{JsCast, JsValue};

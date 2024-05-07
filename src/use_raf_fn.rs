@@ -1,6 +1,7 @@
 use crate::utils::Pausable;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -101,12 +102,12 @@ pub fn use_raf_fn_with_options(
             };
 
             #[cfg(debug_assertions)]
-            let prev = SpecialNonReactiveZone::enter();
+            let zone = SpecialNonReactiveZone::enter();
 
             callback(UseRafFnCallbackArgs { delta, timestamp });
 
             #[cfg(debug_assertions)]
-            SpecialNonReactiveZone::exit(prev);
+            drop(zone);
 
             previous_frame_timestamp.set(timestamp);
 

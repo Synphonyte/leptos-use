@@ -1,4 +1,6 @@
 use leptos::leptos_dom::helpers::TimeoutHandle;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::cell::Cell;
 use std::marker::PhantomData;
@@ -82,12 +84,9 @@ where
                         timer.set(None);
 
                         #[cfg(debug_assertions)]
-                        let prev = SpecialNonReactiveZone::enter();
+                        let _z = SpecialNonReactiveZone::enter();
 
                         callback(arg);
-
-                        #[cfg(debug_assertions)]
-                        SpecialNonReactiveZone::exit(prev);
                     }
                 },
                 Duration::from_millis(delay.get_untracked() as u64),
