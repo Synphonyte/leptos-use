@@ -1,12 +1,12 @@
 use crate::use_media_query;
-use leptos::*;
+use leptos::prelude::*;
 
 /// Reactive [dark theme preference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
 ///
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_preferred_dark;
 /// #
 /// # #[component]

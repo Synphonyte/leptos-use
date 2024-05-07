@@ -1,6 +1,6 @@
 use crate::error_template::{AppError, ErrorTemplate};
 use leptos::ev::{keypress, KeyboardEvent};
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::use_local_storage;
@@ -49,14 +49,14 @@ fn HomePage() -> impl IntoView {
 
     let zh_count = nf.format::<i32>(count);
 
-    let (key, set_key) = create_signal("".to_string());
+    let (key, set_key) = signal("".to_string());
 
     // window() doesn't work on the server so we provide use_window()
     let _ = use_event_listener(use_window(), keypress, move |evt: KeyboardEvent| {
         set_key(evt.key())
     });
 
-    let (debounce_value, set_debounce_value) = create_signal("not called");
+    let (debounce_value, set_debounce_value) = signal("not called");
 
     let debounced_fn = use_debounce_fn(
         move || {

@@ -1,7 +1,7 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -22,14 +22,14 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::use_intersection_observer;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let el = create_node_ref::<Div>();
-/// let (is_visible, set_visible) = create_signal(false);
+/// let (is_visible, set_visible) = signal(false);
 ///
 /// use_intersection_observer(
 ///     el,
@@ -91,7 +91,7 @@ where
         ..
     } = options;
 
-    let (is_active, set_active) = create_signal(immediate);
+    let (is_active, set_active) = signal(immediate);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let pause = || {};

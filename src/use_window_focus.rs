@@ -3,7 +3,7 @@
 use crate::use_event_listener;
 use cfg_if::cfg_if;
 use leptos::ev::{blur, focus};
-use leptos::*;
+use leptos::prelude::*;
 
 /// Reactively track window focus
 /// with `window.onfocus` and `window.onblur` events.
@@ -15,7 +15,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_window_focus;
 /// #
 /// # #[component]
@@ -36,7 +36,7 @@ pub fn use_window_focus() -> Signal<bool> {
         let initial_focus = document().has_focus().unwrap_or_default();
     }}
 
-    let (focused, set_focused) = create_signal(initial_focus);
+    let (focused, set_focused) = signal(initial_focus);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let _ = use_event_listener(window(), blur, move |_| set_focused.set(false));

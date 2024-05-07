@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::signal_throttled;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (input, set_input) = create_signal("".to_string());
+    let (input, set_input) = signal("".to_string());
     let throttled: Signal<String> = signal_throttled(input, 1000.0);
 
     view! {

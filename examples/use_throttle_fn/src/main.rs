@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::use_throttle_fn;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (click_count, set_click_count) = create_signal(0);
-    let (throttled_count, set_throttled_count) = create_signal(0);
+    let (click_count, set_click_count) = signal(0);
+    let (throttled_count, set_throttled_count) = signal(0);
 
     let throttled_fn = use_throttle_fn(
         move || set_throttled_count.set(throttled_count.get_untracked() + 1),

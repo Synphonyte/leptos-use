@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_raf_fn, utils::Pausable};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (count, set_count) = create_signal(0);
+    let (count, set_count) = signal(0);
 
     let Pausable {
         pause,

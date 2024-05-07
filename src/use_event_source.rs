@@ -2,7 +2,9 @@ use crate::core::ConnectionReadyState;
 use crate::utils::StringCodec;
 use crate::{js, use_event_listener};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -24,7 +26,7 @@ use thiserror::Error;
 /// > To use [`ProstCodec`], add the feature `"prost"`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_event_source, UseEventSourceReturn, utils::JsonCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
@@ -53,7 +55,7 @@ use thiserror::Error;
 /// You can define named events when using `use_event_source_with_options`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec};
 /// #
 /// # #[component]
@@ -84,7 +86,7 @@ use thiserror::Error;
 /// interval between them by setting `reconnect_interval`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec};
 /// #
 /// # #[component]
@@ -140,11 +142,11 @@ where
 
     let url = url.to_owned();
 
-    let (event, set_event) = create_signal(None::<web_sys::Event>);
-    let (data, set_data) = create_signal(None::<T>);
-    let (ready_state, set_ready_state) = create_signal(ConnectionReadyState::Closed);
-    let (event_source, set_event_source) = create_signal(None::<web_sys::EventSource>);
-    let (error, set_error) = create_signal(None::<UseEventSourceError<C::Error>>);
+    let (event, set_event) = signal(None::<web_sys::Event>);
+    let (data, set_data) = signal(None::<T>);
+    let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
+    let (event_source, set_event_source) = signal(None::<web_sys::EventSource>);
+    let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
 
     let explicitly_closed = Rc::new(Cell::new(false));
     let retried = Rc::new(Cell::new(0));
@@ -257,7 +259,7 @@ where
 
                 let _ = use_event_listener(
                     es.clone(),
-                    ev::Custom::<ev::Event>::new(event_name),
+                    leptos::ev::Custom::<ev::Event>::new(event_name),
                     move |e| {
                         set_event.set(Some(e.clone()));
                         let data_string = js!(e["data"]).ok().and_then(|d| d.as_string());

@@ -7,7 +7,7 @@ use crate::{
 };
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
@@ -21,7 +21,7 @@ use wasm_bindgen::JsCast;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_css_var;
 /// #
 /// # #[component]
@@ -37,12 +37,12 @@ use wasm_bindgen::JsCast;
 /// The variable name itself can be a `Signal`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_css_var;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (key, set_key) = create_signal("--color".to_string());
+/// let (key, set_key) = signal("--color".to_string());
 /// let (color, set_color) = use_css_var(key);
 /// #
 /// # view! { }
@@ -53,7 +53,7 @@ use wasm_bindgen::JsCast;
 /// the variable is not set yet. The option to listen for changes to the variable is also available.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 /// #
@@ -77,7 +77,7 @@ use wasm_bindgen::JsCast;
 ///
 /// ## Server-Side Rendering
 ///
-/// On the server this simply returns `create_signal(options.initial_value)`.
+/// On the server this simply returns `signal(options.initial_value)`.
 pub fn use_css_var(
     prop: impl Into<MaybeSignal<String>>,
 ) -> (ReadSignal<String>, WriteSignal<String>) {
@@ -102,7 +102,7 @@ where
         ..
     } = options;
 
-    let (variable, set_variable) = create_signal(initial_value.clone());
+    let (variable, set_variable) = signal(initial_value.clone());
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let el_signal = target.into();

@@ -1,6 +1,7 @@
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API).
 /// It allows the user to provide their location to web applications if they so desire. For privacy reasons,
@@ -13,7 +14,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_geolocation, UseGeolocationReturn};
 /// #
 /// # #[component]
@@ -41,9 +42,9 @@ pub fn use_geolocation() -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + 
 pub fn use_geolocation_with_options(
     options: UseGeolocationOptions,
 ) -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
-    let (located_at, set_located_at) = create_signal(None::<f64>);
-    let (error, set_error) = create_signal(None::<web_sys::PositionError>);
-    let (coords, set_coords) = create_signal(None::<web_sys::Coordinates>);
+    let (located_at, set_located_at) = signal(None::<f64>);
+    let (error, set_error) = signal(None::<web_sys::PositionError>);
+    let (coords, set_coords) = signal(None::<web_sys::Coordinates>);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let resume = || ();

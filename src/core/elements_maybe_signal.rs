@@ -2,7 +2,8 @@ use crate::core::ElementMaybeSignal;
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
 use leptos::html::ElementDescriptor;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 use std::ops::Deref;
 

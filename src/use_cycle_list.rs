@@ -1,6 +1,7 @@
 use crate::core::MaybeRwSignal;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Cycle through a list of items.
 ///
@@ -11,7 +12,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// use leptos_use::{use_cycle_list, UseCycleListReturn};
 /// #

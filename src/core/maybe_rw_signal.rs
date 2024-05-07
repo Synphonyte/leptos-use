@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use std::fmt::Debug;
 
 pub enum MaybeRwSignal<T>
@@ -91,7 +91,7 @@ impl<T: Clone> MaybeRwSignal<T> {
     pub fn into_signal(self) -> (Signal<T>, WriteSignal<T>) {
         match self {
             Self::DynamicRead(s) => {
-                let (r, w) = create_signal(s.get_untracked());
+                let (r, w) = signal(s.get_untracked());
 
                 create_effect(move |_| {
                     w.update(move |w| {
@@ -103,7 +103,7 @@ impl<T: Clone> MaybeRwSignal<T> {
             }
             Self::DynamicRw(r, w) => (r, w),
             Self::Static(v) => {
-                let (r, w) = create_signal(v.clone());
+                let (r, w) = signal(v.clone());
                 (Signal::from(r), w)
             }
         }

@@ -4,7 +4,7 @@ pub mod error_template;
 pub mod fileserv;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
-    use leptos::*;
+    use leptos::prelude::*;
     use wasm_bindgen::prelude::wasm_bindgen;
     use crate::app::*;
 

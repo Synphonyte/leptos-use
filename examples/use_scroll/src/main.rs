@@ -1,6 +1,6 @@
 use leptos::html::Div;
 use leptos::logging::log;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseScrollReturn};
 
@@ -9,7 +9,7 @@ use web_sys::Event;
 #[component]
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Div>();
-    let (smooth, set_smooth) = create_signal(false);
+    let (smooth, set_smooth) = signal(false);
     let behavior = Signal::derive(move || {
         if smooth.get() {
             ScrollBehavior::Smooth

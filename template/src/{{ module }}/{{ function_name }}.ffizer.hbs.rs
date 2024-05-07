@@ -1,5 +1,5 @@
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 
 ///{{#if (eq unstable_apis "true")}}
 ///
@@ -13,7 +13,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use{{#if module}}::{{ module }}{{/if}}::{{ function_name }};
 /// #
 /// # #[component]

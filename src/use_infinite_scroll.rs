@@ -6,7 +6,9 @@ use crate::{
 use default_struct_builder::DefaultBuilder;
 use futures_util::join;
 use gloo_timers::future::sleep;
-use leptos::*;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::future::Future;
 use std::rc::Rc;
 use std::time::Duration;
@@ -21,7 +23,7 @@ use wasm_bindgen::JsCast;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// use leptos::html::Div;
 /// # use leptos_use::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
 /// #
@@ -29,7 +31,7 @@ use wasm_bindgen::JsCast;
 /// # fn Demo() -> impl IntoView {
 /// let el = create_node_ref::<Div>();
 ///
-/// let (data, set_data) = create_signal(vec![1, 2, 3, 4, 5, 6]);
+/// let (data, set_data) = signal(vec![1, 2, 3, 4, 5, 6]);
 ///
 /// let _ = use_infinite_scroll_with_options(
 ///     el,
@@ -105,7 +107,7 @@ where
         directions,
     };
 
-    let (is_loading, set_loading) = create_signal(false);
+    let (is_loading, set_loading) = signal(false);
 
     let el = el.into();
     let observed_element = Signal::derive(move || {

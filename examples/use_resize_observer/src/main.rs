@@ -1,12 +1,12 @@
 use leptos::html::Textarea;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::use_resize_observer;
 
 #[component]
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Textarea>();
-    let (text, set_text) = create_signal("".to_string());
+    let (text, set_text) = signal("".to_string());
 
     use_resize_observer(el, move |entries, _| {
         let rect = entries[0].content_rect();

@@ -1,7 +1,8 @@
 use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
@@ -19,7 +20,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneReturn};
 /// #
@@ -71,8 +72,8 @@ where
     El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
-    let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
-    let (files, set_files) = create_signal(Vec::<web_sys::File>::new());
+    let (is_over_drop_zone, set_over_drop_zone) = signal(false);
+    let (files, set_files) = signal(Vec::<web_sys::File>::new());
 
     #[cfg(not(feature = "ssr"))]
     {

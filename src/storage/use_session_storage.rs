@@ -1,6 +1,7 @@
 use super::{use_storage_with_options, StorageType, UseStorageOptions};
 use crate::utils::StringCodec;
-use leptos::signal_prelude::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
 ///

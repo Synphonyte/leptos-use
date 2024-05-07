@@ -17,7 +17,7 @@ pub use crate::utils::ThrottleOptions;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_throttle_fn;
 /// #
 /// # #[component]
@@ -41,7 +41,7 @@ pub use crate::utils::ThrottleOptions;
 /// You can provide options when you use [`use_throttle_fn_with_options`].
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{ThrottleOptions, use_throttle_fn_with_options};
 /// # #[component]
 /// # fn Demo() -> impl IntoView {

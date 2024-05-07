@@ -1,5 +1,5 @@
 use crate::utils::use_derive_signal;
-use leptos::*;
+use leptos::prelude::*;
 
 use_derive_signal!(
     /// Reactive `ToString::to_string()`.
@@ -7,12 +7,12 @@ use_derive_signal!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::use_to_string;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (number, set_number) = create_signal(3.14_f64);
+    /// let (number, set_number) = signal(3.14_f64);
     /// let str = use_to_string::<_, f64>(number);
     /// #
     /// # view! { }

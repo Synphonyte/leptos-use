@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_interval_fn;
 use leptos_use::utils::Pausable;
@@ -18,9 +18,9 @@ fn Demo() -> impl IntoView {
         "Привет",
     ];
 
-    let (word, set_word) = create_signal(greetings[0]);
-    let (interval, set_interval) = create_signal(500_u64);
-    let (index, set_index) = create_signal(0);
+    let (word, set_word) = signal(greetings[0]);
+    let (interval, set_interval) = signal(500_u64);
+    let (index, set_index) = signal(0);
 
     let Pausable {
         pause,

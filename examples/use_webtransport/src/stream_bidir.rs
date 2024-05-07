@@ -1,5 +1,5 @@
 use crate::{LogDisplay, StreamSend};
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::core::ConnectionReadyState;
 use leptos_use::BidirStream;
 
@@ -8,7 +8,7 @@ pub fn StreamBidir(
     #[prop(into)] ready_state: Signal<ConnectionReadyState>,
     stream: BidirStream,
 ) -> impl IntoView {
-    let (log, set_log) = create_signal(vec![]);
+    let (log, set_log) = signal(vec![]);
 
     let on_send = move |msg| {
         set_log.update(|log| log.push(format!("Sent: '{}'", msg)));

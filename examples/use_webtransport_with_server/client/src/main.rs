@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::core::ConnectionReadyState;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_webtransport_with_options, UseWebTransportOptions};
@@ -13,8 +13,8 @@ use stream_send::*;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (datagrams_log, set_datagrams_log) = create_signal(vec![]);
-    let (bidir_streams, set_bidir_streams) = create_signal(vec![]);
+    let (datagrams_log, set_datagrams_log) = signal(vec![]);
+    let (bidir_streams, set_bidir_streams) = signal(vec![]);
 
     let id = store_value(0);
 
@@ -37,7 +37,7 @@ fn Demo() -> impl IntoView {
             }),
     );
 
-    let (text, set_text) = create_signal("".to_string());
+    let (text, set_text) = signal("".to_string());
 
     let on_send_datagrams = {
         let transport = transport.clone();

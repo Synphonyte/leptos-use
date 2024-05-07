@@ -3,7 +3,8 @@ use crate::filter_builder_methods;
 use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 ///
 ///
@@ -14,7 +15,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{use_idle, UseIdleReturn};
 /// #
@@ -34,7 +35,7 @@ use leptos::*;
 ///
 /// ```
 /// # use std::time::Duration;
-/// use leptos::*;
+/// use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{use_idle, UseIdleReturn};
 /// #
@@ -77,8 +78,8 @@ pub fn use_idle_with_options(
         filter,
     } = options;
 
-    let (idle, set_idle) = create_signal(initial_state);
-    let (last_active, set_last_active) = create_signal(now());
+    let (idle, set_idle) = signal(initial_state);
+    let (last_active, set_last_active) = signal(now());
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let reset = || ();

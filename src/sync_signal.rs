@@ -1,6 +1,6 @@
 use crate::core::UseRwSignal;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 /// Two-way Signals synchronization.
@@ -17,13 +17,13 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::sync_signal;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(1);
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal(1);
+/// let (b, set_b) = signal(2);
 ///
 /// let stop = sync_signal((a, set_a), (b, set_b));
 ///
@@ -46,13 +46,13 @@ use std::rc::Rc;
 /// You can mix and match `RwSignal`s and `Signal`-`WriteSignal` pairs.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::sync_signal;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(1);
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal(1);
+/// let (b, set_b) = signal(2);
 /// let c_rw = create_rw_signal(3);
 /// let d_rw = create_rw_signal(4);
 ///
@@ -70,13 +70,13 @@ use std::rc::Rc;
 /// You can synchronize a signal only from left to right or right to left.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions, SyncDirection};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(1);
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal(1);
+/// let (b, set_b) = signal(2);
 ///
 /// let stop = sync_signal_with_options(
 ///     (a, set_a),
@@ -101,13 +101,13 @@ use std::rc::Rc;
 /// You can optionally provide custom transforms between the two signals.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(10);
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal(10);
+/// let (b, set_b) = signal(2);
 ///
 /// let stop = sync_signal_with_options(
 ///     (a, set_a),

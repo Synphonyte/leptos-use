@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay, Note};
 use leptos_use::{use_idle, use_timestamp_with_options, UseIdleReturn, UseTimestampOptions};
 

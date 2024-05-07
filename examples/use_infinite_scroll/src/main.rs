@@ -1,5 +1,5 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
 
@@ -7,7 +7,7 @@ use leptos_use::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Div>();
 
-    let (data, set_data) = create_signal(vec![1, 2, 3, 4, 5, 6]);
+    let (data, set_data) = signal(vec![1, 2, 3, 4, 5, 6]);
 
     let _ = use_infinite_scroll_with_options(
         el,

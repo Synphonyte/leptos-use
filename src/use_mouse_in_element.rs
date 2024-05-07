@@ -5,7 +5,7 @@ use crate::{
 };
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 
 /// Reactive mouse position related to an element.
@@ -17,7 +17,7 @@ use std::marker::PhantomData;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_mouse_in_element, UseMouseInElementReturn};
 /// #
@@ -79,13 +79,13 @@ where
             .initial_value(initial_value),
     );
 
-    let (element_x, set_element_x) = create_signal(0.0);
-    let (element_y, set_element_y) = create_signal(0.0);
-    let (element_position_x, set_element_position_x) = create_signal(0.0);
-    let (element_position_y, set_element_position_y) = create_signal(0.0);
-    let (element_width, set_element_width) = create_signal(0.0);
-    let (element_height, set_element_height) = create_signal(0.0);
-    let (is_outside, set_outside) = create_signal(true);
+    let (element_x, set_element_x) = signal(0.0);
+    let (element_y, set_element_y) = signal(0.0);
+    let (element_position_x, set_element_position_x) = signal(0.0);
+    let (element_position_y, set_element_position_y) = signal(0.0);
+    let (element_width, set_element_width) = signal(0.0);
+    let (element_height, set_element_height) = signal(0.0);
+    let (is_outside, set_outside) = signal(true);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let stop = || ();

@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 pub enum UseRwSignal<T: 'static> {
     Separate(Signal<T>, WriteSignal<T>),

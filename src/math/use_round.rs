@@ -1,5 +1,6 @@
 use crate::math::shared::use_simple_math;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use num::Float;
 use paste::paste;
 
@@ -13,12 +14,12 @@ use_simple_math!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::math::use_round;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (value, set_value) = create_signal(45.95);
+    /// let (value, set_value) = signal(45.95);
     /// let result: Signal<f64> = use_round(value); // 46
     /// #
     /// # assert_eq!(result.get(), 46.0);

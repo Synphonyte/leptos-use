@@ -35,14 +35,16 @@ pub fn some_directive(el: HtmlElement<AnyElement>) {
 Signal of Strings: `Signal<String>`, `ReadSignal<String>`, `RwSignal<String>`, `Memo<String>`; also works with `&str`:
 
 ```rust
-let (str_signal, set_str_signal) = create_signal("div > p.some-class".to_string());
+let (str_signal, set_str_signal) = signal("div > p.some-class".to_string());
 use_element_size(str_signal);
 ```
 
-Signals of Elements: `Signal<web_sys::Element>`, `ReadSignal<web_sys::Element>`, `RwSignal<web_sys::Element>`, `Memo<web_sys::Element>`; also works with `Option<web_sys::Element>`:
+Signals of
+Elements: `Signal<web_sys::Element>`, `ReadSignal<web_sys::Element>`, `RwSignal<web_sys::Element>`, `Memo<web_sys::Element>`;
+also works with `Option<web_sys::Element>`:
 
 ```rust
-let (el_signal, set_el_signal) = create_signal(document().query_selector("div > p.some-class").unwrap());
+let (el_signal, set_el_signal) = signal(document().query_selector("div > p.some-class").unwrap());
 use_element_size(el_signal); 
 ```
 
@@ -61,7 +63,7 @@ types for `ElementMaybeSignal`.
 
 Some functions work on one or more elements. Take [`use_resize_observer`](elements/use_resize_observer.md) for example.
 This works very much the same way as described above but instead of `Into<ElementMaybeSignal>`
-it takes an `Into<ElementsMaybeSignal>` (note the plural). This means you can use it exactly in 
+it takes an `Into<ElementsMaybeSignal>` (note the plural). This means you can use it exactly in
 the same ways as you saw with the singular `ElementMaybeSignal`. Only this time, when you use
 `String` or `&str` it will be interpreted as CSS selector with `query_selector_all`.
 
@@ -83,7 +85,7 @@ use_resize_observer(vec![node_ref1, node_ref2].as_slice());
 
 ## Usage in Options
 
-Some functions have options that take `Element(s)MaybeSignal`. 
+Some functions have options that take `Element(s)MaybeSignal`.
 They can be used in the same way.
 
 ```rust

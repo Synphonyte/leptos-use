@@ -21,7 +21,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_websocket, UseWebsocketReturn};
 /// # use leptos_use::core::ConnectionReadyState;
 /// #
@@ -99,7 +99,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// First we define the `struct` that is going to be passed around as context.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// use std::rc::Rc;
 ///
 /// #[derive(Clone)]
@@ -127,7 +127,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// Now you can provide the context like the following.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_websocket, UseWebsocketReturn};
 /// # use std::rc::Rc;
 /// # #[derive(Clone)]
@@ -162,7 +162,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// Finally let's use the context:
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_websocket, UseWebsocketReturn};
 /// # use std::rc::Rc;
 /// # #[derive(Clone)]
@@ -225,9 +225,9 @@ pub fn use_websocket_with_options(
         protocols,
     } = options;
 
-    let (ready_state, set_ready_state) = create_signal(ConnectionReadyState::Closed);
-    let (message, set_message) = create_signal(None);
-    let (message_bytes, set_message_bytes) = create_signal(None);
+    let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
+    let (message, set_message) = signal(None);
+    let (message_bytes, set_message_bytes) = signal(None);
     let ws_ref: StoredValue<Option<WebSocket>> = store_value(None);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(None);

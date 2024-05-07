@@ -20,16 +20,16 @@ cfg-if = "1"
 cookie = { version = "0.18", features = ["percent-encode"] }
 default-struct-builder = "0.5"
 futures-util = "0.3"
-gloo-timers = { version = "0.3.0", features = ["futures"] }
-gloo-utils = { version = "0.2.0" }
+gloo-timers = { version = "0.3", features = ["futures"] }
+gloo-utils = { version = "0.2" }
 http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
-leptos = "0.6"
-leptos_axum = { version = "0.6", optional = true }
+leptos = "0.7.0-preview2"
+leptos_axum = { version = "0.7.0-preview2", optional = true }
 leptos_actix = { version = "0.6", optional = true }
-leptos-spin = { version = "0.1", optional = true }
+leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 prost = { version = "0.12", optional = true }
@@ -133,7 +133,7 @@ features = [
 
 [dev-dependencies]
 getrandom = { version = "0.2", features = ["js"] }
-leptos_meta = "0.6"
+leptos_meta = "0.7.0-preview2"
 rand = "0.8"
 
 [features]

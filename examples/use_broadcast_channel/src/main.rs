@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::utils::FromToStringCodec;
 use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
@@ -13,7 +13,7 @@ fn Demo() -> impl IntoView {
         ..
     } = use_broadcast_channel::<String, FromToStringCodec>("leptos-use-demo-channel");
 
-    let (input_value, set_input_value) = create_signal(String::new());
+    let (input_value, set_input_value) = signal(String::new());
 
     view! {
         <p>Please open this page in at least two tabs</p>

@@ -3,7 +3,7 @@
 use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -17,7 +17,7 @@ use std::time::Duration;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_interval_fn;
 /// # use leptos_use::utils::Pausable;
 /// #
@@ -64,7 +64,7 @@ where
 
     let timer: Rc<Cell<Option<IntervalHandle>>> = Rc::new(Cell::new(None));
 
-    let (is_active, set_active) = create_signal(false);
+    let (is_active, set_active) = signal(false);
 
     let clean = {
         let timer = Rc::clone(&timer);

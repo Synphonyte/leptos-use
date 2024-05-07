@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 #[component]
 pub fn Note(#[prop(optional, into)] class: String, children: Children) -> impl IntoView {

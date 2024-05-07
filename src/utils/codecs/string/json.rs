@@ -4,7 +4,7 @@ use super::StringCodec;
 ///
 /// ## Example
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::utils::JsonCodec;
@@ -34,7 +34,7 @@ use super::StringCodec;
 /// Previous versions of leptos-use offered a `merge_defaults` fn to rewrite the encoded value. This is possible by wrapping the codec but should be avoided.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::utils::StringCodec;
@@ -76,7 +76,7 @@ use super::StringCodec;
 /// A better alternative to string replacement might be to parse the JSON then transform the resulting `JsValue` before decoding it to to your struct again.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;

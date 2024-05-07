@@ -1,5 +1,6 @@
 use crate::math::shared::use_binary_logic;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use paste::paste;
 
 use_binary_logic!(
@@ -12,13 +13,13 @@ use_binary_logic!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::math::use_and;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (a, set_a) = create_signal(true);
-    /// let (b, set_b) = create_signal(false);
+    /// let (a, set_a) = signal(true);
+    /// let (b, set_b) = signal(false);
     ///
     /// let a_and_b = use_and(a, b);
     /// #

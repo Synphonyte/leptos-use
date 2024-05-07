@@ -1,6 +1,6 @@
 use cfg_if::cfg_if;
 use http::status::StatusCode;
-use leptos::*;
+use leptos::prelude::*;
 use thiserror::Error;
 
 #[cfg(feature = "ssr")]

@@ -1,7 +1,7 @@
 use crate::{use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 /// Reactive [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/Notification).
@@ -15,7 +15,7 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_web_notification_with_options, UseWebNotificationOptions, ShowOptions, UseWebNotificationReturn, NotificationDirection};
 /// #
 /// # #[component]
@@ -51,9 +51,9 @@ pub fn use_web_notification_with_options(
 ) -> UseWebNotificationReturn<impl Fn(ShowOptions) + Clone, impl Fn() + Clone> {
     let is_supported = use_supported(browser_supports_notifications);
 
-    let (notification, set_notification) = create_signal(None::<web_sys::Notification>);
+    let (notification, set_notification) = signal(None::<web_sys::Notification>);
 
-    let (permission, set_permission) = create_signal(NotificationPermission::default());
+    let (permission, set_permission) = signal(NotificationPermission::default());
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let _ = options;

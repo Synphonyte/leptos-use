@@ -3,7 +3,7 @@ use crate::{use_interval_fn_with_options, UseIntervalFnOptions};
 use default_struct_builder::DefaultBuilder;
 use std::rc::Rc;
 
-use leptos::*;
+use leptos::prelude::*;
 
 /// Reactive counter increases on every interval.
 ///
@@ -14,7 +14,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_interval, UseIntervalReturn};
 /// #
 /// # #[component]
@@ -55,7 +55,7 @@ where
         callback,
     } = options;
 
-    let (counter, set_counter) = create_signal(0u64);
+    let (counter, set_counter) = signal(0u64);
 
     let update = move || set_counter.update(|count| *count += 1);
     let reset = move || set_counter.set(0);

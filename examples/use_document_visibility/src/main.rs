@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_document_visibility;
 use std::time::Duration;
@@ -6,7 +6,7 @@ use std::time::Duration;
 #[component]
 fn Demo() -> impl IntoView {
     let start_message = "💡 Minimize the page or switch tab then return";
-    let (message, set_message) = create_signal(start_message);
+    let (message, set_message) = signal(start_message);
     let visibility = use_document_visibility();
 
     let _ = watch(

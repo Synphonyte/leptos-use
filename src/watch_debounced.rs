@@ -1,6 +1,6 @@
 use crate::{watch_with_options, DebounceOptions, WatchOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 
 /// A debounced version of [`watch`].
 ///
@@ -11,12 +11,12 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::watch_debounced;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// #     let (source, set_source) = create_signal(0);
+/// #     let (source, set_source) = signal(0);
 /// #
 /// watch_debounced(
 ///     move || source.get(),
@@ -37,12 +37,12 @@ use leptos::*;
 /// There's also `watch_debounced_with_options` where you can specify the other watch options (except `filter`).
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_debounced_with_options, WatchDebouncedOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// #     let (source, set_source) = create_signal(0);
+/// #     let (source, set_source) = signal(0);
 /// #
 /// watch_debounced_with_options(
 ///     move || source.get(),

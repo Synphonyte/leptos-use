@@ -1,6 +1,6 @@
 use crate::utils::{CloneableFnWithReturn, FilterOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -32,7 +32,7 @@ where
     R: 'static,
     F: Fn(Arg) -> R + Clone,
 {
-    let (active, set_active) = create_signal(true);
+    let (active, set_active) = signal(true);
 
     let pause = move || {
         set_active(false);

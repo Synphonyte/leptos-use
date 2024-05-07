@@ -4,7 +4,7 @@ use crate::js;
 use crate::utils::js_value_from_to_string;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::fmt::Display;
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -19,12 +19,12 @@ use wasm_bindgen::{JsCast, JsValue};
 /// In basic use without specifying a locale, a formatted string in the default locale and with default options is returned.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (number, set_number) = create_signal(3500);
+/// let (number, set_number) = signal(3500);
 ///
 /// let number_format = use_intl_number_format(UseIntlNumberFormatOptions::default());
 ///
@@ -41,7 +41,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// (and possibly some fallback languages) using the `locales` argument:
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
@@ -89,7 +89,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// The results can be customized in multiple ways.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{NumberStyle, UnitDisplay, use_intl_number_format, UseIntlNumberFormatOptions};
 /// #
 /// # #[component]
@@ -599,7 +599,7 @@ pub struct UseIntlNumberFormatOptions {
     /// For example, if `maximum_fraction_digits` is 2 and `rounding_increment` is 5, then the number is rounded to the nearest 0.05 ("nickel rounding").
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::{use_intl_number_format, UseIntlNumberFormatOptions, NumberStyle};
     /// #
     /// # #[component]
@@ -804,7 +804,7 @@ impl UseIntlNumberFormatReturn {
     /// Formats a range of numbers according to the locale and formatting options of this `Intl.NumberFormat` object.
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::{NumberStyle, use_intl_number_format, UseIntlNumberFormatOptions};
     /// #
     /// # #[component]
@@ -828,7 +828,7 @@ impl UseIntlNumberFormatReturn {
     /// ```
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::{NumberStyle, use_intl_number_format, UseIntlNumberFormatOptions};
     /// #
     /// # #[component]

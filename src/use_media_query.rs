@@ -3,7 +3,7 @@
 use crate::use_event_listener;
 use cfg_if::cfg_if;
 use leptos::ev::change;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -16,7 +16,7 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_media_query;
 /// #
 /// # #[component]
@@ -41,7 +41,7 @@ use std::rc::Rc;
 pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
     let query = query.into();
 
-    let (matches, set_matches) = create_signal(false);
+    let (matches, set_matches) = signal(false);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let media_query: Rc<RefCell<Option<web_sys::MediaQueryList>>> = Rc::new(RefCell::new(None));

@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use std::cmp::Ordering;
 use std::ops::DerefMut;
 
@@ -11,7 +11,7 @@ use std::ops::DerefMut;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_sorted;
 /// #
 /// # #[component]
@@ -26,7 +26,7 @@ use std::ops::DerefMut;
 /// You can also sort by key or with a compare function.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_sorted_by, use_sorted_by_key};
 /// #
 /// #[derive(Clone, PartialEq)]

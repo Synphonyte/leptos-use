@@ -1,5 +1,5 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::core::Position;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_draggable_with_options, use_window, UseDraggableOptions, UseDraggableReturn};

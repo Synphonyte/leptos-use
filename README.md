@@ -20,7 +20,6 @@
 <br/>
 <br/>
 
-
 ## Usage
 
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
@@ -29,7 +28,7 @@
 [![Discord](https://img.shields.io/discord/1031524867910148188?color=%237289DA&label=discord)](https://discord.com/channels/1031524867910148188/1121154537709895783)
 
 ```rust
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::{use_mouse, UseMouseReturn};
 
 #[component]
@@ -82,7 +81,8 @@ python3 post_build.py use_storage
 
 ### New Function Template
 
-To scaffold a new function quickly you can run `template/createfn.sh`. It requires that [`ffizer`](https://ffizer.github.io/) and Python 3 is installed.
+To scaffold a new function quickly you can run `template/createfn.sh`. It requires
+that [`ffizer`](https://ffizer.github.io/) and Python 3 is installed.
 This will create the function file in the src directory, scaffold an example directory and an entry in the book.
 
 ## Leptos compatibility

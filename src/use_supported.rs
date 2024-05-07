@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 
 /// SSR compatibe `is_supported`
 ///
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_supported, js};
 /// # use wasm_bindgen::JsValue;
 /// #

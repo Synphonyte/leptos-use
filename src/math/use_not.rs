@@ -1,4 +1,5 @@
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive `NOT` condition.
 ///
@@ -9,12 +10,12 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::math::use_not;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(true);
+/// let (a, set_a) = signal(true);
 ///
 /// let not_a = use_not(a);
 /// #

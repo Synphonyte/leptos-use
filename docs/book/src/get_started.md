@@ -15,7 +15,7 @@ cargo add leptos-use
 Simply import the functions you need from `leptos-use`
 
 ```rust,noplayground
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::{use_mouse, UseMouseReturn};
 
 #[component]
@@ -32,6 +32,6 @@ Please refer to the [functions list](functions.md) for more details.
 
 ## Stable Rust
 
-Just like `leptos` this library can be safely run on stable rust. 
-In the [Getting Started section](https://leptos-rs.github.io/leptos/02_getting_started.html) 
+Just like `leptos` this library can be safely run on stable rust.
+In the [Getting Started section](https://leptos-rs.github.io/leptos/02_getting_started.html)
 of the `leptos` docs you can read more about what this means.

@@ -3,7 +3,8 @@
 use crate::core::MaybeRwSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use wasm_bindgen::JsCast;
 
 /// Reactive favicon.
@@ -15,7 +16,7 @@ use wasm_bindgen::JsCast;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_favicon;
 /// #
 /// # #[component]
@@ -35,7 +36,7 @@ use wasm_bindgen::JsCast;
 /// reflected in your favicon automatically.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_favicon_with_options, UseFaviconOptions, use_preferred_dark};
 /// #
 /// # #[component]

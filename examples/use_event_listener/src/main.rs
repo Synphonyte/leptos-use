@@ -1,7 +1,7 @@
 use leptos::ev::{click, keydown};
 use leptos::html::A;
 use leptos::logging::log;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::{use_event_listener, use_window};
 
 #[component]
@@ -21,7 +21,7 @@ fn Demo() -> impl IntoView {
         evt.prevent_default();
     });
 
-    let (cond, set_cond) = create_signal(true);
+    let (cond, set_cond) = signal(true);
 
     view! {
         <p>"Check in the dev tools console"</p>

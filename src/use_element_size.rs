@@ -1,7 +1,8 @@
 use crate::core::{ElementMaybeSignal, Size};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
@@ -66,8 +67,8 @@ where
 {
     let UseElementSizeOptions { box_, initial_size } = options;
 
-    let (width, set_width) = create_signal(initial_size.width);
-    let (height, set_height) = create_signal(initial_size.height);
+    let (width, set_width) = signal(initial_size.width);
+    let (height, set_height) = signal(initial_size.height);
 
     #[cfg(not(feature = "ssr"))]
     {

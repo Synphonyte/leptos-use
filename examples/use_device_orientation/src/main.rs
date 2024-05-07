@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_device_orientation;
 
@@ -7,22 +7,22 @@ fn Demo() -> impl IntoView {
     let orientation = use_device_orientation();
 
     view! {
-        <pre>
-            {move || format!(
-                concat!(
-                    "is_supported: {}\n",
-                    "absolute: {}\n",
-                    "alpha: {:?}\n",
-                    "beta: {:?}\n",
-                    "gamma: {:?}\n",
-                ),
-                orientation.is_supported.get(),
-                orientation.absolute.get(),
-                orientation.alpha.get(),
-                orientation.beta.get(),
-                orientation.gamma.get(),
-            )}
-        </pre> }
+    <pre>
+        {move || format!(
+            concat!(
+                "is_supported: {}\n",
+                "absolute: {}\n",
+                "alpha: {:?}\n",
+                "beta: {:?}\n",
+                "gamma: {:?}\n",
+            ),
+            orientation.is_supported.get(),
+            orientation.absolute.get(),
+            orientation.alpha.get(),
+            orientation.beta.get(),
+            orientation.gamma.get(),
+        )}
+    </pre> }
 }
 
 fn main() {

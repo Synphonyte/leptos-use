@@ -1,5 +1,6 @@
 use crate::utils::use_derive_signal;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 use_derive_signal!(
     /// Reactive `Option::is_some()`.
@@ -7,12 +8,12 @@ use_derive_signal!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::is_some;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (example, set_example) = create_signal(
+    /// let (example, set_example) = signal(
     ///     if js_sys::Math::random() < 0.5 { Some("Example") } else { None }
     /// );
     ///

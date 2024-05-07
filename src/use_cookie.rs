@@ -5,7 +5,8 @@ use crate::utils::StringCodec;
 use cookie::time::{Duration, OffsetDateTime};
 use cookie::{Cookie, CookieJar, SameSite};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 /// SSR-friendly and reactive cookie access.
@@ -27,7 +28,7 @@ use std::rc::Rc;
 /// Whenever we update the `counter` variable, the cookie will be updated accordingly.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_cookie;
 /// # use leptos_use::utils::FromToStringCodec;
 /// # use rand::prelude::*;
@@ -63,7 +64,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use cookie::SameSite;
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
 /// # use leptos_use::utils::FromToStringCodec;
 /// #
@@ -97,7 +98,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use cookie::Cookie;
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
 /// # use leptos_use::utils::JsonCodec;
@@ -177,7 +178,7 @@ where
         false
     };
 
-    let (cookie, set_cookie) = create_signal(None::<T>);
+    let (cookie, set_cookie) = signal(None::<T>);
 
     let jar = store_value(CookieJar::new());
     let codec = C::default();
@@ -204,7 +205,7 @@ where
 
         handle_expiration(delay, set_cookie);
     } else {
-        logging::debug_warn!(
+        debug_warn!(
             "not setting cookie '{}' because it has already expired",
             cookie_name
         );
@@ -524,7 +525,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                         not(feature = "spin")
                     ))]
                     {
-                        leptos::logging::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
+                        leptos::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
                         None
                     }
 
@@ -580,7 +581,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                     ))]
                     {
                         let _ = cookie;
-                        leptos::logging::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
+                        leptos::warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
@@ -605,7 +606,7 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                 let _ = cookie;
             }),
             on_error: Rc::new(|_| {
-                logging::error!("cookie (de-/)serialization error");
+                error!("cookie (de-/)serialization error");
             }),
         }
     }
@@ -812,7 +813,7 @@ fn build_cookie_from_options(
                 cookie = cookie.expires(expires);
             }
             Err(err) => {
-                logging::debug_warn!("failed to set cookie expiration: {:?}", err);
+                debug_warn!("failed to set cookie expiration: {:?}", err);
             }
         }
     }

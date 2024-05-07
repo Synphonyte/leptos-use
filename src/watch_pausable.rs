@@ -1,5 +1,5 @@
 use crate::{watch_with_options, WatchOptions};
-use leptos::*;
+use leptos::prelude::*;
 
 /// Pausable [`watch`].
 ///
@@ -10,12 +10,12 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_pausable, WatchPausableReturn};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// let (source, set_source) = create_signal("foo".to_string());
+/// let (source, set_source) = signal("foo".to_string());
 ///
 /// let WatchPausableReturn {
 ///     stop,
@@ -78,7 +78,7 @@ where
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    let (is_active, set_active) = create_signal(true);
+    let (is_active, set_active) = signal(true);
 
     let pausable_callback = move |val: &W, prev_val: Option<&W>, prev_ret: Option<Option<T>>| {
         if is_active.get_untracked() {

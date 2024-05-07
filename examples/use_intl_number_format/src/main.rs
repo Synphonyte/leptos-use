@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_intl_number_format, NumberStyle, UseIntlNumberFormatOptions};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (number, set_number) = create_signal(123456.78);
+    let (number, set_number) = signal(123456.78);
 
     let de_nf = use_intl_number_format(
         UseIntlNumberFormatOptions::default()

@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use std::fmt::Display;
 
 /// Reactive [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API).
@@ -10,7 +10,7 @@ use std::fmt::Display;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_permission;
 /// #
 /// # #[component]
@@ -25,7 +25,7 @@ use std::fmt::Display;
 ///
 /// On the server the returned signal will always be `PermissionState::Unknown`.
 pub fn use_permission(permission_name: &str) -> Signal<PermissionState> {
-    let (state, set_state) = create_signal(PermissionState::Unknown);
+    let (state, set_state) = signal(PermissionState::Unknown);
 
     #[cfg(not(feature = "ssr"))]
     {

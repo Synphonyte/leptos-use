@@ -1,5 +1,6 @@
 use cfg_if::cfg_if;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
 /// Provide web developers with information from the physical orientation of
@@ -12,7 +13,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_device_orientation, UseDeviceOrientationReturn};
 /// #
 /// # #[component]
@@ -45,10 +46,10 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         use leptos::ev::deviceorientation;
 
         let is_supported = use_supported(|| js!("DeviceOrientationEvent" in &window()));
-        let (absolute, set_absolute) = create_signal(false);
-        let (alpha, set_alpha) = create_signal(None);
-        let (beta, set_beta) = create_signal(None);
-        let (gamma, set_gamma) = create_signal(None);
+        let (absolute, set_absolute) = signal(false);
+        let (alpha, set_alpha) = signal(None);
+        let (beta, set_beta) = signal(None);
+        let (gamma, set_gamma) = signal(None);
 
         if is_supported.get_untracked() {
             let cleanup = use_event_listener_with_options(

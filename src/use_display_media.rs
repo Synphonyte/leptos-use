@@ -1,7 +1,8 @@
 use crate::core::MaybeRwSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) streaming.
@@ -13,7 +14,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_display_media, UseDisplayMediaReturn};
 /// #
 /// # #[component]
@@ -54,7 +55,7 @@ pub fn use_display_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = create_signal(None::<Result<web_sys::MediaStream, JsValue>>);
+    let (stream, set_stream) = signal(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {

@@ -3,7 +3,7 @@ use std::ops::Deref;
 
 use crate::core::impl_ssr_safe_method;
 #[cfg(not(feature = "ssr"))]
-use leptos::*;
+use leptos::prelude::*;
 use wasm_bindgen::JsValue;
 use web_sys::NodeList;
 
@@ -16,7 +16,7 @@ use web_sys::NodeList;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_document;
 /// #
 /// # #[component]

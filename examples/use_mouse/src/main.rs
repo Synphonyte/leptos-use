@@ -1,5 +1,5 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{
     use_mouse, use_mouse_with_options, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,

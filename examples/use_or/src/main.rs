@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::math::use_or;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (a, set_a) = create_signal(false);
-    let (b, set_b) = create_signal(false);
+    let (a, set_a) = signal(false);
+    let (b, set_b) = signal(false);
 
     let a_or_b = use_or(a, b);
 

@@ -3,7 +3,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    use leptos::*;
+    use leptos::prelude::*;
     use crate::utils::IS_IOS;
     use crate::{use_event_listener, use_event_listener_with_options, UseEventListenerOptions};
     use leptos::ev::{blur, click, pointerdown};
@@ -26,7 +26,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos::html::Div;
 /// # use leptos_use::on_click_outside;
@@ -54,7 +54,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// Use this to ignore clicks on certain elements.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos::html::Div;
 /// # use leptos_use::{on_click_outside_with_options, OnClickOutsideOptions};

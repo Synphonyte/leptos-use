@@ -1,5 +1,5 @@
 use crate::use_media_query;
-use leptos::*;
+use leptos::prelude::*;
 use std::fmt::Display;
 
 /// Reactive [prefers-contrast](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast) media query.
@@ -7,7 +7,7 @@ use std::fmt::Display;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_preferred_contrast;
 /// #
 /// # #[component]

@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::watch_throttled;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (input, set_input) = create_signal("".to_string());
-    let (updated, set_updated) = create_signal(0);
+    let (input, set_input) = signal("".to_string());
+    let (updated, set_updated) = signal(0);
 
     let _ = watch_throttled(
         move || input.get(),

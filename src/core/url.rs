@@ -1,4 +1,4 @@
-use leptos::window;
+use leptos::prelude::*;
 
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 fn get() -> web_sys::Url {

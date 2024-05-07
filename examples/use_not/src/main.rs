@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::math::use_not;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (a, set_a) = create_signal(false);
+    let (a, set_a) = signal(false);
     let not_a = use_not(a);
 
     view! {

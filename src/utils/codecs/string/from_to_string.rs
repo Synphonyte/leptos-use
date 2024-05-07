@@ -7,7 +7,7 @@ use std::str::FromStr;
 ///
 /// ## Example
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage, UseStorageOptions};
 /// # use leptos_use::utils::FromToStringCodec;
 /// #

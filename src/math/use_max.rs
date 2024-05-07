@@ -1,5 +1,6 @@
 use crate::math::shared::use_partial_cmp;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::cmp::Ordering;
 
 use_partial_cmp!(
@@ -14,12 +15,12 @@ use_partial_cmp!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::math::use_max;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (values, set_values) = create_signal(vec![1.0, 2.0, 3.0, f32::NAN, 4.0, 5.0]);
+    /// let (values, set_values) = signal(vec![1.0, 2.0, 3.0, f32::NAN, 4.0, 5.0]);
     /// let result = use_max::<Vec<f32>, _, _>(values); // Some(5.0)
     /// #
     /// # assert_eq!(result.get(), Some(5.0));

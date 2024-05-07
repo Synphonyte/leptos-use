@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::core::ConnectionReadyState;
 use leptos_use::SendableStream;
 
@@ -12,7 +12,7 @@ where
     S: SendableStream + 'static,
     F: Fn(String) + 'static,
 {
-    let (text, set_text) = create_signal("".to_string());
+    let (text, set_text) = signal("".to_string());
 
     let on_send = {
         move |_| {

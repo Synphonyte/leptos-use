@@ -1,7 +1,8 @@
 use crate::{js, js_fut, use_event_listener, use_supported, UseTimeoutFnReturn};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{copy, cut};
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API).
 /// Provides the ability to respond to clipboard commands (cut, copy, and paste)
@@ -20,7 +21,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_clipboard, UseClipboardReturn};
 /// #
 /// # #[component]
@@ -66,8 +67,8 @@ pub fn use_clipboard_with_options(
             .navigator())
     });
 
-    let (text, set_text) = create_signal(None);
-    let (copied, set_copied) = create_signal(false);
+    let (text, set_text) = signal(None);
+    let (copied, set_copied) = signal(false);
 
     let UseTimeoutFnReturn { start, .. } = crate::use_timeout_fn::use_timeout_fn(
         move |_: ()| {

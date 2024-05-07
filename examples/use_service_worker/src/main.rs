@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{use_document, use_service_worker, UseServiceWorkerReturn};
 use web_sys::HtmlMetaElement;

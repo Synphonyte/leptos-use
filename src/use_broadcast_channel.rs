@@ -2,7 +2,9 @@ use crate::utils::StringCodec;
 use crate::{
     js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
 };
-use leptos::*;
+use leptos::ev::messageerror;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
@@ -21,7 +23,7 @@ use wasm_bindgen::JsValue;
 /// Messages are broadcasted via a message event fired at all BroadcastChannel objects listening to the channel.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
 /// # use leptos_use::utils::FromToStringCodec;
 /// #
@@ -47,7 +49,7 @@ use wasm_bindgen::JsValue;
 /// Just like with [`use_storage`] you can use different codecs for encoding and decoding.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::use_broadcast_channel;
 /// # use leptos_use::utils::JsonCodec;
@@ -77,10 +79,10 @@ where
 {
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
-    let (is_closed, set_closed) = create_signal(false);
-    let (channel, set_channel) = create_signal(None::<web_sys::BroadcastChannel>);
-    let (message, set_message) = create_signal(None::<T>);
-    let (error, set_error) = create_signal(None::<UseBroadcastChannelError<C::Error>>);
+    let (is_closed, set_closed) = signal(false);
+    let (channel, set_channel) = signal(None::<web_sys::BroadcastChannel>);
+    let (message, set_message) = signal(None::<T>);
+    let (error, set_error) = signal(None::<UseBroadcastChannelError<C::Error>>);
 
     let codec = C::default();
 
@@ -122,7 +124,7 @@ where
         if let Some(channel) = channel_val {
             let _ = use_event_listener_with_options(
                 channel.clone(),
-                ev::message,
+                leptos::ev::message,
                 move |event| {
                     if let Some(data) = event.data().as_string() {
                         match codec.decode(data) {
@@ -140,14 +142,14 @@ where
 
             let _ = use_event_listener_with_options(
                 channel.clone(),
-                ev::messageerror,
+                messageerror,
                 move |event| {
                     set_error.set(Some(UseBroadcastChannelError::MessageEvent(event)));
                 },
                 UseEventListenerOptions::default().passive(true),
             );
 
-            let _ = use_event_listener(channel, ev::close, move |_| set_closed.set(true));
+            let _ = use_event_listener(channel, leptos::ev::close, move |_| set_closed.set(true));
         }
     }
 

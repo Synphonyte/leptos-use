@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use default_struct_builder::DefaultBuilder;
 use js_sys::Reflect;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -30,7 +30,7 @@ use bincode::serde::{decode_from_slice as from_slice, encode_to_vec as to_vec};
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_webtransport;
 /// #
 /// # #[component]
@@ -61,7 +61,7 @@ pub fn use_webtransport_with_options(
     } = options;
     let url = url.to_string();
 
-    let (ready_state, set_ready_state) = create_signal(ConnectionReadyState::Closed);
+    let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let ready_state: Signal<_> = ready_state.into();
 
     let transport = Rc::new(RefCell::new(None::<web_sys::WebTransport>));
@@ -229,7 +229,7 @@ pub fn use_webtransport_with_options(
         }
     };
 
-    let (datagrams_signal, set_datagrams) = create_signal(None::<Vec<u8>>);
+    let (datagrams_signal, set_datagrams) = signal(None::<Vec<u8>>);
 
     let datagrams = Signal::derive({
         let transport = Rc::clone(&transport);
@@ -657,7 +657,7 @@ impl UseWebTransportReturn {
                 .get_writer()
                 .map_err(|e| WebTransportError::FailedToOpenWriter(e))?;
 
-            let (state, set_state) = create_signal(StreamState::Open);
+            let (state, set_state) = signal(StreamState::Open);
 
             Ok(SendStream {
                 writer,
@@ -693,11 +693,11 @@ fn create_state_and_bytes_signal(
     WriteSignal<StreamState>,
     Signal<Option<Vec<u8>>>,
 ) {
-    let (state, set_state) = create_signal(StreamState::Open);
+    let (state, set_state) = signal(StreamState::Open);
 
     let bytes = Signal::derive({
         let reader_initialized = Rc::new(Cell::new(false));
-        let (message_signal, set_message) = create_signal(None::<Vec<u8>>);
+        let (message_signal, set_message) = signal(None::<Vec<u8>>);
 
         let stream = stream.clone();
 

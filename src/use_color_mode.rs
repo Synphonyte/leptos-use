@@ -5,7 +5,8 @@ use crate::storage::{use_storage_with_options, UseStorageOptions};
 use crate::utils::FromToStringCodec;
 use crate::{sync_signal_with_options, use_cookie, use_preferred_dark, SyncSignalOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -21,7 +22,7 @@ use wasm_bindgen::JsCast;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
@@ -44,7 +45,7 @@ use wasm_bindgen::JsCast;
 /// storage (or your custom storage). You can pass `ColorMode::Auto` to set back to auto mode.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{ColorMode, use_color_mode, UseColorModeReturn};
 /// #
 /// # #[component]
@@ -64,7 +65,7 @@ use wasm_bindgen::JsCast;
 /// ## Options
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_color_mode_with_options, UseColorModeOptions, UseColorModeReturn};
 /// #
 /// # #[component]
@@ -90,7 +91,7 @@ use wasm_bindgen::JsCast;
 /// > Note: To work with SSR you have to add the `axum` or `actix` feature as described in [`use_cookie`].
 ///
 /// ```rust
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_meta::*;
 /// # use leptos_use::{use_color_mode_with_options, UseColorModeOptions, UseColorModeReturn};
 /// #
@@ -323,7 +324,7 @@ fn get_cookie_signal(
     if cookie_enabled {
         use_cookie::<ColorMode, FromToStringCodec>(cookie_name)
     } else {
-        let (value, set_value) = create_signal(None);
+        let (value, set_value) = signal(None);
         (value.into(), set_value)
     }
 }

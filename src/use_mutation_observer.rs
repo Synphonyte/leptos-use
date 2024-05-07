@@ -1,7 +1,7 @@
 use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use wasm_bindgen::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -21,14 +21,14 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Pre;
 /// # use leptos_use::{use_mutation_observer_with_options, UseMutationObserverOptions};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let el = create_node_ref::<Pre>();
-/// let (text, set_text) = create_signal("".to_string());
+/// let (text, set_text) = signal("".to_string());
 ///
 /// use_mutation_observer_with_options(
 ///     el,

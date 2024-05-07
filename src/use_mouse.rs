@@ -5,7 +5,7 @@ use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
-use leptos::*;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -18,7 +18,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// ## Basic Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_mouse, UseMouseReturn};
 /// #
 /// # #[component]
@@ -34,7 +34,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// The `dragover` event is used to track mouse position while dragging.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_mouse_with_options, UseMouseOptions, UseMouseReturn};
 /// #
 /// # #[component]
@@ -53,7 +53,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// It's also possible to provide a custom extractor to get the position from the events.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// use web_sys::MouseEvent;
 /// use leptos_use::{use_mouse_with_options, UseMouseOptions, UseMouseReturn, UseMouseEventExtractor, UseMouseCoordType};
@@ -98,9 +98,9 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
     Ex: UseMouseEventExtractor + Clone + 'static,
 {
-    let (x, set_x) = create_signal(options.initial_value.x);
-    let (y, set_y) = create_signal(options.initial_value.y);
-    let (source_type, set_source_type) = create_signal(UseMouseSourceType::Unset);
+    let (x, set_x) = signal(options.initial_value.x);
+    let (y, set_y) = signal(options.initial_value.y);
+    let (source_type, set_source_type) = signal(UseMouseSourceType::Unset);
 
     let mouse_handler = {
         let coord_type = options.coord_type.clone();

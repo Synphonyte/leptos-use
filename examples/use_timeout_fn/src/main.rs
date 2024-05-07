@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_timeout_fn, UseTimeoutFnReturn};
 
@@ -6,7 +6,7 @@ use leptos_use::{use_timeout_fn, UseTimeoutFnReturn};
 fn Demo() -> impl IntoView {
     const DEFAULT_TEXT: &str = "Please wait for 3 seconds";
 
-    let (text, set_text) = create_signal(DEFAULT_TEXT.to_string());
+    let (text, set_text) = signal(DEFAULT_TEXT.to_string());
     let UseTimeoutFnReturn {
         start, is_pending, ..
     } = use_timeout_fn(

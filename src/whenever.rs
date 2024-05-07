@@ -5,12 +5,12 @@ use crate::{watch_with_options, WatchOptions};
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// let (is_ready, set_ready) = create_signal(false);
+/// let (is_ready, set_ready) = signal(false);
 ///
 /// whenever(move || is_ready.get(), |v, _, _| log!("{}", v));
 /// #
@@ -23,12 +23,12 @@ use crate::{watch_with_options, WatchOptions};
 /// Same as [`watch`], the callback will be called with `callback(input, prev_input, prev_return)`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// # let (is_ready, set_ready) = create_signal(false);
+/// # let (is_ready, set_ready) = signal(false);
 /// whenever(move || is_ready.get(), |value, prev_value, _| {
 ///     log!("before: {prev_value:?}; now: {value}");
 /// });
@@ -42,12 +42,12 @@ use crate::{watch_with_options, WatchOptions};
 /// Same as [`watch`], you can pass a getter function to calculate on each change.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::whenever;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// # let (counter, set_counter) = create_signal(0);
+/// # let (counter, set_counter) = signal(0);
 /// whenever(
 ///     move || counter.get() == 7,
 ///     |_, _, _| log!("counter is 7 now!"),
@@ -62,12 +62,12 @@ use crate::{watch_with_options, WatchOptions};
 /// Options and defaults are same as [`watch_with_options`].
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{WatchOptions, whenever_with_options};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// # let (counter, set_counter) = create_signal(0);
+/// # let (counter, set_counter) = signal(0);
 /// whenever_with_options(
 ///     move || counter.get() == 7,
 ///     |_, _, _| log!("counter is 7 now!"),

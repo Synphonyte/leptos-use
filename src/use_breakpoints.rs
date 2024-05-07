@@ -1,6 +1,7 @@
 use crate::{use_media_query, use_window};
 use leptos::logging::error;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use paste::paste;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -15,7 +16,7 @@ use std::hash::Hash;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_breakpoints, BreakpointsTailwind, breakpoints_tailwind};
 /// #
 /// # #[component]
@@ -49,7 +50,7 @@ use std::hash::Hash;
 ///
 /// ```
 /// # use std::collections::HashMap;
-/// use leptos::*;
+/// use leptos::prelude::*;
 /// # use leptos_use::use_breakpoints;
 /// #
 /// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -86,7 +87,7 @@ use std::hash::Hash;
 /// For every reactive method there is also a non-reactive variant that is prefixed with `is_`
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_breakpoints, BreakpointsTailwind, breakpoints_tailwind};
 /// #
 /// # #[component]

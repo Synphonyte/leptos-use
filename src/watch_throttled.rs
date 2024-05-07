@@ -10,12 +10,12 @@ use default_struct_builder::DefaultBuilder;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::watch_throttled;
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// #     let (source, set_source) = create_signal(0);
+/// #     let (source, set_source) = signal(0);
 /// #
 /// watch_throttled(
 ///     move || source.get(),
@@ -36,12 +36,12 @@ use default_struct_builder::DefaultBuilder;
 /// There's also `watch_throttled_with_options` where you can specify the other watch options (except `filter`).
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_throttled_with_options, WatchThrottledOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// #     let (source, set_source) = create_signal(0);
+/// #     let (source, set_source) = signal(0);
 /// #
 /// watch_throttled_with_options(
 ///     move || source.get(),

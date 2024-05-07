@@ -4,7 +4,7 @@ use crate::{
     use_interval_fn_with_options, use_raf_fn_with_options, UseIntervalFnOptions, UseRafFnOptions,
 };
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 /// Reactive current timestamp.
@@ -16,7 +16,7 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_timestamp;
 /// #
 /// # #[component]
@@ -30,7 +30,7 @@ use std::rc::Rc;
 /// With controls:
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_timestamp_with_controls, UseTimestampReturn};
 /// #
 /// # #[component]
@@ -73,7 +73,7 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
         callback,
     } = options;
 
-    let (ts, set_ts) = create_signal(now() + offset);
+    let (ts, set_ts) = signal(now() + offset);
 
     let update = move || {
         set_ts.set(now() + offset);

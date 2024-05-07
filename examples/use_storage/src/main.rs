@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::storage::use_local_storage;
 use leptos_use::utils::JsonCodec;

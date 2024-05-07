@@ -3,7 +3,7 @@
 async fn main() {
     use axum::{routing::post, Router};
     use leptos::logging::log;
-    use leptos::*;
+    use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use leptos_use_ssr::app::*;
     use leptos_use_ssr::fileserv::file_and_error_handler;

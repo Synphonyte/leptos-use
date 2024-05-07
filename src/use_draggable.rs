@@ -2,7 +2,9 @@ use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
 use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
-use leptos::*;
+use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
@@ -17,7 +19,7 @@ use web_sys::PointerEvent;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
 /// # use leptos_use::core::Position;
@@ -98,7 +100,7 @@ where
     };
 
     let (position, set_position) = initial_value.into_signal();
-    let (start_position, set_start_position) = create_signal(None::<Position>);
+    let (start_position, set_start_position) = signal(None::<Position>);
 
     let filter_event = move |event: &PointerEvent| {
         let ty = event.pointer_type();

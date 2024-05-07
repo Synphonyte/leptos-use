@@ -4,7 +4,7 @@ use cfg_if::cfg_if;
 use std::ops::Deref;
 
 #[cfg(not(feature = "ssr"))]
-use leptos::*;
+use leptos::prelude::*;
 
 /// SSR safe `window()`.
 /// This returns just a new-type wrapper around `Option<Window>`.
@@ -16,7 +16,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_window;
 /// #
 /// # #[component]

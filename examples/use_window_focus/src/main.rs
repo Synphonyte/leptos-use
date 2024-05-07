@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_window_focus;
 
@@ -6,7 +6,7 @@ use leptos_use::use_window_focus;
 fn Demo() -> impl IntoView {
     let start_message = "💡 Click somewhere outside of the document to unfocus.";
 
-    let (message, set_message) = create_signal(start_message);
+    let (message, set_message) = signal(start_message);
 
     let focused = use_window_focus();
 

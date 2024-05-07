@@ -2,7 +2,7 @@ use crate::core::{Direction, Directions, ElementMaybeSignal};
 use crate::UseEventListenerOptions;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -29,7 +29,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::resize;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
@@ -54,7 +54,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// These offsets are thresholds in pixels when a side is considered to have arrived. This is reflected in the return field `arrived_state`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos::ev::resize;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollOffset};
@@ -92,7 +92,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// Set the `x` and `y` values to make the element scroll to that position.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos::ev::resize;
 /// # use leptos_use::{use_scroll, UseScrollReturn};
@@ -120,7 +120,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// [Element.scrollTo](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollTo) for more information.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::resize;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
@@ -144,7 +144,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// or as a `Signal`:
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::resize;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_scroll_with_options, UseScrollReturn, UseScrollOptions, ScrollBehavior};
@@ -153,7 +153,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// # fn Demo() -> impl IntoView {
 /// # let element = create_node_ref::<Div>();
 /// #
-/// let (smooth, set_smooth) = create_signal(false);
+/// let (smooth, set_smooth) = signal(false);
 ///
 /// let behavior = Signal::derive(move || {
 ///     if smooth.get() { ScrollBehavior::Smooth } else { ScrollBehavior::Auto }
@@ -196,10 +196,10 @@ where
     El: Into<ElementMaybeSignal<T, web_sys::Element>>,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    let (internal_x, set_internal_x) = create_signal(0.0);
-    let (internal_y, set_internal_y) = create_signal(0.0);
+    let (internal_x, set_internal_x) = signal(0.0);
+    let (internal_y, set_internal_y) = signal(0.0);
 
-    let (is_scrolling, set_is_scrolling) = create_signal(false);
+    let (is_scrolling, set_is_scrolling) = signal(false);
 
     let arrived_state = create_rw_signal(Directions {
         left: true,

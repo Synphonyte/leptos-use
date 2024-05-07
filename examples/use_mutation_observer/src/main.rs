@@ -1,5 +1,5 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_mutation_observer_with_options, UseMutationObserverOptions};
 use std::time::Duration;
@@ -7,9 +7,9 @@ use std::time::Duration;
 #[component]
 fn Demo() -> impl IntoView {
     let el = create_node_ref::<Div>();
-    let (messages, set_messages) = create_signal(vec![]);
-    let (class_name, set_class_name) = create_signal(String::new());
-    let (style, set_style) = create_signal(String::new());
+    let (messages, set_messages) = signal(vec![]);
+    let (class_name, set_class_name) = signal(String::new());
+    let (style, set_style) = signal(String::new());
 
     use_mutation_observer_with_options(
         el,

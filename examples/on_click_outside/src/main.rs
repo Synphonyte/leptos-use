@@ -1,11 +1,11 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::on_click_outside;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (show_modal, set_show_modal) = create_signal(false);
+    let (show_modal, set_show_modal) = signal(false);
     let modal_ref = create_node_ref::<Div>();
 
     let _ = on_click_outside(modal_ref, move |_| set_show_modal.set(false));

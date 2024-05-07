@@ -15,7 +15,7 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::resize;
 /// # use leptos_use::use_debounce_fn;
 /// #
@@ -39,7 +39,7 @@ use std::rc::Rc;
 /// [lodash debounce](https://lodash.com/docs/#debounce).
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::resize;
 /// # use leptos_use::use_debounce_fn_with_options;
 /// # use leptos_use::utils::DebounceOptions;

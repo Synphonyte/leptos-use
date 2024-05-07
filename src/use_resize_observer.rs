@@ -1,7 +1,7 @@
 use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_supported;
@@ -28,7 +28,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let el = create_node_ref::<Div>();
-/// let (text, set_text) = create_signal("".to_string());
+/// let (text, set_text) = signal("".to_string());
 ///
 /// use_resize_observer(
 ///     el,

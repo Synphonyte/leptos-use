@@ -1,7 +1,8 @@
 use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [bounding box](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) of an HTML element
 ///
@@ -12,7 +13,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 /// #
@@ -46,14 +47,14 @@ where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
     T: Into<web_sys::Element> + Clone + 'static,
 {
-    let (height, set_height) = create_signal(0.0);
-    let (width, set_width) = create_signal(0.0);
-    let (left, set_left) = create_signal(0.0);
-    let (right, set_right) = create_signal(0.0);
-    let (top, set_top) = create_signal(0.0);
-    let (bottom, set_bottom) = create_signal(0.0);
-    let (x, set_x) = create_signal(0.0);
-    let (y, set_y) = create_signal(0.0);
+    let (height, set_height) = signal(0.0);
+    let (width, set_width) = signal(0.0);
+    let (left, set_left) = signal(0.0);
+    let (right, set_right) = signal(0.0);
+    let (top, set_top) = signal(0.0);
+    let (bottom, set_bottom) = signal(0.0);
+    let (x, set_x) = signal(0.0);
+    let (y, set_y) = signal(0.0);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let _ = target;

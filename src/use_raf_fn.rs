@@ -1,7 +1,7 @@
 use crate::utils::Pausable;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -15,13 +15,13 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_raf_fn;
 /// use leptos_use::utils::Pausable;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (count, set_count) = create_signal(0);
+/// let (count, set_count) = signal(0);
 ///
 /// let Pausable { pause, resume, is_active } = use_raf_fn(move |_| {
 ///     set_count.update(|count| *count += 1);
@@ -52,7 +52,7 @@ pub fn use_raf_fn_with_options(
 
     let raf_handle = Rc::new(Cell::new(None::<i32>));
 
-    let (is_active, set_active) = create_signal(false);
+    let (is_active, set_active) = signal(false);
 
     let loop_ref = Rc::new(RefCell::new(Box::new(|_: f64| {}) as Box<dyn Fn(f64)>));
 

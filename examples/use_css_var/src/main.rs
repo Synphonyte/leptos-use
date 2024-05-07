@@ -1,5 +1,5 @@
 use leptos::html::Div;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_css_var_with_options, UseCssVarOptions};
 
@@ -17,7 +17,7 @@ fn Demo() -> impl IntoView {
     };
 
     let elv = create_node_ref::<Div>();
-    let (key, set_key) = create_signal("--color".to_string());
+    let (key, set_key) = signal("--color".to_string());
     let (color_val, _) = use_css_var_with_options(key, UseCssVarOptions::default().target(elv));
     let change_var = move |_| {
         if key.get() == "--color" {

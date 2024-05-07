@@ -1,13 +1,13 @@
 use leptos::html::Input;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{watch_pausable, WatchPausableReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
     let input = create_node_ref::<Input>();
-    let (log, set_log) = create_signal("".to_string());
-    let (source, set_source) = create_signal("".to_string());
+    let (log, set_log) = signal("".to_string());
+    let (source, set_source) = signal("".to_string());
 
     let WatchPausableReturn {
         pause,

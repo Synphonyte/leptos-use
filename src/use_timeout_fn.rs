@@ -1,5 +1,5 @@
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -14,7 +14,7 @@ use std::time::Duration;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_timeout_fn, UseTimeoutFnReturn};
 /// #
 /// # #[component]
@@ -42,7 +42,7 @@ where
 {
     let delay = delay.into();
 
-    let (is_pending, set_pending) = create_signal(false);
+    let (is_pending, set_pending) = signal(false);
 
     let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
 

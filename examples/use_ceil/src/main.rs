@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::math::use_ceil;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (value, set_value) = create_signal(4.15);
+    let (value, set_value) = signal(4.15);
 
     let result: Signal<f64> = use_ceil(value);
 

@@ -1,5 +1,5 @@
 use leptos::html::html;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{
     use_color_mode_with_options, use_cycle_list_with_options, ColorMode, UseColorModeOptions,

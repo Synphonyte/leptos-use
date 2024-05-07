@@ -66,7 +66,7 @@ a new-type-wrapped `Option<web_sys::Window>` or `Option<web_sys::Document>` resp
 used safely on the server. The following code works on both the client and the server:
 
 ```rust
-use leptos::*;
+use leptos::prelude::*;
 use leptos::ev::keyup;
 use leptos_use::{use_event_listener, use_window};
 

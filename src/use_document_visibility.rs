@@ -3,7 +3,8 @@
 use crate::use_event_listener;
 use cfg_if::cfg_if;
 use leptos::ev::visibilitychange;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactively track `document.visibilityState`
 ///
@@ -14,7 +15,7 @@ use leptos::*;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_document_visibility;
 /// #
 /// # #[component]
@@ -35,7 +36,7 @@ pub fn use_document_visibility() -> Signal<web_sys::VisibilityState> {
         let inital_visibility = document().visibility_state();
     }}
 
-    let (visibility, set_visibility) = create_signal(inital_visibility);
+    let (visibility, set_visibility) = signal(inital_visibility);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         let _ = use_event_listener(document(), visibilitychange, move |_| {

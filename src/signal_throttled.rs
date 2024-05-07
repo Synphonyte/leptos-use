@@ -1,6 +1,7 @@
 use crate::utils::signal_filtered;
 use crate::{use_throttle_fn_with_options, ThrottleOptions};
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use paste::paste;
 
 signal_filtered!(
@@ -13,12 +14,12 @@ signal_filtered!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::signal_throttled;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (input, set_input) = create_signal("");
+    /// let (input, set_input) = signal("");
     /// let throttled: Signal<&'static str> = signal_throttled(input, 1000.0);
     /// #
     /// # view! { }
@@ -30,12 +31,12 @@ signal_filtered!(
     /// The usual throttle options `leading` and `trailing` are available.
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::{signal_throttled_with_options, ThrottleOptions};
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (input, set_input) = create_signal("");
+    /// let (input, set_input) = signal("");
     /// let throttled: Signal<&'static str> = signal_throttled_with_options(
     ///     input,
     ///     1000.0,

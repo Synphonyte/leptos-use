@@ -1,11 +1,12 @@
 use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::marker::PhantomData;
 
 #[cfg(not(feature = "ssr"))]
 use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptions};
+use leptos::prelude::wrappers::read::Signal;
 
 /// Tracks the visibility of an element within the viewport.
 ///
@@ -16,7 +17,7 @@ use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptio
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Div;
 /// # use leptos_use::use_element_visibility;
 /// #
@@ -64,7 +65,7 @@ where
     ContainerEl: Into<ElementMaybeSignal<ContainerT, web_sys::Element>>,
     ContainerT: Into<web_sys::Element> + Clone + 'static,
 {
-    let (is_visible, set_visible) = create_signal(false);
+    let (is_visible, set_visible) = signal(false);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         use_intersection_observer_with_options(

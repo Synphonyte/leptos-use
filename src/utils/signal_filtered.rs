@@ -43,7 +43,7 @@ macro_rules! signal_filtered {
                     return value;
                 }
 
-                let (filtered, set_filtered) = create_signal(value.get_untracked());
+                let (filtered, set_filtered) = signal(value.get_untracked());
 
                 let update = [<use_ $filter_name _fn_with_options>](
                     move || set_filtered.set(value.get_untracked()),

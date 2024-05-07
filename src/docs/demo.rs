@@ -1,4 +1,4 @@
-use leptos::document;
+use leptos::prelude::*;
 use wasm_bindgen::JsCast;
 
 pub fn demo_or_body() -> web_sys::HtmlElement {

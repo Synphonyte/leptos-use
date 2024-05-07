@@ -1,4 +1,4 @@
-use leptos::window;
+use leptos::prelude::*;
 use wasm_bindgen::JsValue;
 
 /// Local or session storage or a custom store that is a `web_sys::Storage`.

@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{use_clipboard, use_permission, UseClipboardReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (input, set_input) = create_signal("".to_owned());
+    let (input, set_input) = signal("".to_owned());
 
     let UseClipboardReturn {
         is_supported,

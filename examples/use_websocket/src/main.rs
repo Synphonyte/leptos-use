@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{
     core::ConnectionReadyState, use_websocket, use_websocket_with_options, UseWebSocketOptions,
@@ -9,7 +9,7 @@ use web_sys::{CloseEvent, Event};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (history, set_history) = create_signal(vec![]);
+    let (history, set_history) = signal(vec![]);
 
     fn update_history(&history: &WriteSignal<Vec<String>>, message: String) {
         let _ = &history.update(|history: &mut Vec<_>| history.push(message));
@@ -68,7 +68,7 @@ fn Demo() -> impl IntoView {
     // use_websocket_with_options
     // ----------------------------
 
-    let (history2, set_history2) = create_signal(vec![]);
+    let (history2, set_history2) = signal(vec![]);
 
     let on_open_callback = move |e: Event| {
         set_history2.update(|history: &mut Vec<_>| {

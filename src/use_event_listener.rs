@@ -5,7 +5,7 @@ use leptos::ev::EventDescriptor;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{watch_with_options, WatchOptions};
-    use leptos::*;
+    use leptos::prelude::*;
     use std::cell::RefCell;
     use std::rc::Rc;
     use wasm_bindgen::closure::Closure;
@@ -19,7 +19,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::visibilitychange;
 /// # use leptos::logging::log;
 /// # use leptos_use::{use_document, use_event_listener};
@@ -37,7 +37,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// the new one when you change the target.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::click;
 /// # use leptos::logging::log;
 /// # use leptos_use::use_event_listener;
@@ -50,7 +50,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///     log!("click from element {:?}", event_target::<web_sys::HtmlDivElement>(&evt));
 /// });
 ///
-/// let (cond, set_cond) = create_signal(true);
+/// let (cond, set_cond) = signal(true);
 ///
 /// view! {
 ///     <Show
@@ -66,7 +66,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// You can also call the returned to unregister the listener.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::ev::keydown;
 /// # use leptos::logging::log;
 /// # use web_sys::KeyboardEvent;

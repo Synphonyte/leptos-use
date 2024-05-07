@@ -1,6 +1,7 @@
 use crate::utils::signal_filtered;
 use crate::{use_debounce_fn_with_options, DebounceOptions};
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use paste::paste;
 
 signal_filtered!(
@@ -13,12 +14,12 @@ signal_filtered!(
     /// ## Usage
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::signal_debounced;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (input, set_input) = create_signal("");
+    /// let (input, set_input) = signal("");
     /// let debounced: Signal<&'static str> = signal_debounced(input, 1000.0);
     /// #
     /// # view! { }
@@ -30,12 +31,12 @@ signal_filtered!(
     /// The usual debounce option `max_wait` is available.
     ///
     /// ```
-    /// # use leptos::*;
+    /// # use leptos::prelude::*;
     /// # use leptos_use::{signal_debounced_with_options, DebounceOptions};
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
-    /// let (input, set_input) = create_signal("");
+    /// let (input, set_input) = signal("");
     /// let debounced: Signal<&'static str> = signal_debounced_with_options(
     ///     input,
     ///     1000.0,

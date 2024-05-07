@@ -1,7 +1,7 @@
 use crate::filter_builder_methods;
 use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -16,12 +16,12 @@ use std::rc::Rc;
 /// the first change is detected of any signal that is accessed in `deps`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// let (num, set_num) = create_signal(0);
+/// let (num, set_num) = signal(0);
 ///
 /// watch_with_options(
 ///     move || num.get(),
@@ -41,12 +41,12 @@ use std::rc::Rc;
 /// The callback can be throttled or debounced. Please see [`watch_throttled`] and [`watch_debounced`] for details.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// # let (num, set_num) = create_signal(0);
+/// # let (num, set_num) = signal(0);
 /// #
 /// watch_with_options(
 ///     move || num.get(),
@@ -60,12 +60,12 @@ use std::rc::Rc;
 /// ```
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::logging::log;
 /// # use leptos_use::{watch_with_options, WatchOptions};
 /// #
 /// # pub fn Demo() -> impl IntoView {
-/// # let (num, set_num) = create_signal(0);
+/// # let (num, set_num) = signal(0);
 /// #
 /// watch_with_options(
 ///     move || num.get(),

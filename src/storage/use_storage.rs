@@ -3,7 +3,8 @@ use crate::{
     utils::{FilterOptions, StringCodec},
 };
 use cfg_if::cfg_if;
-use leptos::*;
+use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 use std::rc::Rc;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -34,7 +35,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// ## Example
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage};
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::utils::{FromToStringCodec, JsonCodec, ProstCodec};

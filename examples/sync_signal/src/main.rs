@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::sync_signal;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (a, set_a) = create_signal(String::new());
-    let (b, set_b) = create_signal(String::new());
+    let (a, set_a) = signal(String::new());
+    let (b, set_b) = signal(String::new());
 
     let _ = sync_signal((a, set_a), (b, set_b));
 
