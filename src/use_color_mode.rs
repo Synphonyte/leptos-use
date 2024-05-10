@@ -120,7 +120,6 @@ use wasm_bindgen::JsCast;
 ///
 /// ## See also
 ///
-/// * [`use_dark`]
 /// * [`use_preferred_dark`]
 /// * [`use_storage`]
 /// * [`use_cookie`]
