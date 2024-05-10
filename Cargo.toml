@@ -146,6 +146,7 @@ serde = ["dep:serde", "serde_json"]
 spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
 msgpack = ["dep:rmp-serde", "dep:serde"]
+wasm_ssr = []
 
 [package.metadata.docs.rs]
 features = ["math", "docs", "ssr", "prost", "serde"]

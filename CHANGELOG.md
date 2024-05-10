@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.10] - 2024-05-10
+
+### Change 🔥
+
+- Added compile-time warning when you use `ssr` feature with `wasm32`. You can enable `wasm_ssr` to remove the warning.
+
 ## [0.10.9] - 2024-04-27
 
 ### Fixes 🍕
