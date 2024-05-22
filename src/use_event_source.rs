@@ -362,7 +362,7 @@ impl<T, C: StringCodec<T> + Default> Default for UseEventSourceOptions<T, C> {
 /// Return type of [`use_event_source`].
 pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn>
 where
-    Err: 'static,
+    Err: Clone + 'static,
     T: Clone + 'static,
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
@@ -390,8 +390,8 @@ where
     pub event_source: Signal<Option<web_sys::EventSource>>,
 }
 
-#[derive(Error, Debug)]
-pub enum UseEventSourceError<Err> {
+#[derive(Clone, Error, Debug)]
+pub enum UseEventSourceError<Err: Clone> {
     #[error("Error event: {0:?}")]
     Event(web_sys::Event),
 

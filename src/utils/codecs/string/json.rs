@@ -120,14 +120,30 @@ use super::StringCodec;
 pub struct JsonCodec;
 
 impl<T: serde::Serialize + serde::de::DeserializeOwned> StringCodec<T> for JsonCodec {
-    type Error = serde_json::Error;
+    type Error = JsonCodecError;
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {
-        serde_json::to_string(val)
+        serde_json::to_string(val)?
     }
 
     fn decode(&self, str: String) -> Result<T, Self::Error> {
-        serde_json::from_str(&str)
+        serde_json::from_str(&str)?
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct JsonCodecError {
+    line: usize,
+    column: usize,
+}
+
+impl From<serde_json::Error> for JsonCodecError {
+    fn from(value: serde_json::Error) -> Self {
+        Self {
+            line: value.line(),
+            column: value.column(),
+            // blah blah blah
+        }
     }
 }
 

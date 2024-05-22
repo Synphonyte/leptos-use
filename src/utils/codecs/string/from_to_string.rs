@@ -20,16 +20,23 @@ use std::str::FromStr;
 pub struct FromToStringCodec;
 
 impl<T: FromStr + ToString> StringCodec<T> for FromToStringCodec {
-    type Error = T::Err;
+    type Error = FromToStringCodecError;
 
     fn encode(&self, val: &T) -> Result<String, Self::Error> {
         Ok(val.to_string())
     }
 
     fn decode(&self, str: String) -> Result<T, Self::Error> {
-        T::from_str(&str)
+        T::from_str(&str).or(Err(FromToStringCodecError))
     }
 }
+
+/// We can't tell much about the error because FromStr does not
+/// put any trait bounds on its associated Error type. To use
+/// this error in a Signal, it must implement clone. This is a
+/// fundamental incompatiblity.
+#[derive(Debug, Copy, Clone, Default, PartialEq)]
+pub struct FromToStringCodecError;
 
 #[cfg(test)]
 mod tests {

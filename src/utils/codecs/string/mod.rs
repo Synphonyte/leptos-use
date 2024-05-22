@@ -28,7 +28,7 @@ pub use prost::*;
 /// - The [`JsonCodec`](super::JsonCodec) stores data as JSON. We can then rely on serde or by providing our own manual version handling. See the codec for more details.
 pub trait StringCodec<T>: Clone + 'static {
     /// The error type returned when encoding or decoding fails.
-    type Error;
+    type Error: Clone;
     /// Encodes a value to a string.
     fn encode(&self, val: &T) -> Result<String, Self::Error>;
     /// Decodes a string to a value. Should be able to decode any string encoded by [`encode`].
