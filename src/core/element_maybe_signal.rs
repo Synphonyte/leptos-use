@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::ops::Deref;
 
 /// Used as an argument type to make it easily possible to pass either
-/// * a `web_sys` element that implements `E` (for example `EventTarget` or `Element`),
+/// * a `web_sys` element that implements `E` (for example `EventTarget`, `Element` or `HtmlElement`),
 /// * an `Option<T>` where `T` is the web_sys element,
 /// * a `Signal<T>` where `T` is the web_sys element,
 /// * a `Signal<Option<T>>` where `T` is the web_sys element,
@@ -287,6 +287,7 @@ macro_rules! impl_from_node_ref {
 
 impl_from_node_ref!(web_sys::EventTarget);
 impl_from_node_ref!(web_sys::Element);
+impl_from_node_ref!(web_sys::HtmlElement);
 
 // From leptos::html::HTMLElement ///////////////////////////////////////////////
 
@@ -306,6 +307,7 @@ macro_rules! impl_from_html_element {
 
 impl_from_html_element!(web_sys::EventTarget);
 impl_from_html_element!(web_sys::Element);
+impl_from_html_element!(web_sys::HtmlElement);
 
 // From Signal<leptos::html::HTMLElement> /////////////////////////////////////////
 
@@ -366,3 +368,11 @@ impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::Ele
 impl_from_signal_html_element!(ReadSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
 impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
 impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+
+impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
+impl_from_signal_html_element!(
+    ReadSignal<Option<HtmlElement<HtmlEl>>>,
+    web_sys::HtmlElement
+);
+impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
+impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
