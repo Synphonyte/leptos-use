@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UseStorageOptions` now has `delay_during_hydration` which has to be used when you conditionally show parts of
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
+- `cookie::SameSite` is no re-exported
 
 ### Breaking Changes 🛠
 
