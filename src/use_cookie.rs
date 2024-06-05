@@ -3,7 +3,8 @@
 use crate::core::now;
 use crate::utils::StringCodec;
 use cookie::time::{Duration, OffsetDateTime};
-use cookie::{Cookie, CookieJar, SameSite};
+pub use cookie::SameSite;
+use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::rc::Rc;
