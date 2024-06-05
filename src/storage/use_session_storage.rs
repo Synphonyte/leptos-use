@@ -17,21 +17,21 @@ where
     T: Clone + Default + PartialEq,
     C: StringCodec<T> + Default,
 {
-    use_storage_with_options(
+    use_storage_with_options::<T, C>(
         StorageType::Session,
         key,
-        UseStorageOptions::<T, C>::default(),
+        UseStorageOptions::<T, C::Error>::default(),
     )
 }
 
 /// Accepts [`UseStorageOptions`]. See [`use_session_storage`] for details.
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
-    options: UseStorageOptions<T, C>,
+    options: UseStorageOptions<T, C::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
     C: StringCodec<T> + Default,
 {
-    use_storage_with_options(StorageType::Session, key, options)
+    use_storage_with_options::<T, C>(StorageType::Session, key, options)
 }

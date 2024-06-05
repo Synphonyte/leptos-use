@@ -3,7 +3,7 @@ use leptos::ev::{keypress, KeyboardEvent};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use leptos_use::storage::use_local_storage;
+use leptos_use::storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
 use leptos_use::utils::FromToStringCodec;
 use leptos_use::{
     use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
@@ -40,7 +40,10 @@ pub fn App() -> impl IntoView {
 #[component]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
-    let (count, set_count, _) = use_local_storage::<i32, FromToStringCodec>("count-state");
+    let (count, set_count, _) = use_local_storage_with_options::<i32, FromToStringCodec>(
+        "count-state",
+        UseStorageOptions::default().delay_during_hydration(true),
+    );
     let on_click = move |_| set_count.update(|count| *count += 1);
 
     let nf = use_intl_number_format(
@@ -96,6 +99,10 @@ fn HomePage() -> impl IntoView {
         <p>Dark preferred: {is_dark_preferred}</p>
         <LocalStorageTest/>
         <p>Test cookie: {move || test_cookie().unwrap_or("<Expired>".to_string())}</p>
+
+        <Show when={move || count() > 0 }>
+            <div>Greater than 0 </div>
+        </Show>
     }
 }
 
