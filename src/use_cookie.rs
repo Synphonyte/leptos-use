@@ -484,13 +484,13 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                 #[cfg(feature = "ssr")]
                 {
                     #[cfg(all(feature = "actix", feature = "axum"))]
-                    compile_error!("You cannot enable only one of features \"actix\" and \"axum\" at the same time");
+                    compile_error!("You can only enable one of features \"actix\" and \"axum\" at the same time");
 
                     #[cfg(all(feature = "actix", feature = "spin"))]
-                    compile_error!("You cannot enable only one of features \"actix\" and \"spin\" at the same time");
+                    compile_error!("You can only enable one of features \"actix\" and \"spin\" at the same time");
 
                     #[cfg(all(feature = "axum", feature = "spin"))]
-                    compile_error!("You cannot enable only one of features \"axum\" and \"spin\" at the same time");
+                    compile_error!("You can only enable one of features \"axum\" and \"spin\" at the same time");
 
                     #[cfg(feature = "actix")]
                     const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
