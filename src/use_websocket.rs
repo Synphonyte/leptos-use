@@ -233,6 +233,7 @@ pub fn use_websocket_with_options(
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = store_value(None);
 
     let reconnect_times_ref: StoredValue<u64> = store_value(0);
+    let manually_closed_ref: StoredValue<bool> = store_value(false);
 
     let unmounted = Rc::new(Cell::new(false));
 
@@ -242,11 +243,11 @@ pub fn use_websocket_with_options(
     {
         let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
         reconnect_ref.set_value({
-            let ws = ws_ref.get_value();
             Some(Rc::new(move || {
-                if reconnect_times_ref.get_value() < reconnect_limit
-                    && ws
-                        .clone()
+                if !manually_closed_ref.get_value()
+                    && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
+                    && ws_ref
+                        .get_value()
                         .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                 {
                     reconnect_timer_ref.set_value(
@@ -266,13 +267,12 @@ pub fn use_websocket_with_options(
         });
 
         connect_ref.set_value({
-            let ws = ws_ref.get_value();
             let unmounted = Rc::clone(&unmounted);
 
             Some(Rc::new(move || {
                 reconnect_timer_ref.set_value(None);
 
-                if let Some(web_socket) = &ws {
+                if let Some(web_socket) = ws_ref.get_value() {
                     let _ = web_socket.close();
                 }
 
@@ -470,7 +470,7 @@ pub fn use_websocket_with_options(
         reconnect_timer_ref.set_value(None);
 
         move || {
-            reconnect_times_ref.set_value(reconnect_limit);
+            manually_closed_ref.set_value(true);
             if let Some(web_socket) = ws_ref.get_value() {
                 let _ = web_socket.close();
             }
@@ -501,6 +501,26 @@ pub fn use_websocket_with_options(
         send_bytes,
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ReconnectLimit {
+    Infinite,
+    Limited(u64),
+}
+
+impl Default for ReconnectLimit {
+    fn default() -> Self {
+        ReconnectLimit::Limited(3)
+    }
+}
+
+impl ReconnectLimit {
+    pub fn is_exceeded_by(self, times: u64) -> bool {
+        match self {
+            ReconnectLimit::Infinite => false,
+            ReconnectLimit::Limited(limit) => times >= limit,
+        }
+    }
+}
 
 /// Options for [`use_websocket_with_options`].
 #[derive(DefaultBuilder)]
@@ -515,8 +535,9 @@ pub struct UseWebSocketOptions {
     on_error: Rc<dyn Fn(Event)>,
     /// `WebSocket` close callback.
     on_close: Rc<dyn Fn(CloseEvent)>,
-    /// Retry times. Defaults to 3.
-    reconnect_limit: u64,
+    /// Retry times. Defaults to `ReconnectLimit::Limited(3)`. Use `ReconnectLimit::Infinite` for
+    /// infinite retries.
+    reconnect_limit: ReconnectLimit,
     /// Retry interval in ms. Defaults to 3000.
     reconnect_interval: u64,
     /// If `true` the `WebSocket` connection will immediately be opened when calling this function.
@@ -535,7 +556,7 @@ impl Default for UseWebSocketOptions {
             on_message_bytes: Rc::new(|_| {}),
             on_error: Rc::new(|_| {}),
             on_close: Rc::new(|_| {}),
-            reconnect_limit: 3,
+            reconnect_limit: ReconnectLimit::default(),
             reconnect_interval: 3000,
             immediate: true,
             protocols: Default::default(),
