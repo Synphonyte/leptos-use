@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is no re-exported
+- Fixed typo in compiler error messages in `use_cookie`.
 
 ### Breaking Changes 🛠
 
@@ -116,8 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `leptos` version is now 0.6
 - The trait `Codec` has been renamed to `StringCodec` and has been moved to `util::StringCodec`.
-    - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
-    - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
+  - The struct `StringCodec` has been renamed to `FromToStringCodec` and has been moved to `util::FromToStringCodec`.
+  - The structs `JsonCodec` and `ProstCodec` have been moved to `util` as well.
 - The function `use_storage` now requires type parameters for the stored type and the codec like all the other
   `...storage...` functions.
 
@@ -132,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot
   easier to use in directives.
 - There's now a chapter in the book especially for `Element(s)MaybeSignal`.
-- Throttled or debounced callbacks (in watch_* or *_fn) no longer are called after the containing scope was cleaned up.
+- Throttled or debounced callbacks (in watch\__ or _\_fn) no longer are called after the containing scope was cleaned up.
 - The document returned from `use_document` now supports the methods `query_selector` and `query_selector_all`.
 
 ## [0.9.0] - 2023-12-06
@@ -145,15 +146,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - (@feral-dot-io) The use `use_<type>_storage` functions have been rewritten to use `Codec`s instead of always
   requiring `serde`.
-    - This also removes the feature `storage`
-    - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
-    - If you want to use `JsonCodec` you have to enable the feature `serde`
-    - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
+  - This also removes the feature `storage`
+  - By default the `StringCodec` is used which relies on types implementing `FromString + ToString`
+  - If you want to use `JsonCodec` you have to enable the feature `serde`
+  - If you want to use `ProstCodec` (new!) you have to enable the feature `prost`.
 - (@feral-dot-io) The Rust flag `--cfg=web_sys_unstable_apis` is not needed anymore since relevant `web_sys` APIs are
   now stable.
   This affects in particular
-    - `use_element_size`
-    - `use_resize_observer`
+  - `use_element_size`
+  - `use_resize_observer`
 
 ### Fixes 🍕
 
@@ -162,23 +163,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_scroll` now uses `try_get_untracked` in the debounced callback to avoid panics if the context has been destroyed
   while the callback was waiting to be called.
 - `use_idle` works properly now (no more idles too early).
-- `use_web_notification`  doesn't panic on the server anymore.
+- `use_web_notification` doesn't panic on the server anymore.
 
 ## [0.8.2] - 2023-11-09
 
 ### Fixes 🍕
 
 - Fixed SSR for
-    - use_timestamp
-    - use_raf_fn
-    - use_idle
+  - use_timestamp
+  - use_raf_fn
+  - use_idle
 
 ## [0.8.1] - 2023-10-28
 
 ### Fixes 🍕
 
 - Using strings for `ElementMaybeSignal` and `ElementsMaybeSignal` is now SSR safe.
-    - This fixes specifically `use_color_mode` to work on the server.
+  - This fixes specifically `use_color_mode` to work on the server.
 
 ## [0.8.0] - 2023-10-24
 
@@ -233,17 +234,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_mutation_observer_with_options` now takes a `UseMutationObserverOptions` instead of
   a `web_sys::MutationObserverInit`.
 - `use_websocket`:
-    - takes now a `&str` instead of a `String` as its `url` parameter.
-    - same for the returned `send` method.
-    - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
-    - The returned signals  `ready_state`, `message`, `message_bytes` have now the type
-      `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
-    - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
-    - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
-      To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
-    - Added documentation how pass it ergonomically as context.
+  - takes now a `&str` instead of a `String` as its `url` parameter.
+  - same for the returned `send` method.
+  - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
+  - The returned signals `ready_state`, `message`, `message_bytes` have now the type
+    `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
+  - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
+  - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.
+    To port please note that `immediate` is the inverse of `manual` (`immediate` = `!manual`).
+  - Added documentation how pass it ergonomically as context.
 - `use_color_mode`:
-    - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
+  - The optional `on_changed` handler parameters have changed slightly. Please refer to the docs for more details.
 - Throttled or debounced functions cannot be `FnOnce` anymore.
 - All traits `ClonableFn...` have been removed.
 
@@ -254,16 +255,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Callback in `use_raf_fn` doesn't require to be cloneable anymore
 - All (!) functions can now be safely called on the server. Specifically this includes the following that before
   panicked on the server:
-    - `use_scroll`
-    - `use_event_listener`
-    - `use_element_hover`
-    - `on_click_outside`
-    - `use_drop_zone`
-    - `use_element_size`
-    - `use_element_visibility`
-    - `use_resize_observer`
-    - `use_intersection_observer`
-    - `use_mutation_observer`
+  - `use_scroll`
+  - `use_event_listener`
+  - `use_element_hover`
+  - `on_click_outside`
+  - `use_drop_zone`
+  - `use_element_size`
+  - `use_element_visibility`
+  - `use_resize_observer`
+  - `use_intersection_observer`
+  - `use_mutation_observer`
 
 ### Fixes 🍕
 
@@ -303,18 +304,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The following functions now accept a `MaybeRwSignal` as their initial/default value which means
   you can use a synchronized `RwSignal` in those places.
-    - `use_color_mode`
-    - `use_cycle_list`
-    - `use_favicon`
-    - `use_storage`
-    - `use_local_storage`
-    - `use_session_storage`
+  - `use_color_mode`
+  - `use_cycle_list`
+  - `use_favicon`
+  - `use_storage`
+  - `use_local_storage`
+  - `use_session_storage`
 - Instead of returning `ReadSignal`, the following functions now return `Signal`.
-    - `use_color_mode`
-    - `use_favicon`
-    - `use_storage`
-    - `use_local_storage`
-    - `use_session_storage`
+  - `use_color_mode`
+  - `use_favicon`
+  - `use_storage`
+  - `use_local_storage`
+  - `use_session_storage`
 
 ### Fixes 🍕
 
@@ -387,11 +388,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - You can now specify a `&str` or `Signal<String>` with CSS selectors wherever a node ref is accepted
 - Callbacks of the following functions no longer require `Clone`
-    - `use_resize_observer`
-    - `use_intersection_observer`
+  - `use_resize_observer`
+  - `use_intersection_observer`
 - These functions now also accept multiple target elements in addition to a single one:
-    - `use_resize_observer`
-    - `use_intersection_observer`
+  - `use_resize_observer`
+  - `use_intersection_observer`
 
 ### New Functions 🚀
 
