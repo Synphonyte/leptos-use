@@ -1,9 +1,11 @@
-use super::StringCodec;
+use crate::utils::{Decoder, Encoder};
 use std::str::FromStr;
 
-/// A codec for strings that relies on [`FromStr`] and [`ToString`] to parse.
+/// A string codec that relies on [`FromStr`] and [`ToString`]. It can encode anything that
+/// implements [`ToString`] and decode anything that implements [`FromStr`].
 ///
-/// This makes simple key / value easy to use for primitive types. It is also useful for encoding simple data structures without depending on serde.
+/// This makes simple key / value easy to use for primitive types. It is also useful for encoding
+/// simply data structures without depending on third party crates like serde and serde_json.
 ///
 /// ## Example
 /// ```
@@ -16,18 +18,23 @@ use std::str::FromStr;
 /// #    view! { }
 /// # }
 /// ```
-#[derive(Copy, Clone, Default, PartialEq)]
 pub struct FromToStringCodec;
 
-impl<T: FromStr + ToString> StringCodec<T> for FromToStringCodec {
-    type Error = T::Err;
+impl<T: ToString> Encoder<T> for FromToStringCodec {
+    type Error = ();
+    type Encoded = String;
 
-    fn encode(&self, val: &T) -> Result<String, Self::Error> {
+    fn encode(val: &T) -> Result<String, Self::Error> {
         Ok(val.to_string())
     }
+}
 
-    fn decode(&self, str: String) -> Result<T, Self::Error> {
-        T::from_str(&str)
+impl<T: FromStr> Decoder<T> for FromToStringCodec {
+    type Error = T::Err;
+    type Encoded = str;
+
+    fn decode(val: &Self::Encoded) -> Result<T, Self::Error> {
+        T::from_str(val)
     }
 }
 
@@ -38,8 +45,7 @@ mod tests {
     #[test]
     fn test_string_codec() {
         let s = String::from("party time 🎉");
-        let codec = FromToStringCodec;
-        assert_eq!(codec.encode(&s), Ok(s.clone()));
-        assert_eq!(codec.decode(s.clone()), Ok(s));
+        assert_eq!(FromToStringCodec::encode(&s), Ok(s.clone()));
+        assert_eq!(FromToStringCodec::decode(&s), Ok(s));
     }
 }

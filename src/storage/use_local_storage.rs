@@ -1,5 +1,5 @@
 use super::{use_storage_with_options, StorageType, UseStorageOptions};
-use crate::utils::StringCodec;
+use crate::utils::{Decoder, Encoder};
 use leptos::signal_prelude::*;
 
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
@@ -15,23 +15,23 @@ pub fn use_local_storage<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + Default + PartialEq,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(
         StorageType::Local,
         key,
-        UseStorageOptions::<T, C::Error>::default(),
+        UseStorageOptions::<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>::default(),
     )
 }
 
 /// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
-    options: UseStorageOptions<T, C::Error>,
+    options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(StorageType::Local, key, options)
 }

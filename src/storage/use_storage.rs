@@ -1,9 +1,9 @@
+use crate::utils::{CodecError, Decoder, Encoder};
 use crate::{
     core::{MaybeRwSignal, StorageType},
-    utils::{FilterOptions, StringCodec},
+    utils::FilterOptions,
 };
 use default_struct_builder::DefaultBuilder;
-use leptos::leptos_dom::HydrationCtx;
 use leptos::*;
 use std::rc::Rc;
 use thiserror::Error;
@@ -25,12 +25,13 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// The specified key is where data is stored. All values are stored as UTF-16 strings which
 /// is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using
 /// the same key on the smae page and across tabs for local storage.
-/// See [`UseStorageOptions`] to see how behaviour can be further customised.
+/// See [`UseStorageOptions`] to see how behavior can be further customised.
 ///
-/// See [`StringCodec`] for more details on how to handle versioning — dealing with data that can outlast your code.
+/// Values are (en)decoded via the given codec. You can use any of the string codecs or a
+/// binary codec wrapped in [`Base64`].
 ///
-/// > To use the [`JsonCodec`], you will need to add the `"serde"` feature to your project's `Cargo.toml`.
-/// > To use [`ProstCodec`], add the feature `"prost"`.
+/// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
+///   available and what feature flags they require.
 ///
 /// ## Example
 ///
@@ -38,12 +39,12 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// # use leptos::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage};
 /// # use serde::{Deserialize, Serialize};
-/// # use leptos_use::utils::{FromToStringCodec, JsonCodec, ProstCodec};
+/// # use leptos_use::utils::{FromToStringCodec, JsonSerdeCodec, ProstCodec, Base64};
 /// #
 /// # #[component]
 /// # pub fn Demo() -> impl IntoView {
 /// // Binds a struct:
-/// let (state, set_state, _) = use_local_storage::<MyState, JsonCodec>("my-state");
+/// let (state, set_state, _) = use_local_storage::<MyState, JsonSerdeCodec>("my-state");
 ///
 /// // Binds a bool, stored as a string:
 /// let (flag, set_flag, remove_flag) = use_session_storage::<bool, FromToStringCodec>("my-flag");
@@ -51,10 +52,10 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// // Binds a number, stored as a string:
 /// let (count, set_count, _) = use_session_storage::<i32, FromToStringCodec>("my-count");
 /// // Binds a number, stored in JSON:
-/// let (count, set_count, _) = use_session_storage::<i32, JsonCodec>("my-count-kept-in-js");
+/// let (count, set_count, _) = use_session_storage::<i32, JsonSerdeCodec>("my-count-kept-in-js");
 ///
 /// // Bind string with SessionStorage stored in ProtoBuf format:
-/// let (id, set_id, _) = use_storage::<String, ProstCodec>(
+/// let (id, set_id, _) = use_storage::<String, Base64<ProstCodec>>(
 ///     StorageType::Session,
 ///     "my-id",
 /// );
@@ -81,10 +82,6 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// }
 /// ```
 ///
-/// ## Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
-///
 /// ## Server-Side Rendering
 ///
 /// On the server the returned signals will just read/manipulate the `initial_value` without persistence.
@@ -96,7 +93,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::storage::use_local_storage;
+/// # use leptos_use::storage::use_session_storage;
 /// # use leptos_use::utils::FromToStringCodec;
 /// #
 /// # #[component]
@@ -104,7 +101,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// let (flag, set_flag, _) = use_session_storage::<bool, FromToStringCodec>("my-flag");
 ///
 /// view! {
-///     <Show when=move || flag()>
+///     <Show when=move || flag.get()>
 ///         <div>Some conditional content</div>
 ///     </Show>
 /// }
@@ -134,13 +131,13 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// #
 /// # #[component]
 /// # pub fn Example() -> impl IntoView {
-/// let (flag, set_flag, _) = use_session_storage_with_options::<bool, FromToStringCodec>(
+/// let (flag, set_flag, _) = use_local_storage_with_options::<bool, FromToStringCodec>(
 ///     "my-flag",
 ///     UseStorageOptions::default().delay_during_hydration(true),
 /// );
 ///
 /// view! {
-///     <Show when=move || flag()>
+///     <Show when=move || flag.get()>
 ///         <div>Some conditional content</div>
 ///     </Show>
 /// }
@@ -153,7 +150,7 @@ pub fn use_storage<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Default + Clone + PartialEq,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(storage_type, key, UseStorageOptions::default())
 }
@@ -162,11 +159,11 @@ where
 pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
-    options: UseStorageOptions<T, C::Error>,
+    options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     let UseStorageOptions {
         on_error,
@@ -176,17 +173,15 @@ where
         delay_during_hydration,
     } = options;
 
-    let codec = C::default();
-
     let (data, set_data) = initial_value.into_signal();
     let default = data.get_untracked();
 
     #[cfg(feature = "ssr")]
     {
-        let _ = codec;
         let _ = on_error;
         let _ = listen_to_storage_changes;
         let _ = filter;
+        let _ = delay_during_hydration;
         let _ = storage_type;
         let _ = key;
         let _ = INTERNAL_STORAGE_EVENT;
@@ -278,7 +273,7 @@ where
         };
 
         // Fetch initial value
-        if delay_during_hydration && HydrationCtx::is_hydrating() {
+        if delay_during_hydration && leptos::leptos_dom::HydrationCtx::is_hydrating() {
             request_animation_frame(fetch_from_storage.clone());
         } else {
             fetch_from_storage();
@@ -381,7 +376,7 @@ where
 
 /// Session handling errors returned by [`use_storage_with_options`].
 #[derive(Error, Debug)]
-pub enum UseStorageError<Err> {
+pub enum UseStorageError<E, D> {
     #[error("storage not available")]
     StorageNotAvailable(JsValue),
     #[error("storage not returned from window")]
@@ -395,18 +390,18 @@ pub enum UseStorageError<Err> {
     #[error("failed to notify item changed")]
     NotifyItemChangedFailed(JsValue),
     #[error("failed to encode / decode item value")]
-    ItemCodecError(Err),
+    ItemCodecError(CodecError<E, D>),
 }
 
 /// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseStorageOptions<T, Err>
+pub struct UseStorageOptions<T, E, D>
 where
     T: 'static,
 {
     // Callback for when an error occurs
     #[builder(skip)]
-    on_error: Rc<dyn Fn(UseStorageError<Err>)>,
+    on_error: Rc<dyn Fn(UseStorageError<E, D>)>,
     // Whether to continuously listen to changes from browser storage
     listen_to_storage_changes: bool,
     // Initial value to use when the storage key is not set
@@ -430,7 +425,7 @@ fn handle_error<T, Err>(
     result.map_err(|err| (on_error)(err))
 }
 
-impl<T: Default, Err> Default for UseStorageOptions<T, Err> {
+impl<T: Default, E, D> Default for UseStorageOptions<T, E, D> {
     fn default() -> Self {
         Self {
             on_error: Rc::new(|_err| ()),
@@ -442,9 +437,9 @@ impl<T: Default, Err> Default for UseStorageOptions<T, Err> {
     }
 }
 
-impl<T: Default, Err> UseStorageOptions<T, Err> {
+impl<T: Default, E, D> UseStorageOptions<T, E, D> {
     /// Optional callback whenever an error occurs.
-    pub fn on_error(self, on_error: impl Fn(UseStorageError<Err>) + 'static) -> Self {
+    pub fn on_error(self, on_error: impl Fn(UseStorageError<E, D>) + 'static) -> Self {
         Self {
             on_error: Rc::new(on_error),
             ..self

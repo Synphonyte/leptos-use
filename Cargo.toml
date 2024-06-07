@@ -17,6 +17,7 @@ actix-web = { version = "4", optional = true, default-features = false }
 async-trait = "0.1"
 base64 = { version = "0.21", optional = true }
 cfg-if = "1"
+bincode = { version = "1", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"] }
 default-struct-builder = "0.5"
 futures-util = "0.3"
@@ -141,12 +142,13 @@ actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = []
 math = ["num"]
-prost = ["base64", "dep:prost"]
-serde = ["dep:serde", "serde_json"]
+prost = ["dep:prost"]
+json_serde = ["dep:serde_json", "dep:serde"]
 spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
-msgpack = ["dep:rmp-serde", "dep:serde"]
+msgpack_serde = ["dep:rmp-serde", "dep:serde"]
+bincode_serde = ["dep:bincode", "dep:serde"]
 wasm_ssr = []
 
 [package.metadata.docs.rs]
-features = ["math", "docs", "ssr", "prost", "serde"]
+features = ["math", "docs", "ssr", "prost", "json_serde", "msgpack_serde", "bincode_serde"]

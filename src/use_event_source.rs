@@ -1,6 +1,6 @@
 use crate::core::ConnectionReadyState;
-use crate::utils::StringCodec;
-use crate::{js, use_event_listener};
+use crate::utils::Decoder;
+use crate::{js, use_event_listener, ReconnectLimit};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::Cell;
@@ -18,14 +18,16 @@ use thiserror::Error;
 ///
 /// ## Usage
 ///
-/// Values are decoded via the given [`Codec`].
+/// Values are decoded via the given decoder. You can use any of the string codecs or a
+/// binary codec wrapped in [`Base64`].
 ///
-/// > To use the [`JsonCodec`], you will need to add the `"serde"` feature to your project's `Cargo.toml`.
-/// > To use [`ProstCodec`], add the feature `"prost"`.
+/// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
+///   available and what feature flags they require.
+///
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_event_source, UseEventSourceReturn, utils::JsonCodec};
+/// # use leptos_use::{use_event_source, UseEventSourceReturn, utils::JsonSerdeCodec};
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -38,7 +40,7 @@ use thiserror::Error;
 /// # fn Demo() -> impl IntoView {
 /// let UseEventSourceReturn {
 ///     ready_state, data, error, close, ..
-/// } = use_event_source::<EventSourceData, JsonCodec>("https://event-source-url");
+/// } = use_event_source::<EventSourceData, JsonSerdeCodec>("https://event-source-url");
 /// #
 /// # view! { }
 /// # }
@@ -85,7 +87,7 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec, ReconnectLimit};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -94,7 +96,7 @@ use thiserror::Error;
 /// } = use_event_source_with_options::<bool, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
-///         .reconnect_limit(5)         // at most 5 attempts
+///         .reconnect_limit(ReconnectLimit::Limited(5))         // at most 5 attempts
 ///         .reconnect_interval(2000)   // wait for 2 seconds between attempts
 /// );
 /// #
@@ -113,22 +115,21 @@ pub fn use_event_source<T, C>(
 ) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
 where
     T: Clone + PartialEq + 'static,
-    C: StringCodec<T> + Default,
+    C: Decoder<T, Encoded = str>,
 {
-    use_event_source_with_options(url, UseEventSourceOptions::<T, C>::default())
+    use_event_source_with_options::<T, C>(url, UseEventSourceOptions::<T>::default())
 }
 
 /// Version of [`use_event_source`] that takes a `UseEventSourceOptions`. See [`use_event_source`] for how to use.
 pub fn use_event_source_with_options<T, C>(
     url: &str,
-    options: UseEventSourceOptions<T, C>,
+    options: UseEventSourceOptions<T>,
 ) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
 where
     T: Clone + PartialEq + 'static,
-    C: StringCodec<T> + Default,
+    C: Decoder<T, Encoded = str>,
 {
     let UseEventSourceOptions {
-        codec,
         reconnect_limit,
         reconnect_interval,
         on_failed,
@@ -151,7 +152,7 @@ where
 
     let set_data_from_string = move |data_string: Option<String>| {
         if let Some(data_string) = data_string {
-            match codec.decode(data_string) {
+            match C::decode(&data_string) {
                 Ok(data) => set_data.set(Some(data)),
                 Err(err) => set_error.set(Some(UseEventSourceError::Deserialize(err))),
             }
@@ -213,12 +214,15 @@ where
 
                     // only reconnect if EventSource isn't reconnecting by itself
                     // this is the case when the connection is closed (readyState is 2)
-                    if es.ready_state() == 2 && !explicitly_closed.get() && reconnect_limit > 0 {
+                    if es.ready_state() == 2
+                        && !explicitly_closed.get()
+                        && matches!(reconnect_limit, ReconnectLimit::Limited(_))
+                    {
                         es.close();
 
                         retried.set(retried.get() + 1);
 
-                        if retried.get() < reconnect_limit {
+                        if reconnect_limit.is_exceeded_by(retried.get()) {
                             set_timeout(
                                 move || {
                                     if let Some(init) = init.get_value() {
@@ -312,16 +316,13 @@ where
 
 /// Options for [`use_event_source_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseEventSourceOptions<T, C>
+pub struct UseEventSourceOptions<T>
 where
     T: 'static,
-    C: StringCodec<T>,
 {
-    /// Decodes from the received String to a value of type `T`.
-    codec: C,
-
-    /// Retry times. Defaults to 3.
-    reconnect_limit: u64,
+    /// Retry times. Defaults to `ReconnectLimit::Limited(3)`. Use `ReconnectLimit::Infinite` for
+    /// infinite retries.
+    reconnect_limit: ReconnectLimit,
 
     /// Retry interval in ms. Defaults to 3000.
     reconnect_interval: u64,
@@ -344,11 +345,10 @@ where
     _marker: PhantomData<T>,
 }
 
-impl<T, C: StringCodec<T> + Default> Default for UseEventSourceOptions<T, C> {
+impl<T> Default for UseEventSourceOptions<T> {
     fn default() -> Self {
         Self {
-            codec: C::default(),
-            reconnect_limit: 3,
+            reconnect_limit: ReconnectLimit::default(),
             reconnect_interval: 3000,
             on_failed: Rc::new(|| {}),
             immediate: true,
