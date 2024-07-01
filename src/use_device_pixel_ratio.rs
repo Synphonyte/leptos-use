@@ -30,7 +30,7 @@ use leptos::*;
 /// On the server this function returns a Signal that is always `1.0`.
 pub fn use_device_pixel_ratio() -> Signal<f64> {
     cfg_if! { if #[cfg(feature = "ssr")] {
-        let pixel_ratio = Signal::derive(|| 1.0);
+        Signal::derive(|| 1.0)
     } else {
         use crate::{use_event_listener_with_options, UseEventListenerOptions};
         use leptos::ev::change;
@@ -55,6 +55,7 @@ pub fn use_device_pixel_ratio() -> Signal<f64> {
                     .once(true),
             );
         });
+
+        pixel_ratio.into()
     }}
-    pixel_ratio.into()
 }

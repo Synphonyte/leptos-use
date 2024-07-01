@@ -5,22 +5,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changes 🔥
+### New Features 🚀
 
+- There are now binary codecs in addition to string codecs.
+    - `FromToBytesCodec`
+    - `WebpackSerdeCodec` (requires feature `webpack_serde`)
+    - `BincodeSerdeCodec` (requires feature `bincode_serde`)
+    - `ProstCodec` (requires feature `prost`) (see also the section "Breaking Changes 🛠" below)
+- Every binary codec can be used as a string codec with the `Base64` wrapper which encodes the binary data as a base64
+  string.
+    - This required feature `base64`
+    - It can be wrapped for example like this: `Base64<WebpackSerdeCodec>`.
+- There is now an `OptionCodec` wrapper that allows to wrap any string codec that encodes `T` to encode `Option<T>`.
+    - Use it like this: `OptionCodec<FromToStringCodec<f64>>`.
 - `ElementMaybeSignal` is now implemented for `websys::HtmlElement` (thanks to @blorbb).
 - `UseStorageOptions` now has `delay_during_hydration` which has to be used when you conditionally show parts of
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is now re-exported
-- Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
+- New book chapter about codecs
 
 ### Breaking Changes 🛠
 
-- `UseStorageOptions` no longer accepts a `codec` value because this is already provided as a generic parameter to
-  the respective function calls.
-- `UseWebsocketOptions::reconnect_limit` is now `ReconnectLimit` instead of `u64`. Use `ReconnectLimit::Infinite` for
-  infinite retries or `ReconnectLimit::Limited(...)` for limited retries.
-- `StringCodec::decode` now takes a `&str` instead of a `String`.
+- `UseStorageOptions` and `UseEventSourceOptions` no longer accept a `codec` value because this is already provided as a
+  generic parameter to the respective function calls.
+- Codecs have been refactored. There are now two traits that codecs implement: `Encoder` and `Decoder`. The
+  trait `StringCodec` is gone. The methods are now associated methods and their params now always take references.
+    - `JsonCodec` has been renamed to `JsonSerdeCodec`.
+    - The feature to enable this codec is now called `json_serde` instead of just `serde`.
+    - `ProstCodec` now encodes as binary data. If you want to keep using it with string data you can wrap it like
+      this: `Base64<ProstCodec>`. You have to enable both features `prost` and `base64` for this.
+- `use_websocket`:
+    - `UseWebsocketOptions` has been renamed to `UseWebSocketOptions` (uppercase S) to be consistent with the return
+      type.
+    - `UseWebSocketOptions::reconnect_limit` and `UseEventSourceOptions::reconnect_limit` is now `ReconnectLimit`
+      instead
+      of `u64`. Use `ReconnectLimit::Infinite` for infinite retries or `ReconnectLimit::Limited(...)` for limited
+      retries.
+    - `use_websocket` now uses codecs to send typed messages over the network.
+        - When calling you have give type parameters for the message type and the
+          codec: `use_websocket::<String, WebpackSerdeCodec>`
+        - You can use binary or string codecs.
+        - The `UseWebSocketReturn::send` closure now takes a `&T` which is encoded using the codec.
+        - The `UseWebSocketReturn::message` signal now returns an `Option<T>` which is decoded using the codec.
+        - `UseWebSocketReturn::send_bytes` and `UseWebSocketReturn::message_bytes` are gone.
+        - `UseWebSocketOptions::on_message` and `UseWebSocketOptions::on_message_bytes` have been renamed
+          to `on_message_raw` and `on_message_raw_bytes`.
+        - The new `UseWebSocketOptions::on_message` takes a `&T`.
+        - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
+
+### Fixes 🍕
+
+- Fixed auto-reconnect in `use_websocket`
+- Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
 
 ## [0.10.10] - 2024-05-10
 

@@ -1,5 +1,4 @@
 use crate::utils::{Decoder, Encoder};
-use serde::{Deserialize, Serialize};
 
 /// A codec that relies on `rmp-serde` to encode data in the msgpack format.
 ///

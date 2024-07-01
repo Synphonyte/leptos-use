@@ -1,7 +1,9 @@
 mod bin;
+mod hybrid;
 mod string;
 
 pub use bin::*;
+pub use hybrid::*;
 pub use string::*;
 use thiserror::Error;
 
@@ -19,22 +21,6 @@ pub trait Decoder<T>: 'static {
     type Encoded: ?Sized;
 
     fn decode(val: &Self::Encoded) -> Result<T, Self::Error>;
-}
-
-/// Trait to check if a type is binary or encodes data in a string.
-pub trait IsBinary<T> {
-    fn is_binary() -> bool {
-        true
-    }
-}
-
-impl<Enc, T> IsBinary<T> for Enc
-where
-    Enc: Encoder<T, Encoded = String>,
-{
-    fn is_binary() -> bool {
-        false
-    }
 }
 
 #[derive(Error, Debug)]

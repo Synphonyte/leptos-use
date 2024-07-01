@@ -4,6 +4,7 @@
 [Get Started](get_started.md)
 [Element Parameters](element_parameters.md)
 [Server-Side Rendering](server_side_rendering.md)
+[Encoding and Decoding Data](codecs.md)
 [Changelog](changelog.md)
 [Functions](functions.md)
 
@@ -65,6 +66,7 @@
 
 - [use_event_source](network/use_event_source.md)
 - [use_websocket](network/use_websocket.md)
+
 <!-- - [use_webtransport](network/use_webtransport.md) -->
 
 # Animation
@@ -94,6 +96,7 @@
 - [use_sorted](iterable/use_sorted.md)
 
 # Utilities
+
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)

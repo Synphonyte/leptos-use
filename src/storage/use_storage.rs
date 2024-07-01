@@ -190,7 +190,7 @@ where
             set_data.set(default.clone());
         };
 
-        (data.into(), set_data, remove)
+        (data, set_data, remove)
     }
 
     #[cfg(not(feature = "ssr"))]
@@ -233,7 +233,6 @@ where
         // Fetches direct from browser storage and fills set_data if changed (memo)
         let fetch_from_storage = {
             let storage = storage.to_owned();
-            let codec = codec.to_owned();
             let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
 
@@ -248,11 +247,11 @@ where
                         handle_error(&on_error, result)
                     })
                     .unwrap_or_default() // Drop handled Err(())
+                    .as_ref()
                     .map(|encoded| {
                         // Decode item
-                        let result = codec
-                            .decode(encoded)
-                            .map_err(UseStorageError::ItemCodecError);
+                        let result = C::decode(encoded)
+                            .map_err(|e| UseStorageError::ItemCodecError(CodecError::Decode(e)));
                         handle_error(&on_error, result)
                     })
                     .transpose()
@@ -297,7 +296,6 @@ where
         // Set item on internal (non-event) page changes to the data signal
         {
             let storage = storage.to_owned();
-            let codec = codec.to_owned();
             let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
             let dispatch_storage_event = dispatch_storage_event.to_owned();
@@ -311,9 +309,8 @@ where
 
                     if let Ok(storage) = &storage {
                         // Encode value
-                        let result = codec
-                            .encode(value)
-                            .map_err(UseStorageError::ItemCodecError)
+                        let result = C::encode(value)
+                            .map_err(|e| UseStorageError::ItemCodecError(CodecError::Encode(e)))
                             .and_then(|enc_value| {
                                 // Set storage -- sends a global event
                                 storage
@@ -418,9 +415,9 @@ where
 
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
 #[cfg(not(feature = "ssr"))]
-fn handle_error<T, Err>(
-    on_error: &Rc<dyn Fn(UseStorageError<Err>)>,
-    result: Result<T, UseStorageError<Err>>,
+fn handle_error<T, E, D>(
+    on_error: &Rc<dyn Fn(UseStorageError<E, D>)>,
+    result: Result<T, UseStorageError<E, D>>,
 ) -> Result<T, ()> {
     result.map_err(|err| (on_error)(err))
 }

@@ -1,5 +1,4 @@
 use crate::utils::{Decoder, Encoder};
-use serde::{Deserialize, Serialize};
 
 /// A codec that relies on `bincode` adn `serde` to encode data in the bincode format.
 ///

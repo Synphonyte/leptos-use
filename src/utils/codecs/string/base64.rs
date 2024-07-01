@@ -62,6 +62,6 @@ where
 
     fn decode(val: &Self::Encoded) -> Result<T, Self::Error> {
         let buf = base64::engine::general_purpose::STANDARD.decode(val)?;
-        D::decode(&buf).map_err(|err| Base64DecodeError::Decoder(err))
+        D::decode(&buf).map_err(Base64DecodeError::Decoder)
     }
 }

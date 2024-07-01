@@ -32,11 +32,11 @@ jobs:
       - name: Clippy
         run: cargo clippy --features prost,serde,docs,math --tests -- -D warnings
       - name: Run tests (general)
-        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde
+        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde,base64
       - name: Run tests (axum)
-        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde,axum --doc use_cookie::use_cookie
+        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde,base64,axum --doc use_cookie::use_cookie
       - name: Run tests (actix)
-        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde,actix --doc use_cookie::use_cookie
+        run: cargo test --features math,docs,ssr,prost,json_serde,msgpack_serde,bincode_serde,base64,actix --doc use_cookie::use_cookie
 
       #### mdbook
       - name: Install mdbook I

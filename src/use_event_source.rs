@@ -246,19 +246,13 @@ where
             es.set_onerror(Some(on_error.as_ref().unchecked_ref()));
             on_error.forget();
 
-            let on_message = Closure::wrap(Box::new({
-                let set_data_from_string = set_data_from_string.clone();
-
-                move |e: web_sys::MessageEvent| {
-                    set_data_from_string(e.data().as_string());
-                }
+            let on_message = Closure::wrap(Box::new(move |e: web_sys::MessageEvent| {
+                set_data_from_string(e.data().as_string());
             }) as Box<dyn FnMut(web_sys::MessageEvent)>);
             es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
             on_message.forget();
 
             for event_name in named_events.clone() {
-                let set_data_from_string = set_data_from_string.clone();
-
                 let _ = use_event_listener(
                     es.clone(),
                     ev::Custom::<ev::Event>::new(event_name),

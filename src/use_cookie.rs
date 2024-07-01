@@ -238,9 +238,11 @@ where
                 }
 
                 let value = cookie.with_untracked(|cookie| {
-                    cookie
-                        .as_ref()
-                        .and_then(|cookie| C::encode(cookie).map_err(|err| on_error(err)).ok())
+                    cookie.as_ref().and_then(|cookie| {
+                        C::encode(cookie)
+                            .map_err(|err| on_error(CodecError::Encode(err)))
+                            .ok()
+                    })
                 });
 
                 if value
@@ -316,7 +318,7 @@ where
                                 set_cookie.set(Some(value));
                             }
                             Err(err) => {
-                                on_error(err);
+                                on_error(CodecError::Decode(err));
                             }
                         }
                     } else {
@@ -362,7 +364,7 @@ where
             let value = cookie
                 .with_untracked(|cookie| {
                     cookie.as_ref().map(|cookie| {
-                        C::encode(&cookie)
+                        C::encode(cookie)
                             .map_err(|err| on_error(CodecError::Encode(err)))
                             .ok()
                     })
@@ -858,8 +860,7 @@ fn write_server_cookie(
     if let Some(value) = value {
         let cookie: Cookie = build_cookie_from_options(
             name, max_age, expires, http_only, secure, &path, same_site, &domain, &value,
-        )
-        .into();
+        );
 
         jar.add(cookie.into_owned());
     } else {

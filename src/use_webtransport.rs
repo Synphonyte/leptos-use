@@ -21,7 +21,7 @@ use web_sys::WebTransportBidirectionalStream;
 #[cfg(feature = "bincode")]
 use bincode::serde::{decode_from_slice as from_slice, encode_to_vec as to_vec};
 
-///
+/// This still under development and will not arrive before Leptos 0.7.
 ///
 /// ## Demo
 ///

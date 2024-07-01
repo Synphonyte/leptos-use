@@ -8,7 +8,8 @@ leptos = { version = "0.6", features = ["nightly", "csr"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["docs"] }
+leptos-use = { path = "../..", features = ["docs", "msgpack_serde"] }
+serde = { version = "1", features = ["derive"] }
 web-sys = "0.3"
 
 [dev-dependencies]
