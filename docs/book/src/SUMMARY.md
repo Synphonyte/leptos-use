@@ -2,6 +2,7 @@
 
 [Introduction](introduction.md)
 [Get Started](get_started.md)
+[Options](options.md)
 [Element Parameters](element_parameters.md)
 [Server-Side Rendering](server_side_rendering.md)
 [Encoding and Decoding Data](codecs.md)

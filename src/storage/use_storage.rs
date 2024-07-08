@@ -1,8 +1,8 @@
-use crate::utils::{CodecError, Decoder, Encoder};
 use crate::{
     core::{MaybeRwSignal, StorageType},
     utils::FilterOptions,
 };
+use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::rc::Rc;
@@ -39,7 +39,8 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// # use leptos::*;
 /// # use leptos_use::storage::{StorageType, use_local_storage, use_session_storage, use_storage};
 /// # use serde::{Deserialize, Serialize};
-/// # use leptos_use::utils::{FromToStringCodec, JsonSerdeCodec, ProstCodec, Base64};
+/// # use codee::string::{FromToStringCodec, JsonSerdeCodec, Base64};
+/// # use codee::binary::ProstCodec;
 /// #
 /// # #[component]
 /// # pub fn Demo() -> impl IntoView {
@@ -94,7 +95,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::storage::use_session_storage;
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # pub fn Example() -> impl IntoView {
@@ -127,7 +128,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::storage::{use_local_storage_with_options, UseStorageOptions};
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # pub fn Example() -> impl IntoView {

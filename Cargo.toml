@@ -15,9 +15,8 @@ homepage = "https://leptos-use.rs"
 [dependencies]
 actix-web = { version = "4", optional = true, default-features = false }
 async-trait = "0.1"
-base64 = { version = "0.21", optional = true }
 cfg-if = "1"
-bincode = { version = "1", optional = true }
+codee = "0.1"
 cookie = { version = "0.18", features = ["percent-encode"] }
 default-struct-builder = "0.5"
 futures-util = "0.3"
@@ -33,10 +32,6 @@ leptos_actix = { version = "0.6", optional = true }
 leptos-spin = { version = "0.1", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
-prost = { version = "0.12", optional = true }
-rmp-serde = { version = "1.1", optional = true }
-serde = { version = "1", optional = true }
-serde_json = { version = "1", optional = true }
 thiserror = "1"
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4"
@@ -136,19 +131,19 @@ features = [
 getrandom = { version = "0.2", features = ["js"] }
 leptos_meta = "0.6"
 rand = "0.8"
+codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
+serde = { version = "1", features = ["derive"] }
 
 [features]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = []
 math = ["num"]
-prost = ["dep:prost"]
-json_serde = ["dep:serde_json", "dep:serde"]
 spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
-msgpack_serde = ["dep:rmp-serde", "dep:serde"]
-bincode_serde = ["dep:bincode", "dep:serde"]
 wasm_ssr = []
 
 [package.metadata.docs.rs]
-features = ["math", "docs", "ssr", "prost", "json_serde", "msgpack_serde", "bincode_serde"]
+features = ["math", "docs", "ssr"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]

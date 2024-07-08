@@ -1,6 +1,6 @@
 use crate::core::ConnectionReadyState;
-use crate::utils::Decoder;
 use crate::{js, use_event_listener, ReconnectLimit};
+use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::cell::Cell;
@@ -27,7 +27,8 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_event_source, UseEventSourceReturn, utils::JsonSerdeCodec};
+/// # use leptos_use::{use_event_source, UseEventSourceReturn};
+/// # use codee::string::JsonSerdeCodec;
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -56,7 +57,8 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions};
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -87,7 +89,8 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, utils::FromToStringCodec, ReconnectLimit};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, ReconnectLimit};
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {

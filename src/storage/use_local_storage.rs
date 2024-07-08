@@ -1,5 +1,5 @@
 use super::{use_storage_with_options, StorageType, UseStorageOptions};
-use crate::utils::{Decoder, Encoder};
+use codee::{Decoder, Encoder};
 use leptos::signal_prelude::*;
 
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).

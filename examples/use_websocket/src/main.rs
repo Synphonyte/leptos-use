@@ -6,7 +6,7 @@ use leptos_use::{
 };
 use serde::{Deserialize, Serialize};
 
-use leptos_use::utils::{FromToStringCodec, MsgpackSerdeCodec};
+use codee::{binary::MsgpackSerdeCodec, string::FromToStringCodec};
 use web_sys::{CloseEvent, Event};
 
 #[derive(Serialize, Deserialize, Debug)]

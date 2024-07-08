@@ -1,7 +1,7 @@
-use crate::utils::{CodecError, Decoder, Encoder};
 use crate::{
     js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
 };
+use codee::{CodecError, Decoder, Encoder};
 use leptos::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -23,7 +23,7 @@ use wasm_bindgen::JsValue;
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -54,7 +54,7 @@ use wasm_bindgen::JsValue;
 /// # use leptos::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::use_broadcast_channel;
-/// # use leptos_use::utils::JsonSerdeCodec;
+/// # use codee::string::JsonSerdeCodec;
 /// #
 /// // Data sent in JSON must implement Serialize, Deserialize:
 /// #[derive(Serialize, Deserialize, Clone, PartialEq)]

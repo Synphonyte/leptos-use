@@ -8,7 +8,7 @@ use std::time::Duration;
 use thiserror::Error;
 
 use crate::core::ConnectionReadyState;
-use crate::utils::{
+use codee::{
     CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder, IsBinary,
 };
 use default_struct_builder::DefaultBuilder;
@@ -31,7 +31,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use leptos_use::core::ConnectionReadyState;
 /// #
@@ -81,7 +81,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::utils::MsgpackSerdeCodec;
+/// # use codee::binary::MsgpackSerdeCodec;
 /// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use serde::{Deserialize, Serialize};
 /// #
@@ -164,7 +164,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::*;
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use std::rc::Rc;
 /// # #[derive(Clone)]

@@ -1,7 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use crate::core::now;
-use crate::utils::{CodecError, Decoder, Encoder};
+use codee::{CodecError, Decoder, Encoder};
 use cookie::time::{Duration, OffsetDateTime};
 pub use cookie::SameSite;
 use cookie::{Cookie, CookieJar};
@@ -30,7 +30,7 @@ use std::rc::Rc;
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::use_cookie;
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// # use rand::prelude::*;
 ///
 /// #
@@ -70,7 +70,7 @@ use std::rc::Rc;
 /// # use cookie::SameSite;
 /// # use leptos::*;
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -105,7 +105,7 @@ use std::rc::Rc;
 /// # use leptos::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
-/// # use leptos_use::utils::JsonSerdeCodec;
+/// # use codee::string::JsonSerdeCodec;
 /// #
 /// # #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 /// # pub struct Auth {
@@ -215,10 +215,10 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::utils::{FromToStringCodec, OptionCodec};
         use crate::{
             use_broadcast_channel, watch_pausable, UseBroadcastChannelReturn, WatchPausableReturn,
         };
+        use codee::string::{FromToStringCodec, OptionCodec};
 
         let UseBroadcastChannelReturn { message, post, .. } =
             use_broadcast_channel::<Option<String>, OptionCodec<FromToStringCodec>>(&format!(
