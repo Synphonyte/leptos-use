@@ -1,3 +1,6 @@
+/// Macro to easily create helper functions that derive a signal using a piece of code.
+/// 
+/// See [`is_ok`] or [`use_to_string`] as examples.
 #[macro_export]
 macro_rules! use_derive_signal {
     (

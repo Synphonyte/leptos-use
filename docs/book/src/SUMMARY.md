@@ -104,6 +104,7 @@
 - [is_some](utilities/is_some.md)
 - [use_cycle_list](utilities/use_cycle_list.md)
 - [use_debounce_fn](utilities/use_debounce_fn.md)
+- [use_derive_signal!](utilities/use_derive_signal.md)
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 - [use_to_string](utilities/use_to_string.md)
