@@ -1,3 +1,4 @@
+#[macro_export]
 macro_rules! use_derive_signal {
     (
         $(#[$outer:meta])*
@@ -14,5 +15,3 @@ macro_rules! use_derive_signal {
         }
     };
 }
-
-pub(crate) use use_derive_signal;

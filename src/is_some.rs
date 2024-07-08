@@ -1,7 +1,6 @@
-use crate::utils::use_derive_signal;
 use leptos::*;
 
-use_derive_signal!(
+crate::use_derive_signal!(
     /// Reactive `Option::is_some()`.
     ///
     /// ## Usage

@@ -13,4 +13,3 @@ pub use is::*;
 pub(crate) use js_value_from_to_string::*;
 pub use pausable::*;
 pub(crate) use signal_filtered::*;
-pub(crate) use use_derive_signal::*;
