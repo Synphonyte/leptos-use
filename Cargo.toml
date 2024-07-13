@@ -73,6 +73,7 @@ features = [
     "MediaDevices",
     "MediaQueryList",
     "MediaStream",
+    "MediaStreamConstraints",
     "MediaStreamTrack",
     "MessageEvent",
     "MouseEvent",
