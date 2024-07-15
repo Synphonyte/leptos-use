@@ -55,6 +55,7 @@ members = [
     "use_throttle_fn",
     "use_timeout_fn",
     "use_timestamp",
+    "use_user_media",
     "use_web_notification",
     "use_websocket",
     "use_webtransport",
