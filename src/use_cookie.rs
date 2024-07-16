@@ -90,7 +90,9 @@ use std::rc::Rc;
 /// This works equally well on the server or the client.
 /// On the server this function reads the cookie from the HTTP request header and writes it back into
 /// the HTTP response header according to options (if provided).
-/// The returned `WriteSignal` will not affect the cookie headers on the server.
+/// The returned `WriteSignal` may not affect the cookie headers on the server! It will try and write
+/// the headers buy if this happens after the headers have already been streamed to the client then
+/// this will have no effect. 
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
@@ -361,29 +363,31 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            let value = cookie
-                .with_untracked(|cookie| {
-                    cookie.as_ref().map(|cookie| {
-                        C::encode(cookie)
-                            .map_err(|err| on_error(CodecError::Encode(err)))
-                            .ok()
+            create_isomorphic_effect(move |_| {
+                let value = cookie
+                    .with(|cookie| {
+                        cookie.as_ref().map(|cookie| {
+                            C::encode(cookie)
+                                .map_err(|err| on_error(CodecError::Encode(err)))
+                                .ok()
+                        })
                     })
-                })
-                .flatten();
-            jar.update_value(|jar| {
-                write_server_cookie(
-                    cookie_name,
-                    value,
-                    jar,
-                    max_age,
-                    expires,
-                    domain,
-                    path,
-                    same_site,
-                    secure,
-                    http_only,
-                    ssr_set_cookie,
-                )
+                    .flatten();
+                jar.update_value(|jar| {
+                    write_server_cookie(
+                        cookie_name,
+                        value,
+                        jar,
+                        max_age,
+                        expires,
+                        domain,
+                        path,
+                        same_site,
+                        secure,
+                        http_only,
+                        ssr_set_cookie,
+                    )
+                });
             });
         }
     }
