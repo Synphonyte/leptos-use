@@ -272,13 +272,6 @@ where
             }
         };
 
-        // Fetch initial value
-        if delay_during_hydration && leptos::leptos_dom::HydrationCtx::is_hydrating() {
-            request_animation_frame(fetch_from_storage.clone());
-        } else {
-            fetch_from_storage();
-        }
-
         // Fires when storage needs to be fetched
         let notify = create_trigger();
 
@@ -327,6 +320,13 @@ where
                 },
                 WatchOptions::default().filter(filter),
             );
+        }
+
+        // Fetch initial value
+        if delay_during_hydration && leptos::leptos_dom::HydrationCtx::is_hydrating() {
+            request_animation_frame(fetch_from_storage.clone());
+        } else {
+            fetch_from_storage();
         }
 
         if listen_to_storage_changes {
