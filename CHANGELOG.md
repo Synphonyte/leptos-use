@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is now re-exported
+- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR. 
 - New book chapter about codecs
 - The macro `use_derive_signal!` is now exported (thanks to @mscofield0).
 
