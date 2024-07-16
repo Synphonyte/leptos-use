@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
           to `on_message_raw` and `on_message_raw_bytes`.
         - The new `UseWebSocketOptions::on_message` takes a `&T`.
         - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
+- `use_storage` now always saves the default value to storage if the key doesn't exist yet. 
 
 ### Fixes 🍕
 
