@@ -11,7 +11,7 @@ use std::rc::Rc;
 
 /// SSR-friendly and reactive cookie access.
 ///
-/// You can use this function multiple times in your for the same cookie and they're signals will synchronize
+/// You can use this function multiple times for the same cookie and their signals will synchronize
 /// (even across windows/tabs). But there is no way to listen to changes to `document.cookie` directly so in case
 /// something outside of this function changes the cookie, the signal will **not** be updated.
 ///
