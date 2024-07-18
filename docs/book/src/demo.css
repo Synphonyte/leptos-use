@@ -64,7 +64,7 @@
     cursor: not-allowed;
 }
 
-.demo-container button ~ button {
+.demo-container button + button {
     margin-left: 0.8rem;
 }
 
