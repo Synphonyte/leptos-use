@@ -1,7 +1,6 @@
 use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, throttle_filter};
-use leptos::MaybeSignal;
-use std::cell::RefCell;
-use std::rc::Rc;
+use leptos::prelude::MaybeSignal;
+use std::sync::{Arc, Mutex};
 
 pub use crate::utils::ThrottleOptions;
 
@@ -73,7 +72,7 @@ pub use crate::utils::ThrottleOptions;
 pub fn use_throttle_fn<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,
-) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn() -> R + Clone + 'static,
     R: 'static,
@@ -86,19 +85,19 @@ pub fn use_throttle_fn_with_options<F, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,
     options: ThrottleOptions,
-) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn() -> R + Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper(Rc::new(throttle_filter(ms, options)), func)
+    create_filter_wrapper(Arc::new(throttle_filter(ms, options)), func)
 }
 
 /// Version of [`use_throttle_fn`] with an argument for the throttled function. See the docs for [`use_throttle_fn`] for how to use.
 pub fn use_throttle_fn_with_arg<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,
-) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
@@ -112,11 +111,11 @@ pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     func: F,
     ms: impl Into<MaybeSignal<f64>> + 'static,
     options: ThrottleOptions,
-) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
     R: 'static,
 {
-    create_filter_wrapper_with_arg(Rc::new(throttle_filter(ms, options)), func)
+    create_filter_wrapper_with_arg(Arc::new(throttle_filter(ms, options)), func)
 }

@@ -158,7 +158,7 @@ where
                     set_loading.set(true);
 
                     let measure = measure.clone();
-                    spawn_local(async move {
+                    leptos::spawn::spawn_local(async move {
                         #[cfg(debug_assertions)]
                         let zone = SpecialNonReactiveZone::enter();
 

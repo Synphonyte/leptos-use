@@ -628,7 +628,7 @@ fn read_cookies_string(
 
         let _ = ssr_cookies_header_getter;
 
-        let js_value: wasm_bindgen::JsValue = leptos::document().into();
+        let js_value: wasm_bindgen::JsValue = document().into();
         let document: web_sys::HtmlDocument = js_value.unchecked_into();
         cookies = Some(document.cookie().unwrap_or_default());
     }

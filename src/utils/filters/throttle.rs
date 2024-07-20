@@ -6,9 +6,8 @@ use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
-use std::cell::{Cell, RefCell};
 use std::cmp::max;
-use std::rc::Rc;
+use std::sync::{atomic::AtomicBool, Arc, Mutex};
 use std::time::Duration;
 
 #[derive(Copy, Clone, DefaultBuilder)]
@@ -31,20 +30,21 @@ impl Default for ThrottleOptions {
 pub fn throttle_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: ThrottleOptions,
-) -> impl Fn(Rc<dyn Fn() -> R>) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Arc<dyn Fn() -> R>) -> Arc<Mutex<Option<R>>> + Clone
 where
     R: 'static,
 {
-    let last_exec = Rc::new(Cell::new(0_f64));
-    let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
-    let is_leading = Rc::new(Cell::new(true));
-    let last_return_value: Rc<RefCell<Option<R>>> = Rc::new(RefCell::new(None));
+    let last_exec = Arc::new(Mutex::new(0_f64));
+    let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+    let is_leading = Arc::new(AtomicBool::new(true));
+    let last_return_value: Arc<Mutex<Option<R>>> = Arc::new(Mutex::new(None));
 
-    let t = Rc::clone(&timer);
+    let t = Arc::clone(&timer);
     let clear = move || {
-        if let Some(handle) = t.get() {
+        let mut t = t.lock().unwrap();
+        if let Some(handle) = *t {
             handle.clear();
-            t.set(None);
+            *t = None;
         }
     };
 
@@ -52,11 +52,11 @@ where
 
     let ms = ms.into();
 
-    move |mut _invoke: Rc<dyn Fn() -> R>| {
+    move |mut _invoke: Arc<dyn Fn() -> R>| {
         let duration = ms.get_untracked();
-        let elapsed = now() - last_exec.get();
+        let elapsed = now() - *last_exec.lock().unwrap();
 
-        let last_return_val = Rc::clone(&last_return_value);
+        let last_return_val = Arc::clone(&last_return_value);
         let invoke = move || {
             #[cfg(debug_assertions)]
             let zone = SpecialNonReactiveZone::enter();
@@ -66,7 +66,7 @@ where
             #[cfg(debug_assertions)]
             drop(zone);
 
-            let mut val_mut = last_return_val.borrow_mut();
+            let mut val_mut = last_return_val.lock().unwrap();
             *val_mut = Some(return_value);
         };
 
@@ -74,50 +74,51 @@ where
         clear();
 
         if duration <= 0.0 {
-            last_exec.set(now());
+            *last_exec.lock().unwrap() = now();
             invoke();
-            return Rc::clone(&last_return_value);
+            return Arc::clone(&last_return_value);
         }
 
-        if elapsed > duration && (options.leading || !is_leading.get()) {
-            last_exec.set(now());
+        if elapsed > duration
+            && (options.leading || !is_leading.load(std::sync::atomic::Ordering::Relaxed))
+        {
+            *last_exec.lock().unwrap() = now();
             invoke();
         } else if options.trailing {
             cfg_if! { if #[cfg(not(feature = "ssr"))] {
-                let last_exec = Rc::clone(&last_exec);
-                let is_leading = Rc::clone(&is_leading);
-                timer.set(
+                let last_exec = Arc::clone(&last_exec);
+                let is_leading = Arc::clone(&is_leading);
+                *timer.lock().unwrap() =
                     set_timeout_with_handle(
                         move || {
-                            last_exec.set(now());
-                            is_leading.set(true);
+                            *last_exec.lock().unwrap() = now();
+                            is_leading.store(true, std::sync::atomic::Ordering::Relaxed);
                             invoke();
                             clear();
                         },
                         Duration::from_millis(max(0, (duration - elapsed) as u64)),
                     )
-                    .ok(),
-                );
+                    .ok();
             }}
         }
 
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
-            if !options.leading && timer.get().is_none() {
-                let is_leading = Rc::clone(&is_leading);
-                timer.set(
-                    set_timeout_with_handle(
+            let mut timer = timer.lock().unwrap();
+
+            if !options.leading && timer.is_none() {
+                let is_leading = Arc::clone(&is_leading);
+                *timer = set_timeout_with_handle(
                         move || {
-                            is_leading.set(true);
+                            is_leading.store(true, std::sync::atomic::Ordering::Relaxed);
                         },
                         Duration::from_millis(duration as u64),
                     )
-                    .ok(),
-                );
+                    .ok();
             }
         }}
 
-        is_leading.set(false);
+        is_leading.store(false, std::sync::atomic::Ordering::Relaxed);
 
-        Rc::clone(&last_return_value)
+        Arc::clone(&last_return_value)
     }
 }

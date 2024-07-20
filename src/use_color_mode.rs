@@ -283,7 +283,7 @@ where
         on_changed(mode, Rc::new(default_on_changed.clone()));
     };
 
-    create_effect({
+    Effect::new({
         let on_changed = on_changed.clone();
 
         move |_| {

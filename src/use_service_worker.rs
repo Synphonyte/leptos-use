@@ -3,7 +3,8 @@ use leptos::prelude::actions::Action;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use std::rc::Rc;
+use send_wrapper::SendWrapper;
+use std::sync::Arc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::ServiceWorkerRegistration;
 
@@ -73,20 +74,21 @@ pub fn use_service_worker_with_options(
     create_or_update_registration.dispatch(ServiceWorkerScriptUrl(options.script_url.to_string()));
 
     // And parse the result into individual signals.
-    let registration: Signal<Result<ServiceWorkerRegistration, ServiceWorkerRegistrationError>> =
-        Signal::derive(move || {
-            let a = get_registration.value().get();
-            let b = create_or_update_registration.value().get();
-            // We only dispatch create_or_update_registration once.
-            // Whenever we manually re-fetched the registration, the result of that has precedence!
-            match a {
-                Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
-                None => match b {
-                    Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
-                    None => Err(ServiceWorkerRegistrationError::NeverQueried),
-                },
-            }
-        });
+    let registration: Signal<
+        Result<SendWrapper<ServiceWorkerRegistration>, ServiceWorkerRegistrationError>,
+    > = Signal::derive(move || {
+        let a = get_registration.value().get();
+        let b = create_or_update_registration.value().get();
+        // We only dispatch create_or_update_registration once.
+        // Whenever we manually re-fetched the registration, the result of that has precedence!
+        match a {
+            Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
+            None => match b {
+                Some(res) => res.map_err(|e| ServiceWorkerRegistrationError::Js(e)),
+                None => Err(ServiceWorkerRegistrationError::NeverQueried),
+            },
+        }
+    });
 
     let fetch_registration = Closure::wrap(Box::new(move |_event: JsValue| {
         get_registration.dispatch(());
@@ -182,7 +184,7 @@ pub struct UseServiceWorkerOptions {
 
     /// What should happen when a new service worker was activated?
     /// The default implementation reloads the current page.
-    on_controller_change: Rc<dyn Fn()>,
+    on_controller_change: Arc<dyn Fn()>,
 }
 
 impl Default for UseServiceWorkerOptions {
@@ -190,7 +192,7 @@ impl Default for UseServiceWorkerOptions {
         Self {
             script_url: "service-worker.js".into(),
             skip_waiting_message: "skipWaiting".into(),
-            on_controller_change: Rc::new(move || {
+            on_controller_change: Arc::new(move || {
                 use std::ops::Deref;
                 if let Some(window) = use_window().deref() {
                     if let Err(err) = window.location().reload() {
@@ -211,7 +213,8 @@ where
     SkipFn: Fn() + Clone,
 {
     /// The current registration state.
-    pub registration: Signal<Result<ServiceWorkerRegistration, ServiceWorkerRegistrationError>>,
+    pub registration:
+        Signal<Result<SendWrapper<ServiceWorkerRegistration>, ServiceWorkerRegistrationError>>,
 
     /// Whether a SW is currently installing.
     pub installing: Signal<bool>,
@@ -234,29 +237,37 @@ struct ServiceWorkerScriptUrl(pub String);
 
 #[derive(Debug, Clone)]
 pub enum ServiceWorkerRegistrationError {
-    Js(JsValue),
+    Js(SendWrapper<JsValue>),
     NeverQueried,
 }
 
 /// A leptos action which asynchronously checks for ServiceWorker updates, given an existing ServiceWorkerRegistration.
-fn create_action_update(
-) -> Action<ServiceWorkerRegistration, Result<ServiceWorkerRegistration, JsValue>> {
-    Action::new(move |registration: &ServiceWorkerRegistration| {
-        let registration = registration.clone();
-        async move {
-            match registration.update() {
-                Ok(promise) => js_fut!(promise)
-                    .await
-                    .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>()),
-                Err(err) => Err(err),
+fn create_action_update() -> Action<
+    SendWrapper<ServiceWorkerRegistration>,
+    Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>,
+> {
+    Action::new(
+        move |registration: &SendWrapper<ServiceWorkerRegistration>| {
+            let registration = registration.clone();
+            async move {
+                match registration.update() {
+                    Ok(promise) => js_fut!(promise)
+                        .await
+                        .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
+                        .map(SendWrapper::new)
+                        .map_err(SendWrapper::new),
+                    Err(err) => Err(err),
+                }
             }
-        }
-    })
+        },
+    )
 }
 
 /// A leptos action which asynchronously creates or updates and than retrieves the ServiceWorkerRegistration.
-fn create_action_create_or_update_registration(
-) -> Action<ServiceWorkerScriptUrl, Result<ServiceWorkerRegistration, JsValue>> {
+fn create_action_create_or_update_registration() -> Action<
+    ServiceWorkerScriptUrl,
+    Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>,
+> {
     Action::new(move |script_url: &ServiceWorkerScriptUrl| {
         let script_url = script_url.0.to_owned();
         async move {
@@ -272,14 +283,17 @@ fn create_action_create_or_update_registration(
 }
 
 /// A leptos action which asynchronously fetches the current ServiceWorkerRegistration.
-fn create_action_get_registration() -> Action<(), Result<ServiceWorkerRegistration, JsValue>> {
+fn create_action_get_registration(
+) -> Action<(), Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>> {
     Action::new(move |(): &()| async move {
         if let Some(navigator) = use_window().navigator() {
             js_fut!(navigator.service_worker().get_registration())
                 .await
                 .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
+                .map(SendWrapper::new)
+                .map_err(SendWrapper::new)
         } else {
-            Err(JsValue::from_str("no navigator"))
+            Err(SendWrapper::new(JsValue::from_str("no navigator")))
         }
     })
 }

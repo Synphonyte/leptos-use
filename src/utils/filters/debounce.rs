@@ -5,8 +5,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 #[derive(Copy, Clone, DefaultBuilder, Default)]
@@ -20,23 +19,24 @@ pub struct DebounceOptions {
 pub fn debounce_filter<R>(
     ms: impl Into<MaybeSignal<f64>>,
     options: DebounceOptions,
-) -> impl Fn(Rc<dyn Fn() -> R>) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Arc<dyn Fn() -> R>) -> Arc<Mutex<Option<R>>> + Clone
 where
     R: 'static,
 {
-    let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
-    let max_timer = Rc::new(Cell::new(None::<TimeoutHandle>));
-    let last_return_value: Rc<RefCell<Option<R>>> = Rc::new(RefCell::new(None));
+    let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+    let max_timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+    let last_return_value: Arc<Mutex<Option<R>>> = Arc::new(Mutex::new(None));
 
-    let clear_timeout = move |timer: &Rc<Cell<Option<TimeoutHandle>>>| {
-        if let Some(handle) = timer.get() {
+    let clear_timeout = move |timer: &Arc<Mutex<Option<TimeoutHandle>>>| {
+        let mut timer = timer.lock().unwrap();
+        if let Some(handle) = *timer {
             handle.clear();
-            timer.set(None);
+            *timer = None;
         }
     };
 
     on_cleanup({
-        let timer = Rc::clone(&timer);
+        let timer = Arc::clone(&timer);
 
         move || {
             clear_timeout(&timer);
@@ -46,11 +46,11 @@ where
     let ms = ms.into();
     let max_wait_signal = options.max_wait;
 
-    move |_invoke: Rc<dyn Fn() -> R>| {
+    move |_invoke: Arc<dyn Fn() -> R>| {
         let duration = ms.get_untracked();
         let max_duration = max_wait_signal.get_untracked();
 
-        let last_return_val = Rc::clone(&last_return_value);
+        let last_return_val = Arc::clone(&last_return_value);
         let invoke = move || {
             #[cfg(debug_assertions)]
             let zone = SpecialNonReactiveZone::enter();
@@ -60,7 +60,7 @@ where
             #[cfg(debug_assertions)]
             drop(zone);
 
-            let mut val_mut = last_return_val.borrow_mut();
+            let mut val_mut = last_return_val.lock().unwrap();
             *val_mut = Some(return_value);
         };
 
@@ -70,43 +70,41 @@ where
             clear_timeout(&max_timer);
 
             invoke();
-            return Rc::clone(&last_return_value);
+            return Arc::clone(&last_return_value);
         }
 
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
             // Create the max_timer. Clears the regular timer on invoke
             if let Some(max_duration) = max_duration {
-                if max_timer.get().is_none() {
-                    let timer = Rc::clone(&timer);
+                let mut max_timer = max_timer.lock().unwrap();
+
+                if max_timer.is_none() {
+                    let timer = Arc::clone(&timer);
                     let invok = invoke.clone();
-                    max_timer.set(
-                        set_timeout_with_handle(
-                            move || {
-                                clear_timeout(&timer);
-                                invok();
-                            },
-                            Duration::from_millis(max_duration as u64),
-                        )
-                        .ok(),
-                    );
+                    *max_timer = set_timeout_with_handle(
+                        move || {
+                            clear_timeout(&timer);
+                            invok();
+                        },
+                        Duration::from_millis(max_duration as u64),
+                    )
+                    .ok();
                 }
             }
 
-            let max_timer = Rc::clone(&max_timer);
+            let max_timer = Arc::clone(&max_timer);
 
             // Create the regular timer. Clears the max timer on invoke
-            timer.set(
-                set_timeout_with_handle(
-                    move || {
-                        clear_timeout(&max_timer);
-                        invoke();
-                    },
-                    Duration::from_millis(duration as u64),
-                )
-                .ok(),
-            );
+            *timer.lock().unwrap() = set_timeout_with_handle(
+                move || {
+                    clear_timeout(&max_timer);
+                    invoke();
+                },
+                Duration::from_millis(duration as u64),
+            )
+            .ok();
         }}
 
-        Rc::clone(&last_return_value)
+        Arc::clone(&last_return_value)
     }
 }

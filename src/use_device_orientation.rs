@@ -1,6 +1,5 @@
 use cfg_if::cfg_if;
 use leptos::prelude::wrappers::read::Signal;
-use leptos::prelude::*;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
 /// Provide web developers with information from the physical orientation of
@@ -42,6 +41,7 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         let beta = || None;
         let gamma = || None;
     } else {
+        use leptos::prelude::*;
         use crate::{use_event_listener_with_options, UseEventListenerOptions, use_supported, js};
         use leptos::ev::deviceorientation;
 
@@ -67,7 +67,7 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
                     .once(false),
             );
 
-            leptos::on_cleanup(cleanup);
+            on_cleanup(cleanup);
         }
     }}
 

@@ -37,49 +37,17 @@ impl<T> Clone for UseRwSignal<T> {
 
 impl<T> Copy for UseRwSignal<T> {}
 
-impl<T> SignalGet for UseRwSignal<T>
-where
-    T: Clone,
-{
-    type Value = T;
-
-    fn get(&self) -> T {
+impl<T> DefinedAt for UseRwSignal<T> {
+    fn defined_at(&self) -> Option<&'static std::panic::Location<'static>> {
         match self {
-            Self::Separate(s, _) => s.get(),
-            Self::Combined(s) => s.get(),
-        }
-    }
-
-    fn try_get(&self) -> Option<T> {
-        match self {
-            Self::Separate(s, _) => s.try_get(),
-            Self::Combined(s) => s.try_get(),
+            Self::Combined(s) => s.defined_at(),
+            // NOTE: is this sufficient communication?
+            Self::Separate(_, s) => s.defined_at(),
         }
     }
 }
 
-impl<T> SignalGetUntracked for UseRwSignal<T>
-where
-    T: Clone,
-{
-    type Value = T;
-
-    fn get_untracked(&self) -> T {
-        match self {
-            Self::Separate(s, _) => s.get_untracked(),
-            Self::Combined(s) => s.get_untracked(),
-        }
-    }
-
-    fn try_get_untracked(&self) -> Option<T> {
-        match self {
-            Self::Separate(s, _) => s.try_get_untracked(),
-            Self::Combined(s) => s.try_get_untracked(),
-        }
-    }
-}
-
-impl<T> SignalWith for UseRwSignal<T> {
+impl<T> With for UseRwSignal<T> {
     type Value = T;
 
     fn with<R>(&self, f: impl FnOnce(&T) -> R) -> R {
@@ -97,7 +65,7 @@ impl<T> SignalWith for UseRwSignal<T> {
     }
 }
 
-impl<T> SignalWithUntracked for UseRwSignal<T> {
+impl<T> WithUntracked for UseRwSignal<T> {
     type Value = T;
 
     fn with_untracked<R>(&self, f: impl FnOnce(&T) -> R) -> R {
@@ -115,7 +83,7 @@ impl<T> SignalWithUntracked for UseRwSignal<T> {
     }
 }
 
-impl<T> SignalSet for UseRwSignal<T> {
+impl<T> Set for UseRwSignal<T> {
     type Value = T;
 
     fn set(&self, new_value: T) {
@@ -133,23 +101,7 @@ impl<T> SignalSet for UseRwSignal<T> {
     }
 }
 
-impl<T> SignalSetUntracked<T> for UseRwSignal<T> {
-    fn set_untracked(&self, new_value: T) {
-        match self {
-            Self::Separate(_, s) => s.set_untracked(new_value),
-            Self::Combined(s) => s.set_untracked(new_value),
-        }
-    }
-
-    fn try_set_untracked(&self, new_value: T) -> Option<T> {
-        match self {
-            Self::Separate(_, s) => s.try_set_untracked(new_value),
-            Self::Combined(s) => s.try_set_untracked(new_value),
-        }
-    }
-}
-
-impl<T> SignalUpdate for UseRwSignal<T> {
+impl<T> Update for UseRwSignal<T> {
     type Value = T;
 
     fn update(&self, f: impl FnOnce(&mut T)) {
@@ -163,6 +115,20 @@ impl<T> SignalUpdate for UseRwSignal<T> {
         match self {
             Self::Separate(_, s) => s.try_update(f),
             Self::Combined(s) => s.try_update(f),
+        }
+    }
+
+    fn maybe_update(&self, fun: impl FnOnce(&mut Self::Value) -> bool) {
+        match self {
+            Self::Separate(_, s) => s.maybe_update(fun),
+            Self::Combined(s) => s.maybe_update(fun),
+        }
+    }
+
+    fn try_maybe_update<U>(&self, fun: impl FnOnce(&mut Self::Value) -> (bool, U)) -> Option<U> {
+        match self {
+            Self::Separate(_, s) => s.try_maybe_update(fun),
+            Self::Combined(s) => s.try_maybe_update(fun),
         }
     }
 }

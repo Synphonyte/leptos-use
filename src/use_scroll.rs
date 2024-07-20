@@ -11,6 +11,7 @@ use crate::use_event_listener::use_event_listener_with_options;
 use crate::{
     use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions,
 };
+use leptos::ev;
 use leptos::ev::scrollend;
 use wasm_bindgen::JsCast;
 
@@ -202,13 +203,13 @@ where
 
     let (is_scrolling, set_is_scrolling) = signal(false);
 
-    let arrived_state = create_rw_signal(Directions {
+    let arrived_state = RwSignal::new(Directions {
         left: true,
         right: false,
         top: true,
         bottom: false,
     });
-    let directions = create_rw_signal(Directions {
+    let directions = RwSignal::new(Directions {
         left: false,
         right: false,
         top: false,

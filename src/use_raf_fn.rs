@@ -138,7 +138,8 @@ pub fn use_raf_fn_with_options(
         resume();
     }
 
-    on_cleanup(pause.clone());
+    let pause_cleanup = send_wrapper::SendWrapper::new(pause.clone());
+    on_cleanup(move || pause_cleanup());
 
     Pausable {
         resume,

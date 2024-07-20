@@ -5,9 +5,10 @@ use default_struct_builder::DefaultBuilder;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::cell::Cell;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
 
@@ -114,8 +115,9 @@ pub fn use_event_source<T, C>(
     url: &str,
 ) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     C: StringCodec<T> + Default,
+    C::Error: Send + Sync,
 {
     use_event_source_with_options(url, UseEventSourceOptions::<T, C>::default())
 }
@@ -126,8 +128,9 @@ pub fn use_event_source_with_options<T, C>(
     options: UseEventSourceOptions<T, C>,
 ) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     C: StringCodec<T> + Default,
+    C::Error: Send + Sync,
 {
     let UseEventSourceOptions {
         codec,
@@ -142,14 +145,14 @@ where
 
     let url = url.to_owned();
 
-    let (event, set_event) = signal(None::<web_sys::Event>);
+    let (event, set_event) = signal(None::<SendWrapper<web_sys::Event>>);
     let (data, set_data) = signal(None::<T>);
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
-    let (event_source, set_event_source) = signal(None::<web_sys::EventSource>);
+    let (event_source, set_event_source) = signal(None::<SendWrapper<web_sys::EventSource>>);
     let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
 
-    let explicitly_closed = Rc::new(Cell::new(false));
-    let retried = Rc::new(Cell::new(0));
+    let explicitly_closed = Arc::new(Cell::new(false));
+    let retried = Arc::new(Cell::new(0));
 
     let set_data_from_string = move |data_string: Option<String>| {
         if let Some(data_string) = data_string {
@@ -161,7 +164,7 @@ where
     };
 
     let close = {
-        let explicitly_closed = Rc::clone(&explicitly_closed);
+        let explicitly_closed = Arc::clone(&explicitly_closed);
 
         move || {
             if let Some(event_source) = event_source.get_untracked() {
@@ -173,11 +176,11 @@ where
         }
     };
 
-    let init = StoredValue::new(None::<Rc<dyn Fn()>>);
+    let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
-    init.set_value(Some(Rc::new({
-        let explicitly_closed = Rc::clone(&explicitly_closed);
-        let retried = Rc::clone(&retried);
+    init.set_value(Some(Arc::new({
+        let explicitly_closed = Arc::clone(&explicitly_closed);
+        let retried = Arc::clone(&retried);
 
         move || {
             use wasm_bindgen::prelude::*;
@@ -194,7 +197,7 @@ where
 
             set_ready_state.set(ConnectionReadyState::Connecting);
 
-            set_event_source.set(Some(es.clone()));
+            set_event_source.set(Some(SendWrapper::new(es.clone())));
 
             let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
                 set_ready_state.set(ConnectionReadyState::Open);
@@ -204,14 +207,14 @@ where
             on_open.forget();
 
             let on_error = Closure::wrap(Box::new({
-                let explicitly_closed = Rc::clone(&explicitly_closed);
-                let retried = Rc::clone(&retried);
-                let on_failed = Rc::clone(&on_failed);
+                let explicitly_closed = Arc::clone(&explicitly_closed);
+                let retried = Arc::clone(&retried);
+                let on_failed = Arc::clone(&on_failed);
                 let es = es.clone();
 
                 move |e: web_sys::Event| {
                     set_ready_state.set(ConnectionReadyState::Closed);
-                    set_error.set(Some(UseEventSourceError::Event(e)));
+                    set_error.set(Some(UseEventSourceError::Event(SendWrapper::new(e))));
 
                     // only reconnect if EventSource isn't reconnecting by itself
                     // this is the case when the connection is closed (readyState is 2)
@@ -273,8 +276,8 @@ where
     {
         open = {
             let close = close.clone();
-            let explicitly_closed = Rc::clone(&explicitly_closed);
-            let retried = Rc::clone(&retried);
+            let explicitly_closed = Arc::clone(&explicitly_closed);
+            let retried = Arc::clone(&retried);
 
             move || {
                 close();
@@ -326,7 +329,7 @@ where
     reconnect_interval: u64,
 
     /// On maximum retry times reached.
-    on_failed: Rc<dyn Fn()>,
+    on_failed: Arc<dyn Fn()>,
 
     /// If `true` the `EventSource` connection will immediately be opened when calling this function.
     /// If `false` you have to manually call the `open` function.
@@ -349,7 +352,7 @@ impl<T, C: StringCodec<T> + Default> Default for UseEventSourceOptions<T, C> {
             codec: C::default(),
             reconnect_limit: 3,
             reconnect_interval: 3000,
-            on_failed: Rc::new(|| {}),
+            on_failed: Arc::new(|| {}),
             immediate: true,
             named_events: vec![],
             with_credentials: false,
@@ -361,8 +364,8 @@ impl<T, C: StringCodec<T> + Default> Default for UseEventSourceOptions<T, C> {
 /// Return type of [`use_event_source`].
 pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn>
 where
-    Err: 'static,
-    T: Clone + 'static,
+    Err: Send + Sync + 'static,
+    T: Clone + Send + Sync + 'static,
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
 {
@@ -373,7 +376,7 @@ where
     pub ready_state: Signal<ConnectionReadyState>,
 
     /// The latest named event
-    pub event: Signal<Option<web_sys::Event>>,
+    pub event: Signal<Option<SendWrapper<web_sys::Event>>>,
 
     /// The current error
     pub error: Signal<Option<UseEventSourceError<Err>>>,
@@ -386,13 +389,13 @@ where
     pub close: CloseFn,
 
     /// The `EventSource` instance
-    pub event_source: Signal<Option<web_sys::EventSource>>,
+    pub event_source: Signal<Option<SendWrapper<web_sys::EventSource>>>,
 }
 
 #[derive(Error, Debug)]
 pub enum UseEventSourceError<Err> {
     #[error("Error event: {0:?}")]
-    Event(web_sys::Event),
+    Event(SendWrapper<web_sys::Event>),
 
     #[error("Error decoding value")]
     Deserialize(Err),
