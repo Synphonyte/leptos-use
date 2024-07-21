@@ -91,7 +91,7 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
             listener.replace(Rc::new(move |_| update()) as Rc<dyn Fn(web_sys::Event)>);
         }
 
-        create_effect(move |_| update());
+        Effect::new(move |_| update());
 
         on_cleanup(cleanup);
     }}
