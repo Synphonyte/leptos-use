@@ -46,12 +46,12 @@ pub fn use_permission(permission_name: &str) -> Signal<PermissionState> {
             }
         };
 
-        spawn_local({
+        leptos::spawn::spawn_local({
             let permission_name = permission_name.to_owned();
 
             async move {
                 if let Ok(status) = query_permission(permission_name).await {
-                    let _ = use_event_listener(status.clone(), ev::change, {
+                    let _ = use_event_listener(status.clone(), leptos::ev::change, {
                         let on_change = on_change.clone();
                         move |_| on_change()
                     });

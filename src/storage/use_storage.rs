@@ -5,7 +5,7 @@ use crate::{
 use cfg_if::cfg_if;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use std::rc::Rc;
+use std::sync::Arc;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
@@ -93,7 +93,7 @@ pub fn use_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Default + Clone + PartialEq,
+    T: Default + Clone + PartialEq + Send + Sync,
     C: StringCodec<T> + Default,
 {
     use_storage_with_options::<T, C>(storage_type, key, UseStorageOptions::default())
@@ -106,7 +106,7 @@ pub fn use_storage_with_options<T, C>(
     options: UseStorageOptions<T, C>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Clone + PartialEq,
+    T: Clone + PartialEq + Send + Sync,
     C: StringCodec<T> + Default,
 {
     let UseStorageOptions {
@@ -216,10 +216,10 @@ where
         fetch_from_storage();
 
         // Fires when storage needs to be fetched
-        let notify = create_trigger();
+        let notify = Trigger::new();
 
         // Refetch from storage. Keeps track of how many times we've been notified. Does not increment for calls to set_data
-        let notify_id = create_memo::<usize>(move |prev| {
+        let notify_id = Memo::<usize>::new(move |prev| {
             notify.track();
             match prev {
                 None => 1, // Avoid async fetch of initial value
@@ -334,7 +334,7 @@ pub struct UseStorageOptions<T: 'static, C: StringCodec<T>> {
     // Translates to and from UTF-16 strings
     codec: C,
     // Callback for when an error occurs
-    on_error: Rc<dyn Fn(UseStorageError<C::Error>)>,
+    on_error: Arc<dyn Fn(UseStorageError<C::Error>)>,
     // Whether to continuously listen to changes from browser storage
     listen_to_storage_changes: bool,
     // Initial value to use when the storage key is not set
@@ -346,7 +346,7 @@ pub struct UseStorageOptions<T: 'static, C: StringCodec<T>> {
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
 #[cfg(not(feature = "ssr"))]
 fn handle_error<T, Err>(
-    on_error: &Rc<dyn Fn(UseStorageError<Err>)>,
+    on_error: &Arc<dyn Fn(UseStorageError<Err>)>,
     result: Result<T, UseStorageError<Err>>,
 ) -> Result<T, ()> {
     result.map_err(|err| (on_error)(err))
@@ -356,7 +356,7 @@ impl<T: Default, C: StringCodec<T> + Default> Default for UseStorageOptions<T, C
     fn default() -> Self {
         Self {
             codec: C::default(),
-            on_error: Rc::new(|_err| ()),
+            on_error: Arc::new(|_err| ()),
             listen_to_storage_changes: true,
             initial_value: MaybeRwSignal::default(),
             filter: FilterOptions::default(),
@@ -376,7 +376,7 @@ impl<T: Default, C: StringCodec<T>> UseStorageOptions<T, C> {
     /// Optional callback whenever an error occurs.
     pub fn on_error(self, on_error: impl Fn(UseStorageError<C::Error>) + 'static) -> Self {
         Self {
-            on_error: Rc::new(on_error),
+            on_error: Arc::new(on_error),
             ..self
         }
     }

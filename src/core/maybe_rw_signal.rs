@@ -93,7 +93,7 @@ impl<T: Clone> MaybeRwSignal<T> {
             Self::DynamicRead(s) => {
                 let (r, w) = signal(s.get_untracked());
 
-                create_effect(move |_| {
+                Effect::new(move |_| {
                     w.update(move |w| {
                         *w = s.get();
                     });

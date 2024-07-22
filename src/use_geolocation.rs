@@ -2,6 +2,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 
 /// Reactive [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API).
 /// It allows the user to provide their location to web applications if they so desire. For privacy reasons,
@@ -43,8 +44,8 @@ pub fn use_geolocation_with_options(
     options: UseGeolocationOptions,
 ) -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
     let (located_at, set_located_at) = signal(None::<f64>);
-    let (error, set_error) = signal(None::<web_sys::PositionError>);
-    let (coords, set_coords) = signal(None::<web_sys::Coordinates>);
+    let (error, set_error) = signal(None::<SendWrapper<web_sys::PositionError>>);
+    let (coords, set_coords) = signal(None::<SendWrapper<web_sys::Coordinates>>);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let resume = || ();
@@ -56,24 +57,23 @@ pub fn use_geolocation_with_options(
         let _ = set_coords;
     } else {
         use crate::use_window;
-        use std::cell::Cell;
-        use std::rc::Rc;
         use wasm_bindgen::prelude::*;
+        use std::sync::{Arc, Mutex};
 
         let update_position = move |position: web_sys::Position| {
             set_located_at.set(Some(position.timestamp()));
-            set_coords.set(Some(position.coords()));
+            set_coords.set(Some(SendWrapper::new(position.coords())));
             set_error.set(None);
         };
 
         let on_error = move |err: web_sys::PositionError| {
-            set_error.set(Some(err));
+            set_error.set(Some(SendWrapper::new(err)));
         };
 
-        let watch_handle = Rc::new(Cell::new(None::<i32>));
+        let watch_handle = Arc::new(Mutex::new(None::<i32>));
 
         let resume = {
-            let watch_handle = Rc::clone(&watch_handle);
+            let watch_handle = Arc::clone(&watch_handle);
             let position_options = options.as_position_options();
 
             move || {
@@ -85,15 +85,14 @@ pub fn use_geolocation_with_options(
                         let on_error =
                             Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
 
-                        watch_handle.replace(
+                        *watch_handle.lock().unwrap() =
                             geolocation
                                 .watch_position_with_error_callback_and_options(
                                     update_position.as_ref().unchecked_ref(),
                                     Some(on_error.as_ref().unchecked_ref()),
                                     &position_options,
                                 )
-                                .ok(),
-                        );
+                                .ok();
 
                         update_position.forget();
                         on_error.forget();
@@ -107,12 +106,12 @@ pub fn use_geolocation_with_options(
         }
 
         let pause = {
-            let watch_handle = Rc::clone(&watch_handle);
+            let watch_handle = Arc::clone(&watch_handle);
 
             move || {
                 let navigator = use_window().navigator();
                 if let Some(navigator) = navigator {
-                    if let Some(handle) = watch_handle.take() {
+                    if let Some(handle) = *watch_handle.lock().unwrap() {
                         if let Ok(geolocation) = navigator.geolocation() {
                             geolocation.clear_watch(handle);
                         }
@@ -204,13 +203,13 @@ where
 {
     /// The coordinates of the current device like latitude and longitude.
     /// See [`GeolocationCoordinates`](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates)..
-    pub coords: Signal<Option<web_sys::Coordinates>>,
+    pub coords: Signal<Option<SendWrapper<web_sys::Coordinates>>>,
 
     /// The timestamp of the current coordinates.
     pub located_at: Signal<Option<f64>>,
 
     /// The last error received from `navigator.geolocation`.
-    pub error: Signal<Option<web_sys::PositionError>>,
+    pub error: Signal<Option<SendWrapper<web_sys::PositionError>>>,
 
     /// Resume the geolocation watch.
     pub resume: ResumeFn,

@@ -2,7 +2,6 @@ use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{watch_with_options, WatchOptions};
@@ -120,6 +119,8 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+        use send_wrapper::SendWrapper;
         let event_name = event.name();
         let closure_js = Closure::wrap(Box::new(move |e| {
             #[cfg(debug_assertions)]
@@ -187,7 +188,8 @@ where
             cleanup_prev_element();
         };
 
-        on_cleanup(stop.clone());
+        let cleanup_stop = SendWrapper::new(stop.clone());
+        on_cleanup(move || cleanup_stop());
 
         stop
     }

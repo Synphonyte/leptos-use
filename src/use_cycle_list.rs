@@ -35,13 +35,13 @@ pub fn use_cycle_list<T, L>(
     list: L,
 ) -> UseCycleListReturn<
     T,
-    impl Fn(usize) -> T + Clone,
+    impl Fn(usize) -> T + Clone + Send + Sync,
     impl Fn() + Clone,
     impl Fn() + Clone,
     impl Fn(i64) -> T + Clone,
 >
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     L: Into<MaybeSignal<Vec<T>>>,
 {
     use_cycle_list_with_options(list, UseCycleListOptions::default())
@@ -58,7 +58,7 @@ pub fn use_cycle_list_with_options<T, L>(
     impl Fn(i64) -> T + Clone,
 >
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     L: Into<MaybeSignal<Vec<T>>>,
 {
     let UseCycleListOptions {

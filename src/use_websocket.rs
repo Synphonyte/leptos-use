@@ -2,8 +2,8 @@
 
 use cfg_if::cfg_if;
 use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
-use std::cell::Cell;
-use std::rc::Rc;
+use send_wrapper::SendWrapper;
+use std::sync::{atomic::AtomicBool, Arc};
 use std::time::Duration;
 
 use crate::core::ConnectionReadyState;
@@ -100,16 +100,16 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// use std::rc::Rc;
+/// use std::sync::Arc;
 ///
 /// #[derive(Clone)]
 /// pub struct WebsocketContext {
 ///     pub message: Signal<Option<String>>,
-///     send: Rc<dyn Fn(&str)>,  // use Rc to make it easily cloneable
+///     send: Arc<dyn Fn(&str)>,  // use Arc to make it easily cloneable
 /// }
 ///
 /// impl WebsocketContext {
-///     pub fn new(message: Signal<Option<String>>, send: Rc<dyn Fn(&str)>) -> Self {
+///     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&str)>) -> Self {
 ///         Self {
 ///             message,
 ///             send,
@@ -129,15 +129,15 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::{use_websocket, UseWebsocketReturn};
-/// # use std::rc::Rc;
+/// # use std::sync::Arc;
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Rc<dyn Fn(&str)>,
+/// #     send: Arc<dyn Fn(&str)>,
 /// # }
 /// #
 /// # impl WebsocketContext {
-/// #     pub fn new(message: Signal<Option<String>>, send: Rc<dyn Fn(&str)>) -> Self {
+/// #     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&str)>) -> Self {
 /// #         Self {
 /// #             message,
 /// #             send,
@@ -153,7 +153,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///     ..
 /// } = use_websocket("ws:://some.websocket.io");
 ///
-/// provide_context(WebsocketContext::new(message, Rc::new(send.clone())));
+/// provide_context(WebsocketContext::new(message, Arc::new(send.clone())));
 /// #
 /// # view! {}
 /// # }
@@ -164,11 +164,11 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::{use_websocket, UseWebsocketReturn};
-/// # use std::rc::Rc;
+/// # use std::sync::Arc;
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Rc<dyn Fn(&str)>,
+/// #     send: Arc<dyn Fn(&str)>,
 /// # }
 /// #
 /// # impl WebsocketContext {
@@ -228,26 +228,27 @@ pub fn use_websocket_with_options(
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
     let (message_bytes, set_message_bytes) = signal(None);
-    let ws_ref: StoredValue<Option<WebSocket>> = StoredValue::new(None);
+    let ws_ref: StoredValue<Option<SendWrapper<WebSocket>>> = StoredValue::new(None);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
     let reconnect_times_ref: StoredValue<u64> = StoredValue::new(0);
 
-    let unmounted = Rc::new(Cell::new(false));
+    let unmounted = Arc::new(AtomicBool::new(false));
 
-    let connect_ref: StoredValue<Option<Rc<dyn Fn()>>> = StoredValue::new(None);
+    let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
 
     #[cfg(not(feature = "ssr"))]
     {
-        let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = StoredValue::new(None);
+        let reconnect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> =
+            StoredValue::new(None);
         reconnect_ref.set_value({
             let ws = ws_ref.get_value();
-            Some(Rc::new(move || {
+            Some(Arc::new(move || {
                 if reconnect_times_ref.get_value() < reconnect_limit
-                    && ws
-                        .clone()
-                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                    && ws.clone().map_or(false, |ws: SendWrapper<WebSocket>| {
+                        ws.ready_state() != WebSocket::OPEN
+                    })
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -267,9 +268,9 @@ pub fn use_websocket_with_options(
 
         connect_ref.set_value({
             let ws = ws_ref.get_value();
-            let unmounted = Rc::clone(&unmounted);
+            let unmounted = Arc::clone(&unmounted);
 
-            Some(Rc::new(move || {
+            Some(Arc::new(move || {
                 reconnect_timer_ref.set_value(None);
 
                 if let Some(web_socket) = &ws {
@@ -294,8 +295,8 @@ pub fn use_websocket_with_options(
 
                 // onopen handler
                 {
-                    let unmounted = Rc::clone(&unmounted);
-                    let on_open = Rc::clone(&on_open);
+                    let unmounted = Arc::clone(&unmounted);
+                    let on_open = Arc::clone(&on_open);
 
                     let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
                         if unmounted.get() {
@@ -303,7 +304,7 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = SpecialNonReactiveZone::enter();
+                        let zone = diagnostics::SpecialNonReactiveZone::enter();
 
                         on_open(e);
 
@@ -320,9 +321,9 @@ pub fn use_websocket_with_options(
 
                 // onmessage handler
                 {
-                    let unmounted = Rc::clone(&unmounted);
-                    let on_message = Rc::clone(&on_message);
-                    let on_message_bytes = Rc::clone(&on_message_bytes);
+                    let unmounted = Arc::clone(&unmounted);
+                    let on_message = Arc::clone(&on_message);
+                    let on_message_bytes = Arc::clone(&on_message_bytes);
 
                     let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
                         if unmounted.get() {
@@ -342,7 +343,7 @@ pub fn use_websocket_with_options(
                                         let txt = String::from(&txt);
 
                                         #[cfg(debug_assertions)]
-                                        let zone = SpecialNonReactiveZone::enter();
+                                        let zone = diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message(txt.clone());
 
@@ -358,7 +359,7 @@ pub fn use_websocket_with_options(
                                 let array = array.to_vec();
 
                                 #[cfg(debug_assertions)]
-                                let zone = SpecialNonReactiveZone::enter();
+                                let zone = diagnostics::SpecialNonReactiveZone::enter();
 
                                 on_message_bytes(array.clone());
 
@@ -376,8 +377,8 @@ pub fn use_websocket_with_options(
 
                 // onerror handler
                 {
-                    let unmounted = Rc::clone(&unmounted);
-                    let on_error = Rc::clone(&on_error);
+                    let unmounted = Arc::clone(&unmounted);
+                    let on_error = Arc::clone(&on_error);
 
                     let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
                         if unmounted.get() {
@@ -389,7 +390,7 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = SpecialNonReactiveZone::enter();
+                        let zone = diagnostics::SpecialNonReactiveZone::enter();
 
                         on_error(e);
 
@@ -405,8 +406,8 @@ pub fn use_websocket_with_options(
 
                 // onclose handler
                 {
-                    let unmounted = Rc::clone(&unmounted);
-                    let on_close = Rc::clone(&on_close);
+                    let unmounted = Arc::clone(&unmounted);
+                    let on_close = Arc::clone(&on_close);
 
                     let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
                         if unmounted.get() {
@@ -418,7 +419,7 @@ pub fn use_websocket_with_options(
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = SpecialNonReactiveZone::enter();
+                        let zone = diagnostics::SpecialNonReactiveZone::enter();
 
                         on_close(e);
 
@@ -486,7 +487,7 @@ pub fn use_websocket_with_options(
 
     // clean up (unmount)
     on_cleanup(move || {
-        unmounted.set(true);
+        unmounted.store(true, std::sync::atomic::Ordering::Relaxed);
         close();
     });
 
@@ -506,15 +507,15 @@ pub fn use_websocket_with_options(
 #[derive(DefaultBuilder)]
 pub struct UseWebSocketOptions {
     /// `WebSocket` connect callback.
-    on_open: Rc<dyn Fn(Event)>,
+    on_open: Arc<dyn Fn(Event) + Send + Sync>,
     /// `WebSocket` message callback for text.
-    on_message: Rc<dyn Fn(String)>,
+    on_message: Arc<dyn Fn(String) + Send + Sync>,
     /// `WebSocket` message callback for binary.
-    on_message_bytes: Rc<dyn Fn(Vec<u8>)>,
+    on_message_bytes: Arc<dyn Fn(Vec<u8>) + Send + Sync>,
     /// `WebSocket` error callback.
-    on_error: Rc<dyn Fn(Event)>,
+    on_error: Arc<dyn Fn(Event) + Send + Sync>,
     /// `WebSocket` close callback.
-    on_close: Rc<dyn Fn(CloseEvent)>,
+    on_close: Arc<dyn Fn(CloseEvent) + Send + Sync>,
     /// Retry times. Defaults to 3.
     reconnect_limit: u64,
     /// Retry interval in ms. Defaults to 3000.
@@ -530,11 +531,11 @@ pub struct UseWebSocketOptions {
 impl Default for UseWebSocketOptions {
     fn default() -> Self {
         Self {
-            on_open: Rc::new(|_| {}),
-            on_message: Rc::new(|_| {}),
-            on_message_bytes: Rc::new(|_| {}),
-            on_error: Rc::new(|_| {}),
-            on_close: Rc::new(|_| {}),
+            on_open: Arc::new(|_| {}),
+            on_message: Arc::new(|_| {}),
+            on_message_bytes: Arc::new(|_| {}),
+            on_error: Arc::new(|_| {}),
+            on_close: Arc::new(|_| {}),
             reconnect_limit: 3,
             reconnect_interval: 3000,
             immediate: true,
@@ -559,7 +560,7 @@ where
     /// Latest binary message received from `WebSocket`.
     pub message_bytes: Signal<Option<Vec<u8>>>,
     /// The `WebSocket` instance.
-    pub ws: Option<WebSocket>,
+    pub ws: Option<SendWrapper<WebSocket>>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection

@@ -2,9 +2,8 @@ use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use std::cell::Cell;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 /// Wrapper for `setTimeout` with controls.
@@ -46,13 +45,14 @@ where
 
     let (is_pending, set_pending) = signal(false);
 
-    let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
+    let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
 
     let clear = {
-        let timer = Rc::clone(&timer);
+        let timer = Arc::clone(&timer);
 
         move || {
-            if let Some(timer) = timer.take() {
+            let timer = timer.lock().unwrap();
+            if let Some(timer) = *timer {
                 timer.clear();
             }
         }
@@ -68,7 +68,7 @@ where
     };
 
     let start = {
-        let timer = Rc::clone(&timer);
+        let timer = Arc::clone(&timer);
         let callback = callback.clone();
 
         move |arg: Arg| {
@@ -76,12 +76,12 @@ where
 
             let handle = set_timeout_with_handle(
                 {
-                    let timer = Rc::clone(&timer);
+                    let timer = Arc::clone(&timer);
                     let callback = callback.clone();
 
                     move || {
                         set_pending.set(false);
-                        timer.set(None);
+                        *timer.lock().unwrap() = None;
 
                         #[cfg(debug_assertions)]
                         let _z = SpecialNonReactiveZone::enter();
@@ -93,7 +93,7 @@ where
             )
             .ok();
 
-            timer.set(handle);
+            *timer.lock().unwrap() = handle;
         }
     };
 

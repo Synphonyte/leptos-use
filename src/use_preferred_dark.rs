@@ -1,5 +1,4 @@
 use crate::use_media_query;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// Reactive [dark theme preference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).

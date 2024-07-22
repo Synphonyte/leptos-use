@@ -15,7 +15,7 @@ pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Clone + Default + PartialEq,
+    T: Clone + Default + PartialEq + Send + Sync,
     C: StringCodec<T> + Default,
 {
     use_storage_with_options(
@@ -31,7 +31,7 @@ pub fn use_local_storage_with_options<T, C>(
     options: UseStorageOptions<T, C>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Clone + PartialEq,
+    T: Clone + PartialEq + Send + Sync,
     C: StringCodec<T> + Default,
 {
     use_storage_with_options(StorageType::Local, key, options)

@@ -1,7 +1,6 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use leptos::prelude::*;
@@ -115,6 +114,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
         let OnClickOutsideOptions {
             ignore,
             capture,

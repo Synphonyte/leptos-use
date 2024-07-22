@@ -45,30 +45,16 @@ where
     }
 }
 
-impl<T, E> SignalGet for ElementsMaybeSignal<T, E>
+impl<T, E> DefinedAt for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    type Value = Vec<Option<T>>;
-
-    fn get(&self) -> Vec<Option<T>> {
-        match self {
-            Self::Static(v) => v.clone(),
-            Self::Dynamic(s) => s.get(),
-            Self::_Phantom(_) => unreachable!(),
-        }
-    }
-
-    fn try_get(&self) -> Option<Vec<Option<T>>> {
-        match self {
-            Self::Static(v) => Some(v.clone()),
-            Self::Dynamic(s) => s.try_get(),
-            Self::_Phantom(_) => unreachable!(),
-        }
+    fn defined_at(&self) -> Option<&'static std::panic::Location<'static>> {
+        None
     }
 }
 
-impl<T, E> SignalWith for ElementsMaybeSignal<T, E>
+impl<T, E> With for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
@@ -91,7 +77,7 @@ where
     }
 }
 
-impl<T, E> SignalWithUntracked for ElementsMaybeSignal<T, E>
+impl<T, E> WithUntracked for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
@@ -109,29 +95,6 @@ where
         match self {
             Self::Static(t) => Some(f(t)),
             Self::Dynamic(s) => s.try_with_untracked(f),
-            Self::_Phantom(_) => unreachable!(),
-        }
-    }
-}
-
-impl<T, E> SignalGetUntracked for ElementsMaybeSignal<T, E>
-where
-    T: Into<E> + Clone + 'static,
-{
-    type Value = Vec<Option<T>>;
-
-    fn get_untracked(&self) -> Vec<Option<T>> {
-        match self {
-            Self::Static(t) => t.clone(),
-            Self::Dynamic(s) => s.get_untracked(),
-            Self::_Phantom(_) => unreachable!(),
-        }
-    }
-
-    fn try_get_untracked(&self) -> Option<Vec<Option<T>>> {
-        match self {
-            Self::Static(t) => Some(t.clone()),
-            Self::Dynamic(s) => s.try_get_untracked(),
             Self::_Phantom(_) => unreachable!(),
         }
     }

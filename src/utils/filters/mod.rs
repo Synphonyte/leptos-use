@@ -4,31 +4,30 @@ mod throttle;
 pub use debounce::*;
 pub use throttle::*;
 
-use leptos::MaybeSignal;
-use std::cell::RefCell;
-use std::rc::Rc;
+use leptos::prelude::MaybeSignal;
+use std::sync::{Arc, Mutex};
 
-macro_rules! RcFilterFn {
+macro_rules! ArcFilterFn {
     ($R:ident) => {
-        Rc<dyn Fn(Rc<dyn Fn() -> $R>) -> Rc<RefCell<Option<$R>>>>
+        Arc<dyn Fn(Arc<dyn Fn() -> $R>) -> Arc<Mutex<Option<$R>>>>
     }
 }
 
 pub fn create_filter_wrapper<F, R>(
-    filter: RcFilterFn!(R),
+    filter: ArcFilterFn!(R),
     func: F,
-) -> impl Fn() -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn() -> R + Clone + 'static,
     R: 'static,
 {
-    move || Rc::clone(&filter)(Rc::new(func.clone()))
+    move || Arc::clone(&filter)(Arc::new(func.clone()))
 }
 
 pub fn create_filter_wrapper_with_arg<F, Arg, R>(
-    filter: RcFilterFn!(R),
+    filter: ArcFilterFn!(R),
     func: F,
-) -> impl Fn(Arg) -> Rc<RefCell<Option<R>>> + Clone
+) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn(Arg) -> R + Clone + 'static,
     R: 'static,
@@ -36,7 +35,7 @@ where
 {
     move |arg: Arg| {
         let func = func.clone();
-        Rc::clone(&filter)(Rc::new(move || func(arg.clone())))
+        Arc::clone(&filter)(Arc::new(move || func(arg.clone())))
     }
 }
 
@@ -70,15 +69,15 @@ impl FilterOptions {
         }
     }
 
-    pub fn filter_fn<R>(&self) -> RcFilterFn!(R)
+    pub fn filter_fn<R>(&self) -> ArcFilterFn!(R)
     where
         R: 'static,
     {
         match self {
-            FilterOptions::Debounce { ms, options } => Rc::new(debounce_filter(*ms, *options)),
-            FilterOptions::Throttle { ms, options } => Rc::new(throttle_filter(*ms, *options)),
+            FilterOptions::Debounce { ms, options } => Arc::new(debounce_filter(*ms, *options)),
+            FilterOptions::Throttle { ms, options } => Arc::new(throttle_filter(*ms, *options)),
             FilterOptions::None => {
-                Rc::new(|invoke: Rc<dyn Fn() -> R>| Rc::new(RefCell::new(Some(invoke()))))
+                Arc::new(|invoke: Arc<dyn Fn() -> R>| Arc::new(Mutex::new(Some(invoke()))))
             }
         }
     }

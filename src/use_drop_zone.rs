@@ -1,7 +1,6 @@
 use crate::core::ElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::{Debug, Formatter};
@@ -78,6 +77,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
         let UseDropZoneOptions {
             on_drop,
             on_enter,
