@@ -54,6 +54,13 @@ By adding `"leptos-use/ssr"` to the `ssr` feature of your project, it will only
 be enabled when your project is built with `ssr`, and you will get the server
 functions server-side, and the client functions client-side.
 
+## WASM on the server
+
+If you enable `ssr` in your project on a `wasm32` target architecture, you will get
+a compile-time warning in the console because it is a common mistake that users enable `ssr` globally.
+If you're using `wasm32` on the server however you can safely disable this warning by
+enabling the `wasm_ssr` feature together with `ssr`.
+
 ## Functions with Target Elements
 
 A lot of functions like `use_resize_observer` and `use_element_size` are only useful when a target HTML/SVG element is

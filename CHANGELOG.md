@@ -9,6 +9,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated to Leptos 0.7
 
+## [Unreleased]
+
+### New Functions 🚀
+
+- `use_user_media`
+
+### New Features 🚀
+
+- Codecs:
+    - All codecs now live in their own crate `codee`
+    - There are now binary codecs in addition to string codecs.
+        - `FromToBytesCodec`
+        - `WebpackSerdeCodec`
+        - `BincodeSerdeCodec`
+        - `ProstCodec` (see also the section "Breaking Changes 🛠" below)
+    - Every binary codec can be used as a string codec with the `Base64` wrapper which encodes the binary data as a
+      base64
+      string.
+        - This required feature `base64`
+        - It can be wrapped for example like this: `Base64<WebpackSerdeCodec>`.
+    - There is now an `OptionCodec` wrapper that allows to wrap any string codec that encodes `T` to encode `Option<T>`.
+        - Use it like this: `OptionCodec<FromToStringCodec<f64>>`.
+
+- `ElementMaybeSignal` is now implemented for `websys::HtmlElement` (thanks to @blorbb).
+- `UseStorageOptions` now has `delay_during_hydration` which has to be used when you conditionally show parts of
+  the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
+  option to `true`.
+- `cookie::SameSite` is now re-exported
+- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR. 
+- New book chapter about codecs
+- The macro `use_derive_signal!` is now exported (thanks to @mscofield0).
+
+### Breaking Changes 🛠
+
+- `UseStorageOptions` and `UseEventSourceOptions` no longer accept a `codec` value because this is already provided as a
+  generic parameter to the respective function calls.
+- Codecs have been refactored. There are now two traits that codecs implement: `Encoder` and `Decoder`. The
+  trait `StringCodec` is gone. The methods are now associated methods and their params now always take references.
+    - `JsonCodec` has been renamed to `JsonSerdeCodec`.
+    - The feature to enable this codec is now called `json_serde` instead of just `serde`.
+    - `ProstCodec` now encodes as binary data. If you want to keep using it with string data you can wrap it like
+      this: `Base64<ProstCodec>`. You have to enable both features `prost` and `base64` for this.
+    - All of these structs, traits and features now live in their own crate called `codee`
+- `use_websocket`:
+    - `UseWebsocketOptions` has been renamed to `UseWebSocketOptions` (uppercase S) to be consistent with the return
+      type.
+    - `UseWebSocketOptions::reconnect_limit` and `UseEventSourceOptions::reconnect_limit` is now `ReconnectLimit`
+      instead
+      of `u64`. Use `ReconnectLimit::Infinite` for infinite retries or `ReconnectLimit::Limited(...)` for limited
+      retries.
+    - `use_websocket` now uses codecs to send typed messages over the network.
+        - When calling you have give type parameters for the message type and the
+          codec: `use_websocket::<String, WebpackSerdeCodec>`
+        - You can use binary or string codecs.
+        - The `UseWebSocketReturn::send` closure now takes a `&T` which is encoded using the codec.
+        - The `UseWebSocketReturn::message` signal now returns an `Option<T>` which is decoded using the codec.
+        - `UseWebSocketReturn::send_bytes` and `UseWebSocketReturn::message_bytes` are gone.
+        - `UseWebSocketOptions::on_message` and `UseWebSocketOptions::on_message_bytes` have been renamed
+          to `on_message_raw` and `on_message_raw_bytes`.
+        - The new `UseWebSocketOptions::on_message` takes a `&T`.
+        - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
+- `use_storage` now always saves the default value to storage if the key doesn't exist yet. 
+
+### Fixes 🍕
+
+- Fixed auto-reconnect in `use_websocket`
+- Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
+
+## [0.10.10] - 2024-05-10
+
+### Change 🔥
+
+- Added compile-time warning when you use `ssr` feature with `wasm32`. You can enable `wasm_ssr` to remove the warning.
+
 ## [0.10.9] - 2024-04-27
 
 ### Fixes 🍕
@@ -117,7 +191,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - You can now convert `leptos::html::HtmlElement<T>` into `Element(s)MaybeSignal`. This should make functions a lot
   easier to use in directives.
 - There's now a chapter in the book especially for `Element(s)MaybeSignal`.
-- Throttled or debounced callbacks (in watch_* or *_fn) no longer are called after the containing scope was cleaned up.
+- Throttled or debounced callbacks (in watch\__ or _\_fn) no longer are called after the containing scope was cleaned
+  up.
 - The document returned from `use_document` now supports the methods `query_selector` and `query_selector_all`.
 
 ## [0.9.0] - 2023-12-06
@@ -147,7 +222,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_scroll` now uses `try_get_untracked` in the debounced callback to avoid panics if the context has been destroyed
   while the callback was waiting to be called.
 - `use_idle` works properly now (no more idles too early).
-- `use_web_notification`  doesn't panic on the server anymore.
+- `use_web_notification` doesn't panic on the server anymore.
 
 ## [0.8.2] - 2023-11-09
 
@@ -221,7 +296,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - takes now a `&str` instead of a `String` as its `url` parameter.
     - same for the returned `send` method.
     - The `ready_state` return type is now renamed to `ConnectionReadyState` instead of `UseWebSocketReadyState`.
-    - The returned signals  `ready_state`, `message`, `message_bytes` have now the type
+    - The returned signals `ready_state`, `message`, `message_bytes` have now the type
       `Signal<...>` instead of `ReadSignal<...>` to make them more consistent with other functions.
     - The options `reconnect_limit` and `reconnect_interval` now take a `u64` instead of `Option<u64>` to improve DX.
     - The option `manual` has been renamed to `immediate` to make it more consistent with other functions.

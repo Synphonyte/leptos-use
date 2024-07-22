@@ -8,6 +8,7 @@ macro_rules! signal_filtered {
     ) => {
         paste! {
             $(#[$outer])*
+            #[track_caller]
             pub fn [<signal_ $filter_name d>]<S, T>(
                 value: S,
                 ms: impl Into<MaybeSignal<f64>> + 'static,
@@ -27,6 +28,7 @@ macro_rules! signal_filtered {
             /// See
             #[$simple_func_doc]
             /// for how to use.
+            #[track_caller]
             pub fn [<signal_ $filter_name d_with_options>]<S, T>(
                 value: S,
                 ms: impl Into<MaybeSignal<f64>> + 'static,

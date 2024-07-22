@@ -5,8 +5,12 @@ use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
 use send_wrapper::SendWrapper;
 use std::sync::{atomic::AtomicBool, Arc};
 use std::time::Duration;
+use thiserror::Error;
 
 use crate::core::ConnectionReadyState;
+use codee::{
+    CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder, IsBinary,
+};
 use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
@@ -20,30 +24,30 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ## Usage
 ///
+/// Values are (en)decoded via the given codec. You can use any of the codecs, string or binary.
+///
+/// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
+///   available and what feature flags they require.
+///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use codee::string::FromToStringCodec;
+/// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use leptos_use::core::ConnectionReadyState;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let UseWebsocketReturn {
+/// let UseWebSocketReturn {
 ///     ready_state,
 ///     message,
-///     message_bytes,
 ///     send,
-///     send_bytes,
 ///     open,
 ///     close,
 ///     ..
-/// } = use_websocket("wss://echo.websocket.events/");
+/// } = use_websocket::<String, FromToStringCodec>("wss://echo.websocket.events/");
 ///
 /// let send_message = move |_| {
-///     send("Hello, world!");
-/// };
-///
-/// let send_byte_message = move |_| {
-///     send_bytes(b"Hello, world!\r\n".to_vec());
+///     send(&"Hello, world!".to_string());
 /// };
 ///
 /// let status = move || ready_state.get().to_string();
@@ -63,15 +67,47 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///         <p>"status: " {status}</p>
 ///
 ///         <button on:click=send_message disabled=move || !connected()>"Send"</button>
-///         <button on:click=send_byte_message disabled=move || !connected()>"Send bytes"</button>
 ///         <button on:click=open_connection disabled=connected>"Open"</button>
 ///         <button on:click=close_connection disabled=move || !connected()>"Close"</button>
 ///
 ///         <p>"Receive message: " {move || format!("{:?}", message.get())}</p>
-///         <p>"Receive byte message: " {move || format!("{:?}", message_bytes.get())}</p>
 ///     </div>
 /// }
 /// # }
+/// ```
+///
+/// Here is another example using `msgpack` for encoding and decoding. This means that only binary
+/// messages can be sent or received. For this to work you have to enable the **`msgpack_serde` feature** flag.
+///
+/// ```
+/// # use leptos::*;
+/// # use codee::binary::MsgpackSerdeCodec;
+/// # use leptos_use::{use_websocket, UseWebSocketReturn};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// #[derive(Serialize, Deserialize)]
+/// struct SomeData {
+///     name: String,
+///     count: i32,
+/// }
+///
+/// let UseWebSocketReturn {
+///     message,
+///     send,
+///     ..
+/// } = use_websocket::<SomeData, MsgpackSerdeCodec>("wss://some.websocket.server/");
+///
+/// let send_data = move || {
+///     send(&SomeData {
+///         name: "John Doe".to_string(),
+///         count: 42,
+///     });
+/// };
+/// #
+/// # view! {}
+/// }
 /// ```
 ///
 /// ## Relative Paths
@@ -105,11 +141,11 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// #[derive(Clone)]
 /// pub struct WebsocketContext {
 ///     pub message: Signal<Option<String>>,
-///     send: Arc<dyn Fn(&str)>,  // use Arc to make it easily cloneable
+///     send: Arc<dyn Fn(&String)>,  // use Arc to make it easily cloneable
 /// }
 ///
 /// impl WebsocketContext {
-///     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&str)>) -> Self {
+///     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String)>) -> Self {
 ///         Self {
 ///             message,
 ///             send,
@@ -119,7 +155,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///     // create a method to avoid having to use parantheses around the field
 ///     #[inline(always)]
 ///     pub fn send(&self, message: &str) {
-///         (self.send)(message)
+///         (self.send)(&message.to_string())
 ///     }
 /// }
 /// ```
@@ -128,16 +164,17 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use codee::string::FromToStringCodec;
+/// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use std::sync::Arc;
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Arc<dyn Fn(&str)>,
+/// #     send: Arc<dyn Fn(&String)>,
 /// # }
 /// #
 /// # impl WebsocketContext {
-/// #     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&str)>) -> Self {
+/// #     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String)>) -> Self {
 /// #         Self {
 /// #             message,
 /// #             send,
@@ -147,11 +184,11 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let UseWebsocketReturn {
+/// let UseWebSocketReturn {
 ///     message,
 ///     send,
 ///     ..
-/// } = use_websocket("ws:://some.websocket.io");
+/// } = use_websocket::<String, FromToStringCodec>("ws:://some.websocket.io");
 ///
 /// provide_context(WebsocketContext::new(message, Arc::new(send.clone())));
 /// #
@@ -163,18 +200,18 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_websocket, UseWebsocketReturn};
+/// # use leptos_use::{use_websocket, UseWebSocketReturn};
 /// # use std::sync::Arc;
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Arc<dyn Fn(&str)>,
+/// #     send: Arc<dyn Fn(&String)>,
 /// # }
 /// #
 /// # impl WebsocketContext {
 /// #     #[inline(always)]
 /// #     pub fn send(&self, message: &str) {
-/// #         (self.send)(message)
+/// #         (self.send)(&message.to_string())
 /// #     }
 /// # }
 ///
@@ -191,32 +228,52 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ## Server-Side Rendering
 ///
 /// On the server the returned functions amount to no-ops.
-pub fn use_websocket(
+pub fn use_websocket<T, C>(
     url: &str,
-) -> UseWebsocketReturn<
+) -> UseWebSocketReturn<
+    T,
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(&str) + Clone + 'static,
-    impl Fn(Vec<u8>) + Clone + 'static,
-> {
-    use_websocket_with_options(url, UseWebSocketOptions::default())
+    impl Fn(&T) + Clone + 'static,
+>
+where
+    T: 'static,
+    C: Encoder<T> + Decoder<T>,
+    C: IsBinary<T, <C as Decoder<T>>::Encoded>,
+    C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
+    C: HybridEncoder<T, <C as Encoder<T>>::Encoded, Error = <C as Encoder<T>>::Error>,
+{
+    use_websocket_with_options::<T, C>(url, UseWebSocketOptions::default())
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
-pub fn use_websocket_with_options(
+pub fn use_websocket_with_options<T, C>(
     url: &str,
-    options: UseWebSocketOptions,
-) -> UseWebsocketReturn<
+    options: UseWebSocketOptions<
+        T,
+        HybridCoderError<<C as Encoder<T>>::Error>,
+        HybridCoderError<<C as Decoder<T>>::Error>,
+    >,
+) -> UseWebSocketReturn<
+    T,
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(&str) + Clone + 'static,
-    impl Fn(Vec<u8>) + Clone,
-> {
+    impl Fn(&T) + Clone + 'static,
+>
+where
+    T: 'static,
+    C: Encoder<T> + Decoder<T>,
+    C: IsBinary<T, <C as Decoder<T>>::Encoded>,
+    C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
+    C: HybridEncoder<T, <C as Encoder<T>>::Encoded, Error = <C as Encoder<T>>::Error>,
+{
     let url = normalize_url(url);
+
     let UseWebSocketOptions {
         on_open,
         on_message,
-        on_message_bytes,
+        on_message_raw,
+        on_message_raw_bytes,
         on_error,
         on_close,
         reconnect_limit,
@@ -227,12 +284,12 @@ pub fn use_websocket_with_options(
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
-    let (message_bytes, set_message_bytes) = signal(None);
     let ws_ref: StoredValue<Option<SendWrapper<WebSocket>>> = StoredValue::new(None);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
     let reconnect_times_ref: StoredValue<u64> = StoredValue::new(0);
+    let manually_closed_ref: StoredValue<bool> = StoredValue::new(false);
 
     let unmounted = Arc::new(AtomicBool::new(false));
 
@@ -243,10 +300,10 @@ pub fn use_websocket_with_options(
         let reconnect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> =
             StoredValue::new(None);
         reconnect_ref.set_value({
-            let ws = ws_ref.get_value();
             Some(Arc::new(move || {
-                if reconnect_times_ref.get_value() < reconnect_limit
-                    && ws.clone().map_or(false, |ws: SendWrapper<WebSocket>| {
+                if !manually_closed_ref.get_value()
+                    && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
+                    && ws_ref.get_value().map_or(false, |ws: SendWrapper<WebSocket>| {
                         ws.ready_state() != WebSocket::OPEN
                     })
                 {
@@ -267,13 +324,13 @@ pub fn use_websocket_with_options(
         });
 
         connect_ref.set_value({
-            let ws = ws_ref.get_value();
             let unmounted = Arc::clone(&unmounted);
+            let on_error = Arc::clone(&on_error);
 
             Some(Arc::new(move || {
                 reconnect_timer_ref.set_value(None);
 
-                if let Some(web_socket) = &ws {
+                if let Some(web_socket) = ws_ref.get_value() {
                     let _ = web_socket.close();
                 }
 
@@ -323,7 +380,9 @@ pub fn use_websocket_with_options(
                 {
                     let unmounted = Arc::clone(&unmounted);
                     let on_message = Arc::clone(&on_message);
-                    let on_message_bytes = Arc::clone(&on_message_bytes);
+                    let on_message_raw = Arc::clone(&on_message_raw);
+                    let on_message_raw_bytes = Arc::clone(&on_message_raw_bytes);
+                    let on_error = Arc::clone(&on_error);
 
                     let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
                         if unmounted.get() {
@@ -345,12 +404,27 @@ pub fn use_websocket_with_options(
                                         #[cfg(debug_assertions)]
                                         let zone = diagnostics::SpecialNonReactiveZone::enter();
 
-                                        on_message(txt.clone());
+                                        on_message_raw(&txt);
 
                                         #[cfg(debug_assertions)]
+                                        SpecialNonReactiveZone::exit(prev);
+
+                                        match C::decode_str(&txt) {
+                                            Ok(val) => {
+                                                #[cfg(debug_assertions)]
+                                                let prev = SpecialNonReactiveZone::enter();
+
+                                                on_message(&val);
+
+                                                #[cfg(debug_assertions)]
                                         drop(zone);
 
-                                        set_message.set(Some(txt));
+                                                set_message.set(Some(val));
+                                            }
+                                            Err(err) => {
+                                                on_error(CodecError::Decode(err).into());
+                                            }
+                                        }
                                     },
                                 );
                             },
@@ -361,12 +435,27 @@ pub fn use_websocket_with_options(
                                 #[cfg(debug_assertions)]
                                 let zone = diagnostics::SpecialNonReactiveZone::enter();
 
-                                on_message_bytes(array.clone());
+                                on_message_raw_bytes(&array);
 
                                 #[cfg(debug_assertions)]
                                 drop(zone);
 
-                                set_message_bytes.set(Some(array));
+                                match C::decode_bin(array.as_slice()) {
+                                    Ok(val) => {
+                                        #[cfg(debug_assertions)]
+                                        let prev = SpecialNonReactiveZone::enter();
+
+                                        on_message(&val);
+
+                                        #[cfg(debug_assertions)]
+                                        SpecialNonReactiveZone::exit(prev);
+
+                                        set_message.set(Some(val));
+                                    }
+                                    Err(err) => {
+                                        on_error(CodecError::Decode(err).into());
+                                    }
+                                }
                             },
                         );
                     })
@@ -392,7 +481,7 @@ pub fn use_websocket_with_options(
                         #[cfg(debug_assertions)]
                         let zone = diagnostics::SpecialNonReactiveZone::enter();
 
-                        on_error(e);
+                        on_error(UseWebSocketError::Event(e));
 
                         #[cfg(debug_assertions)]
                         drop(zone);
@@ -439,7 +528,7 @@ pub fn use_websocket_with_options(
     }
 
     // Send text (String)
-    let send = {
+    let send_str = {
         Box::new(move |data: &str| {
             if ready_state.get_untracked() == ConnectionReadyState::Open {
                 if let Some(web_socket) = ws_ref.get_value() {
@@ -450,10 +539,28 @@ pub fn use_websocket_with_options(
     };
 
     // Send bytes
-    let send_bytes = move |data: Vec<u8>| {
+    let send_bytes = move |data: &[u8]| {
         if ready_state.get_untracked() == ConnectionReadyState::Open {
             if let Some(web_socket) = ws_ref.get_value() {
-                let _ = web_socket.send_with_u8_array(&data);
+                let _ = web_socket.send_with_u8_array(data);
+            }
+        }
+    };
+
+    let send = {
+        let on_error = Rc::clone(&on_error);
+
+        move |value: &T| {
+            if C::is_binary() {
+                match C::encode_bin(value) {
+                    Ok(val) => send_bytes(&val),
+                    Err(err) => on_error(CodecError::Encode(err).into()),
+                }
+            } else {
+                match C::encode_str(value) {
+                    Ok(val) => send_str(&val),
+                    Err(err) => on_error(CodecError::Encode(err).into()),
+                }
             }
         }
     };
@@ -471,7 +578,7 @@ pub fn use_websocket_with_options(
         reconnect_timer_ref.set_value(None);
 
         move || {
-            reconnect_times_ref.set_value(reconnect_limit);
+            manually_closed_ref.set_value(true);
             if let Some(web_socket) = ws_ref.get_value() {
                 let _ = web_socket.close();
             }
@@ -491,33 +598,61 @@ pub fn use_websocket_with_options(
         close();
     });
 
-    UseWebsocketReturn {
+    UseWebSocketReturn {
         ready_state: ready_state.into(),
         message: message.into(),
-        message_bytes: message_bytes.into(),
         ws: ws_ref.get_value(),
         open,
         close,
         send,
-        send_bytes,
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ReconnectLimit {
+    Infinite,
+    Limited(u64),
+}
+
+impl Default for ReconnectLimit {
+    fn default() -> Self {
+        ReconnectLimit::Limited(3)
     }
 }
 
+impl ReconnectLimit {
+    pub fn is_exceeded_by(self, times: u64) -> bool {
+        match self {
+            ReconnectLimit::Infinite => false,
+            ReconnectLimit::Limited(limit) => times >= limit,
+        }
+    }
+}
+
+type ArcFnBytes = Arc<dyn Fn(&[u8])>;
+
 /// Options for [`use_websocket_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseWebSocketOptions {
+pub struct UseWebSocketOptions<T, E, D>
+where
+    T: ?Sized,
+{
     /// `WebSocket` connect callback.
     on_open: Arc<dyn Fn(Event) + Send + Sync>,
+    /// `WebSocket` message callback for typed message decoded by codec.
+    #[builder(skip)]
+    on_message: Arc<dyn Fn(&T)>,
     /// `WebSocket` message callback for text.
-    on_message: Arc<dyn Fn(String) + Send + Sync>,
+    on_message_raw: Arc<dyn Fn(&str) + Send + Sync>,
     /// `WebSocket` message callback for binary.
-    on_message_bytes: Arc<dyn Fn(Vec<u8>) + Send + Sync>,
+    on_message_raw_bytes: ArcFnBytes + Send + Sync,
     /// `WebSocket` error callback.
-    on_error: Arc<dyn Fn(Event) + Send + Sync>,
+    #[builder(skip)]
+    on_error: Arc<dyn Fn(UseWebSocketError<E, D>) + Send + Sync>,
     /// `WebSocket` close callback.
     on_close: Arc<dyn Fn(CloseEvent) + Send + Sync>,
-    /// Retry times. Defaults to 3.
-    reconnect_limit: u64,
+    /// Retry times. Defaults to `ReconnectLimit::Limited(3)`. Use `ReconnectLimit::Infinite` for
+    /// infinite retries.
+    reconnect_limit: ReconnectLimit,
     /// Retry interval in ms. Defaults to 3000.
     reconnect_interval: u64,
     /// If `true` the `WebSocket` connection will immediately be opened when calling this function.
@@ -528,15 +663,40 @@ pub struct UseWebSocketOptions {
     protocols: Option<Vec<String>>,
 }
 
-impl Default for UseWebSocketOptions {
+impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
+    /// `WebSocket` error callback.
+    pub fn on_error<F>(self, handler: F) -> Self
+    where
+        F: Fn(UseWebSocketError<E, D>) + 'static,
+    {
+        Self {
+            on_error: Rc::new(handler),
+            ..self
+        }
+    }
+
+    /// `WebSocket` message callback for typed message decoded by codec.
+    pub fn on_message<F>(self, handler: F) -> Self
+    where
+        F: Fn(&T) + 'static,
+    {
+        Self {
+            on_message: Rc::new(handler),
+            ..self
+        }
+    }
+}
+
+impl<T: ?Sized, E, D> Default for UseWebSocketOptions<T, E, D> {
     fn default() -> Self {
         Self {
             on_open: Arc::new(|_| {}),
             on_message: Arc::new(|_| {}),
-            on_message_bytes: Arc::new(|_| {}),
+            on_message_raw: Arc::new(|_| {}),
+            on_message_raw_bytes: Arc::new(|_| {}),
             on_error: Arc::new(|_| {}),
             on_close: Arc::new(|_| {}),
-            reconnect_limit: 3,
+            reconnect_limit: ReconnectLimit::default(),
             reconnect_interval: 3000,
             immediate: true,
             protocols: Default::default(),
@@ -546,29 +706,33 @@ impl Default for UseWebSocketOptions {
 
 /// Return type of [`use_websocket`].
 #[derive(Clone)]
-pub struct UseWebsocketReturn<OpenFn, CloseFn, SendFn, SendBytesFn>
+pub struct UseWebSocketReturn<T, OpenFn, CloseFn, SendFn>
 where
+    T: 'static,
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(&str) + Clone + 'static,
-    SendBytesFn: Fn(Vec<u8>) + Clone + 'static,
+    SendFn: Fn(&T) + Clone + 'static,
 {
     /// The current state of the `WebSocket` connection.
     pub ready_state: Signal<ConnectionReadyState>,
-    /// Latest text message received from `WebSocket`.
-    pub message: Signal<Option<String>>,
-    /// Latest binary message received from `WebSocket`.
-    pub message_bytes: Signal<Option<Vec<u8>>>,
+    /// Latest message received from `WebSocket`.
+    pub message: Signal<Option<T>>,
     /// The `WebSocket` instance.
     pub ws: Option<SendWrapper<WebSocket>>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection
     pub close: CloseFn,
-    /// Sends `text` (string) based data
+    /// Sends data through the socket
     pub send: SendFn,
-    /// Sends binary data
-    pub send_bytes: SendBytesFn,
+}
+
+#[derive(Error, Debug)]
+pub enum UseWebSocketError<E, D> {
+    #[error("WebSocket error event")]
+    Event(Event),
+    #[error("WebSocket codec error: {0}")]
+    Codec(#[from] CodecError<E, D>),
 }
 
 fn normalize_url(url: &str) -> String {

@@ -2,8 +2,10 @@
 
 [Introduction](introduction.md)
 [Get Started](get_started.md)
+[Options](options.md)
 [Element Parameters](element_parameters.md)
 [Server-Side Rendering](server_side_rendering.md)
+[Encoding and Decoding Data](codecs.md)
 [Changelog](changelog.md)
 [Functions](functions.md)
 
@@ -47,6 +49,7 @@
 - [use_preferred_contrast](browser/use_preferred_contrast.md)
 - [use_preferred_dark](browser/use_preferred_dark.md)
 - [use_service_worker](browser/use_service_worker.md)
+- [use_user_media](browser/use_user_media.md)
 - [use_web_notification](browser/use_web_notification.md)
 
 # Sensors
@@ -65,6 +68,7 @@
 
 - [use_event_source](network/use_event_source.md)
 - [use_websocket](network/use_websocket.md)
+
 <!-- - [use_webtransport](network/use_webtransport.md) -->
 
 # Animation
@@ -94,12 +98,14 @@
 - [use_sorted](iterable/use_sorted.md)
 
 # Utilities
+
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)
 - [is_some](utilities/is_some.md)
 - [use_cycle_list](utilities/use_cycle_list.md)
 - [use_debounce_fn](utilities/use_debounce_fn.md)
+- [use_derive_signal!](utilities/use_derive_signal.md)
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 - [use_to_string](utilities/use_to_string.md)

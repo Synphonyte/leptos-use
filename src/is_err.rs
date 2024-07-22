@@ -1,8 +1,7 @@
 use crate::utils::use_derive_signal;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
-use_derive_signal!(
+crate::use_derive_signal!(
     /// Reactive `Result::is_err()`.
     ///
     /// ## Usage

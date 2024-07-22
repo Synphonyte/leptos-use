@@ -1,9 +1,8 @@
-use crate::utils::StringCodec;
 use crate::{
     js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
 };
+use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -25,7 +24,7 @@ use wasm_bindgen::JsValue;
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -46,13 +45,17 @@ use wasm_bindgen::JsValue;
 /// # }
 /// ```
 ///
-/// Just like with [`use_storage`] you can use different codecs for encoding and decoding.
+/// Values are (en)decoded via the given codec. You can use any of the string codecs or a
+/// binary codec wrapped in [`Base64`].
+///
+/// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
+///   available and what feature flags they require.
 ///
 /// ```
 /// # use leptos::prelude::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::use_broadcast_channel;
-/// # use leptos_use::utils::JsonCodec;
+/// # use codee::string::JsonSerdeCodec;
 /// #
 /// // Data sent in JSON must implement Serialize, Deserialize:
 /// #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -63,35 +66,35 @@ use wasm_bindgen::JsValue;
 ///
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// use_broadcast_channel::<MyState, JsonCodec>("everyting-is-awesome");
+/// use_broadcast_channel::<MyState, JsonSerdeCodec>("everyting-is-awesome");
 /// # view! { }
 /// # }
 /// ```
-///
-/// ## Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_broadcast_channel<T, C>(
     name: &str,
-) -> UseBroadcastChannelReturn<T, impl Fn(&T) + Clone, impl Fn() + Clone, C::Error>
+) -> UseBroadcastChannelReturn<
+    T,
+    impl Fn(&T) + Clone,
+    impl Fn() + Clone,
+    <C as Encoder<T>>::Error,
+    <C as Decoder<T>>::Error,
+>
 where
-    C: StringCodec<T> + Default + Clone,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
     let (is_closed, set_closed) = signal(false);
     let (channel, set_channel) = signal(None::<web_sys::BroadcastChannel>);
     let (message, set_message) = signal(None::<T>);
-    let (error, set_error) = signal(None::<UseBroadcastChannelError<C::Error>>);
-
-    let codec = C::default();
+    let (error, set_error) = signal(
+        None::<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>,
+    );
 
     let post = {
-        let codec = codec.clone();
-
         move |data: &T| {
             if let Some(channel) = channel.get_untracked() {
-                match codec.encode(data) {
+                match C::encode(data) {
                     Ok(msg) => {
                         channel
                             .post_message(&msg.into())
@@ -101,7 +104,9 @@ where
                             .ok();
                     }
                     Err(err) => {
-                        set_error.set(Some(UseBroadcastChannelError::Encode(err)));
+                        set_error.set(Some(UseBroadcastChannelError::Codec(CodecError::Encode(
+                            err,
+                        ))));
                     }
                 }
             }
@@ -127,11 +132,13 @@ where
                 leptos::ev::message,
                 move |event| {
                     if let Some(data) = event.data().as_string() {
-                        match codec.decode(data) {
+                        match C::decode(&data) {
                             Ok(msg) => {
                                 set_message.set(Some(msg));
                             }
-                            Err(err) => set_error.set(Some(UseBroadcastChannelError::Decode(err))),
+                            Err(err) => set_error.set(Some(UseBroadcastChannelError::Codec(
+                                CodecError::Decode(err),
+                            ))),
                         }
                     } else {
                         set_error.set(Some(UseBroadcastChannelError::ValueNotString));
@@ -169,12 +176,13 @@ where
 }
 
 /// Return type of [`use_broadcast_channel`].
-pub struct UseBroadcastChannelReturn<T, PFn, CFn, Err>
+pub struct UseBroadcastChannelReturn<T, PFn, CFn, E, D>
 where
     T: 'static,
     PFn: Fn(&T) + Clone,
     CFn: Fn() + Clone,
-    Err: 'static,
+    E: 'static,
+    D: 'static,
 {
     /// `true` if this browser supports `BroadcastChannel`s.
     pub is_supported: Signal<bool>,
@@ -192,22 +200,20 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<UseBroadcastChannelError<Err>>>,
+    pub error: Signal<Option<UseBroadcastChannelError<E, D>>>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,
 }
 
-#[derive(Debug, Error, Clone)]
-pub enum UseBroadcastChannelError<Err> {
+#[derive(Debug, Error)]
+pub enum UseBroadcastChannelError<E, D> {
     #[error("failed to post message")]
     PostMessage(JsValue),
     #[error("channel message error")]
     MessageEvent(web_sys::MessageEvent),
-    #[error("failed to encode value")]
-    Encode(Err),
-    #[error("failed to decode value")]
-    Decode(Err),
+    #[error("failed to (de)encode value")]
+    Codec(CodecError<E, D>),
     #[error("received value is not a string")]
     ValueNotString,
 }

@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 // #![feature(doc_cfg)]
 //! Collection of essential Leptos utilities inspired by SolidJS USE / VueUse
 
@@ -24,6 +25,7 @@ mod is_none;
 mod is_ok;
 mod is_some;
 mod on_click_outside;
+mod use_user_media;
 mod signal_debounced;
 mod signal_throttled;
 mod sync_signal;
@@ -89,6 +91,7 @@ pub use is_none::*;
 pub use is_ok::*;
 pub use is_some::*;
 pub use on_click_outside::*;
+pub use use_user_media::*;
 pub use signal_debounced::*;
 pub use signal_throttled::*;
 pub use sync_signal::*;

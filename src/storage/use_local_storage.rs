@@ -1,5 +1,5 @@
 use super::{use_storage_with_options, StorageType, UseStorageOptions};
-use crate::utils::StringCodec;
+use codee::{Decoder, Encoder};
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
@@ -16,23 +16,23 @@ pub fn use_local_storage<T, C>(
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + Default + PartialEq + Send + Sync,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
-    use_storage_with_options(
+    use_storage_with_options::<T, C>(
         StorageType::Local,
         key,
-        UseStorageOptions::<T, C>::default(),
+        UseStorageOptions::<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>::default(),
     )
 }
 
 /// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
 pub fn use_local_storage_with_options<T, C>(
     key: impl AsRef<str>,
-    options: UseStorageOptions<T, C>,
+    options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
     T: Clone + PartialEq + Send + Sync,
-    C: StringCodec<T> + Default,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
-    use_storage_with_options(StorageType::Local, key, options)
+    use_storage_with_options::<T, C>(StorageType::Local, key, options)
 }

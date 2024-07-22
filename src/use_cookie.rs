@@ -1,17 +1,17 @@
 #![allow(clippy::too_many_arguments)]
 
 use crate::core::now;
-use crate::utils::StringCodec;
+use codee::{CodecError, Decoder, Encoder};
 use cookie::time::{Duration, OffsetDateTime};
-use cookie::{Cookie, CookieJar, SameSite};
+pub use cookie::SameSite;
+use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
 
 /// SSR-friendly and reactive cookie access.
 ///
-/// You can use this function multiple times in your for the same cookie and they're signals will synchronize
+/// You can use this function multiple times for the same cookie and their signals will synchronize
 /// (even across windows/tabs). But there is no way to listen to changes to `document.cookie` directly so in case
 /// something outside of this function changes the cookie, the signal will **not** be updated.
 ///
@@ -30,7 +30,7 @@ use std::rc::Rc;
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::use_cookie;
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// # use rand::prelude::*;
 ///
 /// #
@@ -56,7 +56,11 @@ use std::rc::Rc;
 /// # }
 /// ```
 ///
-/// See [`StringCodec`] for details on how to handle versioning — dealing with data that can outlast your code.
+/// Values are (en)decoded via the given codec. You can use any of the string codecs or a
+/// binary codec wrapped in [`Base64`].
+///
+/// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
+///   available and what feature flags they require.
 ///
 /// ## Cookie attributes
 ///
@@ -66,7 +70,7 @@ use std::rc::Rc;
 /// # use cookie::SameSite;
 /// # use leptos::prelude::*;
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
-/// # use leptos_use::utils::FromToStringCodec;
+/// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -86,7 +90,9 @@ use std::rc::Rc;
 /// This works equally well on the server or the client.
 /// On the server this function reads the cookie from the HTTP request header and writes it back into
 /// the HTTP response header according to options (if provided).
-/// The returned `WriteSignal` will not affect the cookie headers on the server.
+/// The returned `WriteSignal` may not affect the cookie headers on the server! It will try and write
+/// the headers buy if this happens after the headers have already been streamed to the client then
+/// this will have no effect.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
@@ -101,7 +107,7 @@ use std::rc::Rc;
 /// # use leptos::prelude::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use leptos_use::{use_cookie_with_options, UseCookieOptions};
-/// # use leptos_use::utils::JsonCodec;
+/// # use codee::string::JsonSerdeCodec;
 /// #
 /// # #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 /// # pub struct Auth {
@@ -111,7 +117,7 @@ use std::rc::Rc;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// use_cookie_with_options::<Auth, JsonCodec>(
+/// use_cookie_with_options::<Auth, JsonSerdeCodec>(
 ///     "auth",
 ///     UseCookieOptions::default()
 ///         .ssr_cookies_header_getter(|| {
@@ -136,7 +142,7 @@ use std::rc::Rc;
 /// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: StringCodec<T> + Default + Clone,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
@@ -145,10 +151,10 @@ where
 /// Version of [`use_cookie`] that takes [`UseCookieOptions`].
 pub fn use_cookie_with_options<T, C>(
     cookie_name: &str,
-    options: UseCookieOptions<T, C::Error>,
+    options: UseCookieOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: StringCodec<T> + Default + Clone,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone,
 {
     let UseCookieOptions {
@@ -181,7 +187,6 @@ where
     let (cookie, set_cookie) = signal(None::<T>);
 
     let jar = StoredValue::new(CookieJar::new());
-    let codec = C::default();
 
     if !has_expired {
         let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
@@ -193,9 +198,8 @@ where
                 set_cookie.set(
                     jar.get(cookie_name)
                         .and_then(|c| {
-                            codec
-                                .decode(c.value().to_string())
-                                .map_err(|err| on_error(err))
+                            C::decode(c.value())
+                                .map_err(|err| on_error(CodecError::Decode(err)))
                                 .ok()
                         })
                         .or(default_value),
@@ -216,16 +220,16 @@ where
         use crate::{
             use_broadcast_channel, watch_pausable, UseBroadcastChannelReturn, WatchPausableReturn,
         };
+        use codee::string::{FromToStringCodec, OptionCodec};
 
         let UseBroadcastChannelReturn { message, post, .. } =
-            use_broadcast_channel::<Option<String>, OptionStringCodec>(&format!(
+            use_broadcast_channel::<Option<String>, OptionCodec<FromToStringCodec>>(&format!(
                 "leptos-use:cookies:{cookie_name}"
             ));
 
         let on_cookie_change = {
             let cookie_name = cookie_name.to_owned();
             let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
-            let codec = codec.clone();
             let on_error = Rc::clone(&on_error);
             let domain = domain.clone();
             let path = path.clone();
@@ -236,9 +240,11 @@ where
                 }
 
                 let value = cookie.with_untracked(|cookie| {
-                    cookie
-                        .as_ref()
-                        .and_then(|cookie| codec.encode(cookie).map_err(|err| on_error(err)).ok())
+                    cookie.as_ref().and_then(|cookie| {
+                        C::encode(cookie)
+                            .map_err(|err| on_error(CodecError::Encode(err)))
+                            .ok()
+                    })
                 });
 
                 if value
@@ -290,7 +296,7 @@ where
                     pause();
 
                     if let Some(message) = message {
-                        match codec.decode(message.clone()) {
+                        match C::decode(&message) {
                             Ok(value) => {
                                 let ssr_cookies_header_getter =
                                     Rc::clone(&ssr_cookies_header_getter);
@@ -314,7 +320,7 @@ where
                                 set_cookie.set(Some(value));
                             }
                             Err(err) => {
-                                on_error(err);
+                                on_error(CodecError::Decode(err));
                             }
                         }
                     } else {
@@ -357,27 +363,31 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            let value = cookie
-                .with_untracked(|cookie| {
-                    cookie
-                        .as_ref()
-                        .map(|cookie| codec.encode(&cookie).map_err(|err| on_error(err)).ok())
-                })
-                .flatten();
-            jar.update_value(|jar| {
-                write_server_cookie(
-                    cookie_name,
-                    value,
-                    jar,
-                    max_age,
-                    expires,
-                    domain,
-                    path,
-                    same_site,
-                    secure,
-                    http_only,
-                    ssr_set_cookie,
-                )
+            create_isomorphic_effect(move |_| {
+                let value = cookie
+                    .with(|cookie| {
+                        cookie.as_ref().map(|cookie| {
+                            C::encode(cookie)
+                                .map_err(|err| on_error(CodecError::Encode(err)))
+                                .ok()
+                        })
+                    })
+                    .flatten();
+                jar.update_value(|jar| {
+                    write_server_cookie(
+                        cookie_name,
+                        value,
+                        jar,
+                        max_age,
+                        expires,
+                        domain,
+                        path,
+                        same_site,
+                        secure,
+                        http_only,
+                        ssr_set_cookie,
+                    )
+                });
             });
         }
     }
@@ -387,7 +397,7 @@ where
 
 /// Options for [`use_cookie_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseCookieOptions<T, Err> {
+pub struct UseCookieOptions<T, E, D> {
     /// [`Max-Age` of the cookie](https://tools.ietf.org/html/rfc6265#section-5.2.2) in milliseconds. The returned signal will turn to `None` after the max age is reached.
     /// Default: `None`
     ///
@@ -464,10 +474,10 @@ pub struct UseCookieOptions<T, Err> {
     ssr_set_cookie: Rc<dyn Fn(&Cookie)>,
 
     /// Callback for encoding/decoding errors. Defaults to logging the error to the console.
-    on_error: Rc<dyn Fn(Err)>,
+    on_error: Rc<dyn Fn(CodecError<E, D>)>,
 }
 
-impl<T, Err> Default for UseCookieOptions<T, Err> {
+impl<T, E, D> Default for UseCookieOptions<T, E, D> {
     #[allow(dead_code)]
     fn default() -> Self {
         Self {
@@ -484,13 +494,13 @@ impl<T, Err> Default for UseCookieOptions<T, Err> {
                 #[cfg(feature = "ssr")]
                 {
                     #[cfg(all(feature = "actix", feature = "axum"))]
-                    compile_error!("You cannot enable only one of features \"actix\" and \"axum\" at the same time");
+                    compile_error!("You can only enable one of features \"actix\" and \"axum\" at the same time");
 
                     #[cfg(all(feature = "actix", feature = "spin"))]
-                    compile_error!("You cannot enable only one of features \"actix\" and \"spin\" at the same time");
+                    compile_error!("You can only enable one of features \"actix\" and \"spin\" at the same time");
 
                     #[cfg(all(feature = "axum", feature = "spin"))]
-                    compile_error!("You cannot enable only one of features \"axum\" and \"spin\" at the same time");
+                    compile_error!("You can only enable one of features \"axum\" and \"spin\" at the same time");
 
                     #[cfg(feature = "actix")]
                     const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
@@ -854,8 +864,7 @@ fn write_server_cookie(
     if let Some(value) = value {
         let cookie: Cookie = build_cookie_from_options(
             name, max_age, expires, http_only, secure, &path, same_site, &domain, &value,
-        )
-        .into();
+        );
 
         jar.add(cookie.into_owned());
     } else {
@@ -878,22 +887,4 @@ fn load_and_parse_cookie_jar(
 
         jar
     })
-}
-
-#[derive(Default, Copy, Clone)]
-struct OptionStringCodec;
-
-impl StringCodec<Option<String>> for OptionStringCodec {
-    type Error = ();
-
-    fn encode(&self, val: &Option<String>) -> Result<String, Self::Error> {
-        match val {
-            Some(val) => Ok(format!("~<|Some|>~{val}")),
-            None => Ok("~<|None|>~".to_owned()),
-        }
-    }
-
-    fn decode(&self, str: String) -> Result<Option<String>, Self::Error> {
-        Ok(str.strip_prefix("~<|Some|>~").map(|v| v.to_owned()))
-    }
 }

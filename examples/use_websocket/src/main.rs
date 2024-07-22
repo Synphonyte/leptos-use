@@ -1,11 +1,19 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{
-    core::ConnectionReadyState, use_websocket, use_websocket_with_options, UseWebSocketOptions,
-    UseWebsocketReturn,
+    core::ConnectionReadyState, use_websocket, use_websocket_with_options, UseWebSocketError,
+    UseWebSocketOptions, UseWebSocketReturn,
 };
+use serde::{Deserialize, Serialize};
 
+use codee::{binary::MsgpackSerdeCodec, string::FromToStringCodec};
 use web_sys::{CloseEvent, Event};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Apple {
+    name: String,
+    worm_count: u32,
+}
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -18,27 +26,22 @@ fn Demo() -> impl IntoView {
     // use_websocket
     // ----------------------------
 
-    let UseWebsocketReturn {
+    let UseWebSocketReturn {
         ready_state,
         message,
-        message_bytes,
         send,
-        send_bytes,
         open,
         close,
         ..
-    } = use_websocket("wss://echo.websocket.events/");
+    } = use_websocket::<Apple, MsgpackSerdeCodec>("wss://echo.websocket.events/");
 
     let send_message = move |_| {
-        let m = "Hello, world!";
-        send(m);
-        set_history.update(|history: &mut Vec<_>| history.push(format! {"[send]: {:?}", m}));
-    };
-
-    let send_byte_message = move |_| {
-        let m = b"Hello, world!\r\n".to_vec();
-        send_bytes(m.clone());
-        set_history.update(|history: &mut Vec<_>| history.push(format! {"[send_bytes]: {:?}", m}));
+        let m = Apple {
+            name: "More worm than apple".to_string(),
+            worm_count: 10,
+        };
+        send(&m);
+        set_history.update(|history: &mut Vec<_>| history.push(format!("[send]: {:?}", m)));
     };
 
     let status = move || ready_state().to_string();
@@ -53,15 +56,11 @@ fn Demo() -> impl IntoView {
     };
 
     create_effect(move |_| {
-        if let Some(m) = message.get() {
-            update_history(&set_history, format! {"[message]: {:?}", m});
-        };
-    });
-
-    create_effect(move |_| {
-        if let Some(m) = message_bytes.get() {
-            update_history(&set_history, format! {"[message_bytes]: {:?}", m});
-        };
+        message.with(move |message| {
+            if let Some(m) = message {
+                update_history(&set_history, format!("[message]: {:?}", m));
+            }
+        })
     });
 
     // ----------------------------
@@ -72,49 +71,44 @@ fn Demo() -> impl IntoView {
 
     let on_open_callback = move |e: Event| {
         set_history2.update(|history: &mut Vec<_>| {
-            history.push(format! {"[onopen]: event {:?}", e.type_()})
+            history.push(format!("[onopen]: event {:?}", e.type_()))
         });
     };
 
     let on_close_callback = move |e: CloseEvent| {
         set_history2.update(|history: &mut Vec<_>| {
-            history.push(format! {"[onclose]: event {:?}", e.type_()})
+            history.push(format!("[onclose]: event {:?}", e.type_()))
         });
     };
 
-    let on_error_callback = move |e: Event| {
+    let on_error_callback = move |e: UseWebSocketError<_, _>| {
         set_history2.update(|history: &mut Vec<_>| {
-            history.push(format! {"[onerror]: event {:?}", e.type_()})
+            history.push(match e {
+                UseWebSocketError::Event(e) => format!("[onerror]: event {:?}", e.type_()),
+                _ => format!("[onerror]: {:?}", e),
+            })
         });
     };
 
-    let on_message_callback = move |m: String| {
-        set_history2.update(|history: &mut Vec<_>| history.push(format! {"[onmessage]: {:?}", m}));
+    let on_message_callback = move |m: &String| {
+        set_history2.update(|history: &mut Vec<_>| history.push(format!("[onmessage]: {:?}", m)));
     };
 
-    let on_message_bytes_callback = move |m: Vec<u8>| {
-        set_history2
-            .update(|history: &mut Vec<_>| history.push(format! {"[onmessage_bytes]: {:?}", m}));
-    };
-
-    let UseWebsocketReturn {
+    let UseWebSocketReturn {
         ready_state: ready_state2,
         send: send2,
-        send_bytes: send_bytes2,
         open: open2,
         close: close2,
         message: message2,
-        message_bytes: message_bytes2,
         ..
-    } = use_websocket_with_options(
+    } = use_websocket_with_options::<String, FromToStringCodec>(
         "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
             .immediate(false)
             .on_open(on_open_callback.clone())
             .on_close(on_close_callback.clone())
             .on_error(on_error_callback.clone())
-            .on_message(on_message_callback.clone())
-            .on_message_bytes(on_message_bytes_callback.clone()),
+            .on_message(on_message_callback.clone()),
     );
 
     let open_connection2 = move |_| {
@@ -125,28 +119,16 @@ fn Demo() -> impl IntoView {
     };
 
     let send_message2 = move |_| {
-        let message = "Hello, use_leptos!";
-        send2(message);
-        update_history(&set_history2, format! {"[send]: {:?}", message});
-    };
-
-    let send_byte_message2 = move |_| {
-        let m = b"Hello, world!\r\n".to_vec();
-        send_bytes2(m.clone());
-        update_history(&set_history2, format! {"[send_bytes]: {:?}", m});
+        let message = "Hello, use_leptos!".to_string();
+        send2(&message);
+        update_history(&set_history2, format!("[send]: {:?}", message));
     };
 
     let status2 = move || ready_state2.get().to_string();
 
     create_effect(move |_| {
         if let Some(m) = message2.get() {
-            update_history(&set_history2, format! {"[message]: {:?}", m});
-        };
-    });
-
-    create_effect(move |_| {
-        if let Some(m) = message_bytes2.get() {
-            update_history(&set_history2, format! {"[message_bytes]: {:?}", m});
+            update_history(&set_history2, format!("[message]: {:?}", m));
         };
     });
 
@@ -161,9 +143,7 @@ fn Demo() -> impl IntoView {
                     <button on:click=send_message disabled=move || !connected()>
                         "Send"
                     </button>
-                    <button on:click=send_byte_message disabled=move || !connected()>
-                        "Send bytes"
-                    </button>
+
                     <button on:click=open_connection disabled=connected>
                         "Open"
                     </button>
@@ -200,9 +180,7 @@ fn Demo() -> impl IntoView {
                     <button on:click=send_message2 disabled=move || !connected2()>
                         "Send"
                     </button>
-                    <button on:click=send_byte_message2 disabled=move || !connected2()>
-                        "Send Bytes"
-                    </button>
+
                     <div class="flex items-center">
                         <h3 class="text-2xl mr-2">"History"</h3>
                         <button

@@ -1,5 +1,5 @@
 use cfg_if::cfg_if;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::prelude::*;
 
 /// Reactive [`window.devicePixelRatio`](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
 ///
@@ -30,11 +30,10 @@ use leptos::prelude::wrappers::read::Signal;
 /// On the server this function returns a Signal that is always `1.0`.
 pub fn use_device_pixel_ratio() -> Signal<f64> {
     cfg_if! { if #[cfg(feature = "ssr")] {
-        use leptos::prelude::*;
-        let pixel_ratio = Signal::derive(|| 1.0);
+        Signal::derive(|| 1.0)
     } else {
         use crate::{use_event_listener_with_options, UseEventListenerOptions};
-        use leptos::prelude::*;
+
         use leptos::ev::change;
 
         let initial_pixel_ratio = window().device_pixel_ratio();
@@ -57,6 +56,7 @@ pub fn use_device_pixel_ratio() -> Signal<f64> {
                     .once(true),
             );
         });
+
+        pixel_ratio.into()
     }}
-    pixel_ratio.into()
 }
