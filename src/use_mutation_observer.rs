@@ -1,13 +1,12 @@
 use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
-use leptos::prelude::*;
 use wasm_bindgen::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_supported;
+    use leptos::prelude::*;
     use std::cell::RefCell;
     use std::rc::Rc;
 }}
@@ -90,7 +89,7 @@ where
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]
-                let _z = SpecialNonReactiveZone::enter();
+                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                 callback(
                     entries

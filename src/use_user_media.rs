@@ -1,7 +1,7 @@
 use crate::core::MaybeRwSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getUserMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) streaming.
@@ -59,7 +59,7 @@ pub fn use_user_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = create_signal(None::<Result<web_sys::MediaStream, JsValue>>);
+    let (stream, set_stream) = signal(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -88,7 +88,7 @@ pub fn use_user_media_with_options(
 
     let start = move || {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
-            spawn_local(async move {
+            leptos::spawn::spawn_local(async move {
                 _start().await;
                 stream.with_untracked(move |stream| {
                     if let Some(Ok(_)) = stream {
@@ -108,7 +108,7 @@ pub fn use_user_media_with_options(
         move || enabled.get(),
         move |enabled, _, _| {
             if *enabled {
-                spawn_local(async move {
+                leptos::spawn::spawn_local(async move {
                     _start().await;
                 });
             } else {

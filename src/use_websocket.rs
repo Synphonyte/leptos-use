@@ -548,7 +548,7 @@ where
     };
 
     let send = {
-        let on_error = Rc::clone(&on_error);
+        let on_error = Arc::clone(&on_error);
 
         move |value: &T| {
             if C::is_binary() {
@@ -670,7 +670,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
         F: Fn(UseWebSocketError<E, D>) + 'static,
     {
         Self {
-            on_error: Rc::new(handler),
+            on_error: Arc::new(handler),
             ..self
         }
     }
@@ -681,7 +681,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
         F: Fn(&T) + 'static,
     {
         Self {
-            on_message: Rc::new(handler),
+            on_message: Arc::new(handler),
             ..self
         }
     }
