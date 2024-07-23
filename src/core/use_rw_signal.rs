@@ -22,7 +22,7 @@ where
 
 impl<T> Default for UseRwSignal<T>
 where
-    T: Default,
+    T: Default + Send + Sync,
 {
     fn default() -> Self {
         Self::Combined(Default::default())
@@ -47,7 +47,10 @@ impl<T> DefinedAt for UseRwSignal<T> {
     }
 }
 
-impl<T> With for UseRwSignal<T> {
+impl<T> With for UseRwSignal<T>
+where
+    T: Send + Sync,
+{
     type Value = T;
 
     fn with<R>(&self, f: impl FnOnce(&T) -> R) -> R {
@@ -65,7 +68,10 @@ impl<T> With for UseRwSignal<T> {
     }
 }
 
-impl<T> WithUntracked for UseRwSignal<T> {
+impl<T> WithUntracked for UseRwSignal<T>
+where
+    T: Send + Sync,
+{
     type Value = T;
 
     fn with_untracked<R>(&self, f: impl FnOnce(&T) -> R) -> R {

@@ -4,8 +4,10 @@ use cfg_if::cfg_if;
 use leptos::html::{ElementType, HtmlElement};
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
 use std::ops::Deref;
+use wasm_bindgen::JsCast;
 
 /// Used as an argument type to make it easily possible to pass either
 /// * a `web_sys` element that implements `E` (for example `EventTarget` or `Element`),
@@ -58,9 +60,9 @@ impl<T, E> With for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    type Value = Vec<Option<T>>;
+    type Value = Vec<Option<SendWrapper<T>>>;
 
-    fn with<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> O {
+    fn with<O>(&self, f: impl FnOnce(&Vec<Option<SendWrapper<T>>>) -> O) -> O {
         match self {
             Self::Static(v) => f(v),
             Self::Dynamic(s) => s.with(f),
@@ -68,7 +70,7 @@ where
         }
     }
 
-    fn try_with<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> Option<O> {
+    fn try_with<O>(&self, f: impl FnOnce(&Vec<Option<SendWrapper<T>>>) -> O) -> Option<O> {
         match self {
             Self::Static(v) => Some(f(v)),
             Self::Dynamic(s) => s.try_with(f),
@@ -81,9 +83,9 @@ impl<T, E> WithUntracked for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    type Value = Vec<Option<T>>;
+    type Value = Vec<Option<SendWrapper<T>>>;
 
-    fn with_untracked<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> O {
+    fn with_untracked<O>(&self, f: impl FnOnce(&Vec<Option<SendWrapper<T>>>) -> O) -> O {
         match self {
             Self::Static(t) => f(t),
             Self::Dynamic(s) => s.with_untracked(f),
@@ -91,7 +93,10 @@ where
         }
     }
 
-    fn try_with_untracked<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> Option<O> {
+    fn try_with_untracked<O>(
+        &self,
+        f: impl FnOnce(&Vec<Option<SendWrapper<T>>>) -> O,
+    ) -> Option<O> {
         match self {
             Self::Static(t) => Some(f(t)),
             Self::Dynamic(s) => s.try_with_untracked(f),
@@ -107,7 +112,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(value: T) -> Self {
-        ElementsMaybeSignal::Static(vec![Some(value)])
+        ElementsMaybeSignal::Static(vec![Some(SendWrapper::new(value))])
     }
 }
 
@@ -116,7 +121,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Option<T>) -> Self {
-        ElementsMaybeSignal::Static(vec![target])
+        ElementsMaybeSignal::Static(vec![target.map(SendWrapper::new)])
     }
 }
 
@@ -127,7 +132,7 @@ macro_rules! impl_from_deref_option {
             E: From<$ty2> + 'static,
         {
             fn from(value: $ty) -> Self {
-                Self::Static(vec![(*value).clone()])
+                Self::Static(vec![(*value).clone().map(SendWrapper::new)])
             }
         }
     };
@@ -185,7 +190,7 @@ macro_rules! impl_from_signal_string {
                                 let mut list = Vec::with_capacity(node_list.length() as usize);
                                 for i in 0..node_list.length() {
                                     let node = node_list.get(i).expect("checked the range");
-                                    list.push(Some(node));
+                                    list.push(Some(SendWrapper::new(node)));
                                 }
                                 list
                             } else {
@@ -209,8 +214,8 @@ impl_from_signal_string!(Memo<String>);
 
 impl_from_signal_string!(Signal<&str>);
 impl_from_signal_string!(ReadSignal<&str>);
-impl_from_signal_string!(RwSignal<&str>);
-impl_from_signal_string!(Memo<&str>);
+impl_from_signal_string!(RwSignal<&'static str>);
+impl_from_signal_string!(Memo<&'static str>);
 
 // From single signal ///////////////////////////////////////////////////////////////
 
@@ -227,10 +232,10 @@ macro_rules! impl_from_signal_option {
     };
 }
 
-impl_from_signal_option!(Signal<Option<T>>);
-impl_from_signal_option!(ReadSignal<Option<T>>);
-impl_from_signal_option!(RwSignal<Option<T>>);
-impl_from_signal_option!(Memo<Option<T>>);
+impl_from_signal_option!(Signal<Option<SendWrapper<T>>>);
+impl_from_signal_option!(ReadSignal<Option<SendWrapper<T>>>);
+impl_from_signal_option!(RwSignal<Option<SendWrapper<T>>>);
+impl_from_signal_option!(Memo<Option<SendWrapper<T>>>);
 
 macro_rules! impl_from_signal {
     ($ty:ty) => {
@@ -245,10 +250,10 @@ macro_rules! impl_from_signal {
     };
 }
 
-impl_from_signal!(Signal<T>);
-impl_from_signal!(ReadSignal<T>);
-impl_from_signal!(RwSignal<T>);
-impl_from_signal!(Memo<T>);
+impl_from_signal!(Signal<SendWrapper<T>>);
+impl_from_signal!(ReadSignal<SendWrapper<T>>);
+impl_from_signal!(RwSignal<SendWrapper<T>>);
+impl_from_signal!(Memo<SendWrapper<T>>);
 
 // From single NodeRef //////////////////////////////////////////////////////////////
 
@@ -257,13 +262,13 @@ macro_rules! impl_from_node_ref {
         impl<R> From<NodeRef<R>> for ElementsMaybeSignal<$ty, $ty>
         where
             R: ElementType + Clone + 'static,
+            R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_ref: NodeRef<R>) -> Self {
                 Self::Dynamic(Signal::derive(move || {
                     vec![node_ref.get().map(move |el| {
-                        let el = el.into_any();
-                        let el: $ty = el.deref().clone().into();
-                        el
+                        let el: $ty = el.clone().into();
+                        SendWrapper::new(el)
                     })]
                 }))
             }
@@ -276,23 +281,23 @@ impl_from_node_ref!(web_sys::Element);
 
 // From single leptos::html::HTMLElement ///////////////////////////////////////////
 
-macro_rules! impl_from_html_element {
-    ($ty:ty) => {
-        impl<E, At, Ch, Rndr> From<HtmlElement<E, At, Ch, Rndr>> for ElementsMaybeSignal<$ty, $ty>
-        where
-            E: ElementType,
-            E::Output: std::ops::Deref<Target = $ty>,
-        {
-            fn from(value: HtmlElement<E, At, Ch, Rndr>) -> Self {
-                let el: &$ty = value.deref();
-                Self::Static(vec![Some(el.clone())])
-            }
-        }
-    };
-}
-
-impl_from_html_element!(web_sys::EventTarget);
-impl_from_html_element!(web_sys::Element);
+// macro_rules! impl_from_html_element {
+//     ($ty:ty) => {
+//         impl<E, At, Ch, Rndr> From<HtmlElement<E, At, Ch, Rndr>> for ElementsMaybeSignal<$ty, $ty>
+//         where
+//             E: ElementType,
+//             E::Output: std::ops::Deref<Target = $ty>,
+//         {
+//             fn from(value: HtmlElement<E, At, Ch, Rndr>) -> Self {
+//                 let el: &$ty = value.deref();
+//                 Self::Static(vec![Some(el.clone())])
+//             }
+//         }
+//     };
+// }
+//
+// impl_from_html_element!(web_sys::EventTarget);
+// impl_from_html_element!(web_sys::Element);
 
 // From multiple static elements //////////////////////////////////////////////////////
 
@@ -301,7 +306,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: &[T]) -> Self {
-        Self::Static(target.iter().map(|t| Some(t.clone())).collect())
+        Self::Static(
+            target
+                .iter()
+                .map(|t| Some(SendWrapper::new(t.clone())))
+                .collect(),
+        )
     }
 }
 
@@ -310,7 +320,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: &[Option<T>]) -> Self {
-        Self::Static(target.to_vec())
+        Self::Static(
+            target
+                .iter()
+                .map(|t| t.clone().map(SendWrapper::new))
+                .collect(),
+        )
     }
 }
 
@@ -319,7 +334,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Vec<T>) -> Self {
-        Self::Static(target.iter().map(|t| Some(t.clone())).collect())
+        Self::Static(
+            target
+                .iter()
+                .map(|t| Some(SendWrapper::new(t.clone())))
+                .collect(),
+        )
     }
 }
 
@@ -328,7 +348,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Vec<Option<T>>) -> Self {
-        Self::Static(target.to_vec())
+        Self::Static(
+            target
+                .into_iter()
+                .map(|t| t.map(SendWrapper::new))
+                .collect(),
+        )
     }
 }
 
@@ -337,7 +362,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: [T; C]) -> Self {
-        Self::Static(target.iter().map(|t| Some(t.clone())).collect())
+        Self::Static(
+            target
+                .into_iter()
+                .map(|t| Some(SendWrapper::new(t)))
+                .collect(),
+        )
     }
 }
 
@@ -346,7 +376,12 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: [Option<T>; C]) -> Self {
-        Self::Static(target.to_vec())
+        Self::Static(
+            target
+                .into_iter()
+                .map(|t| t.map(SendWrapper::new))
+                .collect(),
+        )
     }
 }
 
@@ -357,7 +392,7 @@ macro_rules! impl_from_strings_inner {
         Self::Static(
             $target
                 .iter()
-                .filter_map(|sel: &$str_ty| -> Option<Vec<Option<$el_ty>>> {
+                .filter_map(|sel: &$str_ty| -> Option<Vec<Option<SendWrapper<$el_ty>>>> {
                     cfg_if! { if #[cfg(feature = "ssr")] {
                         let _ = sel;
                         None
@@ -368,7 +403,7 @@ macro_rules! impl_from_strings_inner {
                             let mut list = Vec::with_capacity(node_list.length() as usize);
                             for i in 0..node_list.length() {
                                 let node: $el_ty = node_list.get(i).expect("checked the range").unchecked_into();
-                                list.push(Some(node));
+                                list.push(Some(SendWrapper::new(node)));
                             }
 
                             Some(list)
@@ -417,33 +452,33 @@ impl_from_strings!(web_sys::EventTarget, String);
 
 // From signal of vec ////////////////////////////////////////////////////////////////
 
-impl<T, E> From<Signal<Vec<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> From<Signal<Vec<SendWrapper<T>>>> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(signal: Signal<Vec<T>>) -> Self {
+    fn from(signal: Signal<Vec<SendWrapper<T>>>) -> Self {
         Self::Dynamic(Signal::derive(move || {
             signal.get().into_iter().map(|t| Some(t)).collect()
         }))
     }
 }
 
-impl<T, E> From<Signal<Vec<Option<T>>>> for ElementsMaybeSignal<T, E>
+impl<T, E> From<Signal<Vec<Option<SendWrapper<T>>>>> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(target: Signal<Vec<Option<T>>>) -> Self {
+    fn from(target: Signal<Vec<Option<SendWrapper<T>>>>) -> Self {
         Self::Dynamic(target)
     }
 }
 
 // From multiple signals //////////////////////////////////////////////////////////////
 
-impl<T, E> From<&[Signal<T>]> for ElementsMaybeSignal<T, E>
+impl<T, E> From<&[Signal<SendWrapper<T>>]> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: &[Signal<T>]) -> Self {
+    fn from(list: &[Signal<SendWrapper<T>>]) -> Self {
         let list = list.to_vec();
 
         Self::Dynamic(Signal::derive(move || {
@@ -452,11 +487,11 @@ where
     }
 }
 
-impl<T, E> From<&[Signal<Option<T>>]> for ElementsMaybeSignal<T, E>
+impl<T, E> From<&[Signal<Option<SendWrapper<T>>>]> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: &[Signal<Option<T>>]) -> Self {
+    fn from(list: &[Signal<Option<SendWrapper<T>>>]) -> Self {
         let list = list.to_vec();
 
         Self::Dynamic(Signal::derive(move || {
@@ -465,11 +500,11 @@ where
     }
 }
 
-impl<T, E> From<Vec<Signal<T>>> for ElementsMaybeSignal<T, E>
+impl<T, E> From<Vec<Signal<SendWrapper<T>>>> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: Vec<Signal<T>>) -> Self {
+    fn from(list: Vec<Signal<SendWrapper<T>>>) -> Self {
         let list = list.clone();
 
         Self::Dynamic(Signal::derive(move || {
@@ -478,11 +513,11 @@ where
     }
 }
 
-impl<T, E> From<Vec<Signal<Option<T>>>> for ElementsMaybeSignal<T, E>
+impl<T, E> From<Vec<Signal<Option<SendWrapper<T>>>>> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: Vec<Signal<Option<T>>>) -> Self {
+    fn from(list: Vec<Signal<Option<SendWrapper<T>>>>) -> Self {
         let list = list.clone();
 
         Self::Dynamic(Signal::derive(move || {
@@ -491,11 +526,11 @@ where
     }
 }
 
-impl<T, E, const C: usize> From<[Signal<T>; C]> for ElementsMaybeSignal<T, E>
+impl<T, E, const C: usize> From<[Signal<SendWrapper<T>>; C]> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: [Signal<T>; C]) -> Self {
+    fn from(list: [Signal<SendWrapper<T>>; C]) -> Self {
         let list = list.to_vec();
 
         Self::Dynamic(Signal::derive(move || {
@@ -504,11 +539,11 @@ where
     }
 }
 
-impl<T, E, const C: usize> From<[Signal<Option<T>>; C]> for ElementsMaybeSignal<T, E>
+impl<T, E, const C: usize> From<[Signal<Option<SendWrapper<T>>>; C]> for ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    fn from(list: [Signal<Option<T>>; C]) -> Self {
+    fn from(list: [Signal<Option<SendWrapper<T>>>; C]) -> Self {
         let list = list.to_vec();
 
         Self::Dynamic(Signal::derive(move || {
@@ -526,9 +561,8 @@ macro_rules! impl_from_multi_node_ref_inner {
                 .iter()
                 .map(|node_ref| {
                     node_ref.get().map(move |el| {
-                        let el = el.into_any();
-                        let el: $ty = el.deref().clone().into();
-                        el
+                        let el: $ty = el.clone().into();
+                        SendWrapper::new(el)
                     })
                 })
                 .collect()
@@ -541,6 +575,7 @@ macro_rules! impl_from_multi_node_ref {
         impl<R> From<&[NodeRef<R>]> for ElementsMaybeSignal<$ty, $ty>
         where
             R: ElementType + Clone + 'static,
+            R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_refs: &[NodeRef<R>]) -> Self {
                 let node_refs = node_refs.to_vec();
@@ -551,6 +586,7 @@ macro_rules! impl_from_multi_node_ref {
         impl<R, const C: usize> From<[NodeRef<R>; C]> for ElementsMaybeSignal<$ty, $ty>
         where
             R: ElementType + Clone + 'static,
+            R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_refs: [NodeRef<R>; C]) -> Self {
                 let node_refs = node_refs.to_vec();
@@ -561,6 +597,7 @@ macro_rules! impl_from_multi_node_ref {
         impl<R> From<Vec<NodeRef<R>>> for ElementsMaybeSignal<$ty, $ty>
         where
             R: ElementType + Clone + 'static,
+            R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_refs: Vec<NodeRef<R>>) -> Self {
                 let node_refs = node_refs.clone();

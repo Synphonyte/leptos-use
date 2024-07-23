@@ -259,9 +259,9 @@ where
             for event_name in named_events.clone() {
                 let _ = use_event_listener(
                     es.clone(),
-                    leptos::ev::Custom::<ev::Event>::new(event_name),
+                    leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
                     move |e| {
-                        set_event.set(Some(e.clone()));
+                        set_event.set(Some(SendWrapper::new(e.clone())));
                         let data_string = js!(e["data"]).ok().and_then(|d| d.as_string());
                         set_data_from_string(data_string);
                     },

@@ -148,7 +148,7 @@ pub fn sync_signal<T>(
     right: impl Into<UseRwSignal<T>>,
 ) -> impl Fn() + Clone
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
 {
     sync_signal_with_options(left, right, SyncSignalOptions::default())
 }
@@ -160,8 +160,8 @@ pub fn sync_signal_with_options<L, R>(
     options: SyncSignalOptions<L, R>,
 ) -> impl Fn() + Clone
 where
-    L: Clone + PartialEq + 'static,
-    R: Clone + PartialEq + 'static,
+    L: Clone + PartialEq + Send + Sync + 'static,
+    R: Clone + PartialEq + Send + Sync + 'static,
 {
     let SyncSignalOptions {
         immediate,

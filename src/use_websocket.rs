@@ -303,9 +303,11 @@ where
             Some(Arc::new(move || {
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
-                    && ws_ref.get_value().map_or(false, |ws: SendWrapper<WebSocket>| {
-                        ws.ready_state() != WebSocket::OPEN
-                    })
+                    && ws_ref
+                        .get_value()
+                        .map_or(false, |ws: SendWrapper<WebSocket>| {
+                            ws.ready_state() != WebSocket::OPEN
+                        })
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -417,7 +419,7 @@ where
                                                 on_message(&val);
 
                                                 #[cfg(debug_assertions)]
-                                        drop(zone);
+                                                drop(zone);
 
                                                 set_message.set(Some(val));
                                             }
@@ -628,7 +630,7 @@ impl ReconnectLimit {
     }
 }
 
-type ArcFnBytes = Arc<dyn Fn(&[u8])>;
+type ArcFnBytes = Arc<dyn Fn(&[u8]) + Send + Sync>;
 
 /// Options for [`use_websocket_with_options`].
 #[derive(DefaultBuilder)]
@@ -644,7 +646,7 @@ where
     /// `WebSocket` message callback for text.
     on_message_raw: Arc<dyn Fn(&str) + Send + Sync>,
     /// `WebSocket` message callback for binary.
-    on_message_raw_bytes: ArcFnBytes + Send + Sync,
+    on_message_raw_bytes: ArcFnBytes,
     /// `WebSocket` error callback.
     #[builder(skip)]
     on_error: Arc<dyn Fn(UseWebSocketError<E, D>) + Send + Sync>,

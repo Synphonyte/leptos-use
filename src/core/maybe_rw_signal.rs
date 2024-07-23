@@ -50,26 +50,38 @@ impl<T> From<Signal<T>> for MaybeRwSignal<T> {
     }
 }
 
-impl<T> From<ReadSignal<T>> for MaybeRwSignal<T> {
+impl<T> From<ReadSignal<T>> for MaybeRwSignal<T>
+where
+    T: Send + Sync,
+{
     fn from(s: ReadSignal<T>) -> Self {
         Self::DynamicRead(s.into())
     }
 }
 
-impl<T> From<Memo<T>> for MaybeRwSignal<T> {
+impl<T> From<Memo<T>> for MaybeRwSignal<T>
+where
+    T: Send + Sync,
+{
     fn from(s: Memo<T>) -> Self {
         Self::DynamicRead(s.into())
     }
 }
 
-impl<T> From<RwSignal<T>> for MaybeRwSignal<T> {
+impl<T> From<RwSignal<T>> for MaybeRwSignal<T>
+where
+    T: Send + Sync,
+{
     fn from(s: RwSignal<T>) -> Self {
         let (r, w) = s.split();
         Self::DynamicRw(r.into(), w)
     }
 }
 
-impl<T> From<(ReadSignal<T>, WriteSignal<T>)> for MaybeRwSignal<T> {
+impl<T> From<(ReadSignal<T>, WriteSignal<T>)> for MaybeRwSignal<T>
+where
+    T: Send + Sync,
+{
     fn from(s: (ReadSignal<T>, WriteSignal<T>)) -> Self {
         Self::DynamicRw(s.0.into(), s.1)
     }
@@ -87,7 +99,10 @@ impl From<&str> for MaybeRwSignal<String> {
     }
 }
 
-impl<T: Clone> MaybeRwSignal<T> {
+impl<T: Clone> MaybeRwSignal<T>
+where
+    T: Send + Sync,
+{
     pub fn into_signal(self) -> (Signal<T>, WriteSignal<T>) {
         match self {
             Self::DynamicRead(s) => {
