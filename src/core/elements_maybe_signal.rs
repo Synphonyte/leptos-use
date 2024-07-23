@@ -1,7 +1,7 @@
 use crate::core::ElementMaybeSignal;
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
-use leptos::html::ElementDescriptor;
+use leptos::html::{ElementType, HtmlElement};
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::marker::PhantomData;
@@ -18,9 +18,9 @@ pub enum ElementsMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    Static(Vec<Option<T>>),
-    Dynamic(Signal<Vec<Option<T>>>),
-    _Phantom(PhantomData<E>),
+    Static(Vec<Option<SendWrapper<T>>>),
+    Dynamic(Signal<Vec<Option<SendWrapper<T>>>>),
+    _Phantom(PhantomData<fn() -> E>),
 }
 
 impl<T, E> Default for ElementsMaybeSignal<T, E>
@@ -256,7 +256,7 @@ macro_rules! impl_from_node_ref {
     ($ty:ty) => {
         impl<R> From<NodeRef<R>> for ElementsMaybeSignal<$ty, $ty>
         where
-            R: ElementDescriptor + Clone + 'static,
+            R: ElementType + Clone + 'static,
         {
             fn from(node_ref: NodeRef<R>) -> Self {
                 Self::Dynamic(Signal::derive(move || {
@@ -278,11 +278,12 @@ impl_from_node_ref!(web_sys::Element);
 
 macro_rules! impl_from_html_element {
     ($ty:ty) => {
-        impl<HtmlEl> From<HtmlElement<HtmlEl>> for ElementsMaybeSignal<$ty, $ty>
+        impl<E, At, Ch, Rndr> From<HtmlElement<E, At, Ch, Rndr>> for ElementsMaybeSignal<$ty, $ty>
         where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
+            E: ElementType,
+            E::Output: std::ops::Deref<Target = $ty>,
         {
-            fn from(value: HtmlElement<HtmlEl>) -> Self {
+            fn from(value: HtmlElement<E, At, Ch, Rndr>) -> Self {
                 let el: &$ty = value.deref();
                 Self::Static(vec![Some(el.clone())])
             }
@@ -539,7 +540,7 @@ macro_rules! impl_from_multi_node_ref {
     ($ty:ty) => {
         impl<R> From<&[NodeRef<R>]> for ElementsMaybeSignal<$ty, $ty>
         where
-            R: ElementDescriptor + Clone + 'static,
+            R: ElementType + Clone + 'static,
         {
             fn from(node_refs: &[NodeRef<R>]) -> Self {
                 let node_refs = node_refs.to_vec();
@@ -549,7 +550,7 @@ macro_rules! impl_from_multi_node_ref {
 
         impl<R, const C: usize> From<[NodeRef<R>; C]> for ElementsMaybeSignal<$ty, $ty>
         where
-            R: ElementDescriptor + Clone + 'static,
+            R: ElementType + Clone + 'static,
         {
             fn from(node_refs: [NodeRef<R>; C]) -> Self {
                 let node_refs = node_refs.to_vec();
@@ -559,7 +560,7 @@ macro_rules! impl_from_multi_node_ref {
 
         impl<R> From<Vec<NodeRef<R>>> for ElementsMaybeSignal<$ty, $ty>
         where
-            R: ElementDescriptor + Clone + 'static,
+            R: ElementType + Clone + 'static,
         {
             fn from(node_refs: Vec<NodeRef<R>>) -> Self {
                 let node_refs = node_refs.clone();
@@ -572,66 +573,71 @@ macro_rules! impl_from_multi_node_ref {
 impl_from_multi_node_ref!(web_sys::EventTarget);
 impl_from_multi_node_ref!(web_sys::Element);
 
-// From multiple leptos::html::HTMLElement /////////////////////////////////////////
-
-macro_rules! impl_from_multi_html_element {
-    ($ty:ty) => {
-        impl<HtmlEl> From<&[HtmlElement<HtmlEl>]> for ElementsMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
-        {
-            fn from(value: &[HtmlElement<HtmlEl>]) -> Self {
-                Self::Static(
-                    value
-                        .iter()
-                        .map(|el| {
-                            let el: &$ty = el.deref();
-                            Some(el.clone())
-                        })
-                        .collect(),
-                )
-            }
-        }
-
-        impl<HtmlEl, const C: usize> From<[HtmlElement<HtmlEl>; C]>
-            for ElementsMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
-        {
-            fn from(value: [HtmlElement<HtmlEl>; C]) -> Self {
-                Self::Static(
-                    value
-                        .iter()
-                        .map(|el| {
-                            let el: &$ty = el.deref();
-                            Some(el.clone())
-                        })
-                        .collect(),
-                )
-            }
-        }
-
-        impl<HtmlEl> From<Vec<HtmlElement<HtmlEl>>> for ElementsMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
-        {
-            fn from(value: Vec<HtmlElement<HtmlEl>>) -> Self {
-                Self::Static(
-                    value
-                        .iter()
-                        .map(|el| {
-                            let el: &$ty = el.deref();
-                            Some(el.clone())
-                        })
-                        .collect(),
-                )
-            }
-        }
-    };
-}
-
-impl_from_multi_html_element!(web_sys::EventTarget);
-impl_from_multi_html_element!(web_sys::Element);
+// // From multiple leptos::html::HTMLElement /////////////////////////////////////////
+//
+// macro_rules! impl_from_multi_html_element {
+//     ($ty:ty) => {
+//         impl<E, At, Ch, Rndr> From<&[HtmlElement<E, At, Ch, Rndr>]>
+//             for ElementsMaybeSignal<$ty, $ty>
+//         where
+//             E: ElementType,
+//             E::Output: std::ops::Deref<Target = $ty>,
+//         {
+//             fn from(value: &[HtmlElement<E, At, Ch, Rndr>]) -> Self {
+//                 Self::Static(
+//                     value
+//                         .iter()
+//                         .map(|el| {
+//                             let el: &$ty = el.deref();
+//                             Some(el.clone())
+//                         })
+//                         .collect(),
+//                 )
+//             }
+//         }
+//
+//         impl<E, At, Ch, Rndr, const C: usize> From<[HtmlElement<E, At, Ch, Rndr>; C]>
+//             for ElementsMaybeSignal<$ty, $ty>
+//         where
+//             E: ElementType,
+//             E::Output: std::ops::Deref<Target = $ty>,
+//         {
+//             fn from(value: [HtmlElement<E, At, Ch, Rndr>; C]) -> Self {
+//                 Self::Static(
+//                     value
+//                         .iter()
+//                         .map(|el| {
+//                             let el: &$ty = el.deref();
+//                             Some(el.clone())
+//                         })
+//                         .collect(),
+//                 )
+//             }
+//         }
+//
+//         impl<E, At, Ch, Rndr> From<Vec<HtmlElement<E, At, Ch, Rndr>>>
+//             for ElementsMaybeSignal<$ty, $ty>
+//         where
+//             E: ElementType,
+//             E::Output: std::ops::Deref<Target = $ty>,
+//         {
+//             fn from(value: Vec<HtmlElement<E, At, Ch, Rndr>>) -> Self {
+//                 Self::Static(
+//                     value
+//                         .iter()
+//                         .map(|el| {
+//                             let el: &$ty = el.deref();
+//                             Some(el.clone())
+//                         })
+//                         .collect(),
+//                 )
+//             }
+//         }
+//     };
+// }
+//
+// impl_from_multi_html_element!(web_sys::EventTarget);
+// impl_from_multi_html_element!(web_sys::Element);
 
 // From ElementMaybeSignal //////////////////////////////////////////////////////////////
 

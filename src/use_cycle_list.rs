@@ -1,6 +1,5 @@
 use crate::core::MaybeRwSignal;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// Cycle through a list of items.
@@ -156,7 +155,7 @@ where
     let _ = {
         let set = set.clone();
 
-        leptos::watch(move || list.get(), move |_, _, _| set(index.get()), false)
+        watch(move || list.get(), move |_, _, _| set(index.get()), false)
     };
 
     UseCycleListReturn {
