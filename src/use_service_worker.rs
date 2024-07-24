@@ -256,7 +256,7 @@ fn create_action_update() -> Action<
                         .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
                         .map(SendWrapper::new)
                         .map_err(SendWrapper::new),
-                    Err(err) => Err(err),
+                    Err(err) => Err(SendWrapper::new(err)),
                 }
             }
         },
@@ -275,8 +275,10 @@ fn create_action_create_or_update_registration() -> Action<
                 js_fut!(navigator.service_worker().register(script_url.as_str()))
                     .await
                     .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
+                    .map(SendWrapper::new)
+                    .map_err(SendWrapper::new)
             } else {
-                Err(JsValue::from_str("no navigator"))
+                Err(SendWrapper::new(JsValue::from_str("no navigator")))
             }
         }
     })

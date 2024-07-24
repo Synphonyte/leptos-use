@@ -6,6 +6,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::fmt::Display;
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -167,7 +168,7 @@ pub fn use_intl_number_format(options: UseIntlNumberFormatOptions) -> UseIntlNum
         );
 
         UseIntlNumberFormatReturn {
-            js_intl_number_format: number_format,
+            js_intl_number_format: SendWrapper::new(number_format),
         }
     }}
 }
@@ -768,7 +769,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     /// Return type of [`use_intl_number_format`].
     pub struct UseIntlNumberFormatReturn {
         /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
-        pub js_intl_number_format: js_sys::Intl::NumberFormat,
+        pub js_intl_number_format: SendWrapper<js_sys::Intl::NumberFormat>,
     }
 }}
 
@@ -777,7 +778,7 @@ impl UseIntlNumberFormatReturn {
     /// See [`use_intl_number_format`] for more information.
     pub fn format<N>(&self, number: impl Into<MaybeSignal<N>>) -> Signal<String>
     where
-        N: Clone + Display + 'static,
+        N: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<N>,
     {
         let number = number.into();
@@ -854,8 +855,8 @@ impl UseIntlNumberFormatReturn {
         end: impl Into<MaybeSignal<NEnd>>,
     ) -> Signal<String>
     where
-        NStart: Clone + Display + 'static,
-        NEnd: Clone + Display + 'static,
+        NStart: Clone + Display + Send + Sync + 'static,
+        NEnd: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<NStart>,
         js_sys::Number: From<NEnd>,
     {

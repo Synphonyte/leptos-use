@@ -90,12 +90,12 @@ where
 
         let update_files = move |event: &web_sys::DragEvent| {
             if let Some(data_transfer) = event.data_transfer() {
-                let files: Vec<web_sys::File> = data_transfer
+                let files: Vec<_> = data_transfer
                     .files()
                     .map(|f| js_sys::Array::from(&f).to_vec())
                     .unwrap_or_default()
                     .into_iter()
-                    .map(web_sys::File::from)
+                    .map(|f| SendWrapper::new(web_sys::File::from(f)))
                     .collect();
 
                 set_files.update(move |f| *f = files);
@@ -113,7 +113,11 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files
+                    .get_untracked()
+                    .into_iter()
+                    .map(SendWrapper::take)
+                    .collect(),
                 event,
             });
         });
@@ -126,7 +130,11 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files
+                    .get_untracked()
+                    .into_iter()
+                    .map(SendWrapper::take)
+                    .collect(),
                 event,
             });
         });
@@ -144,7 +152,11 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files
+                    .get_untracked()
+                    .into_iter()
+                    .map(SendWrapper::take)
+                    .collect(),
                 event,
             });
         });
@@ -160,7 +172,11 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files
+                    .get_untracked()
+                    .into_iter()
+                    .map(SendWrapper::take)
+                    .collect(),
                 event,
             });
         });

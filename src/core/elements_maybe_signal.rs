@@ -156,7 +156,7 @@ where
                 let mut list = Vec::with_capacity(node_list.length() as usize);
                 for i in 0..node_list.length() {
                     let node = node_list.get(i).expect("checked the range");
-                    list.push(Some(node));
+                    list.push(Some(SendWrapper::new(node)));
                 }
 
                 Self::Static(list)

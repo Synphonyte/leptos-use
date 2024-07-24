@@ -20,7 +20,7 @@ use leptos::prelude::*;
 /// #    view! { }
 /// # }
 /// ```
-pub fn use_supported(callback: impl Fn() -> bool + 'static) -> Signal<bool> {
+pub fn use_supported(callback: impl Fn() -> bool + Send + Sync + 'static) -> Signal<bool> {
     #[cfg(feature = "ssr")]
     {
         let _ = callback;

@@ -9,8 +9,8 @@ use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
-use std::rc::Rc;
 use std::str::FromStr;
+use std::sync::Arc;
 use wasm_bindgen::JsCast;
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
@@ -209,7 +209,7 @@ where
         if initial_value_from_url_param_to_storage {
             set_store.set(value);
         } else {
-            set_store.set_untracked(value);
+            *set_store.write_untracked() = value;
         }
     }
 
@@ -279,7 +279,7 @@ where
     };
 
     let on_changed = move |mode: ColorMode| {
-        on_changed(mode, Rc::new(default_on_changed.clone()));
+        on_changed(mode, Arc::new(default_on_changed.clone()));
     };
 
     Effect::new({
@@ -427,7 +427,7 @@ where
     /// To get the default behaviour back you can call the provided `default_handler` function.
     /// It takes two parameters:
     /// - `mode: ColorMode`: The color mode to change to.
-    ///  -`default_handler: Rc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
+    ///  -`default_handler: Arc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
     on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.
@@ -476,7 +476,7 @@ where
     _marker: PhantomData<T>,
 }
 
-type OnChangedFn = Rc<dyn Fn(ColorMode, Rc<dyn Fn(ColorMode)>)>;
+type OnChangedFn = Arc<dyn Fn(ColorMode, Arc<dyn Fn(ColorMode) + Send + Sync>) + Send + Sync>;
 
 impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
     fn default() -> Self {
@@ -487,7 +487,7 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             initial_value_from_url_param: None,
             initial_value_from_url_param_to_storage: false,
             custom_modes: vec![],
-            on_changed: Rc::new(move |mode, default_handler| (default_handler)(mode)),
+            on_changed: Arc::new(move |mode, default_handler| (default_handler)(mode)),
             storage_signal: None,
             storage_key: "leptos-use-color-scheme".into(),
             storage: StorageType::default(),

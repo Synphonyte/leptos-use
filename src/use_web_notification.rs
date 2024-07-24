@@ -149,7 +149,7 @@ pub fn use_web_notification_with_options(
                     notification_value.set_onerror(Some(on_error_closure.unchecked_ref()));
                     notification_value.set_onshow(Some(on_show_closure.unchecked_ref()));
 
-                    set_notification.set(Some(notification_value));
+                    set_notification.set(Some(SendWrapper::new(notification_value)));
                 });
             }
         };

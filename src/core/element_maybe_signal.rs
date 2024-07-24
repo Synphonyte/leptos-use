@@ -171,7 +171,7 @@ where
             let _ = target;
             Self::Static(None)
         } else {
-            Self::Static(document().query_selector(target).unwrap_or_default())
+            Self::Static(document().query_selector(target).unwrap_or_default().map(SendWrapper::new))
         }}
     }
 }
@@ -197,7 +197,7 @@ macro_rules! impl_from_signal_string {
                     Self::Dynamic(Signal::derive(|| None))
                 } else {
                     Self::Dynamic(
-                        Signal::derive(move || document().query_selector(&signal.get()).unwrap_or_default()),
+                        Signal::derive(move || document().query_selector(&signal.get()).unwrap_or_default().map(SendWrapper::new)),
                     )
                 }}
             }
@@ -212,8 +212,8 @@ impl_from_signal_string!(Memo<String>);
 
 impl_from_signal_string!(Signal<&str>);
 impl_from_signal_string!(ReadSignal<&str>);
-impl_from_signal_string!(RwSignal<&str>);
-impl_from_signal_string!(Memo<&str>);
+impl_from_signal_string!(RwSignal<&'static str>);
+impl_from_signal_string!(Memo<&'static str>);
 
 // From signal ///////////////////////////////////////////////////////////////
 

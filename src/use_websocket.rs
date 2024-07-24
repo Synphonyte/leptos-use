@@ -237,7 +237,7 @@ pub fn use_websocket<T, C>(
     impl Fn(&T) + Clone + 'static,
 >
 where
-    T: 'static,
+    T: Send + Sync + 'static,
     C: Encoder<T> + Decoder<T>,
     C: IsBinary<T, <C as Decoder<T>>::Encoded>,
     C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
@@ -261,7 +261,7 @@ pub fn use_websocket_with_options<T, C>(
     impl Fn(&T) + Clone + 'static,
 >
 where
-    T: 'static,
+    T: Send + Sync + 'static,
     C: Encoder<T> + Decoder<T>,
     C: IsBinary<T, <C as Decoder<T>>::Encoded>,
     C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
@@ -358,7 +358,7 @@ where
                     let on_open = Arc::clone(&on_open);
 
                     let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
-                        if unmounted.get() {
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
                             return;
                         }
 
@@ -387,7 +387,7 @@ where
                     let on_error = Arc::clone(&on_error);
 
                     let onmessage_closure = Closure::wrap(Box::new(move |e: MessageEvent| {
-                        if unmounted.get() {
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
                             return;
                         }
 
@@ -409,17 +409,18 @@ where
                                         on_message_raw(&txt);
 
                                         #[cfg(debug_assertions)]
-                                        SpecialNonReactiveZone::exit(prev);
+                                        drop(zone);
 
                                         match C::decode_str(&txt) {
                                             Ok(val) => {
                                                 #[cfg(debug_assertions)]
-                                                let prev = SpecialNonReactiveZone::enter();
+                                                let prev =
+                                                    diagnostics::SpecialNonReactiveZone::enter();
 
                                                 on_message(&val);
 
                                                 #[cfg(debug_assertions)]
-                                                drop(zone);
+                                                drop(prev);
 
                                                 set_message.set(Some(val));
                                             }
@@ -445,12 +446,12 @@ where
                                 match C::decode_bin(array.as_slice()) {
                                     Ok(val) => {
                                         #[cfg(debug_assertions)]
-                                        let prev = SpecialNonReactiveZone::enter();
+                                        let prev = diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message(&val);
 
                                         #[cfg(debug_assertions)]
-                                        SpecialNonReactiveZone::exit(prev);
+                                        drop(prev);
 
                                         set_message.set(Some(val));
                                     }
@@ -472,7 +473,7 @@ where
                     let on_error = Arc::clone(&on_error);
 
                     let onerror_closure = Closure::wrap(Box::new(move |e: Event| {
-                        if unmounted.get() {
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
                             return;
                         }
 
@@ -501,7 +502,7 @@ where
                     let on_close = Arc::clone(&on_close);
 
                     let onclose_closure = Closure::wrap(Box::new(move |e: CloseEvent| {
-                        if unmounted.get() {
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
                             return;
                         }
 
@@ -524,7 +525,7 @@ where
                     onclose_closure.forget();
                 }
 
-                ws_ref.set_value(Some(web_socket));
+                ws_ref.set_value(Some(SendWrapper::new(web_socket)));
             }))
         });
     }
@@ -642,7 +643,7 @@ where
     on_open: Arc<dyn Fn(Event) + Send + Sync>,
     /// `WebSocket` message callback for typed message decoded by codec.
     #[builder(skip)]
-    on_message: Arc<dyn Fn(&T)>,
+    on_message: Arc<dyn Fn(&T) + Send + Sync>,
     /// `WebSocket` message callback for text.
     on_message_raw: Arc<dyn Fn(&str) + Send + Sync>,
     /// `WebSocket` message callback for binary.
@@ -669,7 +670,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
     /// `WebSocket` error callback.
     pub fn on_error<F>(self, handler: F) -> Self
     where
-        F: Fn(UseWebSocketError<E, D>) + 'static,
+        F: Fn(UseWebSocketError<E, D>) + Send + Sync + 'static,
     {
         Self {
             on_error: Arc::new(handler),
@@ -680,7 +681,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
     /// `WebSocket` message callback for typed message decoded by codec.
     pub fn on_message<F>(self, handler: F) -> Self
     where
-        F: Fn(&T) + 'static,
+        F: Fn(&T) + Send + Sync + 'static,
     {
         Self {
             on_message: Arc::new(handler),
@@ -710,7 +711,7 @@ impl<T: ?Sized, E, D> Default for UseWebSocketOptions<T, E, D> {
 #[derive(Clone)]
 pub struct UseWebSocketReturn<T, OpenFn, CloseFn, SendFn>
 where
-    T: 'static,
+    T: Send + Sync + 'static,
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
     SendFn: Fn(&T) + Clone + 'static,

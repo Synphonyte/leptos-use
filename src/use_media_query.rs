@@ -93,7 +93,10 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
 
         Effect::new(move |_| update());
 
-        on_cleanup(cleanup);
+        on_cleanup({
+            let cleanup = send_wrapper::SendWrapper::new(cleanup);
+            move || cleanup()
+        });
     }}
 
     matches.into()
