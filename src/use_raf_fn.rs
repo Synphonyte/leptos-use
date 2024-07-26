@@ -89,7 +89,7 @@ pub fn use_raf_fn_with_options(
         let previous_frame_timestamp = Cell::new(0.0_f64);
 
         move |timestamp: f64| {
-            if !is_active.get_untracked() {
+            if !is_active.try_get_untracked().unwrap_or_default() {
                 return;
             }
 

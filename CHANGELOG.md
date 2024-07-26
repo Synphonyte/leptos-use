@@ -70,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed auto-reconnect in `use_websocket`
 - Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
+- Fixed potential signal out of scope issue with `use_raf_fn`
 
 ## [0.10.10] - 2024-05-10
 
