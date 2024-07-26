@@ -44,8 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `JsonCodec` has been renamed to `JsonSerdeCodec`.
     - The feature to enable this codec is now called `json_serde` instead of just `serde`.
     - `ProstCodec` now encodes as binary data. If you want to keep using it with string data you can wrap it like
-      this: `Base64<ProstCodec>`. You have to enable both features `prost` and `base64` for this.
+      this: `Base64<ProstCodec>`.
     - All of these structs, traits and features now live in their own crate called `codee`
+    - A bunch of new codecs are available. Have a look at the docs for crate `codee`.
 - `use_websocket`:
     - `UseWebsocketOptions` has been renamed to `UseWebSocketOptions` (uppercase S) to be consistent with the return
       type.

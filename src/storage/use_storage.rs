@@ -276,13 +276,17 @@ where
         let notify = create_trigger();
 
         // Refetch from storage. Keeps track of how many times we've been notified. Does not increment for calls to set_data
-        let notify_id = create_memo::<usize>(move |prev| {
-            notify.track();
-            match prev {
-                None => 1, // Avoid async fetch of initial value
-                Some(prev) => {
-                    fetch_from_storage();
-                    prev + 1
+        let notify_id = create_memo::<usize>({
+            let fetch_from_storage = fetch_from_storage.clone();
+
+            move |prev| {
+                notify.track();
+                match prev {
+                    None => 1, // Avoid async fetch of initial value
+                    Some(prev) => {
+                        fetch_from_storage();
+                        prev + 1
+                    }
                 }
             }
         });
