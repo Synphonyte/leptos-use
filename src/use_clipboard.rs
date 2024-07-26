@@ -127,6 +127,8 @@ pub fn use_clipboard_with_options(
 pub struct UseClipboardOptions {
     /// When `true` event handlers are added so that the returned signal `text` is updated whenever the clipboard changes.
     /// Defaults to `false`.
+    /// 
+    /// > Please note that clipboard changes are only detected when copying or cutting text inside the same document.
     read: bool,
 
     /// After how many milliseconds after copying should the returned signal `copied` be set to `false`?
