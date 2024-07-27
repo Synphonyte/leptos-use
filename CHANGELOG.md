@@ -65,13 +65,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
           to `on_message_raw` and `on_message_raw_bytes`.
         - The new `UseWebSocketOptions::on_message` takes a `&T`.
         - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
-- `use_storage` now always saves the default value to storage if the key doesn't exist yet. 
+- `use_storage` now always saves the default value to storage if the key doesn't exist yet.
+- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic` 
+  (note the `n`) (thanks to @mondeja).
 
 ### Fixes 🍕
 
 - Fixed auto-reconnect in `use_websocket`
 - Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
 - Fixed potential signal out of scope issue with `use_raf_fn`
+
+### Other Changes 🔥
+
+- Better links in docs that work both in the book and in rustdoc (thanks to @mondeja).
+- Better CI/CD (thanks to @EstebanBorai).
 
 ## [0.10.10] - 2024-05-10
 
