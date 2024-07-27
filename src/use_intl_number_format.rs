@@ -485,7 +485,7 @@ pub struct UseIntlNumberFormatOptions {
 
     /// The currency to use in currency formatting.
     /// Possible values are the ISO 4217 currency codes, such as "USD" for the US dollar, "EUR" for the euro,
-    /// or "CNY" for the Chinese RMB — see the [Current currency & funds code list](https://www.six-group.com/en/products-services/financial-information/data-standards.html#scrollTo=currency-codes.
+    /// or "CNY" for the Chinese RMB — see the [Current currency & funds code list](https://www.six-group.com/en/products-services/financial-information/data-standards.html#scrollTo=currency-codes).
     /// There is no default value; if the style is `Currency`, the currency property must be provided.
     #[builder(into)]
     currency: Option<String>,

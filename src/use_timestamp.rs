@@ -154,10 +154,10 @@ pub struct UseTimestampOptions {
 /// Interval type for [`UseTimestampOptions`].
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum TimestampInterval {
-    /// use [`use_raf_fn`] for updating the timestamp
+    /// use [`fn@crate::use_raf_fn`] for updating the timestamp
     RequestAnimationFrame,
 
-    /// use [`use_interval_fn`] for updating the timestamp
+    /// use [`fn@crate::use_interval_fn`] for updating the timestamp
     Interval(u64),
 }
 

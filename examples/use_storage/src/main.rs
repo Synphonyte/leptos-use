@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::storage::use_local_storage;
-use leptos_use::utils::JsonCodec;
+use codee::string::JsonSerdeCodec;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -25,8 +25,8 @@ impl Default for BananaState {
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (state, set_state, reset) = use_local_storage::<BananaState, JsonCodec>("banana-state");
-    let (state2, _, _) = use_local_storage::<BananaState, JsonCodec>("banana-state");
+    let (state, set_state, reset) = use_local_storage::<BananaState, JsonSerdeCodec>("banana-state");
+    let (state2, _, _) = use_local_storage::<BananaState, JsonSerdeCodec>("banana-state");
 
     view! {
         <input

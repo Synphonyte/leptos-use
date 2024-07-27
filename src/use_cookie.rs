@@ -57,10 +57,10 @@ use std::rc::Rc;
 /// ```
 ///
 /// Values are (en)decoded via the given codec. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ## Cookie attributes
 ///
@@ -136,10 +136,6 @@ use std::rc::Rc;
 /// # view! {}
 /// # }
 /// ```
-///
-/// ## Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -363,6 +359,8 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
+            let cookie_name = cookie_name.to_owned();
+
             create_isomorphic_effect(move |_| {
                 let value = cookie
                     .with(|cookie| {
@@ -373,20 +371,27 @@ where
                         })
                     })
                     .flatten();
-                jar.update_value(|jar| {
-                    write_server_cookie(
-                        cookie_name,
-                        value,
-                        jar,
-                        max_age,
-                        expires,
-                        domain,
-                        path,
-                        same_site,
-                        secure,
-                        http_only,
-                        ssr_set_cookie,
-                    )
+
+                jar.update_value({
+                    let domain = domain.clone();
+                    let path = path.clone();
+                    let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
+
+                    |jar| {
+                        write_server_cookie(
+                            &cookie_name,
+                            value,
+                            jar,
+                            max_age,
+                            expires,
+                            domain,
+                            path,
+                            same_site,
+                            secure,
+                            http_only,
+                            ssr_set_cookie,
+                        )
+                    }
                 });
             });
         }

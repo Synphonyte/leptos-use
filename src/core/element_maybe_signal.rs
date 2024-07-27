@@ -7,12 +7,14 @@ use std::marker::PhantomData;
 use std::ops::Deref;
 
 /// Used as an argument type to make it easily possible to pass either
+///
 /// * a `web_sys` element that implements `E` (for example `EventTarget`, `Element` or `HtmlElement`),
 /// * an `Option<T>` where `T` is the web_sys element,
 /// * a `Signal<T>` where `T` is the web_sys element,
 /// * a `Signal<Option<T>>` where `T` is the web_sys element,
 /// * a `NodeRef`
-/// into a function. Used for example in [`use_event_listener`].
+///
+/// into a function. Used for example in [`fn@crate::use_event_listener`].
 pub enum ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,

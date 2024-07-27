@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 leptos = { version = "0.6", features = ["nightly", "csr"] }
+codee = "0.1"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"

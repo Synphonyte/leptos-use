@@ -26,8 +26,8 @@ use std::fmt::Display;
 ///
 /// ## See also
 ///
-/// * [`use_media_query`]
-/// * [`use_preferred_dark`]
+/// * [`fn@crate::use_media_query`]
+/// * [`fn@crate::use_preferred_dark`]
 pub fn use_preferred_contrast() -> Signal<PreferredContrast> {
     let is_more = use_media_query("(prefers-contrast: more)");
     let is_less = use_media_query("(prefers-contrast: less)");

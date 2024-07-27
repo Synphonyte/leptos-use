@@ -8,6 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum = { version = "0.7", optional = true }
+codee = "0.1"
 console_error_panic_hook = "0.1"
 console_log = "1"
 cfg-if = "1"

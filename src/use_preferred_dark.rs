@@ -24,8 +24,8 @@ use leptos::prelude::*;
 ///
 /// ## See also
 ///
-/// * [`use_media_query`]
-/// * [`use_preferred_contrast`]
+/// * [`fn@crate::use_media_query`]
+/// * [`fn@crate::use_preferred_contrast`]
 pub fn use_preferred_dark() -> Signal<bool> {
     use_media_query("(prefers-color-scheme: dark)")
 }

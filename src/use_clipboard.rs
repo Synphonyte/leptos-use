@@ -12,7 +12,7 @@ use leptos::prelude::*;
 /// Without user permission, reading or altering the clipboard contents is not permitted.
 ///
 /// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
+/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
 ///
 /// ## Demo
 ///
@@ -30,14 +30,14 @@ use leptos::prelude::*;
 ///
 /// view! {
 ///     <Show
-///         when=is_supported
+///         when=move || is_supported.get()
 ///         fallback=move || view! { <p>Your browser does not support Clipboard API</p> }
 ///     >
 ///         <button on:click={
 ///             let copy = copy.clone();
 ///             move |_| copy("Hello!")
 ///         }>
-///             <Show when=copied fallback=move || "Copy">
+///             <Show when=move || copied.get() fallback=move || "Copy">
 ///                 "Copied!"
 ///             </Show>
 ///         </button>
@@ -90,7 +90,7 @@ pub fn use_clipboard_with_options(
     };
 
     if is_supported.get() && read {
-        let _ = use_event_listener(window(), copy, update_text.clone());
+        let _ = use_event_listener(window(), copy, update_text);
         let _ = use_event_listener(window(), cut, update_text);
     }
 
@@ -128,6 +128,8 @@ pub fn use_clipboard_with_options(
 pub struct UseClipboardOptions {
     /// When `true` event handlers are added so that the returned signal `text` is updated whenever the clipboard changes.
     /// Defaults to `false`.
+    ///
+    /// > Please note that clipboard changes are only detected when copying or cutting text inside the same document.
     read: bool,
 
     /// After how many milliseconds after copying should the returned signal `copied` be set to `false`?
