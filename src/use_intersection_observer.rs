@@ -52,7 +52,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## See also
 ///
-/// * [`use_element_visibility`]
+/// * [`fn@crate::use_element_visibility`]
 pub fn use_intersection_observer<El, T, F>(
     target: El,
     callback: F,

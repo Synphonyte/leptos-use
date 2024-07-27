@@ -38,7 +38,8 @@ use std::rc::Rc;
 ///
 /// ## Filters
 ///
-/// The callback can be throttled or debounced. Please see [`watch_throttled`] and [`watch_debounced`] for details.
+/// The callback can be throttled or debounced. Please see [`fn@crate::watch_throttled`]
+/// and [`fn@crate::watch_debounced`] for details.
 ///
 /// ```
 /// # use leptos::*;
@@ -86,8 +87,8 @@ use std::rc::Rc;
 ///
 /// ## See also
 ///
-/// * [`watch_throttled`]
-/// * [`watch_debounced`]
+/// * [`fn@crate::watch_throttled`]
+/// * [`fn@crate::watch_debounced`]
 
 /// Version of `watch` that accepts `WatchOptions`. See [`watch`] for how to use.
 pub fn watch_with_options<W, T, DFn, CFn>(

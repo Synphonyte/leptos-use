@@ -16,6 +16,7 @@ use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 
+#[allow(rustdoc::bare_urls)]
 /// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
 ///
 /// ## Demo

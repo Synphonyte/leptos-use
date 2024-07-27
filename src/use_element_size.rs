@@ -45,7 +45,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## See also
 ///
-/// - [`use_resize_observer`]
+/// - [`fn@crate::use_resize_observer`]
 pub fn use_element_size<El, T>(target: El) -> UseElementSizeReturn
 where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,

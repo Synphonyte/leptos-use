@@ -11,7 +11,7 @@ use std::ops::Deref;
 /// * a `Signal<T>` where `T` is the web_sys element,
 /// * a `Signal<Option<T>>` where `T` is the web_sys element,
 /// * a `NodeRef`
-/// into a function. Used for example in [`use_event_listener`].
+/// into a function. Used for example in [`fn@crate::use_event_listener`].
 pub enum ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,

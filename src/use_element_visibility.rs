@@ -40,7 +40,7 @@ use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptio
 ///
 /// ## See also
 ///
-/// * [`use_intersection_observer`]
+/// * [`fn@crate::use_intersection_observer`]
 pub fn use_element_visibility<El, T>(target: El) -> Signal<bool>
 where
     El: Into<ElementMaybeSignal<T, web_sys::Element>>,

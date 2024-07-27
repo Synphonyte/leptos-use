@@ -34,7 +34,7 @@ use leptos::*;
 ///
 /// Please note that if the current component is cleaned up before the debounced callback is called, the debounced callback will not be called.
 ///
-/// There's also `watch_debounced_with_options` where you can specify the other watch options (except `filter`).
+/// There's also [`watch_debounced_with_options`] where you can specify the other watch options (except `filter`).
 ///
 /// ```
 /// # use leptos::*;
@@ -70,8 +70,8 @@ use leptos::*;
 ///
 /// ## See also
 ///
-/// * [`watch`]
-/// * [`watch_throttled`]
+/// * `leptos::watch`
+/// * [`fn@crate::watch_throttled`]
 pub fn watch_debounced<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone
 where
     DFn: Fn() -> W + 'static,
@@ -82,7 +82,8 @@ where
     watch_with_options(deps, callback, WatchOptions::default().debounce(ms))
 }
 
-/// Version of `watch_debounced` that accepts `WatchDebouncedOptions`. See [`watch_debounced`] for how to use.
+/// Version of `watch_debounced` that accepts `WatchDebouncedOptions`.
+/// See [`watch_debounced`] for how to use.
 pub fn watch_debounced_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
