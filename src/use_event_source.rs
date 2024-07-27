@@ -24,7 +24,6 @@ use thiserror::Error;
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
 /// > available and what feature flags they require.
 ///
-///
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::{use_event_source, UseEventSourceReturn};

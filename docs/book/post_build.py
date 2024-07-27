@@ -13,8 +13,8 @@ def main():
         if os.path.isdir(category_dir):
             for file in os.listdir(category_dir):
                 if file.endswith(".md") and (len(sys.argv) == 1 or (sys.argv[1] in file)):
-                    build_and_copy_demo(category, file)
-                    rewrite_links(category, file)
+                    if build_and_copy_demo(category, file):
+                        rewrite_links(category, file)
 
 
 def build_and_copy_demo(category, md_name):
@@ -51,7 +51,7 @@ def build_and_copy_demo(category, md_name):
 
         with open(book_html_path, "w") as f:
             f.write(
-                f"""{head_split[0]}
+                f"""{head_split[0]} 
 <head>
     {demo_head}
     {target_head}
@@ -61,6 +61,10 @@ def build_and_copy_demo(category, md_name):
     {target_body}
 </body>
 {body_split[1]}""")
+
+        return True
+
+    return False
 
 
 def rewrite_links(category, md_name):
