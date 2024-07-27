@@ -36,8 +36,8 @@ use std::rc::Rc;
 ///
 /// ## See also
 ///
-/// * [`use_preferred_dark`]
-/// * [`use_preferred_contrast`]
+/// * [`fn@crate::use_preferred_dark`]
+/// * [`fn@crate::use_preferred_contrast`]
 pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
     let query = query.into();
 

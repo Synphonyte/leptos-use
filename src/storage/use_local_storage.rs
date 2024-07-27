@@ -2,14 +2,19 @@ use super::{use_storage_with_options, StorageType, UseStorageOptions};
 use codee::{Decoder, Encoder};
 use leptos::signal_prelude::*;
 
+#[allow(rustdoc::bare_urls)]
 /// Reactive [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 ///
-/// LocalStorage stores data in the browser with no expiration time. Access is given to all pages from the same origin (e.g., all pages from "https://example.com" share the same origin). While data doesn't expire the user can view, modify and delete all data stored. Browsers allow 5MB of data to be stored.
+/// LocalStorage stores data in the browser with no expiration time. Access is given to all pages
+/// from the same origin (e.g., all pages from "https://example.com" share the same origin).
+/// While data doesn't expire the user can view, modify and delete all data stored.
+/// Browsers allow 5MB of data to be stored.
 ///
-/// This is contrast to [`use_session_storage`] which clears data when the page session ends and is not shared.
+/// This is contrast to [`fn@crate::storage::use_session_storage`] which clears data when the page session ends and is not shared.
 ///
 /// ## Usage
-/// See [`use_storage`] for more details on how to use.
+///
+/// See [`fn@crate::storage::use_storage`] for more details on how to use.
 pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)

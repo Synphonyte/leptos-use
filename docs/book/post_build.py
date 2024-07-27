@@ -14,6 +14,7 @@ def main():
             for file in os.listdir(category_dir):
                 if file.endswith(".md") and (len(sys.argv) == 1 or (sys.argv[1] in file)):
                     build_and_copy_demo(category, file)
+                    rewrite_links(category, file)
 
 
 def build_and_copy_demo(category, md_name):
@@ -24,7 +25,8 @@ def build_and_copy_demo(category, md_name):
         code = p.wait()
 
         if code != 0:
-            sys.exit(code, f"failed to build example '{name}'")
+            sys.stderr.write(f"failed to build example '{name}'\n")
+            sys.exit(code)
 
         example_output_path = os.path.join(example_dir, "dist")
         target_path = os.path.join("book", category, name, "demo")
@@ -59,6 +61,28 @@ def build_and_copy_demo(category, md_name):
     {target_body}
 </body>
 {body_split[1]}""")
+
+
+def rewrite_links(category, md_name):
+    """Rewrite links in generated documentation to make them
+    compatible between rustdoc and the book.
+    """
+    html_name = f"{md_name[:-3]}.html"
+    target_path = os.path.join("book", category, html_name)
+
+    with open(target_path, "r") as f:
+        html = f.read()
+
+    html = html.replace(
+        "fn@crate::", "",
+    ).replace(
+        "crate::", "",
+    ).replace(
+        "fn@", "",
+    )
+
+    with open(target_path, "w") as f:
+        f.write(html)
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ impl UseWindow {
         navigator(&self) -> Option<web_sys::Navigator>
     );
 
-    /// Returns the same as [`use_document`].
+    /// Returns the same as [`fn@use_document`].
     #[inline(always)]
     pub fn document(&self) -> UseDocument {
         use_document()

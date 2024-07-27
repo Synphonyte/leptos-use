@@ -165,6 +165,6 @@ pub struct UseRafFnCallbackArgs {
     /// Time elapsed between this and the last frame.
     pub delta: f64,
 
-    /// Time elapsed since the creation of the web page. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp#the_time_origin Time origin).
+    /// Time elapsed since the creation of the web page. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp#the_time_origin) Time origin.
     pub timestamp: f64,
 }

@@ -57,10 +57,10 @@ use std::rc::Rc;
 /// ```
 ///
 /// Values are (en)decoded via the given codec. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ## Cookie attributes
 ///
@@ -92,7 +92,7 @@ use std::rc::Rc;
 /// the HTTP response header according to options (if provided).
 /// The returned `WriteSignal` may not affect the cookie headers on the server! It will try and write
 /// the headers buy if this happens after the headers have already been streamed to the client then
-/// this will have no effect. 
+/// this will have no effect.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
@@ -136,10 +136,6 @@ use std::rc::Rc;
 /// # view! {}
 /// # }
 /// ```
-///
-/// ## Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,

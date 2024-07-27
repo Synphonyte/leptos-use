@@ -52,7 +52,7 @@ use leptos::*;
 ///
 /// ## See also
 ///
-/// * [`watch`]
+/// * `leptos::watch`
 pub fn watch_pausable<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
