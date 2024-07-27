@@ -11,7 +11,7 @@ use leptos::*;
 /// Without user permission, reading or altering the clipboard contents is not permitted.
 ///
 /// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
+/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
 ///
 /// ## Demo
 ///
@@ -89,7 +89,7 @@ pub fn use_clipboard_with_options(
     };
 
     if is_supported.get() && read {
-        let _ = use_event_listener(window(), copy, update_text.clone());
+        let _ = use_event_listener(window(), copy, update_text);
         let _ = use_event_listener(window(), cut, update_text);
     }
 
