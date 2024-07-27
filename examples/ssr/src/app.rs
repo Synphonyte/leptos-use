@@ -4,7 +4,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
-use leptos_use::utils::FromToStringCodec;
+use codee::string::FromToStringCodec;
 use leptos_use::{
     use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
     use_interval, use_intl_number_format, use_preferred_dark, use_timestamp, use_window, ColorMode,
@@ -78,7 +78,7 @@ fn HomePage() -> impl IntoView {
 
     let (test_cookie, _) = use_cookie_with_options::<String, FromToStringCodec>(
         "test-cookie",
-        UseCookieOptions::<String, _>::default()
+        UseCookieOptions::<String, _, _>::default()
             .max_age(3000)
             .default_value(Some("Bogus string".to_owned())),
     );

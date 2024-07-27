@@ -359,6 +359,8 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
+            let cookie_name = cookie_name.to_owned();
+            
             create_isomorphic_effect(move |_| {
                 let value = cookie
                     .with(|cookie| {
@@ -369,20 +371,27 @@ where
                         })
                     })
                     .flatten();
-                jar.update_value(|jar| {
-                    write_server_cookie(
-                        cookie_name,
-                        value,
-                        jar,
-                        max_age,
-                        expires,
-                        domain,
-                        path,
-                        same_site,
-                        secure,
-                        http_only,
-                        ssr_set_cookie,
-                    )
+
+                jar.update_value({
+                    let domain = domain.clone();
+                    let path = path.clone();
+                    let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
+
+                    |jar| {
+                        write_server_cookie(
+                            &cookie_name,
+                            value,
+                            jar,
+                            max_age,
+                            expires,
+                            domain,
+                            path,
+                            same_site,
+                            secure,
+                            http_only,
+                            ssr_set_cookie,
+                        )
+                    }
                 });
             });
         }
