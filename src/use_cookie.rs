@@ -360,7 +360,7 @@ where
     {
         if !readonly {
             let cookie_name = cookie_name.to_owned();
-            
+
             create_isomorphic_effect(move |_| {
                 let value = cookie
                     .with(|cookie| {
