@@ -92,7 +92,7 @@ use std::rc::Rc;
 /// the HTTP response header according to options (if provided).
 /// The returned `WriteSignal` may not affect the cookie headers on the server! It will try and write
 /// the headers buy if this happens after the headers have already been streamed to the client then
-/// this will have no effect. 
+/// this will have no effect.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
