@@ -89,8 +89,6 @@ use std::rc::Rc;
 ///
 /// * [`fn@crate::watch_throttled`]
 /// * [`fn@crate::watch_debounced`]
-
-/// Version of `watch` that accepts `WatchOptions`. See [`watch`] for how to use.
 pub fn watch_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,

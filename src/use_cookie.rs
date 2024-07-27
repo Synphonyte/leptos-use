@@ -60,7 +60,7 @@ use std::rc::Rc;
 /// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ## Cookie attributes
 ///
