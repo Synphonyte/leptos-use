@@ -1,5 +1,11 @@
 on:
   pull_request:
+    branches:
+      - main
+    paths:
+      - "**"
+      - "!/*.md"
+      - "!/**.md"
   workflow_dispatch:
 
 name: Tests
@@ -20,13 +26,18 @@ jobs:
           components: rustfmt, clippy, rust-src
       - name: Cache
         uses: Swatinem/rust-cache@v2
-      - name: Check formatting
-        run: cargo fmt --check
-      - name: Clippy
-        run: cargo clippy --features docs,math --tests -- -D warnings
+
       - name: Run tests (general)
         run: cargo test --features math,docs,ssr
-      - name: Run tests (axum)
-        run: cargo test --features math,docs,ssr,axum --doc use_cookie::use_cookie
-      - name: Run tests (actix)
-        run: cargo test --features math,docs,ssr,actix --doc use_cookie::use_cookie
+
+      - name: Run tests (axum) use_cookie
+        run: cargo test --features math,docs,ssr,axum --doc use_cookie
+
+      - name: Run tests (axum) use_locales
+        run: cargo test --features math,docs,ssr,axum --doc use_locales
+
+      - name: Run tests (actix) use_cookie
+        run: cargo test --features math,docs,ssr,actix --doc use_cookie
+
+      - name: Run tests (actix) use_locales
+        run: cargo test --features math,docs,ssr,actix --doc use_locales

@@ -23,20 +23,27 @@ jobs:
           components: rustfmt, clippy, rust-src
       - name: Cache
         uses: Swatinem/rust-cache@v2
+        
       - name: Check function count badge
         run: python3 docs/generate_count_badge.py --check
       - name: Check version in docs
         run: python3 docs/add_version_to_docs.py --check
+        
       - name: Check formatting
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --features docs,math --tests -- -D warnings
+        
       - name: Run tests (general)
         run: cargo test --features math,docs,ssr
-      - name: Run tests (axum)
-        run: cargo test --features math,docs,ssr,axum --doc use_cookie::use_cookie
-      - name: Run tests (actix)
-        run: cargo test --features math,docs,ssr,actix --doc use_cookie::use_cookie
+      - name: Run tests (axum) use_cookie
+        run: cargo test --features math,docs,ssr,axum --doc use_cookie
+      - name: Run tests (axum) use_locales
+        run: cargo test --features math,docs,ssr,axum --doc use_locales
+      - name: Run tests (actix) use_cookie
+        run: cargo test --features math,docs,ssr,actix --doc use_cookie
+      - name: Run tests (actix) use_locales
+        run: cargo test --features math,docs,ssr,actix --doc use_locales
 
       #### mdbook
       - name: Install mdbook I
