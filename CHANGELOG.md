@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New Functions 🚀
 
 - `use_locale`
+- `use_locale`
 - `header` – Standard implementations for reading a header on the server.
 
 ## [0.11.0] - 2024-07-27

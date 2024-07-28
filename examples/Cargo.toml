@@ -38,6 +38,7 @@ members = [
     "use_interval",
     "use_interval_fn",
     "use_intl_number_format",
+    "use_locale",
     "use_locales",
     "use_media_query",
     "use_mouse",

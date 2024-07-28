@@ -3,7 +3,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::rc::Rc;
 
-/// Reactive accepted locales.
+/// Reactive locales.
 ///
 /// If called on the client-side this function returns the value of
 /// [`navigator.languages`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
@@ -100,7 +100,7 @@ pub struct UseLocalesOptions {
     /// Getter function to return the string value of the accept languange header.
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
     #[allow(dead_code)]
-    ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
+    pub(crate) ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
 }
 
 impl Default for UseLocalesOptions {

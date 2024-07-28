@@ -114,6 +114,7 @@
 # Intl
 
 - [use_intl_number_format](intl/use_intl_number_format.md)
+- [use_locale](intl/use_locale.md)
 - [use_locales](intl/use_locales.md)
 
 # @Math

@@ -33,11 +33,11 @@ jobs:
       - name: Run tests (axum) use_cookie
         run: cargo test --features math,docs,ssr,axum --doc use_cookie
 
-      - name: Run tests (axum) use_locales
-        run: cargo test --features math,docs,ssr,axum --doc use_locales
+      - name: Run tests (axum) use_locale
+        run: cargo test --features math,docs,ssr,axum --doc use_locale
 
       - name: Run tests (actix) use_cookie
         run: cargo test --features math,docs,ssr,actix --doc use_cookie
 
-      - name: Run tests (actix) use_locales
-        run: cargo test --features math,docs,ssr,actix --doc use_locales
+      - name: Run tests (actix) use_locale
+        run: cargo test --features math,docs,ssr,actix --doc use_locale
