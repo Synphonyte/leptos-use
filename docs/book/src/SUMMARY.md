@@ -99,6 +99,7 @@
 
 # Utilities
 
+- [header](utilities/header.md)
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)

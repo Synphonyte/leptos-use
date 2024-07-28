@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### New Functions 🚀
+
+- `header` – Standard implementations for reading a header on the server.
+
 ## [0.11.0] - 2024-07-27
 
 ### New Functions 🚀
@@ -31,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is now re-exported
-- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR. 
+- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR.
 - New book chapter about codecs
 - The macro `use_derive_signal!` is now exported (thanks to @mscofield0).
 
@@ -66,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         - The new `UseWebSocketOptions::on_message` takes a `&T`.
         - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
 - `use_storage` now always saves the default value to storage if the key doesn't exist yet.
-- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic` 
+- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic`
   (note the `n`) (thanks to @mondeja).
 
 ### Fixes 🍕
