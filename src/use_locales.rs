@@ -100,7 +100,7 @@ pub struct UseLocalesOptions {
     /// Getter function to return the string value of the accept languange header.
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
     #[allow(dead_code)]
-    pub(crate) ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
 }
 
 impl Default for UseLocalesOptions {

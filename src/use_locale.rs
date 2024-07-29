@@ -1,14 +1,14 @@
-use crate::utils::get_header;
 use crate::{use_locales_with_options, UseLocalesOptions};
-use default_struct_builder::DefaultBuilder;
 use leptos::*;
-use std::rc::Rc;
 
-/// Reactive locale.
+/// Reactive locale matching.
 ///
-/// This is basically the same as [`fn@crate::use_locales`] but takes the first entry of the list.
-/// If no locale is found then [`crate::UseLocaleOptions::fallback`] is returned which defaults
-/// to `"en"`.
+/// Returns the first matching locale given by [`fn@crate::use_locales`] that is also found in
+/// the `supported` list. In case there is no match, then the first locale in `supported` will be
+/// returned. If `supported` is empty, the empty string is returned.
+///
+/// Matching is done by checking if an accepted locale from `use_locales` starts with a supported
+/// locale. If a match is found the locale from the `supported` list is returned.
 ///
 /// ## Demo
 ///
@@ -22,7 +22,7 @@ use std::rc::Rc;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let locale = use_locale();
+/// let locale = use_locale(&["en".to_string(), "de".to_string(), "fr".to_string()]);
 /// #
 /// # view! { }
 /// # }
@@ -31,44 +31,47 @@ use std::rc::Rc;
 /// ## Server-Side Rendering
 ///
 /// See [`fn@crate::use_locales`]
-
-pub fn use_locale() -> Signal<String> {
-    use_locale_with_options(UseLocaleOptions::default())
+pub fn use_locale<S>(supported: S) -> Signal<String>
+where
+    S: IntoIterator,
+    S::Item: Into<String> + Clone + 'static,
+{
+    use_locale_with_options(supported, UseLocaleOptions::default())
 }
 
 /// Version of [`fn@crate::use_locale`] that takes a `UseLocaleOptions`. See [`fn@crate::use_locale`] for how to use.
-pub fn use_locale_with_options(options: UseLocaleOptions) -> Signal<String> {
-    let UseLocaleOptions {
-        fallback,
-        ssr_lang_header_getter,
-    } = options;
+pub fn use_locale_with_options<S>(supported: S, options: UseLocaleOptions) -> Signal<String>
+where
+    S: IntoIterator,
+    S::Item: Into<String> + Clone + 'static,
+{
+    let locales = use_locales_with_options(options);
 
-    let locales = use_locales_with_options(UseLocalesOptions {
-        ssr_lang_header_getter,
-    });
+    let supported = supported.into_iter().collect::<Vec<_>>();
 
-    Signal::derive(move || locales.get().first().cloned().unwrap_or(fallback.clone()))
+    Signal::derive(move || {
+        let supported = supported.clone();
+
+        locales.with(|locales| {
+            let mut first_supported = None;
+
+            for s in supported {
+                let s = s.into();
+
+                if first_supported.is_none() {
+                    first_supported = Some(s.clone());
+                }
+
+                for locale in locales {
+                    if locale.starts_with(&s) {
+                        return s;
+                    }
+                }
+            }
+
+            first_supported.unwrap_or_else(|| "".to_string())
+        })
+    })
 }
 
-/// Options for [`fn@crate::use_locale_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseLocaleOptions {
-    /// Fallback value in case no locale is found. Defaults to `"en"`.
-    fallback: String,
-
-    /// Getter function to return the string value of the accept languange header.
-    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
-    #[allow(dead_code)]
-    ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
-}
-
-impl Default for UseLocaleOptions {
-    fn default() -> Self {
-        Self {
-            fallback: "en".to_string(),
-            ssr_lang_header_getter: Rc::new(move || {
-                get_header!(ACCEPT_LANGUAGE, use_locale, ssr_lang_header_getter)
-            }),
-        }
-    }
-}
+pub type UseLocaleOptions = UseLocalesOptions;

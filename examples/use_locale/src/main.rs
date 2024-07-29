@@ -4,7 +4,7 @@ use leptos_use::use_locale;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let locale = use_locale();
+    let locale = use_locale(["en", "de", "fr"]);
 
     view! {
         <p>Locale: <code class="font-bold">{locale}</code></p>
