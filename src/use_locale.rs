@@ -22,7 +22,7 @@ use leptos::*;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let locale = use_locale(&["en".to_string(), "de".to_string(), "fr".to_string()]);
+/// let locale = use_locale(["en", "de", "fr"]);
 /// #
 /// # view! { }
 /// # }
