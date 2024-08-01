@@ -28,7 +28,7 @@ use std::rc::Rc;
 ///     UseWebNotificationOptions::default()
 ///         .direction(NotificationDirection::Auto)
 ///         .language("en")
-///         .renotity(true)
+///         .renotify(true)
 ///         .tag("test"),
 /// );
 ///
