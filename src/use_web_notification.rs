@@ -229,7 +229,6 @@ impl From<NotificationDirection> for web_sys::NotificationDirection {
 ///
 /// The following implementations are missing:
 /// - `vibrate`
-/// - `image`
 #[derive(DefaultBuilder, Clone)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseWebNotificationOptions {
@@ -262,6 +261,11 @@ pub struct UseWebNotificationOptions {
     /// in the constructor's options parameter.
     #[builder(into)]
     icon: Option<String>,
+
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
 
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
@@ -300,6 +304,7 @@ impl Default for UseWebNotificationOptions {
             language: None,
             tag: None,
             icon: None,
+            image: None,
             require_interaction: false,
             renotify: false,
             silent: None,
@@ -329,6 +334,10 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
             web_sys_options.icon(icon);
         }
 
+        if let Some(image) = &options.image {
+            web_sys_options.image(image);
+        }
+
         if let Some(language) = &options.language {
             web_sys_options.lang(language);
         }
@@ -347,7 +356,6 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 ///
 /// The following implementations are missing:
 /// - `vibrate`
-/// - `image`
 #[derive(DefaultBuilder, Default)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct ShowOptions {
@@ -382,6 +390,11 @@ pub struct ShowOptions {
     #[builder(into)]
     icon: Option<String>,
 
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
+
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
     #[builder(into)]
@@ -415,6 +428,10 @@ impl ShowOptions {
 
         if let Some(icon) = &self.icon {
             options.icon(icon);
+        }
+
+        if let Some(image) = &self.image {
+            options.image(image);
         }
 
         if let Some(language) = &self.language {
