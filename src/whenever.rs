@@ -20,7 +20,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ### Callback Function
 ///
-/// Same as [`watch`], the callback will be called with `callback(input, prev_input, prev_return)`.
+/// Same as [`fn@crate::watch`], the callback will be called with `callback(input, prev_input, prev_return)`.
 ///
 /// ```
 /// # use leptos::*;
@@ -39,7 +39,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ### Computed
 ///
-/// Same as [`watch`], you can pass a getter function to calculate on each change.
+/// Same as [`fn@crate::watch`], you can pass a getter function to calculate on each change.
 ///
 /// ```
 /// # use leptos::*;
@@ -59,7 +59,7 @@ use crate::{watch_with_options, WatchOptions};
 ///
 /// ### Options
 ///
-/// Options and defaults are same as [`watch_with_options`].
+/// Options and defaults are same as [`fn@watch_with_options`].
 ///
 /// ```
 /// # use leptos::*;

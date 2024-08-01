@@ -1,10 +1,10 @@
 [package]
 name = "leptos-use"
-version = "0.10.10"
+version = "0.11.3"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
-description = "Collection of essential Leptos utilities inspired by SolidJS USE / VueUse"
+description = "Collection of essential Leptos utilities inspired by React-Use / VueUse / SolidJS-USE"
 exclude = ["examples/", "tests/"]
 keywords = ["leptos", "utilities"]
 license = "MIT OR Apache-2.0"

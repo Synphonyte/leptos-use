@@ -3,7 +3,27 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.3] - 2024-07-31
+
+### Fix 🍕
+
+- Made `use_timeout_fn` SSR-safe
+
+## [0.11.2] - 2024-07-30
+
+### Change 🔥
+
+- `use_locale` has now a supported locale list.
+
+## (yanked) [0.11.1] - 2024-07-28 
+
+### New Functions 🚀
+
+- `use_locale` (thanks to @BrandonDyer64)
+- `use_locales` (thanks to @BrandonDyer64)
+- `header` – Standard implementations for reading a header on the server.
+
+## [0.11.0] - 2024-07-27
 
 ### New Functions 🚀
 
@@ -31,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is now re-exported
-- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR. 
+- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR.
 - New book chapter about codecs
 - The macro `use_derive_signal!` is now exported (thanks to @mscofield0).
 
@@ -44,8 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `JsonCodec` has been renamed to `JsonSerdeCodec`.
     - The feature to enable this codec is now called `json_serde` instead of just `serde`.
     - `ProstCodec` now encodes as binary data. If you want to keep using it with string data you can wrap it like
-      this: `Base64<ProstCodec>`. You have to enable both features `prost` and `base64` for this.
+      this: `Base64<ProstCodec>`.
     - All of these structs, traits and features now live in their own crate called `codee`
+    - A bunch of new codecs are available. Have a look at the docs for crate `codee`.
 - `use_websocket`:
     - `UseWebsocketOptions` has been renamed to `UseWebSocketOptions` (uppercase S) to be consistent with the return
       type.
@@ -64,12 +85,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
           to `on_message_raw` and `on_message_raw_bytes`.
         - The new `UseWebSocketOptions::on_message` takes a `&T`.
         - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
-- `use_storage` now always saves the default value to storage if the key doesn't exist yet. 
+- `use_storage` now always saves the default value to storage if the key doesn't exist yet.
+- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic`
+  (note the `n`) (thanks to @mondeja).
 
 ### Fixes 🍕
 
 - Fixed auto-reconnect in `use_websocket`
 - Fixed typo in compiler error messages in `use_cookie` (thanks to @SleeplessOne1917).
+- Fixed potential signal out of scope issue with `use_raf_fn`
+
+### Other Changes 🔥
+
+- Better links in docs that work both in the book and in rustdoc (thanks to @mondeja).
+- Better CI/CD (thanks to @EstebanBorai).
 
 ## [0.10.10] - 2024-05-10
 

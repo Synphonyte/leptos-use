@@ -36,7 +36,7 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
-/// By default, it will match with users' browser preference using [`use_preferred_dark`] (a.k.a. `ColorMode::Auto`).
+/// By default, it will match with users' browser preference using [`fn@crate::use_preferred_dark`] (a.k.a. `ColorMode::Auto`).
 /// When reading the signal, it will by default return the current color mode (`ColorMode::Dark`, `ColorMode::Light` or
 /// your custom modes `ColorMode::Custom("some-custom")`). The `ColorMode::Auto` variant can
 /// be included in the returned modes by enabling the `emit_auto` option and using [`use_color_mode_with_options`].
@@ -87,7 +87,7 @@ use wasm_bindgen::JsCast;
 ///
 /// To persist color mode in a cookie, use `use_cookie_with_options` and specify `.cookie_enabled(true)`.
 ///
-/// > Note: To work with SSR you have to add the `axum` or `actix` feature as described in [`use_cookie`].
+/// > Note: To work with SSR you have to add the `axum` or `actix` feature as described in [`fn@crate::use_cookie`].
 ///
 /// ```rust
 /// # use leptos::*;
@@ -116,13 +116,13 @@ use wasm_bindgen::JsCast;
 ///
 /// If `cookie_enabled` is set to `true`, cookies will be used and if present this value will be used
 /// on the server as well as on the client. Please note that you have to add the `axum` or `actix`
-/// feature as described in [`use_cookie`].
+/// feature as described in [`fn@crate::use_cookie`].
 ///
 /// ## See also
 ///
-/// * [`use_preferred_dark`]
-/// * [`use_storage`]
-/// * [`use_cookie`]
+/// * [`fn@crate::use_preferred_dark`]
+/// * [`fn@crate::storage::use_storage`]
+/// * [`fn@crate::use_cookie`]
 pub fn use_color_mode() -> UseColorModeReturn {
     use_color_mode_with_options(UseColorModeOptions::default())
 }
@@ -426,7 +426,7 @@ where
     /// To get the default behaviour back you can call the provided `default_handler` function.
     /// It takes two parameters:
     /// - `mode: ColorMode`: The color mode to change to.
-    ///  -`default_handler: Rc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
+    /// - `default_handler: Rc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
     on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.
@@ -508,9 +508,9 @@ pub struct UseColorModeReturn {
     /// Main value setter signal of the color mode
     pub set_mode: WriteSignal<ColorMode>,
 
-    /// Direct access to the returned signal of [`use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    /// Direct access to the returned signal of [`fn@crate::storage::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
     pub store: Signal<ColorMode>,
-    /// Direct write access to the returned signal of [`use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    /// Direct write access to the returned signal of [`fn@crate::storage::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
     pub set_store: WriteSignal<ColorMode>,
 
     /// Signal of the system's preferred color mode that you would get from a media query

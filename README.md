@@ -13,7 +13,7 @@
     <a href="https://crates.io/crates/leptos-use"><img src="https://img.shields.io/crates/v/leptos-use.svg?label=&color=%232C1275" alt="Crates.io"/></a>
     <a href="https://leptos-use.rs/server_side_rendering.html"><img src="https://img.shields.io/badge/-SSR-%236a214b" alt="SSR"></a> 
     <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-docs%20%26%20demos-%239A233F" alt="Docs & Demos"></a> 
-    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-77%20functions-%23EF3939" alt="77 Functions" /></a>
+    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-82%20functions-%23EF3939" alt="82 Functions" /></a>
 </p>
 
 <br/>
@@ -25,7 +25,7 @@
 
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
-[![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/ci.yml)
+[![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/cd.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/cd.yml)
 [![Discord](https://img.shields.io/discord/1031524867910148188?color=%237289DA&label=discord)](https://discord.com/channels/1031524867910148188/1121154537709895783)
 
 ```rust
@@ -92,4 +92,4 @@ This will create the function file in the src directory, scaffold an example dir
 | <= 0.3        | 0.3                       |
 | 0.4, 0.5, 0.6 | 0.4                       |
 | 0.7, 0.8, 0.9 | 0.5                       |
-| 0.10          | 0.6                       |
+| 0.10, 0.11          | 0.6                       |

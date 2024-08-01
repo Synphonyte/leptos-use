@@ -99,6 +99,7 @@
 
 # Utilities
 
+- [header](utilities/header.md)
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)
@@ -113,6 +114,8 @@
 # Intl
 
 - [use_intl_number_format](intl/use_intl_number_format.md)
+- [use_locale](intl/use_locale.md)
+- [use_locales](intl/use_locales.md)
 
 # @Math
 

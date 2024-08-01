@@ -16,6 +16,7 @@ use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 
+#[allow(rustdoc::bare_urls)]
 /// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
 ///
 /// ## Demo
@@ -27,7 +28,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// Values are (en)decoded via the given codec. You can use any of the codecs, string or binary.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ```
 /// # use leptos::*;
@@ -247,6 +248,7 @@ where
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
+#[allow(clippy::type_complexity)]
 pub fn use_websocket_with_options<T, C>(
     url: &str,
     options: UseWebSocketOptions<
