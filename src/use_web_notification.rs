@@ -28,6 +28,7 @@ use std::rc::Rc;
 ///     UseWebNotificationOptions::default()
 ///         .direction(NotificationDirection::Auto)
 ///         .language("en")
+///         .renotify(true)
 ///         .tag("test"),
 /// );
 ///
@@ -227,10 +228,7 @@ impl From<NotificationDirection> for web_sys::NotificationDirection {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `renotify`
-/// - `vibrate`  
-/// - `silent`
-/// - `image`
+/// - `vibrate`
 #[derive(DefaultBuilder, Clone)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseWebNotificationOptions {
@@ -264,14 +262,25 @@ pub struct UseWebNotificationOptions {
     #[builder(into)]
     icon: Option<String>,
 
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
+
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
     require_interaction: bool,
 
-    // /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
-    // /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
-    // #[builder(into)]
-    // renotify: bool,
+    /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
+    /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
+    #[builder(into)]
+    renotify: bool,
+
+    /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
+    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    #[builder(into)]
+    silent: Option<bool>,
+
     /// Called when the user clicks on displayed `Notification`.
     on_click: Rc<dyn Fn(web_sys::Event)>,
 
@@ -295,8 +304,10 @@ impl Default for UseWebNotificationOptions {
             language: None,
             tag: None,
             icon: None,
+            image: None,
             require_interaction: false,
-            // renotify: false,
+            renotify: false,
+            silent: None,
             on_click: Rc::new(|_| {}),
             on_close: Rc::new(|_| {}),
             on_error: Rc::new(|_| {}),
@@ -311,8 +322,9 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 
         web_sys_options
             .dir(options.direction.into())
-            .require_interaction(options.require_interaction);
-        // .renotify(options.renotify);
+            .require_interaction(options.require_interaction)
+            .renotify(options.renotify)
+            .silent(options.silent);
 
         if let Some(body) = &options.body {
             web_sys_options.body(body);
@@ -320,6 +332,10 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 
         if let Some(icon) = &options.icon {
             web_sys_options.icon(icon);
+        }
+
+        if let Some(image) = &options.image {
+            web_sys_options.image(image);
         }
 
         if let Some(language) = &options.language {
@@ -339,9 +355,7 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`  
-/// - `silent`
-/// - `image`
+/// - `vibrate`
 #[derive(DefaultBuilder, Default)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct ShowOptions {
@@ -376,14 +390,25 @@ pub struct ShowOptions {
     #[builder(into)]
     icon: Option<String>,
 
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
+
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
     #[builder(into)]
     require_interaction: Option<bool>,
-    // /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
-    // /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
-    // #[builder(into)]
-    // renotify: Option<bool>,
+
+    /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
+    /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
+    #[builder(into)]
+    renotify: Option<bool>,
+
+    /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
+    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    #[builder(into)]
+    silent: Option<bool>,
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -405,6 +430,10 @@ impl ShowOptions {
             options.icon(icon);
         }
 
+        if let Some(image) = &self.image {
+            options.image(image);
+        }
+
         if let Some(language) = &self.language {
             options.lang(language);
         }
@@ -413,9 +442,13 @@ impl ShowOptions {
             options.tag(tag);
         }
 
-        // if let Some(renotify) = &self.renotify {
-        //     options.renotify(renotify);
-        // }
+        if let Some(renotify) = self.renotify {
+            options.renotify(renotify);
+        }
+
+        if let Some(silent) = self.silent {
+            options.silent(Some(silent));
+        }
     }
 }
 

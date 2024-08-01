@@ -14,7 +14,7 @@ fn Demo() -> impl IntoView {
             .title("Hello World from leptos-use")
             .direction(NotificationDirection::Auto)
             .language("en")
-            // .renotify(true)
+            .renotify(true)
             .tag("test"),
     );
 
