@@ -35,7 +35,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # fn Demo() -> impl IntoView {
 /// let target = create_node_ref::<Div>();
 ///
-/// on_click_outside(target, move |event| { log!("{:?}", event); });
+/// let _ = on_click_outside(target, move |event| { log!("{:?}", event); });
 ///
 /// view! {
 ///     <div node_ref=target>"Hello World"</div>
@@ -48,6 +48,10 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// > which is **not** supported by IE 11, Edge 18 and below.
 /// > If you are targeting these browsers, we recommend you to include
 /// > [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
+///
+/// > `on_click_outside` and  `on_click_outside_with_options` returns a closure that you can call to stop
+/// > the behavior. Rust will complain with "unused implementer of `FnOnce` that must be used closures are lazy and do nothing unless called"
+/// > if not binded to a variable. You can bind it to `let _ =` to silence the warning.
 ///
 /// ## Excluding Elements
 ///
@@ -63,7 +67,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # fn Demo() -> impl IntoView {
 /// # let target = create_node_ref::<Div>();
 /// #
-/// on_click_outside_with_options(
+/// let _ = on_click_outside_with_options(
 ///     target,
 ///     move |event| { log!("{:?}", event); },
 ///     OnClickOutsideOptions::default().ignore(["input", "#some-id"]),
