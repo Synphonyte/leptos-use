@@ -51,7 +51,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## See also
 ///
-/// - [`use_element_size`]
+/// * [`fn@crate::use_element_size`]
 pub fn use_resize_observer<El, T, F>(
     target: El, // TODO : multiple elements?
     callback: F,

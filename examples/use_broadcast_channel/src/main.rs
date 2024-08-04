@@ -1,6 +1,6 @@
+use codee::string::FromToStringCodec;
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::utils::FromToStringCodec;
 use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
 
 #[component]
@@ -46,8 +46,8 @@ fn Demo() -> impl IntoView {
                 <p>"Received message: " {move || message().as_ref().unwrap().to_string()}</p>
             </Show>
 
-            <Show when=move || error().is_some()>
-                <p>"Error: " {move || format!("{:?}", error().as_ref().unwrap())}</p>
+            <Show when=move || error.with(|e| e.is_some())>
+                <p>"Error: " {move || error.with(|e| format!("{:?}", e.as_ref().unwrap()))}</p>
             </Show>
         </Show>
     }

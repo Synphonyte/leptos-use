@@ -25,15 +25,15 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// Pass a [`StorageType`] to determine the kind of key-value browser storage to use.
 /// The specified key is where data is stored. All values are stored as UTF-16 strings which
-/// is then encoded and decoded via the given [`Codec`]. This value is synced with other calls using
-/// the same key on the smae page and across tabs for local storage.
+/// is then encoded and decoded via the given `*Codec`. This value is synced with other calls using
+/// the same key on the same page and across tabs for local storage.
 /// See [`UseStorageOptions`] to see how behavior can be further customised.
 ///
 /// Values are (en)decoded via the given codec. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ## Example
 ///
@@ -410,7 +410,7 @@ pub enum UseStorageError<E, D> {
     ItemCodecError(CodecError<E, D>),
 }
 
-/// Options for use with [`use_local_storage_with_options`], [`use_session_storage_with_options`] and [`use_storage_with_options`].
+/// Options for use with [`fn@crate::storage::use_local_storage_with_options`], [`fn@crate::storage::use_session_storage_with_options`] and [`use_storage_with_options`].
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T, E, D>
 where

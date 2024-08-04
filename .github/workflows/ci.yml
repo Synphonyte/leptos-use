@@ -1,82 +1,48 @@
+name: Continuous Integration
+
 on:
-  push:
-    # Pattern matched against refs/tags
-    tags:
-      - '*'           # Push events to every tag not containing /
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**"
+      - "!/*.md"
+      - "!/**.md"
 
-name: CI
-
-permissions: write-all
+concurrency:
+    group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+    cancel-in-progress: true
 
 jobs:
-  publish:
-    name: Publish
+  integrity:
+    name: Integrity Checks on Rust ${{ matrix.toolchain }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - nightly
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly
-          profile: minimal
-          override: true
-          components: rustfmt, clippy, rust-src
-      - name: Cache
+          toolchain: ${{ matrix.toolchain }}
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+
+      - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
-      - name: Check function count badge
-        run: python3 docs/generate_count_badge.py --check
-      - name: Check version in docs
-        run: python3 docs/add_version_to_docs.py --check
-      - name: Check formatting
+
+      - name: Build
+        run: cargo build
+
+      - name: Format
         run: cargo fmt --check
+
       - name: Clippy
-        run: cargo clippy --features docs,math --tests -- -D warnings
-      - name: Run tests (general)
-        run: cargo test --features math,docs,ssr
-      - name: Run tests (axum)
-        run: cargo test --features math,docs,ssr,axum --doc use_cookie::use_cookie
-      - name: Run tests (actix)
-        run: cargo test --features math,docs,ssr,actix --doc use_cookie::use_cookie
-
-      #### mdbook
-      - name: Install mdbook I
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-binstall,mdbook
-      - name: Install mdbook II
-        run: |
-          cargo binstall -y mdbook-cmdrun
-          cargo binstall -y trunk@0.17.5
-          rustup target add wasm32-unknown-unknown
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v3
-      - name: Build mdbook # TODO : run mdbook tests
-        run: |
-          cd docs/book
-          mdbook build
-          python3 post_build.py
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./docs/book/book
-      - name: Deploy book to github pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-      ##### mdbook end
-
-      - name: Publish crate leptos-use
-        uses: katyo/publish-crates@v2
-        with:
-          registry-token: ${{ secrets.CRATES_TOKEN }}
-
-      - uses: CSchoel/release-notes-from-changelog@v1
-      - name: Create Release using GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: >
-          gh release create
-          -d
-          -F RELEASE.md
-          -t "Version $RELEASE_VERSION"
-          ${GITHUB_REF#refs/*/}
+        run: cargo clippy -- -D warnings

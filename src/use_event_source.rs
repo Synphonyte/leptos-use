@@ -20,11 +20,10 @@ use thiserror::Error;
 /// ## Usage
 ///
 /// Values are decoded via the given decoder. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
-///
+/// > available and what feature flags they require.
 ///
 /// ```
 /// # use leptos::prelude::*;
@@ -47,10 +46,6 @@ use thiserror::Error;
 /// # view! { }
 /// # }
 /// ```
-///
-/// ### Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 ///
 /// ### Named Events
 ///

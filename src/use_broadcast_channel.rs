@@ -46,10 +46,10 @@ use wasm_bindgen::JsValue;
 /// ```
 ///
 /// Values are (en)decoded via the given codec. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ```
 /// # use leptos::prelude::*;

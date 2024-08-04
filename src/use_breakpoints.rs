@@ -38,6 +38,7 @@ use std::hash::Hash;
 /// ## Breakpoints
 ///
 /// There are many predefined breakpoints for major UI frameworks. The following are provided.
+///
 /// * [`breakpoints_tailwind`]
 /// * [`breakpoints_bootstrap_v5`]
 /// * [`breakpoints_material`]
@@ -108,7 +109,7 @@ use std::hash::Hash;
 ///
 /// ## Server-Side Rendering
 ///
-/// Since internally this uses [`use_media_query`], which returns always `false` on the server,
+/// Since internally this uses [`fn@crate::use_media_query`], which returns always `false` on the server,
 /// the returned methods also will return `false`.
 pub fn use_breakpoints<K: Eq + Hash + Debug + Clone + Send + Sync>(
     breakpoints: HashMap<K, u32>,
@@ -280,7 +281,7 @@ where
 
 /// Breakpoint keys for Tailwind V2
 ///
-/// See [https://tailwindcss.com/docs/breakpoints]
+/// See <https://tailwindcss.com/docs/breakpoints>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsTailwind {
     Sm,
@@ -292,7 +293,7 @@ pub enum BreakpointsTailwind {
 
 /// Breakpoint definitions for Tailwind V2
 ///
-/// See [https://tailwindcss.com/docs/breakpoints]
+/// See <https://tailwindcss.com/docs/breakpoints>
 pub fn breakpoints_tailwind() -> HashMap<BreakpointsTailwind, u32> {
     HashMap::from([
         (BreakpointsTailwind::Sm, 640),
@@ -305,7 +306,7 @@ pub fn breakpoints_tailwind() -> HashMap<BreakpointsTailwind, u32> {
 
 /// Breakpoint keys for Bootstrap V5
 ///
-/// See [https://getbootstrap.com/docs/5.0/layout/breakpoints]
+/// See <https://getbootstrap.com/docs/5.0/layout/breakpoints>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsBootstrapV5 {
     Sm,
@@ -317,7 +318,7 @@ pub enum BreakpointsBootstrapV5 {
 
 /// Breakpoint definitions for Bootstrap V5
 ///
-/// See [https://getbootstrap.com/docs/5.0/layout/breakpoints]
+/// <https://getbootstrap.com/docs/5.0/layout/breakpoints>
 pub fn breakpoints_bootstrap_v5() -> HashMap<BreakpointsBootstrapV5, u32> {
     HashMap::from([
         (BreakpointsBootstrapV5::Sm, 576),
@@ -330,7 +331,7 @@ pub fn breakpoints_bootstrap_v5() -> HashMap<BreakpointsBootstrapV5, u32> {
 
 /// Breakpoint keys for Material UI V5
 ///
-/// See [https://mui.com/material-ui/customization/breakpoints/]
+/// See <https://mui.com/material-ui/customization/breakpoints/>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsMaterial {
     Xs,
@@ -342,7 +343,7 @@ pub enum BreakpointsMaterial {
 
 /// Breakpoint definitions for Material UI V5
 ///
-/// See [https://mui.com/material-ui/customization/breakpoints/]
+/// See <https://mui.com/material-ui/customization/breakpoints/>
 pub fn breakpoints_material() -> HashMap<BreakpointsMaterial, u32> {
     HashMap::from([
         (BreakpointsMaterial::Xs, 1),
@@ -355,7 +356,7 @@ pub fn breakpoints_material() -> HashMap<BreakpointsMaterial, u32> {
 
 /// Breakpoint keys for Ant Design
 ///
-/// See [https://ant.design/components/layout/#breakpoint-width]
+/// See <https://ant.design/components/layout/#breakpoint-width>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsAntDesign {
     Xs,
@@ -368,7 +369,7 @@ pub enum BreakpointsAntDesign {
 
 /// Breakpoint definitions for Ant Design
 ///
-/// See [https://ant.design/components/layout/#breakpoint-width]
+/// See <https://ant.design/components/layout/#breakpoint-width>
 pub fn breakpoints_ant_design() -> HashMap<BreakpointsAntDesign, u32> {
     HashMap::from([
         (BreakpointsAntDesign::Xs, 480),
@@ -382,7 +383,7 @@ pub fn breakpoints_ant_design() -> HashMap<BreakpointsAntDesign, u32> {
 
 /// Breakpoint keys for Quasar V2
 ///
-/// See [https://quasar.dev/style/breakpoints]
+/// See <https://quasar.dev/style/breakpoints>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsQuasar {
     Xs,
@@ -394,7 +395,7 @@ pub enum BreakpointsQuasar {
 
 /// Breakpoint definitions for Quasar V2
 ///
-/// See [https://quasar.dev/style/breakpoints]
+/// See <https://quasar.dev/style/breakpoints>
 pub fn breakpoints_quasar() -> HashMap<BreakpointsQuasar, u32> {
     HashMap::from([
         (BreakpointsQuasar::Xs, 1),
@@ -405,32 +406,32 @@ pub fn breakpoints_quasar() -> HashMap<BreakpointsQuasar, u32> {
     ])
 }
 
-/// Breakpoint keys for Sematic UI
+/// Breakpoint keys for Semantic UI
 ///
-/// See [https://semantic-ui.com/elements/container.html]
+/// See <https://semantic-ui.com/elements/container.html>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum BreakpointsSematic {
+pub enum BreakpointsSemantic {
     Mobile,
     Tablet,
     SmallMonitor,
     LargeMonitor,
 }
 
-/// Breakpoint definitions for Sematic UI
+/// Breakpoint definitions for Semantic UI
 ///
-/// See [https://semantic-ui.com/elements/container.html]
-pub fn breakpoints_sematic() -> HashMap<BreakpointsSematic, u32> {
+/// See <https://semantic-ui.com/elements/container.html>
+pub fn breakpoints_semantic() -> HashMap<BreakpointsSemantic, u32> {
     HashMap::from([
-        (BreakpointsSematic::Mobile, 1),
-        (BreakpointsSematic::Tablet, 768),
-        (BreakpointsSematic::SmallMonitor, 992),
-        (BreakpointsSematic::LargeMonitor, 1200),
+        (BreakpointsSemantic::Mobile, 1),
+        (BreakpointsSemantic::Tablet, 768),
+        (BreakpointsSemantic::SmallMonitor, 992),
+        (BreakpointsSemantic::LargeMonitor, 1200),
     ])
 }
 
 /// Breakpoint keys for Master CSS
 ///
-/// See [https://docs.master.co/css/breakpoints]
+/// See <https://docs.master.co/css/breakpoints>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BreakpointsMasterCss {
     Xxxs,
@@ -447,7 +448,7 @@ pub enum BreakpointsMasterCss {
 
 /// Breakpoint definitions for Master CSS
 ///
-/// See [https://docs.master.co/css/breakpoints]
+/// See <https://docs.master.co/css/breakpoints>
 pub fn breakpoints_master_css() -> HashMap<BreakpointsMasterCss, u32> {
     HashMap::from([
         (BreakpointsMasterCss::Xxxs, 360),

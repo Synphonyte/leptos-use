@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::{use_clipboard, use_permission, UseClipboardReturn};
+use leptos_use::{
+    use_clipboard_with_options, use_permission, UseClipboardOptions, UseClipboardReturn,
+};
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -11,7 +13,7 @@ fn Demo() -> impl IntoView {
         text,
         copied,
         copy,
-    } = use_clipboard();
+    } = use_clipboard_with_options(UseClipboardOptions::default().read(true));
 
     let permission_read = use_permission("clipboard-read");
     let permission_write = use_permission("clipboard-write");

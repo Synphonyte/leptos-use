@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.10.10"
+version = "0.11.0"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -26,8 +26,8 @@ http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
-leptos = { version = "0.7.0-alpha" }
-leptos_axum = { version = "0.7.0-alpha", optional = true }
+leptos = { version = "0.7.0-beta" }
+leptos_axum = { version = "0.7.0-beta", optional = true }
 leptos_actix = { version = "0.6", optional = true }
 leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }
@@ -131,7 +131,7 @@ features = [
 
 [dev-dependencies]
 getrandom = { version = "0.2", features = ["js"] }
-leptos_meta = "0.7.0-alpha"
+leptos_meta = "0.7.0-beta"
 rand = "0.8"
 codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
 serde = { version = "1", features = ["derive"] }

@@ -57,10 +57,10 @@ use std::sync::Arc;
 /// ```
 ///
 /// Values are (en)decoded via the given codec. You can use any of the string codecs or a
-/// binary codec wrapped in [`Base64`].
+/// binary codec wrapped in `Base64`.
 ///
 /// > Please check [the codec chapter](https://leptos-use.rs/codecs.html) to see what codecs are
-///   available and what feature flags they require.
+/// > available and what feature flags they require.
 ///
 /// ## Cookie attributes
 ///
@@ -136,10 +136,6 @@ use std::sync::Arc;
 /// # view! {}
 /// # }
 /// ```
-///
-/// ## Create Your Own Custom Codec
-///
-/// All you need to do is to implement the [`StringCodec`] trait together with `Default` and `Clone`.
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -365,6 +361,7 @@ where
         if !readonly {
             Effect::new_isomorphic({
                 let cookie_name = cookie_name.to_owned();
+                let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
                 move |_| {
                     let domain = domain.clone();

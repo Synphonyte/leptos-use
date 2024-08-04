@@ -1,7 +1,7 @@
 use crate::{watch_with_options, ThrottleOptions, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 
-/// A throttled version of [`watch`].
+/// A throttled version of `leptos::watch`.
 ///
 /// ## Demo
 ///
@@ -69,8 +69,8 @@ use default_struct_builder::DefaultBuilder;
 ///
 /// ## See also
 ///
-/// * [`watch`]
-/// * [`watch_debounced`]
+/// * `leptos::watch`
+/// * [`fn@crate::watch_debounced`]
 pub fn watch_throttled<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone
 where
     DFn: Fn() -> W + 'static,
@@ -81,7 +81,7 @@ where
     watch_with_options(deps, callback, WatchOptions::default().throttle(ms))
 }
 
-/// Version of `watch_throttled` that accepts `WatchThrottledOptions`. See [`watch_throttled`] for how to use.
+/// Version of [`fn@watch_throttled`] that accepts `WatchThrottledOptions`. See [`watch_throttled`] for how to use.
 pub fn watch_throttled_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
