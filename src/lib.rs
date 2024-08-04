@@ -75,7 +75,6 @@ mod use_throttle_fn;
 mod use_timeout_fn;
 mod use_timestamp;
 mod use_to_string;
-mod use_user_media;
 mod use_web_notification;
 mod use_websocket;
 mod use_window;
