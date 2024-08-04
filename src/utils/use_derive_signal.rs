@@ -11,6 +11,7 @@ macro_rules! use_derive_signal {
         $(#[$outer])*
         pub fn $name<V $(, $( $type_param ),* )? >(value: V) -> Signal<$return_type>
         where
+            $inner_signal_type $(< $( $inner_type_param ),+ >)?: Send + Sync,
             V: Into<MaybeSignal<$inner_signal_type $(< $( $inner_type_param ),+ >)?>> $(, $( $type_param $( : $first_bound $(+ $rest_bound)* )? ),+ )?
         {
             let value = value.into();

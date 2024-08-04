@@ -1,6 +1,5 @@
 use crate::core::MaybeRwSignal;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// Cycle through a list of items.
@@ -156,7 +155,7 @@ where
     let _ = {
         let set = set.clone();
 
-        leptos::watch(move || list.get(), move |_, _, _| set(index.get()), false)
+        watch(move || list.get(), move |_, _, _| set(index.get()), false)
     };
 
     UseCycleListReturn {
@@ -174,7 +173,7 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseCycleListOptions<T>
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
 {
     /// The initial value of the state. Can be a Signal. If none is provided the first entry
     /// of the list will be used.
@@ -192,7 +191,7 @@ where
 
 impl<T> Default for UseCycleListOptions<T>
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
 {
     fn default() -> Self {
         Self {
@@ -206,7 +205,7 @@ where
 /// Return type of [`use_cycle_list`].
 pub struct UseCycleListReturn<T, SetFn, NextFn, PrevFn, ShiftFn>
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     SetFn: Fn(usize) -> T + Clone,
     NextFn: Fn() + Clone,
     PrevFn: Fn() + Clone,

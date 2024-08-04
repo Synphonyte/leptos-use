@@ -111,7 +111,7 @@ use std::hash::Hash;
 ///
 /// Since internally this uses [`fn@crate::use_media_query`], which returns always `false` on the server,
 /// the returned methods also will return `false`.
-pub fn use_breakpoints<K: Eq + Hash + Debug + Clone>(
+pub fn use_breakpoints<K: Eq + Hash + Debug + Clone + Send + Sync>(
     breakpoints: HashMap<K, u32>,
 ) -> UseBreakpointsReturn<K> {
     UseBreakpointsReturn { breakpoints }
@@ -119,7 +119,7 @@ pub fn use_breakpoints<K: Eq + Hash + Debug + Clone>(
 
 /// Return type of [`use_breakpoints`]
 #[derive(Clone)]
-pub struct UseBreakpointsReturn<K: Eq + Hash + Debug + Clone> {
+pub struct UseBreakpointsReturn<K: Eq + Hash + Debug + Clone + Send + Sync> {
     breakpoints: HashMap<K, u32>,
 }
 
@@ -185,7 +185,10 @@ macro_rules! impl_cmp_reactively {
     };
 }
 
-impl<K: Eq + Hash + Debug + Clone> UseBreakpointsReturn<K> {
+impl<K> UseBreakpointsReturn<K>
+where
+    K: Eq + Hash + Debug + Clone + Send + Sync + 'static,
+{
     fn match_(query: &str) -> bool {
         if let Ok(Some(query_list)) = use_window().match_media(query) {
             return query_list.matches();

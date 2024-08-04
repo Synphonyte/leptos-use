@@ -2,6 +2,7 @@ use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 use wasm_bindgen::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -124,7 +125,7 @@ where
         let stop_watch = {
             let cleanup = cleanup.clone();
 
-            leptos::watch(
+            leptos::prelude::watch(
                 move || targets.get(),
                 move |targets, _, _| {
                     cleanup();
@@ -151,7 +152,10 @@ where
             stop_watch();
         };
 
-        on_cleanup(stop.clone());
+        on_cleanup({
+            let stop = SendWrapper::new(stop.clone());
+            move || stop()
+        });
 
         UseMutationObserverReturn { is_supported, stop }
     }

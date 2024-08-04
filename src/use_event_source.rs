@@ -4,9 +4,8 @@ use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
-use std::cell::Cell;
 use std::marker::PhantomData;
+use std::sync::atomic::{AtomicBool, AtomicU32};
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
@@ -143,14 +142,14 @@ where
 
     let url = url.to_owned();
 
-    let (event, set_event) = signal(None::<SendWrapper<web_sys::Event>>);
+    let (event, set_event) = signal_local(None::<web_sys::Event>);
     let (data, set_data) = signal(None::<T>);
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
-    let (event_source, set_event_source) = signal(None::<SendWrapper<web_sys::EventSource>>);
-    let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
+    let (event_source, set_event_source) = signal_local(None::<web_sys::EventSource>);
+    let (error, set_error) = signal_local(None::<UseEventSourceError<C::Error>>);
 
-    let explicitly_closed = Arc::new(Cell::new(false));
-    let retried = Arc::new(Cell::new(0));
+    let explicitly_closed = Arc::new(AtomicBool::new(false));
+    let retried = Arc::new(AtomicU32::new(0));
 
     let set_data_from_string = move |data_string: Option<String>| {
         if let Some(data_string) = data_string {
@@ -169,7 +168,7 @@ where
                 event_source.close();
                 set_event_source.set(None);
                 set_ready_state.set(ConnectionReadyState::Closed);
-                explicitly_closed.set(true);
+                explicitly_closed.store(true, std::sync::atomic::Ordering::Relaxed);
             }
         }
     };
@@ -183,7 +182,7 @@ where
         move || {
             use wasm_bindgen::prelude::*;
 
-            if explicitly_closed.get() {
+            if explicitly_closed.load(std::sync::atomic::Ordering::Relaxed) {
                 return;
             }
 
@@ -195,7 +194,7 @@ where
 
             set_ready_state.set(ConnectionReadyState::Connecting);
 
-            set_event_source.set(Some(SendWrapper::new(es.clone())));
+            set_event_source.set(Some(es.clone()));
 
             let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
                 set_ready_state.set(ConnectionReadyState::Open);
@@ -212,19 +211,20 @@ where
 
                 move |e: web_sys::Event| {
                     set_ready_state.set(ConnectionReadyState::Closed);
-                    set_error.set(Some(UseEventSourceError::Event(SendWrapper::new(e))));
+                    set_error.set(Some(UseEventSourceError::Event(e)));
 
                     // only reconnect if EventSource isn't reconnecting by itself
                     // this is the case when the connection is closed (readyState is 2)
                     if es.ready_state() == 2
-                        && !explicitly_closed.get()
+                        && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
                         && matches!(reconnect_limit, ReconnectLimit::Limited(_))
                     {
                         es.close();
 
-                        retried.set(retried.get() + 1);
+                        let retried_value =
+                            retried.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
 
-                        if reconnect_limit.is_exceeded_by(retried.get()) {
+                        if reconnect_limit.is_exceeded_by(retried_value as u64) {
                             set_timeout(
                                 move || {
                                     if let Some(init) = init.get_value() {
@@ -254,7 +254,7 @@ where
             for event_name in named_events.clone() {
                 let _ = use_event_listener(
                     es.clone(),
-                    leptos::ev::Custom::<ev::Event>::new(event_name),
+                    leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
                     move |e| {
                         set_event.set(Some(e.clone()));
                         let data_string = js!(e["data"]).ok().and_then(|d| d.as_string());
@@ -276,8 +276,8 @@ where
 
             move || {
                 close();
-                explicitly_closed.set(false);
-                retried.set(0);
+                explicitly_closed.store(false, std::sync::atomic::Ordering::Relaxed);
+                retried.store(0, std::sync::atomic::Ordering::Relaxed);
                 if let Some(init) = init.get_value() {
                     init();
                 }
@@ -321,7 +321,7 @@ where
     reconnect_interval: u64,
 
     /// On maximum retry times reached.
-    on_failed: Arc<dyn Fn()>,
+    on_failed: Arc<dyn Fn() + Send + Sync>,
 
     /// If `true` the `EventSource` connection will immediately be opened when calling this function.
     /// If `false` you have to manually call the `open` function.
@@ -367,10 +367,10 @@ where
     pub ready_state: Signal<ConnectionReadyState>,
 
     /// The latest named event
-    pub event: Signal<Option<SendWrapper<web_sys::Event>>>,
+    pub event: Signal<Option<web_sys::Event>, LocalStorage>,
 
     /// The current error
-    pub error: Signal<Option<UseEventSourceError<Err>>>,
+    pub error: Signal<Option<UseEventSourceError<Err>>, LocalStorage>,
 
     /// (Re-)Opens the `EventSource` connection
     /// If the current one is active, will close it before opening a new one.
@@ -380,13 +380,13 @@ where
     pub close: CloseFn,
 
     /// The `EventSource` instance
-    pub event_source: Signal<Option<SendWrapper<web_sys::EventSource>>>,
+    pub event_source: Signal<Option<web_sys::EventSource>, LocalStorage>,
 }
 
 #[derive(Error, Debug)]
 pub enum UseEventSourceError<Err> {
     #[error("Error event: {0:?}")]
-    Event(SendWrapper<web_sys::Event>),
+    Event(web_sys::Event),
 
     #[error("Error decoding value")]
     Deserialize(Err),

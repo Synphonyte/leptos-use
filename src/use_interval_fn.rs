@@ -5,6 +5,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -140,7 +141,10 @@ where
         on_cleanup(stop_watch);
     }
 
-    on_cleanup(pause.clone());
+    on_cleanup({
+        let pause = SendWrapper::new(pause.clone());
+        move || pause()
+    });
 
     Pausable {
         is_active: is_active.into(),

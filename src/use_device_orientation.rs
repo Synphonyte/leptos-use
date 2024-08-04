@@ -1,5 +1,6 @@
 use cfg_if::cfg_if;
 use leptos::prelude::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
 /// Provide web developers with information from the physical orientation of
@@ -36,10 +37,10 @@ use leptos::prelude::wrappers::read::Signal;
 pub fn use_device_orientation() -> UseDeviceOrientationReturn {
     cfg_if! { if #[cfg(feature = "ssr")] {
         let is_supported = Signal::derive(|| false);
-        let absolute = || false;
-        let alpha = || None;
-        let beta = || None;
-        let gamma = || None;
+        let absolute = Signal::derive(|| false);
+        let alpha = Signal::derive(|| None);
+        let beta = Signal::derive(|| None);
+        let gamma = Signal::derive(|| None);
     } else {
         use leptos::prelude::*;
         use crate::{use_event_listener_with_options, UseEventListenerOptions, use_supported, js};
@@ -67,7 +68,10 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
                     .once(false),
             );
 
-            on_cleanup(cleanup);
+            on_cleanup({
+                let cleanup = SendWrapper::new(cleanup);
+                move || cleanup()
+            });
         }
     }}
 

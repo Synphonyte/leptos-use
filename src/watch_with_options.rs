@@ -129,7 +129,7 @@ where
     let filtered_callback =
         create_filter_wrapper(options.filter.filter_fn(), wrapped_callback.clone());
 
-    leptos::watch(
+    leptos::prelude::watch(
         deps,
         move |deps_value, previous_deps_value, did_run_before| {
             cur_deps_value.replace(Some(deps_value.clone()));
@@ -138,7 +138,7 @@ where
             let callback_value = if options.immediate && did_run_before.is_none() {
                 Some(wrapped_callback())
             } else {
-                filtered_callback().take()
+                filtered_callback().lock().unwrap().take()
             };
 
             prev_callback_value.replace(callback_value);
@@ -196,5 +196,5 @@ where
     W: Clone + 'static,
     T: Clone + 'static,
 {
-    leptos::watch(deps, callback, false)
+    leptos::prelude::watch(deps, callback, false)
 }

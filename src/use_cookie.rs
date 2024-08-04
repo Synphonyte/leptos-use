@@ -7,7 +7,7 @@ pub use cookie::SameSite;
 use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// SSR-friendly and reactive cookie access.
 ///
@@ -139,7 +139,7 @@ use std::rc::Rc;
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone,
+    T: Clone + Send + Sync + 'static,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
 }
@@ -151,7 +151,7 @@ pub fn use_cookie_with_options<T, C>(
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone,
+    T: Clone + Send + Sync + 'static,
 {
     let UseCookieOptions {
         max_age,
@@ -185,7 +185,7 @@ where
     let jar = StoredValue::new(CookieJar::new());
 
     if !has_expired {
-        let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
+        let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
         jar.update_value(|jar| {
             if let Some(new_jar) = load_and_parse_cookie_jar(ssr_cookies_header_getter) {
@@ -225,8 +225,8 @@ where
 
         let on_cookie_change = {
             let cookie_name = cookie_name.to_owned();
-            let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
-            let on_error = Rc::clone(&on_error);
+            let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
+            let on_error = Arc::clone(&on_error);
             let domain = domain.clone();
             let path = path.clone();
 
@@ -261,7 +261,7 @@ where
                         same_site,
                         secure,
                         http_only,
-                        Rc::clone(&ssr_cookies_header_getter),
+                        Arc::clone(&ssr_cookies_header_getter),
                     );
                 });
 
@@ -284,7 +284,7 @@ where
 
         // listen to cookie changes from the broadcast channel
         Effect::new({
-            let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
+            let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
             let cookie_name = cookie_name.to_owned();
 
             move |_| {
@@ -295,7 +295,7 @@ where
                         match C::decode(&message) {
                             Ok(value) => {
                                 let ssr_cookies_header_getter =
-                                    Rc::clone(&ssr_cookies_header_getter);
+                                    Arc::clone(&ssr_cookies_header_getter);
 
                                 jar.update_value(|jar| {
                                     update_client_cookie_jar(
@@ -321,7 +321,7 @@ where
                         }
                     } else {
                         let cookie_name = cookie_name.clone();
-                        let ssr_cookies_header_getter = Rc::clone(&ssr_cookies_header_getter);
+                        let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
                         jar.update_value(|jar| {
                             update_client_cookie_jar(
@@ -359,25 +359,24 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            let cookie_name = cookie_name.to_owned();
+            Effect::new_isomorphic({
+                let cookie_name = cookie_name.to_owned();
+                let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-            create_isomorphic_effect(move |_| {
-                let value = cookie
-                    .with(|cookie| {
-                        cookie.as_ref().map(|cookie| {
-                            C::encode(cookie)
-                                .map_err(|err| on_error(CodecError::Encode(err)))
-                                .ok()
-                        })
-                    })
-                    .flatten();
-
-                jar.update_value({
+                move |_| {
                     let domain = domain.clone();
                     let path = path.clone();
-                    let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
 
-                    |jar| {
+                    let value = cookie
+                        .with(|cookie| {
+                            cookie.as_ref().map(|cookie| {
+                                C::encode(cookie)
+                                    .map_err(|err| on_error(CodecError::Encode(err)))
+                                    .ok()
+                            })
+                        })
+                        .flatten();
+                    jar.update_value(|jar| {
                         write_server_cookie(
                             &cookie_name,
                             value,
@@ -389,10 +388,10 @@ where
                             same_site,
                             secure,
                             http_only,
-                            ssr_set_cookie,
+                            Arc::clone(&ssr_set_cookie),
                         )
-                    }
-                });
+                    });
+                }
             });
         }
     }
@@ -472,14 +471,14 @@ pub struct UseCookieOptions<T, E, D> {
 
     /// Getter function to return the string value of the cookie header.
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
-    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 
     /// Function to add a set cookie header to the response on the server.
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
-    ssr_set_cookie: Rc<dyn Fn(&Cookie)>,
+    ssr_set_cookie: Arc<dyn Fn(&Cookie) + Send + Sync>,
 
     /// Callback for encoding/decoding errors. Defaults to logging the error to the console.
-    on_error: Rc<dyn Fn(CodecError<E, D>)>,
+    on_error: Arc<dyn Fn(CodecError<E, D>) + Send + Sync>,
 }
 
 impl<T, E, D> Default for UseCookieOptions<T, E, D> {
@@ -495,7 +494,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
             domain: None,
             path: None,
             same_site: None,
-            ssr_cookies_header_getter: Rc::new(move || {
+            ssr_cookies_header_getter: Arc::new(move || {
                 #[cfg(feature = "ssr")]
                 {
                     #[cfg(all(feature = "actix", feature = "axum"))]
@@ -569,7 +568,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                 #[cfg(not(feature = "ssr"))]
                 None
             }),
-            ssr_set_cookie: Rc::new(|cookie: &Cookie| {
+            ssr_set_cookie: Arc::new(|cookie: &Cookie| {
                 #[cfg(feature = "ssr")]
                 {
                     #[cfg(feature = "actix")]
@@ -620,7 +619,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
 
                 let _ = cookie;
             }),
-            on_error: Rc::new(|_| {
+            on_error: Arc::new(|_| {
                 error!("cookie (de-/)serialization error");
             }),
         }
@@ -628,7 +627,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
 }
 
 fn read_cookies_string(
-    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 ) -> Option<String> {
     let cookies;
 
@@ -651,71 +650,80 @@ fn read_cookies_string(
     cookies
 }
 
-fn handle_expiration<T>(delay: Option<i64>, set_cookie: WriteSignal<Option<T>>) {
+fn handle_expiration<T>(delay: Option<i64>, set_cookie: WriteSignal<Option<T>>)
+where
+    T: Send + Sync + 'static,
+{
     if let Some(delay) = delay {
         #[cfg(not(feature = "ssr"))]
         {
             use leptos::leptos_dom::helpers::TimeoutHandle;
-            use std::cell::Cell;
-            use std::cell::RefCell;
+            use std::sync::{atomic::AtomicI32, Mutex};
 
             // The maximum value allowed on a timeout delay.
             // Reference: https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value
             const MAX_TIMEOUT_DELAY: i64 = 2_147_483_647;
 
-            let timeout = Rc::new(Cell::new(None::<TimeoutHandle>));
-            let elapsed = Rc::new(Cell::new(0));
+            let timeout = Arc::new(Mutex::new(None::<TimeoutHandle>));
+            let elapsed = Arc::new(AtomicI32::new(0));
 
             on_cleanup({
-                let timeout = Rc::clone(&timeout);
+                let timeout = Arc::clone(&timeout);
                 move || {
-                    if let Some(timeout) = timeout.take() {
+                    if let Some(timeout) = timeout.lock().unwrap().take() {
                         timeout.clear();
                     }
                 }
             });
 
-            let create_expiration_timeout = Rc::new(RefCell::new(None::<Box<dyn Fn()>>));
+            let create_expiration_timeout =
+                Arc::new(Mutex::new(None::<Box<dyn Fn() + Send + Sync>>));
 
-            create_expiration_timeout.replace(Some(Box::new({
-                let timeout = Rc::clone(&timeout);
-                let elapsed = Rc::clone(&elapsed);
-                let create_expiration_timeout = Rc::clone(&create_expiration_timeout);
+            *create_expiration_timeout.lock().unwrap() = Some(Box::new({
+                let timeout = Arc::clone(&timeout);
+                let elapsed = Arc::clone(&elapsed);
+                let create_expiration_timeout = Arc::clone(&create_expiration_timeout);
 
                 move || {
-                    if let Some(timeout) = timeout.take() {
+                    if let Some(timeout) = timeout.lock().unwrap().take() {
                         timeout.clear();
                     }
 
-                    let time_remaining = delay - elapsed.get();
+                    let time_remaining =
+                        delay - elapsed.load(std::sync::atomic::Ordering::Relaxed) as i64;
                     let timeout_length = time_remaining.min(MAX_TIMEOUT_DELAY);
 
-                    let elapsed = Rc::clone(&elapsed);
-                    let create_expiration_timeout = Rc::clone(&create_expiration_timeout);
+                    let elapsed = Arc::clone(&elapsed);
+                    let create_expiration_timeout = Arc::clone(&create_expiration_timeout);
 
-                    timeout.set(
-                        set_timeout_with_handle(
-                            move || {
-                                elapsed.set(elapsed.get() + timeout_length);
-                                if elapsed.get() < delay {
-                                    if let Some(create_expiration_timeout) =
-                                        &*create_expiration_timeout.borrow()
-                                    {
-                                        create_expiration_timeout();
-                                    }
-                                    return;
+                    *timeout.lock().unwrap() = set_timeout_with_handle(
+                        move || {
+                            let elapsed = elapsed.fetch_add(
+                                timeout_length as i32,
+                                std::sync::atomic::Ordering::Relaxed,
+                            ) as i64
+                                + timeout_length;
+
+                            if elapsed < delay {
+                                if let Some(create_expiration_timeout) =
+                                    create_expiration_timeout.lock().unwrap().as_ref()
+                                {
+                                    create_expiration_timeout();
                                 }
+                                return;
+                            }
 
-                                set_cookie.set(None);
-                            },
-                            std::time::Duration::from_millis(timeout_length as u64),
-                        )
-                        .ok(),
-                    );
+                            set_cookie.set(None);
+                        },
+                        std::time::Duration::from_millis(timeout_length as u64),
+                    )
+                    .ok();
                 }
-            })));
+            }));
 
-            if let Some(create_expiration_timeout) = &*create_expiration_timeout.borrow() {
+            if let Some(create_expiration_timeout) =
+                create_expiration_timeout.lock().unwrap().as_ref()
+            {
                 create_expiration_timeout();
             };
         }
@@ -740,7 +748,7 @@ fn write_client_cookie(
     same_site: Option<SameSite>,
     secure: bool,
     http_only: bool,
-    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 ) {
     use wasm_bindgen::JsCast;
 
@@ -776,7 +784,7 @@ fn update_client_cookie_jar(
     same_site: Option<SameSite>,
     secure: bool,
     http_only: bool,
-    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 ) {
     if let Some(new_jar) = load_and_parse_cookie_jar(ssr_cookies_header_getter) {
         *jar = new_jar;
@@ -864,7 +872,7 @@ fn write_server_cookie(
     same_site: Option<SameSite>,
     secure: bool,
     http_only: bool,
-    ssr_set_cookie: Rc<dyn Fn(&Cookie)>,
+    ssr_set_cookie: Arc<dyn Fn(&Cookie) + Send + Sync>,
 ) {
     if let Some(value) = value {
         let cookie: Cookie = build_cookie_from_options(
@@ -882,7 +890,7 @@ fn write_server_cookie(
 }
 
 fn load_and_parse_cookie_jar(
-    ssr_cookies_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 ) -> Option<CookieJar> {
     read_cookies_string(ssr_cookies_header_getter).map(|cookies| {
         let mut jar = CookieJar::new();

@@ -188,8 +188,10 @@ where
             cleanup_prev_element();
         };
 
-        let cleanup_stop = SendWrapper::new(stop.clone());
-        on_cleanup(move || cleanup_stop());
+        on_cleanup({
+            let stop = SendWrapper::new(stop.clone());
+            move || stop()
+        });
 
         stop
     }

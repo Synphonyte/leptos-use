@@ -1,10 +1,11 @@
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
-use leptos::html::HtmlElement;
+use leptos::html::{CreateElement, ElementType};
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
-use std::ops::Deref;
+use wasm_bindgen::JsCast;
 
 /// Used as an argument type to make it easily possible to pass either
 ///
@@ -19,9 +20,9 @@ pub enum ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    Static(Option<T>),
-    Dynamic(Signal<Option<T>>),
-    _Phantom(PhantomData<E>),
+    Static(SendWrapper<Option<T>>),
+    Dynamic(Signal<Option<T>, LocalStorage>),
+    _Phantom(PhantomData<fn() -> E>),
 }
 
 impl<T, E> Default for ElementMaybeSignal<T, E>
@@ -29,7 +30,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn default() -> Self {
-        Self::Static(None)
+        Self::Static(SendWrapper::new(None))
     }
 }
 
@@ -63,15 +64,18 @@ where
 
     fn with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => f(t),
-            Self::Dynamic(s) => s.with(f),
+            Self::Static(t) => f(&t),
+            Self::Dynamic(s) => {
+                let value = s.get();
+                f(&value)
+            }
             _ => unreachable!(),
         }
     }
 
     fn try_with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => Some(f(t)),
+            Self::Static(t) => Some(f(&t)),
             Self::Dynamic(s) => s.try_with(f),
             _ => unreachable!(),
         }
@@ -86,7 +90,7 @@ where
 
     fn with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => f(t),
+            Self::Static(t) => f(&t),
             Self::Dynamic(s) => s.with_untracked(f),
             _ => unreachable!(),
         }
@@ -94,7 +98,7 @@ where
 
     fn try_with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => Some(f(t)),
+            Self::Static(t) => Some(f(&t)),
             Self::Dynamic(s) => s.try_with_untracked(f),
             _ => unreachable!(),
         }
@@ -108,7 +112,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(value: T) -> Self {
-        ElementMaybeSignal::Static(Some(value))
+        ElementMaybeSignal::Static(SendWrapper::new(Some(value)))
     }
 }
 
@@ -117,7 +121,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Option<T>) -> Self {
-        ElementMaybeSignal::Static(target)
+        ElementMaybeSignal::Static(SendWrapper::new(target))
     }
 }
 
@@ -128,7 +132,7 @@ macro_rules! impl_from_deref_option {
             E: From<$ty2> + 'static,
         {
             fn from(value: $ty) -> Self {
-                Self::Static((*value).clone())
+                Self::Static(SendWrapper::new((*value).clone()))
             }
         }
     };
@@ -146,9 +150,9 @@ where
     fn from(target: &'a str) -> Self {
         cfg_if! { if #[cfg(feature = "ssr")] {
             let _ = target;
-            Self::Static(None)
+            Self::Static(SendWrapper::new(None))
         } else {
-            Self::Static(document().query_selector(target).unwrap_or_default())
+            Self::Static(SendWrapper::new(document().query_selector(target).unwrap_or_default()))
         }}
     }
 }
@@ -171,10 +175,10 @@ macro_rules! impl_from_signal_string {
             fn from(signal: $ty) -> Self {
                 cfg_if! { if #[cfg(feature = "ssr")] {
                     let _ = signal;
-                    Self::Dynamic(Signal::derive(|| None))
+                    Self::Dynamic(Signal::derive_local(|| None))
                 } else {
                     Self::Dynamic(
-                        Signal::derive(move || document().query_selector(&signal.get()).unwrap_or_default()),
+                        Signal::derive_local(move || document().query_selector(&signal.get()).unwrap_or_default()),
                     )
                 }}
             }
@@ -187,10 +191,10 @@ impl_from_signal_string!(ReadSignal<String>);
 impl_from_signal_string!(RwSignal<String>);
 impl_from_signal_string!(Memo<String>);
 
-impl_from_signal_string!(Signal<&str>);
-impl_from_signal_string!(ReadSignal<&str>);
-impl_from_signal_string!(RwSignal<&str>);
-impl_from_signal_string!(Memo<&str>);
+impl_from_signal_string!(Signal<&'static str>);
+impl_from_signal_string!(ReadSignal<&'static str>);
+impl_from_signal_string!(RwSignal<&'static str>);
+impl_from_signal_string!(Memo<&'static str>);
 
 // From signal ///////////////////////////////////////////////////////////////
 
@@ -207,10 +211,10 @@ macro_rules! impl_from_signal_option {
     };
 }
 
-impl_from_signal_option!(Signal<Option<T>>);
-impl_from_signal_option!(ReadSignal<Option<T>>);
-impl_from_signal_option!(RwSignal<Option<T>>);
-impl_from_signal_option!(Memo<Option<T>>);
+impl_from_signal_option!(Signal<Option<T>, LocalStorage>);
+impl_from_signal_option!(ReadSignal<Option<T>, LocalStorage>);
+impl_from_signal_option!(RwSignal<Option<T>, LocalStorage>);
+impl_from_signal_option!(Memo<Option<T>, LocalStorage>);
 
 macro_rules! impl_from_signal {
     ($ty:ty) => {
@@ -219,16 +223,16 @@ macro_rules! impl_from_signal {
             T: Into<E> + Clone + 'static,
         {
             fn from(signal: $ty) -> Self {
-                Self::Dynamic(Signal::derive(move || Some(signal.get())))
+                Self::Dynamic(Signal::derive_local(move || Some(signal.get())))
             }
         }
     };
 }
 
-impl_from_signal!(Signal<T>);
-impl_from_signal!(ReadSignal<T>);
-impl_from_signal!(RwSignal<T>);
-impl_from_signal!(Memo<T>);
+impl_from_signal!(Signal<T, LocalStorage>);
+impl_from_signal!(ReadSignal<T, LocalStorage>);
+impl_from_signal!(RwSignal<T, LocalStorage>);
+impl_from_signal!(Memo<T, LocalStorage>);
 
 // From NodeRef //////////////////////////////////////////////////////////////
 
@@ -236,13 +240,13 @@ macro_rules! impl_from_node_ref {
     ($ty:ty) => {
         impl<R> From<NodeRef<R>> for ElementMaybeSignal<$ty, $ty>
         where
-            R: ElementDescriptor + Clone + 'static,
+            R: ElementType + CreateElement<Dom> + Clone + Send + Sync + 'static,
+            R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_ref: NodeRef<R>) -> Self {
-                Self::Dynamic(Signal::derive(move || {
+                Self::Dynamic(Signal::derive_local(move || {
                     node_ref.get().map(move |el| {
-                        let el = el.into_any();
-                        let el: $ty = el.deref().clone().into();
+                        let el: $ty = el.clone().into();
                         el
                     })
                 }))
@@ -255,90 +259,90 @@ impl_from_node_ref!(web_sys::EventTarget);
 impl_from_node_ref!(web_sys::Element);
 impl_from_node_ref!(web_sys::HtmlElement);
 
-// From leptos::html::HTMLElement ///////////////////////////////////////////////
-
-macro_rules! impl_from_html_element {
-    ($ty:ty) => {
-        impl<HtmlEl> From<HtmlElement<HtmlEl>> for ElementMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
-        {
-            fn from(value: HtmlElement<HtmlEl>) -> Self {
-                let el: &$ty = value.deref();
-                Self::Static(Some(el.clone()))
-            }
-        }
-    };
-}
-
-impl_from_html_element!(web_sys::EventTarget);
-impl_from_html_element!(web_sys::Element);
-impl_from_html_element!(web_sys::HtmlElement);
-
-// From Signal<leptos::html::HTMLElement> /////////////////////////////////////////
-
-macro_rules! impl_from_signal_html_element {
-    ($signal:ty, $ty:ty) => {
-        impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
-        {
-            fn from(value: $signal) -> Self {
-                Self::Dynamic(Signal::derive(move || {
-                    let value = value.get();
-                    let el: &$ty = value.deref();
-                    Some(el.clone())
-                }))
-            }
-        }
-    };
-}
-
-impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
-impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
-impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
-impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::EventTarget);
-
-impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::Element);
-impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::Element);
-impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::Element);
-impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::Element);
-
-// From Signal<Option<leptos::html::HTMLElement>> /////////////////////////////////////////
-
-macro_rules! impl_from_signal_html_element {
-    ($signal:ty, $ty:ty) => {
-        impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
-        where
-            HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
-        {
-            fn from(value: $signal) -> Self {
-                Self::Dynamic(Signal::derive(move || {
-                    let el: Option<$ty> = value.get().map(|el| el.deref().clone());
-                    el
-                }))
-            }
-        }
-    };
-}
-
-impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
-impl_from_signal_html_element!(
-    ReadSignal<Option<HtmlElement<HtmlEl>>>,
-    web_sys::EventTarget
-);
-impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
-impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
-
-impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
-impl_from_signal_html_element!(ReadSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
-impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
-impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
-
-impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
-impl_from_signal_html_element!(
-    ReadSignal<Option<HtmlElement<HtmlEl>>>,
-    web_sys::HtmlElement
-);
-impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
-impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
+// // From leptos::html::HTMLElement ///////////////////////////////////////////////
+//
+// macro_rules! impl_from_html_element {
+//     ($ty:ty) => {
+//         impl<HtmlEl> From<HtmlElement<HtmlEl>> for ElementMaybeSignal<$ty, $ty>
+//         where
+//             HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty>,
+//         {
+//             fn from(value: HtmlElement<HtmlEl>) -> Self {
+//                 let el: &$ty = value.deref();
+//                 Self::Static(Some(el.clone()))
+//             }
+//         }
+//     };
+// }
+//
+// impl_from_html_element!(web_sys::EventTarget);
+// impl_from_html_element!(web_sys::Element);
+// impl_from_html_element!(web_sys::HtmlElement);
+//
+// // From Signal<leptos::html::HTMLElement> /////////////////////////////////////////
+//
+// macro_rules! impl_from_signal_html_element {
+//     ($signal:ty, $ty:ty) => {
+//         impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
+//         where
+//             HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
+//         {
+//             fn from(value: $signal) -> Self {
+//                 Self::Dynamic(Signal::derive(move || {
+//                     let value = value.get();
+//                     let el: &$ty = value.deref();
+//                     Some(el.clone())
+//                 }))
+//             }
+//         }
+//     };
+// }
+//
+// impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+// impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+// impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+// impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::EventTarget);
+//
+// impl_from_signal_html_element!(Signal<HtmlElement<HtmlEl>>, web_sys::Element);
+// impl_from_signal_html_element!(ReadSignal<HtmlElement<HtmlEl>>, web_sys::Element);
+// impl_from_signal_html_element!(RwSignal<HtmlElement<HtmlEl>>, web_sys::Element);
+// impl_from_signal_html_element!(Memo<HtmlElement<HtmlEl>>, web_sys::Element);
+//
+// // From Signal<Option<leptos::html::HTMLElement>> /////////////////////////////////////////
+//
+// macro_rules! impl_from_signal_html_element {
+//     ($signal:ty, $ty:ty) => {
+//         impl<HtmlEl> From<$signal> for ElementMaybeSignal<$ty, $ty>
+//         where
+//             HtmlEl: ElementDescriptor + std::ops::Deref<Target = $ty> + Clone,
+//         {
+//             fn from(value: $signal) -> Self {
+//                 Self::Dynamic(Signal::derive(move || {
+//                     let el: Option<$ty> = value.get().map(|el| el.deref().clone());
+//                     el
+//                 }))
+//             }
+//         }
+//     };
+// }
+//
+// impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+// impl_from_signal_html_element!(
+//     ReadSignal<Option<HtmlElement<HtmlEl>>>,
+//     web_sys::EventTarget
+// );
+// impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+// impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::EventTarget);
+//
+// impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+// impl_from_signal_html_element!(ReadSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+// impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+// impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::Element);
+//
+// impl_from_signal_html_element!(Signal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
+// impl_from_signal_html_element!(
+//     ReadSignal<Option<HtmlElement<HtmlEl>>>,
+//     web_sys::HtmlElement
+// );
+// impl_from_signal_html_element!(RwSignal<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);
+// impl_from_signal_html_element!(Memo<Option<HtmlElement<HtmlEl>>>, web_sys::HtmlElement);

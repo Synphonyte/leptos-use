@@ -370,7 +370,7 @@ where
         let target = {
             let signal = signal.clone();
 
-            Signal::derive(move || {
+            Signal::derive_local(move || {
                 let element = signal.get();
                 element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
             })
@@ -392,14 +392,14 @@ where
 
             let _ = use_event_listener_with_options::<
                 _,
-                Signal<Option<web_sys::EventTarget>>,
+                Signal<Option<web_sys::EventTarget>, LocalStorage>,
                 web_sys::EventTarget,
                 _,
             >(target, ev::scroll, handler, options.event_listener_options);
         } else {
             let _ = use_event_listener_with_options::<
                 _,
-                Signal<Option<web_sys::EventTarget>>,
+                Signal<Option<web_sys::EventTarget>, LocalStorage>,
                 web_sys::EventTarget,
                 _,
             >(
@@ -412,7 +412,7 @@ where
 
         let _ = use_event_listener_with_options::<
             _,
-            Signal<Option<web_sys::EventTarget>>,
+            Signal<Option<web_sys::EventTarget>, LocalStorage>,
             web_sys::EventTarget,
             _,
         >(

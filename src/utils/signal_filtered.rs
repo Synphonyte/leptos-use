@@ -15,7 +15,7 @@ macro_rules! signal_filtered {
             ) -> Signal<T>
             where
                 S: Into<Signal<T>>,
-                T: Clone + 'static,
+                T: Clone + Send + Sync + 'static,
             {
                 [<signal_ $filter_name d_with_options>](value, ms, [<$filter_name:camel Options>]::default())
             }
@@ -36,7 +36,7 @@ macro_rules! signal_filtered {
             ) -> Signal<T>
             where
                 S: Into<Signal<T>>,
-                T: Clone + 'static,
+                T: Clone + Send + Sync + 'static,
             {
                 let value = value.into();
                 let ms = ms.into();

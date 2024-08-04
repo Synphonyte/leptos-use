@@ -59,7 +59,7 @@ pub fn use_user_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = signal(None::<Result<web_sys::MediaStream, JsValue>>);
+    let (stream, set_stream) = signal_local(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -187,7 +187,7 @@ where
     /// Initially this is `None` until `start` resolved successfully.
     /// In case the stream couldn't be started, for example because the user didn't grant permission,
     /// this has the value `Some(Err(...))`.
-    pub stream: Signal<Option<Result<web_sys::MediaStream, JsValue>>>,
+    pub stream: Signal<Option<Result<web_sys::MediaStream, JsValue>>, LocalStorage>,
 
     /// Starts the screen streaming. Triggers the ask for permission if not already granted.
     pub start: StartFn,

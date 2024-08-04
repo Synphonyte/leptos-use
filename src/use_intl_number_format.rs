@@ -775,21 +775,21 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
     /// See [`use_intl_number_format`] for more information.
-    pub fn format<N>(&self, number: impl Into<MaybeSignal<N>>) -> Signal<String>
+    pub fn format<N>(&self, number: impl Into<MaybeSignal<N>>) -> Signal<String, LocalStorage>
     where
-        N: Clone + Display + 'static,
+        N: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<N>,
     {
         let number = number.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive(move || {
+            Signal::derive_local(move || {
                 format!("{}", number.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive(move || {
+            Signal::derive_local(move || {
                 if let Ok(result) = number_format
                     .format()
                     .call1(&number_format, &js_sys::Number::from(number.get()).into())
@@ -852,10 +852,10 @@ impl UseIntlNumberFormatReturn {
         &self,
         start: impl Into<MaybeSignal<NStart>>,
         end: impl Into<MaybeSignal<NEnd>>,
-    ) -> Signal<String>
+    ) -> Signal<String, LocalStorage>
     where
-        NStart: Clone + Display + 'static,
-        NEnd: Clone + Display + 'static,
+        NStart: Clone + Display + Send + Sync + 'static,
+        NEnd: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<NStart>,
         js_sys::Number: From<NEnd>,
     {
@@ -863,13 +863,13 @@ impl UseIntlNumberFormatReturn {
         let end = end.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive(move || {
+            Signal::derive_local(move || {
                 format!("{} - {}", start.get(), end.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive(move || {
+            Signal::derive_local(move || {
                 if let Ok(function) = js!(number_format["formatRange"]) {
                     let function = function.unchecked_into::<js_sys::Function>();
 

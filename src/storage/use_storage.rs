@@ -6,6 +6,7 @@ use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::sync::Arc;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -151,7 +152,7 @@ pub fn use_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Default + Clone + PartialEq + Send + Sync,
+    T: Default + Clone + PartialEq + Send + Sync + 'static,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(storage_type, key, UseStorageOptions::default())
@@ -238,7 +239,7 @@ where
             let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
 
-            move || {
+            SendWrapper::new(move || {
                 let fetched = storage
                     .to_owned()
                     .and_then(|storage| {
@@ -270,14 +271,15 @@ where
                     // Revert to default
                     None => set_data.set(default.clone()),
                 };
-            }
+            })
         };
 
         // Fires when storage needs to be fetched
-        let notify = Trigger::new();
+        let notify = ArcTrigger::new();
 
         // Refetch from storage. Keeps track of how many times we've been notified. Does not increment for calls to set_data
         let notify_id = Memo::<usize>::new({
+            let notify = notify.clone();
             let fetch_from_storage = fetch_from_storage.clone();
 
             move |prev| {
@@ -327,31 +329,43 @@ where
             );
         }
 
-        // Fetch initial value
-        if delay_during_hydration && leptos::leptos_dom::HydrationCtx::is_hydrating() {
-            request_animation_frame(fetch_from_storage.clone());
+        if delay_during_hydration
+            && Owner::current_shared_context()
+                .map(|sc| sc.during_hydration())
+                .unwrap_or_default()
+        {
+            request_animation_frame({
+                let fetch_from_storage = fetch_from_storage.clone();
+                #[allow(clippy::redundant_closure)]
+                move || fetch_from_storage()
+            });
         } else {
             fetch_from_storage();
         }
 
         if listen_to_storage_changes {
             let check_key = key.as_ref().to_owned();
+            let storage_notify = notify.clone();
+            let custom_notify = notify.clone();
+
             // Listen to global storage events
             let _ = use_event_listener(use_window(), leptos::ev::storage, move |ev| {
                 let ev_key = ev.key();
                 // Key matches or all keys deleted (None)
                 if ev_key == Some(check_key.clone()) || ev_key.is_none() {
-                    notify.notify()
+                    storage_notify.trigger()
                 }
             });
             // Listen to internal storage events
             let check_key = key.as_ref().to_owned();
             let _ = use_event_listener(
                 use_window(),
-                ev::Custom::new(INTERNAL_STORAGE_EVENT),
-                move |ev: web_sys::CustomEvent| {
-                    if Some(check_key.clone()) == ev.detail().as_string() {
-                        notify.notify()
+                leptos::ev::Custom::new(INTERNAL_STORAGE_EVENT),
+                {
+                    move |ev: web_sys::CustomEvent| {
+                        if Some(check_key.clone()) == ev.detail().as_string() {
+                            custom_notify.trigger()
+                        }
                     }
                 },
             );
@@ -365,9 +379,9 @@ where
                     // Delete directly from storage
                     let result = storage
                         .remove_item(&key)
-                        .map_err(UseStorageError::RemoveItemFailed);
+                        .map_err(|e| UseStorageError::RemoveItemFailed(e));
                     let _ = handle_error(&on_error, result);
-                    notify.notify();
+                    notify.trigger();
                     dispatch_storage_event();
                 });
             }
@@ -400,11 +414,11 @@ pub enum UseStorageError<E, D> {
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T, E, D>
 where
-    T: 'static,
+    T: Send + Sync + 'static,
 {
     // Callback for when an error occurs
     #[builder(skip)]
-    on_error: Arc<dyn Fn(UseStorageError<E, D>)>,
+    on_error: Arc<dyn Fn(UseStorageError<E, D>) + Send + Sync>,
     // Whether to continuously listen to changes from browser storage
     listen_to_storage_changes: bool,
     // Initial value to use when the storage key is not set
@@ -422,13 +436,16 @@ where
 /// Calls the on_error callback with the given error. Removes the error from the Result to avoid double error handling.
 #[cfg(not(feature = "ssr"))]
 fn handle_error<T, E, D>(
-    on_error: &Arc<dyn Fn(UseStorageError<E, D>)>,
+    on_error: &Arc<dyn Fn(UseStorageError<E, D>) + Send + Sync>,
     result: Result<T, UseStorageError<E, D>>,
 ) -> Result<T, ()> {
     result.map_err(|err| (on_error)(err))
 }
 
-impl<T: Default, E, D> Default for UseStorageOptions<T, E, D> {
+impl<T: Default, E, D> Default for UseStorageOptions<T, E, D>
+where
+    T: Send + Sync + 'static,
+{
     fn default() -> Self {
         Self {
             on_error: Arc::new(|_err| ()),
@@ -440,9 +457,15 @@ impl<T: Default, E, D> Default for UseStorageOptions<T, E, D> {
     }
 }
 
-impl<T: Default, E, D> UseStorageOptions<T, E, D> {
+impl<T: Default, E, D> UseStorageOptions<T, E, D>
+where
+    T: Send + Sync + 'static,
+{
     /// Optional callback whenever an error occurs.
-    pub fn on_error(self, on_error: impl Fn(UseStorageError<E, D>) + 'static) -> Self {
+    pub fn on_error(
+        self,
+        on_error: impl Fn(UseStorageError<E, D>) + Send + Sync + 'static,
+    ) -> Self {
         Self {
             on_error: Arc::new(on_error),
             ..self

@@ -153,7 +153,10 @@ where
             stop_watch();
         };
 
-        on_cleanup(stop.clone());
+        on_cleanup({
+            let stop = send_wrapper::SendWrapper::new(stop.clone());
+            move || stop()
+        });
 
         UseResizeObserverReturn { is_supported, stop }
     }

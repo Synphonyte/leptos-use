@@ -80,14 +80,17 @@ pub fn use_broadcast_channel<T, C>(
     <C as Decoder<T>>::Error,
 >
 where
+    T: Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
+    <C as Encoder<T>>::Error: Send + Sync,
+    <C as Decoder<T>>::Error: Send + Sync,
 {
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
     let (is_closed, set_closed) = signal(false);
-    let (channel, set_channel) = signal(None::<web_sys::BroadcastChannel>);
+    let (channel, set_channel) = signal_local(None::<web_sys::BroadcastChannel>);
     let (message, set_message) = signal(None::<T>);
-    let (error, set_error) = signal(
+    let (error, set_error) = signal_local(
         None::<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>,
     );
 
@@ -178,17 +181,17 @@ where
 /// Return type of [`use_broadcast_channel`].
 pub struct UseBroadcastChannelReturn<T, PFn, CFn, E, D>
 where
-    T: 'static,
+    T: Send + Sync + 'static,
     PFn: Fn(&T) + Clone,
     CFn: Fn() + Clone,
-    E: 'static,
-    D: 'static,
+    E: Send + Sync + 'static,
+    D: Send + Sync + 'static,
 {
     /// `true` if this browser supports `BroadcastChannel`s.
     pub is_supported: Signal<bool>,
 
     /// The broadcast channel that is wrapped by this function
-    pub channel: Signal<Option<web_sys::BroadcastChannel>>,
+    pub channel: Signal<Option<web_sys::BroadcastChannel>, LocalStorage>,
 
     /// Latest message received from the channel
     pub message: Signal<Option<T>>,
@@ -200,7 +203,7 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<UseBroadcastChannelError<E, D>>>,
+    pub error: Signal<Option<UseBroadcastChannelError<E, D>>, LocalStorage>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,

@@ -10,7 +10,7 @@ use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::future::Future;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
 
@@ -55,7 +55,7 @@ pub fn use_infinite_scroll<El, T, LFn, LFut>(el: El, on_load_more: LFn) -> Signa
 where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone + 'static,
     T: Into<web_sys::Element> + Clone + 'static,
-    LFn: Fn(ScrollState) -> LFut + 'static,
+    LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
     LFut: Future<Output = ()>,
 {
     use_infinite_scroll_with_options(el, on_load_more, UseInfiniteScrollOptions::default())
@@ -70,7 +70,7 @@ pub fn use_infinite_scroll_with_options<El, T, LFn, LFut>(
 where
     El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone + 'static,
     T: Into<web_sys::Element> + Clone + 'static,
-    LFn: Fn(ScrollState) -> LFut + 'static,
+    LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
     LFut: Future<Output = ()>,
 {
     let UseInfiniteScrollOptions {
@@ -110,7 +110,7 @@ where
     let (is_loading, set_loading) = signal(false);
 
     let el = el.into();
-    let observed_element = Signal::derive(move || {
+    let observed_element = Signal::derive_local(move || {
         let el = el.get();
 
         el.map(|el| {
@@ -128,9 +128,9 @@ where
 
     let is_element_visible = use_element_visibility(observed_element);
 
-    let check_and_load = StoredValue::new(None::<Rc<dyn Fn()>>);
+    let check_and_load = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
-    check_and_load.set_value(Some(Rc::new({
+    check_and_load.set_value(Some(Arc::new({
         let measure = measure.clone();
 
         move || {
@@ -215,7 +215,7 @@ where
 #[derive(DefaultBuilder)]
 pub struct UseInfiniteScrollOptions {
     /// Callback when scrolling is happening.
-    on_scroll: Rc<dyn Fn(web_sys::Event)>,
+    on_scroll: Arc<dyn Fn(web_sys::Event) + Send + Sync>,
 
     /// Options passed to the `addEventListener("scroll", ...)` call
     event_listener_options: UseEventListenerOptions,
@@ -233,7 +233,7 @@ pub struct UseInfiniteScrollOptions {
 impl Default for UseInfiniteScrollOptions {
     fn default() -> Self {
         Self {
-            on_scroll: Rc::new(|_| {}),
+            on_scroll: Arc::new(|_| {}),
             event_listener_options: Default::default(),
             distance: 0.0,
             direction: Direction::Bottom,

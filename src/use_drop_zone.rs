@@ -4,7 +4,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::{Debug, Formatter};
-use std::rc::Rc;
+use std::sync::Arc;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_event_listener;
@@ -73,7 +73,7 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let (is_over_drop_zone, set_over_drop_zone) = signal(false);
-    let (files, set_files) = signal(Vec::<web_sys::File>::new());
+    let (files, set_files) = signal_local(Vec::<web_sys::File>::new());
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -89,7 +89,7 @@ where
 
         let update_files = move |event: &web_sys::DragEvent| {
             if let Some(data_transfer) = event.data_transfer() {
-                let files: Vec<web_sys::File> = data_transfer
+                let files: Vec<_> = data_transfer
                     .files()
                     .map(|f| js_sys::Array::from(&f).to_vec())
                     .unwrap_or_default()
@@ -112,7 +112,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -125,7 +125,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -143,7 +143,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -159,7 +159,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
-                files: files.get_untracked(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -176,22 +176,22 @@ where
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseDropZoneOptions {
     /// Event handler for the [`drop`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event) event
-    on_drop: Rc<dyn Fn(UseDropZoneEvent)>,
+    on_drop: Arc<dyn Fn(UseDropZoneEvent) + Send + Sync>,
     /// Event handler for the [`dragenter`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragenter_event) event
-    on_enter: Rc<dyn Fn(UseDropZoneEvent)>,
+    on_enter: Arc<dyn Fn(UseDropZoneEvent) + Send + Sync>,
     /// Event handler for the [`dragleave`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragleave_event) event
-    on_leave: Rc<dyn Fn(UseDropZoneEvent)>,
+    on_leave: Arc<dyn Fn(UseDropZoneEvent) + Send + Sync>,
     /// Event handler for the [`dragover`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragover_event) event
-    on_over: Rc<dyn Fn(UseDropZoneEvent)>,
+    on_over: Arc<dyn Fn(UseDropZoneEvent) + Send + Sync>,
 }
 
 impl Default for UseDropZoneOptions {
     fn default() -> Self {
         Self {
-            on_drop: Rc::new(|_| {}),
-            on_enter: Rc::new(|_| {}),
-            on_leave: Rc::new(|_| {}),
-            on_over: Rc::new(|_| {}),
+            on_drop: Arc::new(|_| {}),
+            on_enter: Arc::new(|_| {}),
+            on_leave: Arc::new(|_| {}),
+            on_over: Arc::new(|_| {}),
         }
     }
 }
@@ -214,7 +214,7 @@ pub struct UseDropZoneEvent {
 /// Return type of [`use_drop_zone`].
 pub struct UseDropZoneReturn {
     /// Files being handled
-    pub files: Signal<Vec<web_sys::File>>,
+    pub files: Signal<Vec<web_sys::File>, LocalStorage>,
     /// Whether the files (dragged by the pointer) are over the drop zone
     pub is_over_drop_zone: Signal<bool>,
 }

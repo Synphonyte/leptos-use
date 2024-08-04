@@ -3,12 +3,14 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{watch_with_options, WatchOptions};
-    use std::cell::RefCell;
-    use std::rc::Rc;
+    // use std::cell::RefCell;
+    // use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
     use wasm_bindgen::prelude::*;
 }}
 
@@ -116,14 +118,14 @@ where
         )
         .into_js_value();
 
-        let observer: Rc<RefCell<Option<web_sys::IntersectionObserver>>> =
-            Rc::new(RefCell::new(None));
+        let observer: Arc<Mutex<Option<SendWrapper<web_sys::IntersectionObserver>>>> =
+            Arc::new(Mutex::new(None));
 
         let cleanup = {
-            let obsserver = Rc::clone(&observer);
+            let observer = Arc::clone(&observer);
 
             move || {
-                if let Some(o) = obsserver.take() {
+                if let Some(o) = observer.lock().unwrap().take() {
                     o.disconnect();
                 }
             }
@@ -177,7 +179,7 @@ where
                         obs.observe(&target);
                     }
 
-                    observer.replace(Some(obs));
+                    *observer.lock().unwrap() = Some(SendWrapper::new(obs));
                 },
                 WatchOptions::default().immediate(immediate),
             )

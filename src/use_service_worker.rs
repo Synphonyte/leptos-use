@@ -146,7 +146,7 @@ pub fn use_service_worker_with_options(
         check_for_update: move || {
             registration.with(|reg| {
                 if let Ok(reg) = reg {
-                    update_sw.dispatch(reg.clone())
+                    update_sw.dispatch(reg.clone());
                 }
             })
         },
@@ -246,7 +246,7 @@ fn create_action_update() -> Action<
     SendWrapper<ServiceWorkerRegistration>,
     Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>,
 > {
-    Action::new(
+    Action::new_unsync(
         move |registration: &SendWrapper<ServiceWorkerRegistration>| {
             let registration = registration.clone();
             async move {
@@ -256,7 +256,7 @@ fn create_action_update() -> Action<
                         .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
                         .map(SendWrapper::new)
                         .map_err(SendWrapper::new),
-                    Err(err) => Err(err),
+                    Err(err) => Err(SendWrapper::new(err)),
                 }
             }
         },
@@ -268,15 +268,17 @@ fn create_action_create_or_update_registration() -> Action<
     ServiceWorkerScriptUrl,
     Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>,
 > {
-    Action::new(move |script_url: &ServiceWorkerScriptUrl| {
+    Action::new_unsync(move |script_url: &ServiceWorkerScriptUrl| {
         let script_url = script_url.0.to_owned();
         async move {
             if let Some(navigator) = use_window().navigator() {
                 js_fut!(navigator.service_worker().register(script_url.as_str()))
                     .await
                     .and_then(|ok| ok.dyn_into::<ServiceWorkerRegistration>())
+                    .map(SendWrapper::new)
+                    .map_err(SendWrapper::new)
             } else {
-                Err(JsValue::from_str("no navigator"))
+                Err(SendWrapper::new(JsValue::from_str("no navigator")))
             }
         }
     })
@@ -285,7 +287,7 @@ fn create_action_create_or_update_registration() -> Action<
 /// A leptos action which asynchronously fetches the current ServiceWorkerRegistration.
 fn create_action_get_registration(
 ) -> Action<(), Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>> {
-    Action::new(move |(): &()| async move {
+    Action::new_unsync(move |(): &()| async move {
         if let Some(navigator) = use_window().navigator() {
             js_fut!(navigator.service_worker().get_registration())
                 .await

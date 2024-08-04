@@ -6,7 +6,7 @@ use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::Arc;
 use wasm_bindgen::JsCast;
 use web_sys::PointerEvent;
 
@@ -92,11 +92,11 @@ where
     let target = target.into();
 
     let dragging_handle = if let Some(handle) = handle {
-        let handle = (handle).into();
-        Signal::derive(move || handle.get().map(|handle| handle.into()))
+        let handle: ElementMaybeSignal<_, _> = handle.into();
+        Signal::derive_local(move || handle.get().map(|handle| handle.into()))
     } else {
         let target = target.clone();
-        Signal::derive(move || target.get().map(|target| target.into()))
+        Signal::derive_local(move || target.get().map(|target| target.into()))
     };
 
     let (position, set_position) = initial_value.into_signal();
@@ -280,13 +280,13 @@ where
     initial_value: MaybeRwSignal<Position>,
 
     /// Callback when the dragging starts. Return `false` to prevent dragging.
-    on_start: Rc<dyn Fn(UseDraggableCallbackArgs) -> bool>,
+    on_start: Arc<dyn Fn(UseDraggableCallbackArgs) -> bool + Send + Sync>,
 
     /// Callback during dragging.
-    on_move: Rc<dyn Fn(UseDraggableCallbackArgs)>,
+    on_move: Arc<dyn Fn(UseDraggableCallbackArgs) + Send + Sync>,
 
     /// Callback when dragging end.
-    on_end: Rc<dyn Fn(UseDraggableCallbackArgs)>,
+    on_end: Arc<dyn Fn(UseDraggableCallbackArgs) + Send + Sync>,
 
     #[builder(skip)]
     _marker1: PhantomData<DragT>,
@@ -306,9 +306,9 @@ impl Default
             handle: None,
             pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],
             initial_value: MaybeRwSignal::default(),
-            on_start: Rc::new(|_| true),
-            on_move: Rc::new(|_| {}),
-            on_end: Rc::new(|_| {}),
+            on_start: Arc::new(|_| true),
+            on_move: Arc::new(|_| {}),
+            on_end: Arc::new(|_| {}),
             _marker1: PhantomData,
             _marker2: PhantomData,
         }
