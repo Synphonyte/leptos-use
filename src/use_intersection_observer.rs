@@ -3,7 +3,6 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -101,6 +100,8 @@ where
         let cleanup = || {};
         let stop = || {};
     } else {
+        use send_wrapper::SendWrapper;
+        
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]

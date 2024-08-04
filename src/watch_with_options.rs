@@ -129,7 +129,7 @@ where
     let filtered_callback =
         create_filter_wrapper(options.filter.filter_fn(), wrapped_callback.clone());
 
-    leptos::prelude::watch(
+    let effect = Effect::watch(
         deps,
         move |deps_value, previous_deps_value, did_run_before| {
             cur_deps_value.replace(Some(deps_value.clone()));
@@ -144,7 +144,9 @@ where
             prev_callback_value.replace(callback_value);
         },
         options.immediate,
-    )
+    );
+
+    move || effect.stop()
 
     // create_effect(move |did_run_before| {
     //     if !is_active.get() {
@@ -185,16 +187,4 @@ impl WatchOptions {
         /// the watch callback
         filter
     );
-}
-
-#[deprecated(since = "0.7.0", note = "Use `leptos::watch` instead")]
-#[inline(always)]
-pub fn watch<W, T, DFn, CFn>(deps: DFn, callback: CFn) -> impl Fn() + Clone
-where
-    DFn: Fn() -> W + 'static,
-    CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
-    W: Clone + 'static,
-    T: Clone + 'static,
-{
-    leptos::prelude::watch(deps, callback, false)
 }

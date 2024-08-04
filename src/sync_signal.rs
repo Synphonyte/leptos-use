@@ -177,7 +177,7 @@ where
     let mut stop_watch_right = None;
 
     if matches!(direction, SyncDirection::Both | SyncDirection::LeftToRight) {
-        stop_watch_left = Some(watch(
+        stop_watch_left = Some(Effect::watch(
             move || left.get(),
             move |new_value, _, _| {
                 let new_value = (*transform_ltr)(new_value);
@@ -191,7 +191,7 @@ where
     }
 
     if matches!(direction, SyncDirection::Both | SyncDirection::RightToLeft) {
-        stop_watch_right = Some(watch(
+        stop_watch_right = Some(Effect::watch(
             move || right.get(),
             move |new_value, _, _| {
                 let new_value = (*transform_rtl)(new_value);
@@ -206,10 +206,10 @@ where
 
     move || {
         if let Some(stop_watch_left) = &stop_watch_left {
-            stop_watch_left();
+            stop_watch_left.stop();
         }
         if let Some(stop_watch_right) = &stop_watch_right {
-            stop_watch_right();
+            stop_watch_right.stop();
         }
     }
 }

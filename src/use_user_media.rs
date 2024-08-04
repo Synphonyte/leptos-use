@@ -104,7 +104,7 @@ pub fn use_user_media_with_options(
         set_enabled.set(false);
     };
 
-    let _ = watch(
+    Effect::watch(
         move || enabled.get(),
         move |enabled, _, _| {
             if *enabled {

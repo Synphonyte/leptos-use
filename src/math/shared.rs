@@ -9,7 +9,7 @@ macro_rules! use_partial_cmp {
             S: Into<MaybeSignal<C>>,
             C: Send + Sync + 'static,
             for<'a> &'a C: IntoIterator<Item = &'a N>,
-            N: PartialOrd + Clone + Send + Sync,
+            N: PartialOrd + Clone + Send + Sync + 'static,
         {
             let container = container.into();
 
@@ -48,7 +48,7 @@ macro_rules! use_simple_math {
             pub fn [<use_ $fn_name>]<S, N>(x: S) -> Signal<N>
             where
                 S: Into<MaybeSignal<N>> + Send + Sync,
-                N: Float + Send + Sync,
+                N: Float + Send + Sync + 'static,
             {
                 let x = x.into();
                 Signal::derive(move || x.get().$fn_name())

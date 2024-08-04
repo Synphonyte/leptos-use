@@ -129,7 +129,7 @@ where
     if matches!(interval, MaybeSignal::Dynamic(_)) {
         let resume = resume.clone();
 
-        let stop_watch = watch(
+        let effect = Effect::watch(
             move || interval.get(),
             move |_, _, _| {
                 if is_active.get() {
@@ -138,7 +138,7 @@ where
             },
             false,
         );
-        on_cleanup(stop_watch);
+        on_cleanup(move || effect.stop());
     }
 
     on_cleanup({

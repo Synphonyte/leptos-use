@@ -2,7 +2,6 @@ use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
-use send_wrapper::SendWrapper;
 use wasm_bindgen::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -86,6 +85,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::js;
+        use send_wrapper::SendWrapper;
 
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>::new(
             move |entries: js_sys::Array, observer| {

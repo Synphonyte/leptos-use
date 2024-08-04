@@ -53,7 +53,7 @@ macro_rules! signal_filtered {
                     options,
                 );
 
-                let _ = watch(move || value.get(), move |_, _, _| update(), false);
+                Effect::watch(move || value.get(), move |_, _, _| update(), false);
 
                 filtered.into()
             }

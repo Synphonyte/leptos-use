@@ -182,7 +182,7 @@ where
         }
     })));
 
-    let _ = watch(
+    Effect::watch(
         move || is_element_visible.get(),
         move |visible, prev_visible, _| {
             if *visible && !prev_visible.copied().unwrap_or_default() {
@@ -192,7 +192,7 @@ where
         true,
     );
 
-    let _ = watch(
+    Effect::watch(
         move || state.arrived_state.get().get_direction(direction),
         move |arrived, prev_arrived, _| {
             if let Some(prev_arrived) = prev_arrived {

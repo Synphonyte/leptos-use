@@ -155,7 +155,7 @@ where
     let _ = {
         let set = set.clone();
 
-        watch(move || list.get(), move |_, _, _| set(index.get()), false)
+        Effect::watch(move || list.get(), move |_, _, _| set(index.get()), false)
     };
 
     UseCycleListReturn {

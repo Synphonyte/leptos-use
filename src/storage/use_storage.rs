@@ -6,7 +6,6 @@ use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::sync::Arc;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -199,6 +198,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{use_event_listener, use_window, watch_with_options, WatchOptions};
+        use send_wrapper::SendWrapper;
 
         // Get storage API
         let storage = storage_type
