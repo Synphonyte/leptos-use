@@ -4,7 +4,6 @@ use crate::{
 use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
@@ -89,9 +88,9 @@ where
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
     let (is_closed, set_closed) = signal(false);
-    let (channel, set_channel) = signal(None::<SendWrapper<web_sys::BroadcastChannel>>);
+    let (channel, set_channel) = signal_local(None::<web_sys::BroadcastChannel>);
     let (message, set_message) = signal(None::<T>);
-    let (error, set_error) = signal(
+    let (error, set_error) = signal_local(
         None::<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>,
     );
 
@@ -103,9 +102,7 @@ where
                         channel
                             .post_message(&msg.into())
                             .map_err(|err| {
-                                set_error.set(Some(UseBroadcastChannelError::PostMessage(
-                                    SendWrapper::new(err),
-                                )))
+                                set_error.set(Some(UseBroadcastChannelError::PostMessage(err)))
                             })
                             .ok();
                     }
@@ -130,7 +127,7 @@ where
 
     if is_supported.get_untracked() {
         let channel_val = web_sys::BroadcastChannel::new(name).ok();
-        set_channel.set(channel_val.clone().map(SendWrapper::new));
+        set_channel.set(channel_val.clone());
 
         if let Some(channel) = channel_val {
             let _ = use_event_listener_with_options(
@@ -157,9 +154,7 @@ where
                 channel.clone(),
                 messageerror,
                 move |event| {
-                    set_error.set(Some(UseBroadcastChannelError::MessageEvent(
-                        SendWrapper::new(event),
-                    )));
+                    set_error.set(Some(UseBroadcastChannelError::MessageEvent(event)));
                 },
                 UseEventListenerOptions::default().passive(true),
             );
@@ -186,17 +181,17 @@ where
 /// Return type of [`use_broadcast_channel`].
 pub struct UseBroadcastChannelReturn<T, PFn, CFn, E, D>
 where
-    T: 'static,
+    T: Send + Sync + 'static,
     PFn: Fn(&T) + Clone,
     CFn: Fn() + Clone,
-    E: 'static,
-    D: 'static,
+    E: Send + Sync + 'static,
+    D: Send + Sync + 'static,
 {
     /// `true` if this browser supports `BroadcastChannel`s.
     pub is_supported: Signal<bool>,
 
     /// The broadcast channel that is wrapped by this function
-    pub channel: Signal<Option<SendWrapper<web_sys::BroadcastChannel>>>,
+    pub channel: Signal<Option<web_sys::BroadcastChannel>, LocalStorage>,
 
     /// Latest message received from the channel
     pub message: Signal<Option<T>>,
@@ -208,7 +203,7 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<UseBroadcastChannelError<E, D>>>,
+    pub error: Signal<Option<UseBroadcastChannelError<E, D>>, LocalStorage>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,
@@ -217,9 +212,9 @@ where
 #[derive(Debug, Error)]
 pub enum UseBroadcastChannelError<E, D> {
     #[error("failed to post message")]
-    PostMessage(SendWrapper<JsValue>),
+    PostMessage(JsValue),
     #[error("channel message error")]
-    MessageEvent(SendWrapper<web_sys::MessageEvent>),
+    MessageEvent(web_sys::MessageEvent),
     #[error("failed to (de)encode value")]
     Codec(CodecError<E, D>),
     #[error("received value is not a string")]

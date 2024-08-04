@@ -5,7 +5,6 @@ use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use wasm_bindgen::JsCast;
@@ -93,12 +92,11 @@ where
     let target = target.into();
 
     let dragging_handle = if let Some(handle) = handle {
-        // let handle = Signal::derive(|| SendWrapper::new(handle));
         let handle: ElementMaybeSignal<_, _> = handle.into();
-        Signal::derive(move || handle.get().map(|handle| SendWrapper::new(handle.into())))
+        Signal::derive_local(move || handle.get().map(|handle| handle.into()))
     } else {
         let target = target.clone();
-        Signal::derive(move || target.get().map(|target| SendWrapper::new(target.into())))
+        Signal::derive_local(move || target.get().map(|target| target.into()))
     };
 
     let (position, set_position) = initial_value.into_signal();

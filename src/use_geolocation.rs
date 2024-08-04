@@ -2,7 +2,6 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 
 /// Reactive [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API).
 /// It allows the user to provide their location to web applications if they so desire. For privacy reasons,
@@ -44,8 +43,8 @@ pub fn use_geolocation_with_options(
     options: UseGeolocationOptions,
 ) -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
     let (located_at, set_located_at) = signal(None::<f64>);
-    let (error, set_error) = signal(None::<SendWrapper<web_sys::PositionError>>);
-    let (coords, set_coords) = signal(None::<SendWrapper<web_sys::Coordinates>>);
+    let (error, set_error) = signal_local(None::<web_sys::PositionError>);
+    let (coords, set_coords) = signal_local(None::<web_sys::Coordinates>);
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let resume = || ();
@@ -62,12 +61,12 @@ pub fn use_geolocation_with_options(
 
         let update_position = move |position: web_sys::Position| {
             set_located_at.set(Some(position.timestamp()));
-            set_coords.set(Some(SendWrapper::new(position.coords())));
+            set_coords.set(Some(position.coords()));
             set_error.set(None);
         };
 
         let on_error = move |err: web_sys::PositionError| {
-            set_error.set(Some(SendWrapper::new(err)));
+            set_error.set(Some(err));
         };
 
         let watch_handle = Arc::new(Mutex::new(None::<i32>));
@@ -203,13 +202,13 @@ where
 {
     /// The coordinates of the current device like latitude and longitude.
     /// See [`GeolocationCoordinates`](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates)..
-    pub coords: Signal<Option<SendWrapper<web_sys::Coordinates>>>,
+    pub coords: Signal<Option<web_sys::Coordinates>, LocalStorage>,
 
     /// The timestamp of the current coordinates.
     pub located_at: Signal<Option<f64>>,
 
     /// The last error received from `navigator.geolocation`.
-    pub error: Signal<Option<SendWrapper<web_sys::PositionError>>>,
+    pub error: Signal<Option<web_sys::PositionError>, LocalStorage>,
 
     /// Resume the geolocation watch.
     pub resume: ResumeFn,

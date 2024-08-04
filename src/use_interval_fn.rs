@@ -141,8 +141,10 @@ where
         on_cleanup(stop_watch);
     }
 
-    let pause_cleanup = SendWrapper::new(pause.clone());
-    on_cleanup(move || pause_cleanup());
+    on_cleanup({
+        let pause = SendWrapper::new(pause.clone());
+        move || pause()
+    });
 
     Pausable {
         is_active: is_active.into(),

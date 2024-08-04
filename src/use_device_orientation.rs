@@ -68,8 +68,10 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
                     .once(false),
             );
 
-            let cleanup = SendWrapper::new(cleanup);
-            on_cleanup(move || cleanup());
+            on_cleanup({
+                let cleanup = SendWrapper::new(cleanup);
+                move || cleanup()
+            });
         }
     }}
 

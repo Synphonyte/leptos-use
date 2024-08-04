@@ -9,7 +9,6 @@ use gloo_timers::future::sleep;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
@@ -111,20 +110,18 @@ where
     let (is_loading, set_loading) = signal(false);
 
     let el = el.into();
-    let observed_element = Signal::derive(move || {
+    let observed_element = Signal::derive_local(move || {
         let el = el.get();
 
         el.map(|el| {
             let el = el.into();
 
             if el.is_instance_of::<web_sys::Window>() || el.is_instance_of::<web_sys::Document>() {
-                SendWrapper::new(
-                    document()
-                        .document_element()
-                        .expect("document element not found"),
-                )
+                document()
+                    .document_element()
+                    .expect("document element not found")
             } else {
-                SendWrapper::new(el)
+                el
             }
         })
     });

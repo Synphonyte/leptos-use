@@ -1,21 +1,28 @@
 use leptos::prelude::*;
 
-pub enum UseRwSignal<T: 'static> {
-    Separate(Signal<T>, WriteSignal<T>),
-    Combined(RwSignal<T>),
+pub enum UseRwSignal<T: 'static, S = SyncStorage>
+where
+    S: Storage<T>,
+{
+    Separate(Signal<T, S>, WriteSignal<T, S>),
+    Combined(RwSignal<T, S>),
 }
 
-impl<T> From<RwSignal<T>> for UseRwSignal<T> {
-    fn from(s: RwSignal<T>) -> Self {
+impl<T, S> From<RwSignal<T, S>> for UseRwSignal<T, S>
+where
+    S: Storage<T>,
+{
+    fn from(s: RwSignal<T, S>) -> Self {
         Self::Combined(s)
     }
 }
 
-impl<T, RS> From<(RS, WriteSignal<T>)> for UseRwSignal<T>
+impl<T, S, RS> From<(RS, WriteSignal<T, S>)> for UseRwSignal<T, S>
 where
-    RS: Into<Signal<T>>,
+    RS: Into<Signal<T, S>>,
+    S: Storage<T>,
 {
-    fn from(s: (RS, WriteSignal<T>)) -> Self {
+    fn from(s: (RS, WriteSignal<T, S>)) -> Self {
         Self::Separate(s.0.into(), s.1)
     }
 }
@@ -29,15 +36,30 @@ where
     }
 }
 
-impl<T> Clone for UseRwSignal<T> {
+impl<T> Default for UseRwSignal<T, LocalStorage>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        Self::Combined(Default::default())
+    }
+}
+
+impl<T, S> Clone for UseRwSignal<T, S>
+where
+    S: Storage<T>,
+{
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<T> Copy for UseRwSignal<T> {}
+impl<T, S> Copy for UseRwSignal<T, S> where S: Storage<T> {}
 
-impl<T> DefinedAt for UseRwSignal<T> {
+impl<T, S> DefinedAt for UseRwSignal<T, S>
+where
+    S: Storage<T>,
+{
     fn defined_at(&self) -> Option<&'static std::panic::Location<'static>> {
         match self {
             Self::Combined(s) => s.defined_at(),
@@ -47,9 +69,12 @@ impl<T> DefinedAt for UseRwSignal<T> {
     }
 }
 
-impl<T> With for UseRwSignal<T>
+impl<T, S> With for UseRwSignal<T, S>
 where
-    T: Send + Sync,
+    RwSignal<T, S>: With<Value = T>,
+    Signal<T, S>: With<Value = T>,
+    ReadSignal<T, S>: With<Value = T>,
+    S: Storage<T>,
 {
     type Value = T;
 
@@ -68,9 +93,12 @@ where
     }
 }
 
-impl<T> WithUntracked for UseRwSignal<T>
+impl<T, S> WithUntracked for UseRwSignal<T, S>
 where
-    T: Send + Sync,
+    RwSignal<T, S>: WithUntracked<Value = T>,
+    Signal<T, S>: WithUntracked<Value = T>,
+    ReadSignal<T, S>: WithUntracked<Value = T>,
+    S: Storage<T>,
 {
     type Value = T;
 
@@ -89,7 +117,12 @@ where
     }
 }
 
-impl<T> Set for UseRwSignal<T> {
+impl<T, S> Set for UseRwSignal<T, S>
+where
+    RwSignal<T, S>: Set<Value = T>,
+    WriteSignal<T, S>: Set<Value = T>,
+    S: Storage<T>,
+{
     type Value = T;
 
     fn set(&self, new_value: T) {
@@ -107,7 +140,12 @@ impl<T> Set for UseRwSignal<T> {
     }
 }
 
-impl<T> Update for UseRwSignal<T> {
+impl<T, S> Update for UseRwSignal<T, S>
+where
+    RwSignal<T, S>: Update<Value = T>,
+    WriteSignal<T, S>: Update<Value = T>,
+    S: Storage<T>,
+{
     type Value = T;
 
     fn update(&self, f: impl FnOnce(&mut T)) {

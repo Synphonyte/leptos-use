@@ -18,8 +18,8 @@ pub enum ElementMaybeSignal<T, E>
 where
     T: Into<E> + Clone + 'static,
 {
-    Static(Option<SendWrapper<T>>),
-    Dynamic(Signal<Option<SendWrapper<T>>>),
+    Static(SendWrapper<Option<T>>),
+    Dynamic(Signal<Option<T>, LocalStorage>),
     _Phantom(PhantomData<fn() -> E>),
 }
 
@@ -28,7 +28,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn default() -> Self {
-        Self::Static(None)
+        Self::Static(SendWrapper::new(None))
     }
 }
 
@@ -62,28 +62,19 @@ where
 
     fn with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => {
-                let value = t.as_ref().map(|t| t.clone().take());
+            Self::Static(t) => f(&t),
+            Self::Dynamic(s) => {
+                let value = s.get();
                 f(&value)
             }
-            Self::Dynamic(s) => s.with(|s| {
-                let value = s.as_ref().map(|s| s.clone().take());
-                f(&value)
-            }),
             _ => unreachable!(),
         }
     }
 
     fn try_with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => {
-                let value = t.as_ref().map(|t| t.clone().take());
-                Some(f(&value))
-            }
-            Self::Dynamic(s) => s.try_with(|s| {
-                let value = s.as_ref().map(|s| s.clone().take());
-                f(&value)
-            }),
+            Self::Static(t) => Some(f(&t)),
+            Self::Dynamic(s) => s.try_with(f),
             _ => unreachable!(),
         }
     }
@@ -97,28 +88,16 @@ where
 
     fn with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => {
-                let value = t.as_ref().map(|t| t.clone().take());
-                f(&value)
-            }
-            Self::Dynamic(s) => s.with_untracked(|s| {
-                let value = s.as_ref().map(|s| s.clone().take());
-                f(&value)
-            }),
+            Self::Static(t) => f(&t),
+            Self::Dynamic(s) => s.with_untracked(f),
             _ => unreachable!(),
         }
     }
 
     fn try_with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => {
-                let value = t.as_ref().map(|t| t.clone().take());
-                Some(f(&value))
-            }
-            Self::Dynamic(s) => s.try_with_untracked(|s| {
-                let value = s.as_ref().map(|s| s.clone().take());
-                f(&value)
-            }),
+            Self::Static(t) => Some(f(&t)),
+            Self::Dynamic(s) => s.try_with_untracked(f),
             _ => unreachable!(),
         }
     }
@@ -131,7 +110,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(value: T) -> Self {
-        ElementMaybeSignal::Static(Some(SendWrapper::new(value)))
+        ElementMaybeSignal::Static(SendWrapper::new(Some(value)))
     }
 }
 
@@ -140,7 +119,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Option<T>) -> Self {
-        ElementMaybeSignal::Static(target.map(SendWrapper::new))
+        ElementMaybeSignal::Static(SendWrapper::new(target))
     }
 }
 
@@ -151,7 +130,7 @@ macro_rules! impl_from_deref_option {
             E: From<$ty2> + 'static,
         {
             fn from(value: $ty) -> Self {
-                Self::Static((*value).clone().map(SendWrapper::new))
+                Self::Static(SendWrapper::new((*value).clone()))
             }
         }
     };
@@ -169,9 +148,9 @@ where
     fn from(target: &'a str) -> Self {
         cfg_if! { if #[cfg(feature = "ssr")] {
             let _ = target;
-            Self::Static(None)
+            Self::Static(SendWrapper::new(None))
         } else {
-            Self::Static(document().query_selector(target).unwrap_or_default().map(SendWrapper::new))
+            Self::Static(SendWrapper::new(document().query_selector(target).unwrap_or_default()))
         }}
     }
 }
@@ -194,10 +173,10 @@ macro_rules! impl_from_signal_string {
             fn from(signal: $ty) -> Self {
                 cfg_if! { if #[cfg(feature = "ssr")] {
                     let _ = signal;
-                    Self::Dynamic(Signal::derive(|| None))
+                    Self::Dynamic(Signal::derive_local(|| None))
                 } else {
                     Self::Dynamic(
-                        Signal::derive(move || document().query_selector(&signal.get()).unwrap_or_default().map(SendWrapper::new)),
+                        Signal::derive_local(move || document().query_selector(&signal.get()).unwrap_or_default()),
                     )
                 }}
             }
@@ -210,8 +189,8 @@ impl_from_signal_string!(ReadSignal<String>);
 impl_from_signal_string!(RwSignal<String>);
 impl_from_signal_string!(Memo<String>);
 
-impl_from_signal_string!(Signal<&str>);
-impl_from_signal_string!(ReadSignal<&str>);
+impl_from_signal_string!(Signal<&'static str>);
+impl_from_signal_string!(ReadSignal<&'static str>);
 impl_from_signal_string!(RwSignal<&'static str>);
 impl_from_signal_string!(Memo<&'static str>);
 
@@ -230,10 +209,10 @@ macro_rules! impl_from_signal_option {
     };
 }
 
-impl_from_signal_option!(Signal<Option<SendWrapper<T>>>);
-impl_from_signal_option!(ReadSignal<Option<SendWrapper<T>>>);
-impl_from_signal_option!(RwSignal<Option<SendWrapper<T>>>);
-impl_from_signal_option!(Memo<Option<SendWrapper<T>>>);
+impl_from_signal_option!(Signal<Option<T>, LocalStorage>);
+impl_from_signal_option!(ReadSignal<Option<T>, LocalStorage>);
+impl_from_signal_option!(RwSignal<Option<T>, LocalStorage>);
+impl_from_signal_option!(Memo<Option<T>, LocalStorage>);
 
 macro_rules! impl_from_signal {
     ($ty:ty) => {
@@ -242,16 +221,16 @@ macro_rules! impl_from_signal {
             T: Into<E> + Clone + 'static,
         {
             fn from(signal: $ty) -> Self {
-                Self::Dynamic(Signal::derive(move || Some(signal.get())))
+                Self::Dynamic(Signal::derive_local(move || Some(signal.get())))
             }
         }
     };
 }
 
-impl_from_signal!(Signal<SendWrapper<T>>);
-impl_from_signal!(ReadSignal<SendWrapper<T>>);
-impl_from_signal!(RwSignal<SendWrapper<T>>);
-impl_from_signal!(Memo<SendWrapper<T>>);
+impl_from_signal!(Signal<T, LocalStorage>);
+impl_from_signal!(ReadSignal<T, LocalStorage>);
+impl_from_signal!(RwSignal<T, LocalStorage>);
+impl_from_signal!(Memo<T, LocalStorage>);
 
 // From NodeRef //////////////////////////////////////////////////////////////
 
@@ -263,10 +242,10 @@ macro_rules! impl_from_node_ref {
             R::Output: JsCast + Into<$ty> + Clone + 'static,
         {
             fn from(node_ref: NodeRef<R>) -> Self {
-                Self::Dynamic(Signal::derive(move || {
+                Self::Dynamic(Signal::derive_local(move || {
                     node_ref.get().map(move |el| {
                         let el: $ty = el.clone().into();
-                        SendWrapper::new(el)
+                        el
                     })
                 }))
             }

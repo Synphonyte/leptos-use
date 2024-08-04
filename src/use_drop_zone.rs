@@ -3,7 +3,6 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
@@ -74,7 +73,7 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let (is_over_drop_zone, set_over_drop_zone) = signal(false);
-    let (files, set_files) = signal(Vec::<SendWrapper<web_sys::File>>::new());
+    let (files, set_files) = signal_local(Vec::<web_sys::File>::new());
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -95,7 +94,7 @@ where
                     .map(|f| js_sys::Array::from(&f).to_vec())
                     .unwrap_or_default()
                     .into_iter()
-                    .map(|f| SendWrapper::new(web_sys::File::from(f)))
+                    .map(web_sys::File::from)
                     .collect();
 
                 set_files.update(move |f| *f = files);
@@ -113,11 +112,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
-                files: files
-                    .get_untracked()
-                    .into_iter()
-                    .map(SendWrapper::take)
-                    .collect(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -130,11 +125,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
-                files: files
-                    .get_untracked()
-                    .into_iter()
-                    .map(SendWrapper::take)
-                    .collect(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -152,11 +143,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
-                files: files
-                    .get_untracked()
-                    .into_iter()
-                    .map(SendWrapper::take)
-                    .collect(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -172,11 +159,7 @@ where
             let _z = SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
-                files: files
-                    .get_untracked()
-                    .into_iter()
-                    .map(SendWrapper::take)
-                    .collect(),
+                files: files.get_untracked().into_iter().collect(),
                 event,
             });
         });
@@ -231,7 +214,7 @@ pub struct UseDropZoneEvent {
 /// Return type of [`use_drop_zone`].
 pub struct UseDropZoneReturn {
     /// Files being handled
-    pub files: Signal<Vec<SendWrapper<web_sys::File>>>,
+    pub files: Signal<Vec<web_sys::File>, LocalStorage>,
     /// Whether the files (dragged by the pointer) are over the drop zone
     pub is_over_drop_zone: Signal<bool>,
 }

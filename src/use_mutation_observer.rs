@@ -136,7 +136,7 @@ where
                                 .expect("failed to create MutationObserver");
 
                         for target in targets.iter().flatten() {
-                            let target: web_sys::Element = target.clone().take().into();
+                            let target: web_sys::Element = target.clone().into();
                             let _ = obs.observe_with_options(&target, &options.clone().into());
                         }
 

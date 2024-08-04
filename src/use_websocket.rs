@@ -2,7 +2,6 @@
 
 use cfg_if::cfg_if;
 use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
-use send_wrapper::SendWrapper;
 use std::sync::{atomic::AtomicBool, Arc};
 use std::time::Duration;
 use thiserror::Error;
@@ -284,7 +283,7 @@ where
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
-    let ws_ref: StoredValue<Option<SendWrapper<WebSocket>>> = StoredValue::new(None);
+    let ws_ref: StoredValue<Option<WebSocket>, _> = StoredValue::new_local(None);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
@@ -305,9 +304,7 @@ where
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_ref
                         .get_value()
-                        .map_or(false, |ws: SendWrapper<WebSocket>| {
-                            ws.ready_state() != WebSocket::OPEN
-                        })
+                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -525,7 +522,7 @@ where
                     onclose_closure.forget();
                 }
 
-                ws_ref.set_value(Some(SendWrapper::new(web_socket)));
+                ws_ref.set_value(Some(web_socket));
             }))
         });
     }
@@ -721,7 +718,7 @@ where
     /// Latest message received from `WebSocket`.
     pub message: Signal<Option<T>>,
     /// The `WebSocket` instance.
-    pub ws: Option<SendWrapper<WebSocket>>,
+    pub ws: Option<WebSocket>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection

@@ -175,7 +175,7 @@ where
                     .expect("failed to create IntersectionObserver");
 
                     for target in targets.iter().flatten() {
-                        let target: web_sys::Element = target.clone().take().into();
+                        let target: web_sys::Element = target.clone().into();
                         obs.observe(&target);
                     }
 

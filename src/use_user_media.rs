@@ -2,7 +2,6 @@ use crate::core::MaybeRwSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getUserMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) streaming.
@@ -60,8 +59,7 @@ pub fn use_user_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) =
-        signal(None::<Result<SendWrapper<web_sys::MediaStream>, SendWrapper<JsValue>>>);
+    let (stream, set_stream) = signal_local(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -69,10 +67,7 @@ pub fn use_user_media_with_options(
                 return;
             }
 
-            let stream = create_media(video, audio)
-                .await
-                .map(SendWrapper::new)
-                .map_err(SendWrapper::new);
+            let stream = create_media(video, audio).await;
 
             set_stream.update(|s| *s = Some(stream));
         } else {
@@ -192,7 +187,7 @@ where
     /// Initially this is `None` until `start` resolved successfully.
     /// In case the stream couldn't be started, for example because the user didn't grant permission,
     /// this has the value `Some(Err(...))`.
-    pub stream: Signal<Option<Result<SendWrapper<web_sys::MediaStream>, SendWrapper<JsValue>>>>,
+    pub stream: Signal<Option<Result<web_sys::MediaStream, JsValue>>, LocalStorage>,
 
     /// Starts the screen streaming. Triggers the ask for permission if not already granted.
     pub start: StartFn,

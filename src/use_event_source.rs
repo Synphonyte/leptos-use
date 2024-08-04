@@ -4,7 +4,6 @@ use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicBool, AtomicU32};
 use std::sync::Arc;
@@ -148,11 +147,11 @@ where
 
     let url = url.to_owned();
 
-    let (event, set_event) = signal(None::<SendWrapper<web_sys::Event>>);
+    let (event, set_event) = signal_local(None::<web_sys::Event>);
     let (data, set_data) = signal(None::<T>);
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
-    let (event_source, set_event_source) = signal(None::<SendWrapper<web_sys::EventSource>>);
-    let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
+    let (event_source, set_event_source) = signal_local(None::<web_sys::EventSource>);
+    let (error, set_error) = signal_local(None::<UseEventSourceError<C::Error>>);
 
     let explicitly_closed = Arc::new(AtomicBool::new(false));
     let retried = Arc::new(AtomicU32::new(0));
@@ -200,7 +199,7 @@ where
 
             set_ready_state.set(ConnectionReadyState::Connecting);
 
-            set_event_source.set(Some(SendWrapper::new(es.clone())));
+            set_event_source.set(Some(es.clone()));
 
             let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
                 set_ready_state.set(ConnectionReadyState::Open);
@@ -217,7 +216,7 @@ where
 
                 move |e: web_sys::Event| {
                     set_ready_state.set(ConnectionReadyState::Closed);
-                    set_error.set(Some(UseEventSourceError::Event(SendWrapper::new(e))));
+                    set_error.set(Some(UseEventSourceError::Event(e)));
 
                     // only reconnect if EventSource isn't reconnecting by itself
                     // this is the case when the connection is closed (readyState is 2)
@@ -262,7 +261,7 @@ where
                     es.clone(),
                     leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
                     move |e| {
-                        set_event.set(Some(SendWrapper::new(e.clone())));
+                        set_event.set(Some(e.clone()));
                         let data_string = js!(e["data"]).ok().and_then(|d| d.as_string());
                         set_data_from_string(data_string);
                     },
@@ -373,10 +372,10 @@ where
     pub ready_state: Signal<ConnectionReadyState>,
 
     /// The latest named event
-    pub event: Signal<Option<SendWrapper<web_sys::Event>>>,
+    pub event: Signal<Option<web_sys::Event>, LocalStorage>,
 
     /// The current error
-    pub error: Signal<Option<UseEventSourceError<Err>>>,
+    pub error: Signal<Option<UseEventSourceError<Err>>, LocalStorage>,
 
     /// (Re-)Opens the `EventSource` connection
     /// If the current one is active, will close it before opening a new one.
@@ -386,13 +385,13 @@ where
     pub close: CloseFn,
 
     /// The `EventSource` instance
-    pub event_source: Signal<Option<SendWrapper<web_sys::EventSource>>>,
+    pub event_source: Signal<Option<web_sys::EventSource>, LocalStorage>,
 }
 
 #[derive(Error, Debug)]
 pub enum UseEventSourceError<Err> {
     #[error("Error event: {0:?}")]
-    Event(SendWrapper<web_sys::Event>),
+    Event(web_sys::Event),
 
     #[error("Error decoding value")]
     Deserialize(Err),

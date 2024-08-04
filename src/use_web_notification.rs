@@ -2,7 +2,6 @@ use crate::{use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::{wrappers::read::Signal, *};
-use send_wrapper::SendWrapper;
 use std::rc::Rc;
 
 /// Reactive [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/Notification).
@@ -52,7 +51,7 @@ pub fn use_web_notification_with_options(
 ) -> UseWebNotificationReturn<impl Fn(ShowOptions) + Clone, impl Fn() + Clone> {
     let is_supported = use_supported(browser_supports_notifications);
 
-    let (notification, set_notification) = signal(None::<SendWrapper<web_sys::Notification>>);
+    let (notification, set_notification) = signal_local(None::<web_sys::Notification>);
 
     let (permission, set_permission) = signal(NotificationPermission::default());
 
@@ -149,7 +148,7 @@ pub fn use_web_notification_with_options(
                     notification_value.set_onerror(Some(on_error_closure.unchecked_ref()));
                     notification_value.set_onshow(Some(on_show_closure.unchecked_ref()));
 
-                    set_notification.set(Some(SendWrapper::new(notification_value)));
+                    set_notification.set(Some(notification_value));
                 });
             }
         };
@@ -462,7 +461,7 @@ where
     CloseFn: Fn() + Clone,
 {
     pub is_supported: Signal<bool>,
-    pub notification: Signal<Option<SendWrapper<web_sys::Notification>>>,
+    pub notification: Signal<Option<web_sys::Notification>, LocalStorage>,
     pub show: ShowFn,
     pub close: CloseFn,
     pub permission: Signal<NotificationPermission>,

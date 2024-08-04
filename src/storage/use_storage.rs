@@ -152,7 +152,7 @@ pub fn use_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
 where
-    T: Default + Clone + PartialEq + Send + Sync,
+    T: Default + Clone + PartialEq + Send + Sync + 'static,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(storage_type, key, UseStorageOptions::default())
@@ -203,7 +203,7 @@ where
         // Get storage API
         let storage = storage_type
             .into_storage()
-            .map_err(|e| UseStorageError::StorageNotAvailable(SendWrapper::new(e)))
+            .map_err(UseStorageError::StorageNotAvailable)
             .and_then(|s| s.ok_or(UseStorageError::StorageReturnedNone));
         let storage = handle_error(&on_error, storage);
 
@@ -227,7 +227,7 @@ where
                             )
                             .expect("failed to create custom storage event"),
                         )
-                        .map_err(|e| UseStorageError::NotifyItemChangedFailed(SendWrapper::new(e)));
+                        .map_err(UseStorageError::NotifyItemChangedFailed);
                     let _ = handle_error(&on_error, result);
                 })
             }
@@ -246,7 +246,7 @@ where
                         // Get directly from storage
                         let result = storage
                             .get_item(&key)
-                            .map_err(|e| UseStorageError::GetItemFailed(SendWrapper::new(e)));
+                            .map_err(UseStorageError::GetItemFailed);
                         handle_error(&on_error, result)
                     })
                     .unwrap_or_default() // Drop handled Err(())
@@ -314,9 +314,9 @@ where
                             .map_err(|e| UseStorageError::ItemCodecError(CodecError::Encode(e)))
                             .and_then(|enc_value| {
                                 // Set storage -- sends a global event
-                                storage.set_item(&key, &enc_value).map_err(|e| {
-                                    UseStorageError::SetItemFailed(SendWrapper::new(e))
-                                })
+                                storage
+                                    .set_item(&key, &enc_value)
+                                    .map_err(UseStorageError::SetItemFailed)
                             });
                         let result = handle_error(&on_error, result);
                         // Send internal storage event
@@ -329,18 +329,19 @@ where
             );
         }
 
-        // TODO: solve for 0.7
-        // // Fetch initial value
-        // if delay_during_hydration && leptos::leptos_dom::HydrationCtx::is_hydrating() {
-        //     request_animation_frame(fetch_from_storage.clone());
-        // } else {
-        //     fetch_from_storage();
-        // }
-        request_animation_frame({
-            let fetch_from_storage = fetch_from_storage.clone();
-            #[allow(clippy::redundant_closure)]
-            move || fetch_from_storage()
-        });
+        if delay_during_hydration
+            && Owner::current_shared_context()
+                .map(|sc| sc.during_hydration())
+                .unwrap_or_default()
+        {
+            request_animation_frame({
+                let fetch_from_storage = fetch_from_storage.clone();
+                #[allow(clippy::redundant_closure)]
+                move || fetch_from_storage()
+            });
+        } else {
+            fetch_from_storage();
+        }
 
         if listen_to_storage_changes {
             let check_key = key.as_ref().to_owned();
@@ -378,7 +379,7 @@ where
                     // Delete directly from storage
                     let result = storage
                         .remove_item(&key)
-                        .map_err(|e| UseStorageError::RemoveItemFailed(SendWrapper::new(e)));
+                        .map_err(|e| UseStorageError::RemoveItemFailed(e));
                     let _ = handle_error(&on_error, result);
                     notify.trigger();
                     dispatch_storage_event();
@@ -394,17 +395,17 @@ where
 #[derive(Error, Debug)]
 pub enum UseStorageError<E, D> {
     #[error("storage not available")]
-    StorageNotAvailable(SendWrapper<JsValue>),
+    StorageNotAvailable(JsValue),
     #[error("storage not returned from window")]
     StorageReturnedNone,
     #[error("failed to get item")]
-    GetItemFailed(SendWrapper<JsValue>),
+    GetItemFailed(JsValue),
     #[error("failed to set item")]
-    SetItemFailed(SendWrapper<JsValue>),
+    SetItemFailed(JsValue),
     #[error("failed to delete item")]
-    RemoveItemFailed(SendWrapper<JsValue>),
+    RemoveItemFailed(JsValue),
     #[error("failed to notify item changed")]
-    NotifyItemChangedFailed(SendWrapper<JsValue>),
+    NotifyItemChangedFailed(JsValue),
     #[error("failed to encode / decode item value")]
     ItemCodecError(CodecError<E, D>),
 }
@@ -413,7 +414,7 @@ pub enum UseStorageError<E, D> {
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T, E, D>
 where
-    T: 'static,
+    T: Send + Sync + 'static,
 {
     // Callback for when an error occurs
     #[builder(skip)]
@@ -441,7 +442,10 @@ fn handle_error<T, E, D>(
     result.map_err(|err| (on_error)(err))
 }
 
-impl<T: Default, E, D> Default for UseStorageOptions<T, E, D> {
+impl<T: Default, E, D> Default for UseStorageOptions<T, E, D>
+where
+    T: Send + Sync + 'static,
+{
     fn default() -> Self {
         Self {
             on_error: Arc::new(|_err| ()),
@@ -453,7 +457,10 @@ impl<T: Default, E, D> Default for UseStorageOptions<T, E, D> {
     }
 }
 
-impl<T: Default, E, D> UseStorageOptions<T, E, D> {
+impl<T: Default, E, D> UseStorageOptions<T, E, D>
+where
+    T: Send + Sync + 'static,
+{
     /// Optional callback whenever an error occurs.
     pub fn on_error(
         self,

@@ -138,7 +138,7 @@ where
                         .expect("failed to create ResizeObserver");
 
                         for target in targets.iter().flatten() {
-                            let target: web_sys::Element = target.clone().take().into();
+                            let target: web_sys::Element = target.clone().into();
                             obs.observe_with_options(&target, &options.clone().into());
                         }
                         observer.replace(Some(obs));

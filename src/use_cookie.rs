@@ -143,7 +143,7 @@ use std::sync::Arc;
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone + Send + Sync,
+    T: Clone + Send + Sync + 'static,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
 }
@@ -155,7 +155,7 @@ pub fn use_cookie_with_options<T, C>(
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone + Send + Sync,
+    T: Clone + Send + Sync + 'static,
 {
     let UseCookieOptions {
         max_age,
@@ -363,31 +363,38 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            create_isomorphic_effect(move |_| {
-                let value = cookie
-                    .with(|cookie| {
-                        cookie.as_ref().map(|cookie| {
-                            C::encode(cookie)
-                                .map_err(|err| on_error(CodecError::Encode(err)))
-                                .ok()
+            Effect::new_isomorphic({
+                let cookie_name = cookie_name.to_owned();
+
+                move |_| {
+                    let domain = domain.clone();
+                    let path = path.clone();
+
+                    let value = cookie
+                        .with(|cookie| {
+                            cookie.as_ref().map(|cookie| {
+                                C::encode(cookie)
+                                    .map_err(|err| on_error(CodecError::Encode(err)))
+                                    .ok()
+                            })
                         })
-                    })
-                    .flatten();
-                jar.update_value(|jar| {
-                    write_server_cookie(
-                        cookie_name,
-                        value,
-                        jar,
-                        max_age,
-                        expires,
-                        domain,
-                        path,
-                        same_site,
-                        secure,
-                        http_only,
-                        ssr_set_cookie,
-                    )
-                });
+                        .flatten();
+                    jar.update_value(|jar| {
+                        write_server_cookie(
+                            &cookie_name,
+                            value,
+                            jar,
+                            max_age,
+                            expires,
+                            domain,
+                            path,
+                            same_site,
+                            secure,
+                            http_only,
+                            Arc::clone(&ssr_set_cookie),
+                        )
+                    });
+                }
             });
         }
     }

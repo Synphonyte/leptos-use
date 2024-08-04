@@ -149,7 +149,7 @@ where
             let ignore = ignore.get_untracked();
 
             ignore.into_iter().flatten().any(|element| {
-                let element: web_sys::EventTarget = element.take().into();
+                let element: web_sys::EventTarget = element.into();
 
                 event_target::<web_sys::EventTarget>(event) == element
                     || event.composed_path().includes(element.as_ref(), 0)

@@ -78,7 +78,7 @@ pub fn use_sorted<S, I, T>(iterable: S) -> Signal<I>
 where
     S: Into<MaybeSignal<I>>,
     T: Ord,
-    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync,
+    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
 {
     let iterable = iterable.into();
 
@@ -93,7 +93,7 @@ where
 pub fn use_sorted_by<S, I, T, F>(iterable: S, cmp_fn: F) -> Signal<I>
 where
     S: Into<MaybeSignal<I>>,
-    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync,
+    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
     F: FnMut(&T, &T) -> Ordering + Clone + Send + Sync + 'static,
 {
     let iterable = iterable.into();
@@ -109,7 +109,7 @@ where
 pub fn use_sorted_by_key<S, I, T, K, F>(iterable: S, key_fn: F) -> Signal<I>
 where
     S: Into<MaybeSignal<I>>,
-    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync,
+    I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
     K: Ord,
     F: FnMut(&T) -> K + Clone + Send + Sync + 'static,
 {

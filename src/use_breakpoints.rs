@@ -184,7 +184,10 @@ macro_rules! impl_cmp_reactively {
     };
 }
 
-impl<K: Eq + Hash + Debug + Clone + Send + Sync> UseBreakpointsReturn<K> {
+impl<K> UseBreakpointsReturn<K>
+where
+    K: Eq + Hash + Debug + Clone + Send + Sync + 'static,
+{
     fn match_(query: &str) -> bool {
         if let Ok(Some(query_list)) = use_window().match_media(query) {
             return query_list.matches();
