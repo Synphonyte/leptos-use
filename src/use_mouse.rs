@@ -259,42 +259,47 @@ impl Default for UseMouseCoordType<Infallible> {
 }
 
 /// Trait to implement if you want to specify a custom extractor
+#[allow(unused_variables)]
 pub trait UseMouseEventExtractor {
     /// Return the coordinates from mouse events (`Some(x, y)`) or `None`
-    fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> (f64, f64);
+    fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> Option<(f64, f64)> {
+        None
+    }
 
     /// Return the coordinates from touches (`Some(x, y)`) or `None`
-    fn extract_touch_coords(&self, touch: &web_sys::Touch) -> (f64, f64);
+    fn extract_touch_coords(&self, touch: &web_sys::Touch) -> Option<(f64, f64)> {
+        None
+    }
 }
 
 impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoordType<E> {
-    fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> (f64, f64) {
-        match self {
+    fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> Option<(f64, f64)> {
+        Some(match self {
             UseMouseCoordType::Page => (event.page_x() as f64, event.page_y() as f64),
             UseMouseCoordType::Client => (event.client_x() as f64, event.client_y() as f64),
             UseMouseCoordType::Screen => (event.screen_x() as f64, event.client_y() as f64),
             UseMouseCoordType::Movement => (event.movement_x() as f64, event.movement_y() as f64),
-            UseMouseCoordType::Custom(ref extractor) => extractor.extract_mouse_coords(event),
-        }
+            UseMouseCoordType::Custom(ref extractor) => return extractor.extract_mouse_coords(event),
+        })
     }
 
-    fn extract_touch_coords(&self, touch: &web_sys::Touch) -> (f64, f64) {
-        match self {
+    fn extract_touch_coords(&self, touch: &web_sys::Touch) -> Option<(f64, f64)> {
+        Some(match self {
             UseMouseCoordType::Page => (touch.page_x() as f64, touch.page_y() as f64),
             UseMouseCoordType::Client => (touch.client_x() as f64, touch.client_y() as f64),
             UseMouseCoordType::Screen => (touch.screen_x() as f64, touch.client_y() as f64),
-            UseMouseCoordType::Movement => (0., 0.),
-            UseMouseCoordType::Custom(ref extractor) => extractor.extract_touch_coords(touch),
-        }
+            UseMouseCoordType::Movement => return None,
+            UseMouseCoordType::Custom(ref extractor) => return extractor.extract_touch_coords(touch),
+        })
     }
 }
 
 impl UseMouseEventExtractor for Infallible {
-    fn extract_mouse_coords(&self, _: &web_sys::MouseEvent) -> (f64, f64) {
+    fn extract_mouse_coords(&self, _: &web_sys::MouseEvent) -> Option<(f64, f64)> {
         unreachable!()
     }
 
-    fn extract_touch_coords(&self, _: &web_sys::Touch) -> (f64, f64) {
+    fn extract_touch_coords(&self, _: &web_sys::Touch) -> Option<(f64, f64)> {
         unreachable!()
     }
 }
