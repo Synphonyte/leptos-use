@@ -10,9 +10,6 @@ use leptos::*;
 /// [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API).
 /// Without user permission, reading or altering the clipboard contents is not permitted.
 ///
-/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
-///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_clipboard)
