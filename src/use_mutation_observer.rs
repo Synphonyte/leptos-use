@@ -214,20 +214,20 @@ impl From<UseMutationObserverOptions> for web_sys::MutationObserverInit {
             character_data_old_value,
         } = val;
 
-        let mut init = Self::new();
+        let init = Self::new();
 
-        init.subtree(subtree)
-            .child_list(child_list)
-            .attributes(attributes)
-            .attribute_old_value(attribute_old_value)
-            .character_data_old_value(character_data_old_value);
+        init.set_subtree(subtree);
+        init.set_child_list(child_list);
+        init.set_attributes(attributes);
+        init.set_attribute_old_value(attribute_old_value);
+        init.set_character_data_old_value(character_data_old_value);
 
         if let Some(attribute_filter) = attribute_filter {
             let array = js_sys::Array::from_iter(attribute_filter.into_iter().map(JsValue::from));
-            init.attribute_filter(array.unchecked_ref());
+            init.set_attribute_filter(array.unchecked_ref());
         }
         if let Some(character_data) = character_data {
-            init.character_data(character_data);
+            init.set_character_data(character_data);
         }
 
         init

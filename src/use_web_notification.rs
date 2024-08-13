@@ -318,32 +318,31 @@ impl Default for UseWebNotificationOptions {
 
 impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
     fn from(options: &UseWebNotificationOptions) -> Self {
-        let mut web_sys_options = Self::new();
+        let web_sys_options = Self::new();
 
-        web_sys_options
-            .dir(options.direction.into())
-            .require_interaction(options.require_interaction)
-            .renotify(options.renotify)
-            .silent(options.silent);
+        web_sys_options.set_dir(options.direction.into());
+        web_sys_options.set_require_interaction(options.require_interaction);
+        web_sys_options.set_renotify(options.renotify);
+        web_sys_options.set_silent(options.silent);
 
         if let Some(body) = &options.body {
-            web_sys_options.body(body);
+            web_sys_options.set_body(body);
         }
 
         if let Some(icon) = &options.icon {
-            web_sys_options.icon(icon);
+            web_sys_options.set_icon(icon);
         }
 
         if let Some(image) = &options.image {
-            web_sys_options.image(image);
+            web_sys_options.set_image(image);
         }
 
         if let Some(language) = &options.language {
-            web_sys_options.lang(language);
+            web_sys_options.set_lang(language);
         }
 
         if let Some(tag) = &options.tag {
-            web_sys_options.tag(tag);
+            web_sys_options.set_tag(tag);
         }
 
         web_sys_options
