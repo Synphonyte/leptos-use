@@ -1,7 +1,7 @@
 use crate::core::{ElementMaybeSignal, Position};
 use crate::{
-    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor,
-    UseMouseOptions, UseMouseReturn, UseMouseSourceType, UseWindow,
+    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
+    UseMouseReturn, UseMouseSourceType, UseWindow,
 };
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
@@ -196,9 +196,7 @@ where
     _marker: PhantomData<T>,
 }
 
-impl Default
-    for UseMouseInElementOptions<UseWindow, web_sys::Window, Infallible>
-{
+impl Default for UseMouseInElementOptions<UseWindow, web_sys::Window, Infallible> {
     fn default() -> Self {
         Self {
             coord_type: UseMouseCoordType::<Infallible>::default(),

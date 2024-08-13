@@ -273,9 +273,7 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
             UseMouseCoordType::Page => (event.page_x() as f64, event.page_y() as f64),
             UseMouseCoordType::Client => (event.client_x() as f64, event.client_y() as f64),
             UseMouseCoordType::Screen => (event.screen_x() as f64, event.client_y() as f64),
-            UseMouseCoordType::Movement => {
-                (event.movement_x() as f64, event.movement_y() as f64)
-            }
+            UseMouseCoordType::Movement => (event.movement_x() as f64, event.movement_y() as f64),
             UseMouseCoordType::Custom(ref extractor) => extractor.extract_mouse_coords(event),
         }
     }
