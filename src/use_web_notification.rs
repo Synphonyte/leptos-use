@@ -481,7 +481,7 @@ impl From<web_sys::NotificationPermission> for NotificationPermission {
             web_sys::NotificationPermission::Default => Self::Default,
             web_sys::NotificationPermission::Granted => Self::Granted,
             web_sys::NotificationPermission::Denied => Self::Denied,
-            web_sys::NotificationPermission::__Nonexhaustive => Self::Default,
+            _ => Self::Default,
         }
     }
 }
