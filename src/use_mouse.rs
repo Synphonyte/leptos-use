@@ -109,11 +109,10 @@ where
         move |event: web_sys::MouseEvent| {
             let result = coord_type.extract_mouse_coords(&event);
 
-            if let (x, y) = result {
-                set_x.set(x);
-                set_y.set(y);
-                set_source_type.set(UseMouseSourceType::Mouse);
-            }
+            let (x, y) = result;
+            set_x.set(x);
+            set_y.set(y);
+            set_source_type.set(UseMouseSourceType::Mouse);
         }
     };
 
@@ -138,11 +137,10 @@ where
                         .expect("Just checked that there's at least on touch"),
                 );
 
-                if let (x, y) = result {
-                    set_x.set(x);
-                    set_y.set(y);
-                    set_source_type.set(UseMouseSourceType::Touch);
-                }
+                let (x, y) = result;
+                set_x.set(x);
+                set_y.set(y);
+                set_source_type.set(UseMouseSourceType::Touch);
             }
         }
     };
@@ -234,7 +232,7 @@ where
 impl Default for UseMouseOptions<UseWindow, web_sys::Window, Infallible> {
     fn default() -> Self {
         Self {
-            coord_type: UseMouseCoordType::<Infallible>::default(),
+            coord_type: UseMouseCoordType::default(),
             target: use_window(),
             touch: true,
             reset_on_touch_ends: false,
@@ -254,7 +252,7 @@ pub enum UseMouseCoordType<E> {
     Custom(E),
 }
 
-impl<E> Default for UseMouseCoordType<E> {
+impl Default for UseMouseCoordType<Infallible> {
     fn default() -> Self {
         Self::Page
     }
