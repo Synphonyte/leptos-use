@@ -109,10 +109,11 @@ where
         move |event: web_sys::MouseEvent| {
             let result = coord_type.extract_mouse_coords(&event);
 
-            let (x, y) = result;
-            set_x.set(x);
-            set_y.set(y);
-            set_source_type.set(UseMouseSourceType::Mouse);
+            if let Some((x, y)) = result {
+                set_x.set(x);
+                set_y.set(y);
+                set_source_type.set(UseMouseSourceType::Mouse);
+            }
         }
     };
 
@@ -137,10 +138,11 @@ where
                         .expect("Just checked that there's at least on touch"),
                 );
 
-                let (x, y) = result;
-                set_x.set(x);
-                set_y.set(y);
-                set_source_type.set(UseMouseSourceType::Touch);
+                if let Some((x, y)) = result {
+                    set_x.set(x);
+                    set_y.set(y);
+                    set_source_type.set(UseMouseSourceType::Touch);
+                }
             }
         }
     };
@@ -244,7 +246,7 @@ impl Default for UseMouseOptions<UseWindow, web_sys::Window, Infallible> {
 
 /// Defines how to get the coordinates from the event.
 #[derive(Clone)]
-pub enum UseMouseCoordType<E> {
+pub enum UseMouseCoordType<E: UseMouseEventExtractor + Clone> {
     Page,
     Client,
     Screen,
@@ -279,7 +281,9 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
             UseMouseCoordType::Client => (event.client_x() as f64, event.client_y() as f64),
             UseMouseCoordType::Screen => (event.screen_x() as f64, event.client_y() as f64),
             UseMouseCoordType::Movement => (event.movement_x() as f64, event.movement_y() as f64),
-            UseMouseCoordType::Custom(ref extractor) => return extractor.extract_mouse_coords(event),
+            UseMouseCoordType::Custom(ref extractor) => {
+                return extractor.extract_mouse_coords(event)
+            }
         })
     }
 
@@ -289,7 +293,9 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
             UseMouseCoordType::Client => (touch.client_x() as f64, touch.client_y() as f64),
             UseMouseCoordType::Screen => (touch.screen_x() as f64, touch.client_y() as f64),
             UseMouseCoordType::Movement => return None,
-            UseMouseCoordType::Custom(ref extractor) => return extractor.extract_touch_coords(touch),
+            UseMouseCoordType::Custom(ref extractor) => {
+                return extractor.extract_touch_coords(touch)
+            }
         })
     }
 }
