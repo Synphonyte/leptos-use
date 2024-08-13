@@ -97,6 +97,7 @@ use std::rc::Rc;
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
 /// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
+/// > Ensure that the `"ssr"` feature is enabled as well. 
 ///
 /// ### Bring your own header
 ///
