@@ -186,10 +186,10 @@ impl UseGeolocationOptions {
             ..
         } = self;
 
-        let mut options = web_sys::PositionOptions::new();
-        options.enable_high_accuracy(*enable_high_accuracy);
-        options.maximum_age(*maximum_age);
-        options.timeout(*timeout);
+        let options = web_sys::PositionOptions::new();
+        options.set_enable_high_accuracy(*enable_high_accuracy);
+        options.set_maximum_age(*maximum_age);
+        options.set_timeout(*timeout);
 
         options
     }

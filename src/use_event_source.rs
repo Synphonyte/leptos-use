@@ -183,8 +183,8 @@ where
                 return;
             }
 
-            let mut event_src_opts = web_sys::EventSourceInit::new();
-            event_src_opts.with_credentials(with_credentials);
+            let event_src_opts = web_sys::EventSourceInit::new();
+            event_src_opts.set_with_credentials(with_credentials);
 
             let es = web_sys::EventSource::new_with_event_source_init_dict(&url, &event_src_opts)
                 .unwrap_throw();

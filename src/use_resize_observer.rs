@@ -171,8 +171,8 @@ pub struct UseResizeObserverOptions {
 
 impl From<UseResizeObserverOptions> for web_sys::ResizeObserverOptions {
     fn from(val: UseResizeObserverOptions) -> Self {
-        let mut options = web_sys::ResizeObserverOptions::new();
-        options.box_(
+        let options = web_sys::ResizeObserverOptions::new();
+        options.set_box(
             val.box_
                 .unwrap_or(web_sys::ResizeObserverBoxOptions::ContentBox),
         );

@@ -15,11 +15,6 @@ pub mod utils;
 // #[cfg(web_sys_unstable_apis)]
 // pub use use_webtransport::*;
 
-#[cfg(web_sys_unstable_apis)]
-mod use_clipboard;
-#[cfg(web_sys_unstable_apis)]
-pub use use_clipboard::*;
-
 mod is_err;
 mod is_none;
 mod is_ok;
@@ -31,6 +26,7 @@ mod sync_signal;
 mod use_active_element;
 mod use_breakpoints;
 mod use_broadcast_channel;
+mod use_clipboard;
 mod use_color_mode;
 mod use_cookie;
 mod use_css_var;
@@ -99,6 +95,7 @@ pub use sync_signal::*;
 pub use use_active_element::*;
 pub use use_breakpoints::*;
 pub use use_broadcast_channel::*;
+pub use use_clipboard::*;
 pub use use_color_mode::*;
 pub use use_cookie::*;
 pub use use_css_var::*;

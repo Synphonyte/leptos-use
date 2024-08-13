@@ -3,11 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] -
 
-### Removed 🗑
+### Breaking Changes 🛠
 
-- Removed `UseMouseEventExtractorDefault`
+- Updated to web_sys 0.3.70 which unfortunately is breaking some things.
+- `use_clipboard` doesn't need the unstable flags anymore.
+- `use_locale` now uses `unic_langid::LanguageIdentifier` and proper locale matching (thanks to @mondeja).
+- Removed `UseMouseEventExtractorDefault` and reworked `UseMouseCoordType` (thanks to @carloskiki)
+
 
 ## [0.11.4] - 2024-08-12
 

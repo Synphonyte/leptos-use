@@ -136,12 +136,12 @@ async fn create_media(video: bool, audio: bool) -> Result<web_sys::MediaStream, 
         .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
         .and_then(|n| n.media_devices())?;
 
-    let mut constraints = web_sys::MediaStreamConstraints::new();
+    let constraints = web_sys::MediaStreamConstraints::new();
     if video {
-        constraints.video(&JsValue::from(true));
+        constraints.set_video(&JsValue::from(true));
     }
     if audio {
-        constraints.audio(&JsValue::from(true));
+        constraints.set_audio(&JsValue::from(true));
     }
 
     let promise = media.get_user_media_with_constraints(&constraints)?;

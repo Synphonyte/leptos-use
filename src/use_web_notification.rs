@@ -318,32 +318,31 @@ impl Default for UseWebNotificationOptions {
 
 impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
     fn from(options: &UseWebNotificationOptions) -> Self {
-        let mut web_sys_options = Self::new();
+        let web_sys_options = Self::new();
 
-        web_sys_options
-            .dir(options.direction.into())
-            .require_interaction(options.require_interaction)
-            .renotify(options.renotify)
-            .silent(options.silent);
+        web_sys_options.set_dir(options.direction.into());
+        web_sys_options.set_require_interaction(options.require_interaction);
+        web_sys_options.set_renotify(options.renotify);
+        web_sys_options.set_silent(options.silent);
 
         if let Some(body) = &options.body {
-            web_sys_options.body(body);
+            web_sys_options.set_body(body);
         }
 
         if let Some(icon) = &options.icon {
-            web_sys_options.icon(icon);
+            web_sys_options.set_icon(icon);
         }
 
         if let Some(image) = &options.image {
-            web_sys_options.image(image);
+            web_sys_options.set_image(image);
         }
 
         if let Some(language) = &options.language {
-            web_sys_options.lang(language);
+            web_sys_options.set_lang(language);
         }
 
         if let Some(tag) = &options.tag {
-            web_sys_options.tag(tag);
+            web_sys_options.set_tag(tag);
         }
 
         web_sys_options
@@ -415,39 +414,39 @@ pub struct ShowOptions {
 impl ShowOptions {
     fn override_notification_options(&self, options: &mut web_sys::NotificationOptions) {
         if let Some(direction) = self.direction {
-            options.dir(direction.into());
+            options.set_dir(direction.into());
         }
 
         if let Some(require_interaction) = self.require_interaction {
-            options.require_interaction(require_interaction);
+            options.set_require_interaction(require_interaction);
         }
 
         if let Some(body) = &self.body {
-            options.body(body);
+            options.set_body(body);
         }
 
         if let Some(icon) = &self.icon {
-            options.icon(icon);
+            options.set_icon(icon);
         }
 
         if let Some(image) = &self.image {
-            options.image(image);
+            options.set_image(image);
         }
 
         if let Some(language) = &self.language {
-            options.lang(language);
+            options.set_lang(language);
         }
 
         if let Some(tag) = &self.tag {
-            options.tag(tag);
+            options.set_tag(tag);
         }
 
         if let Some(renotify) = self.renotify {
-            options.renotify(renotify);
+            options.set_renotify(renotify);
         }
 
         if let Some(silent) = self.silent {
-            options.silent(Some(silent));
+            options.set_silent(Some(silent));
         }
     }
 }
@@ -481,7 +480,7 @@ impl From<web_sys::NotificationPermission> for NotificationPermission {
             web_sys::NotificationPermission::Default => Self::Default,
             web_sys::NotificationPermission::Granted => Self::Granted,
             web_sys::NotificationPermission::Denied => Self::Denied,
-            web_sys::NotificationPermission::__Nonexhaustive => Self::Default,
+            _ => Self::Default,
         }
     }
 }

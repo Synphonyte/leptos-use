@@ -154,8 +154,9 @@ where
                         return;
                     }
 
-                    let mut options = web_sys::IntersectionObserverInit::new();
-                    options.root_margin(&root_margin).threshold(
+                    let options = web_sys::IntersectionObserverInit::new();
+                    options.set_root_margin(&root_margin);
+                    options.set_threshold(
                         &thresholds
                             .iter()
                             .copied()
@@ -165,7 +166,7 @@ where
 
                     if let Some(Some(root)) = root {
                         let root: web_sys::Element = root.clone().into();
-                        options.root(Some(&root));
+                        options.set_root(Some(&root));
                     }
 
                     let obs = web_sys::IntersectionObserver::new_with_options(

@@ -231,14 +231,14 @@ where
                 if let Some(element) = element {
                     let element = element.into();
 
-                    let mut scroll_options = web_sys::ScrollToOptions::new();
-                    scroll_options.behavior(behavior.get_untracked().into());
+                    let scroll_options = web_sys::ScrollToOptions::new();
+                    scroll_options.set_behavior(behavior.get_untracked().into());
 
                     if let Some(x) = x {
-                        scroll_options.left(x);
+                        scroll_options.set_left(x);
                     }
                     if let Some(y) = y {
-                        scroll_options.top(y);
+                        scroll_options.set_top(y);
                     }
 
                     element.scroll_to_with_scroll_to_options(&scroll_options);
