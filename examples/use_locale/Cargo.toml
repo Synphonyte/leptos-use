@@ -9,6 +9,7 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
 leptos-use = { path = "../..", features = ["docs"] }
+unic-langid = { version = "0.9", features = ["macros"] }
 web-sys = "0.3"
 
 [dev-dependencies]

@@ -215,8 +215,8 @@ where
                 queue_microtask(move || {
                     // TODO : better to use a BroadcastChannel (use_broadcast_channel)?
                     // Note: we cannot construct a full StorageEvent so we _must_ rely on a custom event
-                    let mut custom = web_sys::CustomEventInit::new();
-                    custom.detail(&JsValue::from_str(&key));
+                    let custom = web_sys::CustomEventInit::new();
+                    custom.set_detail(&JsValue::from_str(&key));
                     let result = window()
                         .dispatch_event(
                             &web_sys::CustomEvent::new_with_event_init_dict(

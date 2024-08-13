@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated to web_sys 0.3.70 which unfortunately is breaking some things.
 - `use_clipboard` doesn't need the unstable flags anymore.
+- `use_local` now uses `unic_langid::LanguageIdentifier` and proper locale matching (thanks to @mondeja).
 
 ## [0.11.4] - 2024-08-12
 

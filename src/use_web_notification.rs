@@ -414,39 +414,39 @@ pub struct ShowOptions {
 impl ShowOptions {
     fn override_notification_options(&self, options: &mut web_sys::NotificationOptions) {
         if let Some(direction) = self.direction {
-            options.dir(direction.into());
+            options.set_dir(direction.into());
         }
 
         if let Some(require_interaction) = self.require_interaction {
-            options.require_interaction(require_interaction);
+            options.set_require_interaction(require_interaction);
         }
 
         if let Some(body) = &self.body {
-            options.body(body);
+            options.set_body(body);
         }
 
         if let Some(icon) = &self.icon {
-            options.icon(icon);
+            options.set_icon(icon);
         }
 
         if let Some(image) = &self.image {
-            options.image(image);
+            options.set_image(image);
         }
 
         if let Some(language) = &self.language {
-            options.lang(language);
+            options.set_lang(language);
         }
 
         if let Some(tag) = &self.tag {
-            options.tag(tag);
+            options.set_tag(tag);
         }
 
         if let Some(renotify) = self.renotify {
-            options.renotify(renotify);
+            options.set_renotify(renotify);
         }
 
         if let Some(silent) = self.silent {
-            options.silent(Some(silent));
+            options.set_silent(Some(silent));
         }
     }
 }

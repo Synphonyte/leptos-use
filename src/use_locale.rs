@@ -1,14 +1,16 @@
 use crate::{use_locales_with_options, UseLocalesOptions};
 use leptos::*;
+use unic_langid::LanguageIdentifier;
 
 /// Reactive locale matching.
 ///
 /// Returns the first matching locale given by [`fn@crate::use_locales`] that is also found in
 /// the `supported` list. In case there is no match, then the first locale in `supported` will be
-/// returned. If `supported` is empty, the empty string is returned.
+/// returned.
 ///
-/// Matching is done by checking if an accepted locale from `use_locales` starts with a supported
-/// locale. If a match is found the locale from the `supported` list is returned.
+/// > If `supported` is empty, this function will panic!
+///
+/// Matching is done by using the [`fn@unic_langid::LanguageIdentifier::matches`] method.
 ///
 /// ## Demo
 ///
@@ -19,10 +21,11 @@ use leptos::*;
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::use_locale;
+/// use unic_langid::langid_slice;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let locale = use_locale(["en", "de", "fr"]);
+/// let locale = use_locale(langid_slice!["en", "de", "fr"]);
 /// #
 /// # view! { }
 /// # }
@@ -31,45 +34,55 @@ use leptos::*;
 /// ## Server-Side Rendering
 ///
 /// See [`fn@crate::use_locales`]
-pub fn use_locale<S>(supported: S) -> Signal<String>
+pub fn use_locale<S>(supported: S) -> Signal<LanguageIdentifier>
 where
     S: IntoIterator,
-    S::Item: Into<String> + Clone + 'static,
+    S::Item: AsRef<LanguageIdentifier>,
 {
     use_locale_with_options(supported, UseLocaleOptions::default())
 }
 
 /// Version of [`fn@crate::use_locale`] that takes a `UseLocaleOptions`. See [`fn@crate::use_locale`] for how to use.
-pub fn use_locale_with_options<S>(supported: S, options: UseLocaleOptions) -> Signal<String>
+pub fn use_locale_with_options<S>(
+    supported: S,
+    options: UseLocaleOptions,
+) -> Signal<LanguageIdentifier>
 where
     S: IntoIterator,
-    S::Item: Into<String> + Clone + 'static,
+    S::Item: AsRef<LanguageIdentifier>,
 {
-    let locales = use_locales_with_options(options);
+    let client_locales = use_locales_with_options(options);
 
-    let supported = supported.into_iter().collect::<Vec<_>>();
+    let supported = supported
+        .into_iter()
+        .map(|l| l.as_ref().clone())
+        .collect::<Vec<_>>();
+
+    const EMPTY_ERR_MSG: &'static str = "Empty supported list. You have to provide at least one locale in the `supported` parameter";
+    assert!(supported.len() > 0, "{}", EMPTY_ERR_MSG);
 
     Signal::derive(move || {
         let supported = supported.clone();
 
-        locales.with(|locales| {
+        client_locales.with(|clienht_locales| {
             let mut first_supported = None;
 
             for s in supported {
-                let s = s.into();
-
                 if first_supported.is_none() {
                     first_supported = Some(s.clone());
                 }
 
-                for locale in locales {
-                    if locale.starts_with(&s) {
+                for client_locale in clienht_locales {
+                    let client_locale: LanguageIdentifier = client_locale
+                        .parse()
+                        .expect("Client should provide a list of valid unicode locales");
+                    if client_locale.matches(&s, true, true) {
                         return s;
                     }
                 }
             }
 
-            first_supported.unwrap_or_else(|| "".to_string())
+            unreachable!("{}", EMPTY_ERR_MSG);
         })
     })
 }

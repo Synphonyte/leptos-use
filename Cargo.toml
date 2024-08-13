@@ -33,7 +33,8 @@ leptos-spin = { version = "0.1", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 thiserror = "1"
-wasm-bindgen = "0.2.92"
+unic-langid = "0.9"
+wasm-bindgen = ">=0.2.93"
 wasm-bindgen-futures = "0.4"
 
 [dependencies.web-sys]
@@ -129,11 +130,12 @@ features = [
 ]
 
 [dev-dependencies]
+codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
 getrandom = { version = "0.2", features = ["js"] }
 leptos_meta = "0.6"
 rand = "0.8"
-codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
 serde = { version = "1", features = ["derive"] }
+unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
