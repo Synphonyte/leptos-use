@@ -1,11 +1,12 @@
 use crate::core::{ElementMaybeSignal, Position};
 use crate::{
-    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor,
-    UseMouseEventExtractorDefault, UseMouseOptions, UseMouseReturn, UseMouseSourceType, UseWindow,
+    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
+    UseMouseReturn, UseMouseSourceType, UseWindow,
 };
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
+use std::convert::Infallible;
 use std::marker::PhantomData;
 
 /// Reactive mouse position related to an element.
@@ -195,12 +196,10 @@ where
     _marker: PhantomData<T>,
 }
 
-impl Default
-    for UseMouseInElementOptions<UseWindow, web_sys::Window, UseMouseEventExtractorDefault>
-{
+impl Default for UseMouseInElementOptions<UseWindow, web_sys::Window, Infallible> {
     fn default() -> Self {
         Self {
-            coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
+            coord_type: UseMouseCoordType::default(),
             target: use_window(),
             touch: true,
             reset_on_touch_ends: false,

@@ -6,6 +6,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::*;
+use std::convert::Infallible;
 use std::marker::PhantomData;
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -230,10 +231,10 @@ where
     _marker: PhantomData<T>,
 }
 
-impl Default for UseMouseOptions<UseWindow, web_sys::Window, UseMouseEventExtractorDefault> {
+impl Default for UseMouseOptions<UseWindow, web_sys::Window, Infallible> {
     fn default() -> Self {
         Self {
-            coord_type: UseMouseCoordType::<UseMouseEventExtractorDefault>::default(),
+            coord_type: UseMouseCoordType::default(),
             target: use_window(),
             touch: true,
             reset_on_touch_ends: false,
@@ -253,7 +254,7 @@ pub enum UseMouseCoordType<E: UseMouseEventExtractor + Clone> {
     Custom(E),
 }
 
-impl Default for UseMouseCoordType<UseMouseEventExtractorDefault> {
+impl Default for UseMouseCoordType<Infallible> {
     fn default() -> Self {
         Self::Page
     }
@@ -297,10 +298,15 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
     }
 }
 
-#[derive(Clone)]
-pub struct UseMouseEventExtractorDefault;
+impl UseMouseEventExtractor for Infallible {
+    fn extract_mouse_coords(&self, _: &web_sys::MouseEvent) -> Option<(f64, f64)> {
+        unreachable!()
+    }
 
-impl UseMouseEventExtractor for UseMouseEventExtractorDefault {}
+    fn extract_touch_coords(&self, _: &web_sys::Touch) -> Option<(f64, f64)> {
+        unreachable!()
+    }
+}
 
 /// Return type of [`use_mouse`].
 pub struct UseMouseReturn {
