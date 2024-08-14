@@ -4,8 +4,8 @@ use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
 use crate::utils::get_header;
 use crate::{
-    sync_signal_with_options, use_cookie, use_preferred_dark_with_options,
-    SyncSignalOptions, UsePreferredDarkOptions,
+    sync_signal_with_options, use_cookie, use_preferred_dark_with_options, SyncSignalOptions,
+    UsePreferredDarkOptions,
 };
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;

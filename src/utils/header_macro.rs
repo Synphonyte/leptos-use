@@ -19,7 +19,7 @@ macro_rules! get_header {
                 );
                 return None;
             }
-            
+
             #[cfg(feature = "actix")]
             #[allow(unused_imports)]
             use http0_2::{HeaderName, header::*};

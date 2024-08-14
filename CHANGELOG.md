@@ -3,7 +3,9 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] -
+## [0.12.0] - 2024-08-14
+
+> Make sure you also update `cargo-leptos` to the latest version if you use that.
 
 ### Breaking Changes 🛠
 
@@ -11,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_clipboard` doesn't need the unstable flags anymore.
 - `use_locale` now uses `unic_langid::LanguageIdentifier` and proper locale matching (thanks to @mondeja).
 - Removed `UseMouseEventExtractorDefault` and reworked `UseMouseCoordType` (thanks to @carloskiki)
-- `use_preferred_dark` and `use_color_mode` now try to read the `Sec-CH-Prefers-Color-Scheme` header in SSR.
+- `use_preferred_dark` and `use_color_mode` now try to read the `Sec-CH-Prefers-Color-Scheme` header in SSR. This brings
+  the necessity to enable an additional feature for them (`axum` / `actix` / `spin`).
 
 ### Fixes 🍕
 
