@@ -58,8 +58,8 @@ where
         .map(|l| l.as_ref().clone())
         .collect::<Vec<_>>();
 
-    const EMPTY_ERR_MSG: &'static str = "Empty supported list. You have to provide at least one locale in the `supported` parameter";
-    assert!(supported.len() > 0, "{}", EMPTY_ERR_MSG);
+    const EMPTY_ERR_MSG: &str = "Empty supported list. You have to provide at least one locale in the `supported` parameter";
+    assert!(!supported.is_empty(), "{}", EMPTY_ERR_MSG);
 
     Signal::derive(move || {
         let supported = supported.clone();
