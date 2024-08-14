@@ -59,12 +59,13 @@ where
         .collect::<Vec<_>>();
 
     const EMPTY_ERR_MSG: &str = "Empty supported list. You have to provide at least one locale in the `supported` parameter";
+
     assert!(!supported.is_empty(), "{}", EMPTY_ERR_MSG);
 
     Signal::derive(move || {
         let supported = supported.clone();
 
-        client_locales.with(|clienht_locales| {
+        client_locales.with(|client_locales| {
             let mut first_supported = None;
 
             for s in supported {
@@ -72,7 +73,7 @@ where
                     first_supported = Some(s.clone());
                 }
 
-                for client_locale in clienht_locales {
+                for client_locale in client_locales {
                     let client_locale: LanguageIdentifier = client_locale
                         .parse()
                         .expect("Client should provide a list of valid unicode locales");

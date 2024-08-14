@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_clipboard` doesn't need the unstable flags anymore.
 - `use_locale` now uses `unic_langid::LanguageIdentifier` and proper locale matching (thanks to @mondeja).
 - Removed `UseMouseEventExtractorDefault` and reworked `UseMouseCoordType` (thanks to @carloskiki)
+- `use_preferred_dark` and `use_color_mode` now try to read the `Sec-CH-Prefers-Color-Scheme` header in SSR.
 
+### Fixes 🍕
+
+- Fixed the codec chapter in the book to refer to crate `codee`.
 
 ## [0.11.4] - 2024-08-12
 

@@ -1,6 +1,6 @@
 macro_rules! get_header {
     (
-        $header_name:ident,
+        $header_name:expr,
         $function_name:ident,
         $option_name:ident
         $(,)?
@@ -19,14 +19,19 @@ macro_rules! get_header {
                 );
                 return None;
             }
-
+            
             #[cfg(feature = "actix")]
-            const $header_name: http0_2::HeaderName = http0_2::header::$header_name;
+            #[allow(unused_imports)]
+            use http0_2::{HeaderName, header::*};
             #[cfg(any(feature = "axum", feature = "spin"))]
-            const $header_name: http1::HeaderName = http1::header::$header_name;
+            #[allow(unused_imports)]
+            use http1::{HeaderName, header::*};
 
             #[cfg(any(feature = "axum", feature = "actix", feature = "spin"))]
-            crate::utils::header($header_name)
+            {
+                let header_name = $header_name;
+                crate::utils::header(header_name)
+            }
         } else {
             None
         }
