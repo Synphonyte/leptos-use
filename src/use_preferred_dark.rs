@@ -41,6 +41,7 @@ use std::rc::Rc;
 ///
 /// * [`fn@crate::use_media_query`]
 /// * [`fn@crate::use_preferred_contrast`]
+/// * [`fn@crate::use_prefers_reduced_motion`]
 pub fn use_preferred_dark() -> Signal<bool> {
     use_preferred_dark_with_options(Default::default())
 }
