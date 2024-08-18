@@ -54,7 +54,6 @@ pub enum PreferredContrast {
     Custom,
     #[default]
     NoPreference,
-
 }
 impl Display for PreferredContrast {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

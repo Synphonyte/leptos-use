@@ -61,7 +61,9 @@ pub fn use_prefers_reduced_motion() -> Signal<bool> {
 }
 
 /// Version of [`fn@crate::use_prefers_reduced_motion`] that takes a `UsePrefersReducedMotionOptions`. See [`fn@crate::use_prefers_reduced_motion`] for how to use.
-pub fn use_prefers_reduced_motion_with_options(options: UsePrefersReducedMotionOptions) -> Signal<bool> {
+pub fn use_prefers_reduced_motion_with_options(
+    options: UsePrefersReducedMotionOptions,
+) -> Signal<bool> {
     #[cfg(not(feature = "ssr"))]
     {
         let _ = options;
