@@ -14,6 +14,7 @@ use std::rc::Rc;
 /// ```
 /// # use leptos::*;
 /// # use leptos_use::use_prefers_reduced_motion;
+/// # use leptos_use::docs::BooleanDisplay;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
