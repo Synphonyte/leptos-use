@@ -47,6 +47,7 @@ members = [
     "use_not",
     "use_or",
     "use_permission",
+    "use_prefers_reduced_motion",
     "use_raf_fn",
     "use_resize_observer",
     "use_round",
