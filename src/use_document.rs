@@ -6,7 +6,10 @@ use crate::core::impl_ssr_safe_method;
 #[cfg(not(feature = "ssr"))]
 use leptos::*;
 use wasm_bindgen::JsValue;
-use web_sys::{Document, Element, HtmlCollection, HtmlElement, HtmlHeadElement, Location, NodeList, VisibilityState, Window};
+use web_sys::{
+    Document, Element, HtmlCollection, HtmlElement, HtmlHeadElement, Location, NodeList,
+    VisibilityState, Window,
+};
 
 /// SSR safe `document()`.
 /// This returns just a new-type wrapper around `Option<Document>`.
