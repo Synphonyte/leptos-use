@@ -225,7 +225,9 @@ impl UseDocument {
     );
 
     impl_ssr_safe_method!(
-        hidden(&self) -> Option<bool>
+        /// Hides on server by default
+        hidden(&self) -> bool;
+        .unwrap_or(true)
     );
 
     impl_ssr_safe_method!(
