@@ -1,5 +1,5 @@
 use crate::{use_locales_with_options, UseLocalesOptions};
-use leptos::*;
+use leptos::prelude::*;
 use unic_langid::LanguageIdentifier;
 
 /// Reactive locale matching.

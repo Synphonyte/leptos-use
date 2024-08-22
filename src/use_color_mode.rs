@@ -107,7 +107,7 @@ use wasm_bindgen::JsCast;
 ///
 /// // This adds the color mode class to the `<html>` element even with SSR
 /// view! {
-///     <Html class=move || mode.get().to_string()/>
+///     <Html {..} class=move || mode.get().to_string()/>
 /// }
 /// # }
 /// ```
@@ -499,7 +499,7 @@ where
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default
     /// implementation provided.
     #[allow(dead_code)]
-    ssr_color_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_color_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 
     #[builder(skip)]
     _marker: PhantomData<T>,
@@ -526,7 +526,7 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             emit_auto: false,
             transition_enabled: false,
             listen_to_storage_changes: true,
-            ssr_color_header_getter: Rc::new(move || {
+            ssr_color_header_getter: Arc::new(move || {
                 get_header!(
                     HeaderName::from_static("sec-ch-prefers-color-scheme"),
                     use_locale,

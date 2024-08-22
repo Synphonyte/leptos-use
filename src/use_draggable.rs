@@ -26,7 +26,7 @@ use web_sys::PointerEvent;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 ///
 /// // `style` is a helper string "left: {x}px; top: {y}px;"
 /// let UseDraggableReturn {

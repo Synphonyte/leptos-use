@@ -22,12 +22,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::{html::Div, *};
+/// # use leptos::{html::Div, prelude::*};
 /// # use leptos_use::{use_element_size, UseElementSizeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 ///
 /// let UseElementSizeReturn { width, height } = use_element_size(el);
 ///

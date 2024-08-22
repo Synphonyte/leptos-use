@@ -6,7 +6,7 @@ pub use use_local_storage::*;
 pub use use_session_storage::*;
 pub use use_storage::*;
 
-use leptos::window;
+use leptos::prelude::window;
 use wasm_bindgen::JsValue;
 
 /// Local or session storage or a custom store that is a `web_sys::Storage`.

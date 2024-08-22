@@ -1,7 +1,7 @@
 use crate::utils::get_header;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Reactive [dark theme preference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
 ///
@@ -70,13 +70,13 @@ pub struct UsePreferredDarkOptions {
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default
     /// implementation provided.
     #[allow(dead_code)]
-    pub(crate) ssr_color_header_getter: Rc<dyn Fn() -> Option<String>>,
+    pub(crate) ssr_color_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 }
 
 impl Default for UsePreferredDarkOptions {
     fn default() -> Self {
         Self {
-            ssr_color_header_getter: Rc::new(move || {
+            ssr_color_header_getter: Arc::new(move || {
                 get_header!(
                     HeaderName::from_static("sec-ch-prefers-color-scheme"),
                     use_locale,

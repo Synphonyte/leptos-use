@@ -23,12 +23,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Usage
 ///
 /// ```
-/// # use leptos::{html::Div, *};
+/// # use leptos::{html::Div, prelude::*};
 /// # use leptos_use::use_resize_observer;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 /// let (text, set_text) = signal("".to_string());
 ///
 /// use_resize_observer(

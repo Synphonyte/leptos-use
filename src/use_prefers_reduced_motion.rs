@@ -1,7 +1,7 @@
 use crate::utils::get_header;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
-use std::rc::Rc;
+use leptos::prelude::*;
+use std::sync::Arc;
 
 /// Reactive [reduced motions preference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
 ///
@@ -12,7 +12,7 @@ use std::rc::Rc;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_prefers_reduced_motion;
 /// # use leptos_use::docs::BooleanDisplay;
 /// #
@@ -84,13 +84,13 @@ pub struct UsePrefersReducedMotionOptions {
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default
     /// implementation provided.
     #[allow(dead_code)]
-    pub(crate) ssr_motion_header_getter: Rc<dyn Fn() -> Option<String>>,
+    pub(crate) ssr_motion_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 }
 
 impl Default for UsePrefersReducedMotionOptions {
     fn default() -> Self {
         Self {
-            ssr_motion_header_getter: Rc::new(move || {
+            ssr_motion_header_getter: Arc::new(move || {
                 get_header!(
                     HeaderName::from_static("sec-ch-prefers-reduced-motion"),
                     use_locale,

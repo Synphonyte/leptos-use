@@ -495,7 +495,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
             domain: None,
             path: None,
             same_site: None,
-            ssr_cookies_header_getter: Rc::new(move || {
+            ssr_cookies_header_getter: Arc::new(move || {
                 get_header!(COOKIE, use_cookie, ssr_cookies_header_getter)
             }),
             ssr_set_cookie: Arc::new(|cookie: &Cookie| {

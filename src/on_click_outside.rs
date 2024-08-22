@@ -33,7 +33,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let target = create_node_ref::<Div>();
+/// let target = NodeRef::<Div>::new();
 ///
 /// on_click_outside(target, move |event| { log!("{:?}", event); });
 ///

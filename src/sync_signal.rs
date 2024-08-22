@@ -27,15 +27,15 @@ use std::rc::Rc;
 ///
 /// let stop = sync_signal((a, set_a), (b, set_b));
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 1, b: 1
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 1, b: 1
 ///
 /// set_b.set(3);
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 3, b: 3
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 3, b: 3
 ///
 /// set_a.set(4);
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 4, b: 4
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 4, b: 4
 /// #
 /// # view! { }
 /// # }
@@ -53,8 +53,8 @@ use std::rc::Rc;
 /// # fn Demo() -> impl IntoView {
 /// let (a, set_a) = signal(1);
 /// let (b, set_b) = signal(2);
-/// let c_rw = create_rw_signal(3);
-/// let d_rw = create_rw_signal(4);
+/// let c_rw = RwSignal::new(3);
+/// let d_rw = RwSignal::new(4);
 ///
 /// sync_signal((a, set_a), c_rw);
 /// sync_signal(d_rw, (b, set_b));
@@ -86,11 +86,11 @@ use std::rc::Rc;
 ///
 /// set_b.set(3); // doesn't sync
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 1, b: 3
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 1, b: 3
 ///
 /// set_a.set(4);
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 4, b: 4
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 4, b: 4
 /// #
 /// # view! { }
 /// # }
@@ -117,11 +117,11 @@ use std::rc::Rc;
 ///         .transform_rtl(|right| *right / 2)
 /// );
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 10, b: 20
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 10, b: 20
 ///
 /// set_b.set(30);
 ///
-/// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 15, b: 30
+/// log!("a: {}, b: {}", a.get(), b.get()); // a: 15, b: 30
 /// #
 /// # view! { }
 /// # }

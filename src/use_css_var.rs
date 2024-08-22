@@ -59,7 +59,7 @@ use wasm_bindgen::JsCast;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 ///
 /// let (color, set_color) = use_css_var_with_options(
 ///     "--color",

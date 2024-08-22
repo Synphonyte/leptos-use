@@ -190,6 +190,7 @@ use_display_media = [
 ]
 use_document = [
     "dep:web-sys",
+    "web-sys/NodeList",
     "web-sys/VisibilityState",
 ]
 use_document_visibility = ["use_event_listener", "web-sys/VisibilityState"]

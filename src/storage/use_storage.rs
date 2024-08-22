@@ -91,7 +91,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// hydration.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::use_session_storage;
 /// # use codee::string::FromToStringCodec;
 /// #
@@ -124,7 +124,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 /// the app correctly render things. Some flickering might be unavoidable though.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::storage::{use_local_storage_with_options, UseStorageOptions};
 /// # use codee::string::FromToStringCodec;
 /// #

@@ -1,6 +1,6 @@
 use crate::utils::get_header;
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
+use leptos::prelude::*;
 use std::rc::Rc;
 
 /// Reactive locales.

@@ -1,9 +1,5 @@
-use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::marker::PhantomData;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 /// Wrapper for `setTimeout` with controls.
 ///
@@ -55,8 +51,9 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use leptos::leptos_dom::helpers::TimeoutHandle;
+        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
         use std::cell::Cell;
-        use std::rc::Rc;
+        use std::sync::{Arc, Mutex};
         use std::time::Duration;
 
         let delay = delay.into();

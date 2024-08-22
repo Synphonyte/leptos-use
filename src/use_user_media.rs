@@ -13,23 +13,23 @@ use wasm_bindgen::{JsCast, JsValue};
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{use_user_media, UseUserMediaReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let video_ref = create_node_ref::<leptos::html::Video>();
+/// let video_ref = NodeRef::<leptos::html::Video>::new();
 ///
 /// let UseUserMediaReturn { stream, start, .. } = use_user_media();
 ///
 /// start();
 ///
-/// create_effect(move |_|
+/// Effect::new(move |_|
 ///     video_ref.get().map(|v| {
 ///         match stream.get() {
 ///             Some(Ok(s)) => v.set_src_object(Some(&s)),
-///             Some(Err(e)) => logging::error!("Failed to get media stream: {:?}", e),
-///             None => logging::log!("No stream yet"),
+///             Some(Err(e)) => error!("Failed to get media stream: {:?}", e),
+///             None => log!("No stream yet"),
 ///         }
 ///     })
 /// );
