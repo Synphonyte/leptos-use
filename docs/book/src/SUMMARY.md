@@ -48,6 +48,7 @@
 - [use_permission](browser/use_permission.md)
 - [use_preferred_contrast](browser/use_preferred_contrast.md)
 - [use_preferred_dark](browser/use_preferred_dark.md)
+- [use_prefers_reduced_motion](browser/use_prefers_reduced_motion.md)
 - [use_service_worker](browser/use_service_worker.md)
 - [use_user_media](browser/use_user_media.md)
 - [use_web_notification](browser/use_web_notification.md)
@@ -99,6 +100,7 @@
 
 # Utilities
 
+- [header](utilities/header.md)
 - [is_err](utilities/is_err.md)
 - [is_none](utilities/is_none.md)
 - [is_ok](utilities/is_ok.md)
@@ -113,6 +115,8 @@
 # Intl
 
 - [use_intl_number_format](intl/use_intl_number_format.md)
+- [use_locale](intl/use_locale.md)
+- [use_locales](intl/use_locales.md)
 
 # @Math
 

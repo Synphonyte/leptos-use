@@ -1,3 +1,5 @@
+#![allow(unused_macros, unused_imports)]
+
 macro_rules! signal_filtered {
     (
         $(#[$outer:meta])*

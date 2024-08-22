@@ -28,6 +28,7 @@ use std::rc::Rc;
 ///     UseWebNotificationOptions::default()
 ///         .direction(NotificationDirection::Auto)
 ///         .language("en")
+///         .renotify(true)
 ///         .tag("test"),
 /// );
 ///
@@ -216,10 +217,7 @@ impl From<NotificationDirection> for web_sys::NotificationDirection {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `renotify`
-/// - `vibrate`  
-/// - `silent`
-/// - `image`
+/// - `vibrate`
 #[derive(DefaultBuilder, Clone)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseWebNotificationOptions {
@@ -253,14 +251,25 @@ pub struct UseWebNotificationOptions {
     #[builder(into)]
     icon: Option<String>,
 
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
+
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
     require_interaction: bool,
 
-    // /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
-    // /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
-    // #[builder(into)]
-    // renotify: bool,
+    /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
+    /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
+    #[builder(into)]
+    renotify: bool,
+
+    /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
+    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    #[builder(into)]
+    silent: Option<bool>,
+
     /// Called when the user clicks on displayed `Notification`.
     on_click: Rc<dyn Fn(web_sys::Event)>,
 
@@ -284,8 +293,10 @@ impl Default for UseWebNotificationOptions {
             language: None,
             tag: None,
             icon: None,
+            image: None,
             require_interaction: false,
-            // renotify: false,
+            renotify: false,
+            silent: None,
             on_click: Rc::new(|_| {}),
             on_close: Rc::new(|_| {}),
             on_error: Rc::new(|_| {}),
@@ -296,27 +307,31 @@ impl Default for UseWebNotificationOptions {
 
 impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
     fn from(options: &UseWebNotificationOptions) -> Self {
-        let mut web_sys_options = Self::new();
+        let web_sys_options = Self::new();
 
-        web_sys_options
-            .dir(options.direction.into())
-            .require_interaction(options.require_interaction);
-        // .renotify(options.renotify);
+        web_sys_options.set_dir(options.direction.into());
+        web_sys_options.set_require_interaction(options.require_interaction);
+        web_sys_options.set_renotify(options.renotify);
+        web_sys_options.set_silent(options.silent);
 
         if let Some(body) = &options.body {
-            web_sys_options.body(body);
+            web_sys_options.set_body(body);
         }
 
         if let Some(icon) = &options.icon {
-            web_sys_options.icon(icon);
+            web_sys_options.set_icon(icon);
+        }
+
+        if let Some(image) = &options.image {
+            web_sys_options.set_image(image);
         }
 
         if let Some(language) = &options.language {
-            web_sys_options.lang(language);
+            web_sys_options.set_lang(language);
         }
 
         if let Some(tag) = &options.tag {
-            web_sys_options.tag(tag);
+            web_sys_options.set_tag(tag);
         }
 
         web_sys_options
@@ -328,9 +343,7 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`  
-/// - `silent`
-/// - `image`
+/// - `vibrate`
 #[derive(DefaultBuilder, Default)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct ShowOptions {
@@ -365,46 +378,65 @@ pub struct ShowOptions {
     #[builder(into)]
     icon: Option<String>,
 
+    /// The URL of the image to be displayed as part of the notification as specified
+    /// in the constructor's options parameter.
+    #[builder(into)]
+    image: Option<String>,
+
     /// A boolean value indicating that a notification should remain active until the
     /// user clicks or dismisses it, rather than closing automatically.
     #[builder(into)]
     require_interaction: Option<bool>,
-    // /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
-    // /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
-    // #[builder(into)]
-    // renotify: Option<bool>,
+
+    /// A boolean value specifying whether the user should be notified after a new notification replaces an old one.
+    /// The default is `false`, which means they won't be notified. If `true`, then `tag` also must be set.
+    #[builder(into)]
+    renotify: Option<bool>,
+
+    /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
+    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    #[builder(into)]
+    silent: Option<bool>,
 }
 
 #[cfg(not(feature = "ssr"))]
 impl ShowOptions {
     fn override_notification_options(&self, options: &mut web_sys::NotificationOptions) {
         if let Some(direction) = self.direction {
-            options.dir(direction.into());
+            options.set_dir(direction.into());
         }
 
         if let Some(require_interaction) = self.require_interaction {
-            options.require_interaction(require_interaction);
+            options.set_require_interaction(require_interaction);
         }
 
         if let Some(body) = &self.body {
-            options.body(body);
+            options.set_body(body);
         }
 
         if let Some(icon) = &self.icon {
-            options.icon(icon);
+            options.set_icon(icon);
+        }
+
+        if let Some(image) = &self.image {
+            options.set_image(image);
         }
 
         if let Some(language) = &self.language {
-            options.lang(language);
+            options.set_lang(language);
         }
 
         if let Some(tag) = &self.tag {
-            options.tag(tag);
+            options.set_tag(tag);
         }
 
-        // if let Some(renotify) = &self.renotify {
-        //     options.renotify(renotify);
-        // }
+        if let Some(renotify) = self.renotify {
+            options.set_renotify(renotify);
+        }
+
+        if let Some(silent) = self.silent {
+            options.set_silent(Some(silent));
+        }
     }
 }
 
@@ -437,7 +469,7 @@ impl From<web_sys::NotificationPermission> for NotificationPermission {
             web_sys::NotificationPermission::Default => Self::Default,
             web_sys::NotificationPermission::Granted => Self::Granted,
             web_sys::NotificationPermission::Denied => Self::Denied,
-            web_sys::NotificationPermission::__Nonexhaustive => Self::Default,
+            _ => Self::Default,
         }
     }
 }

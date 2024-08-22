@@ -1,3 +1,5 @@
+#![allow(unused_macros, unused_imports)]
+
 macro_rules! impl_ssr_safe_method {
     (
         $(#[$attr:meta])*

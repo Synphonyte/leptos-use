@@ -8,7 +8,7 @@ codee = { version = "0.1", features = ["json_serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 leptos = { version = "0.6", features = ["nightly", "csr"] }
-leptos-use = { path = "../..", features = ["docs"] }
+leptos-use = { path = "../..", features = ["storage", "docs"] }
 log = "0.4"
 serde = "1.0.163"
 web-sys = "0.3"

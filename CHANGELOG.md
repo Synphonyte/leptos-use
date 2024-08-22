@@ -3,6 +3,56 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 
+
+### New Functions 🚀
+
+- `use_prefers_reduced_motion`
+
+## [0.12.0] - 2024-08-14
+
+> Make sure you also update `cargo-leptos` to the latest version if you use that.
+
+### Breaking Changes 🛠
+
+- Updated to web_sys 0.3.70 which unfortunately is breaking some things.
+- `use_clipboard` doesn't need the unstable flags anymore.
+- `use_locale` now uses `unic_langid::LanguageIdentifier` and proper locale matching (thanks to @mondeja).
+- Removed `UseMouseEventExtractorDefault` and reworked `UseMouseCoordType` (thanks to @carloskiki)
+- `use_preferred_dark` and `use_color_mode` now try to read the `Sec-CH-Prefers-Color-Scheme` header in SSR. This brings
+  the necessity to enable an additional feature for them (`axum` / `actix` / `spin`).
+
+### Fixes 🍕
+
+- Fixed the codec chapter in the book to refer to crate `codee`.
+
+## [0.11.4] - 2024-08-12
+
+### New Features 🚀
+
+- `use_web_notification` now supports the options `renotify`, `silent` and `image` (thanks to @hcandelaria).
+- `sync_signal` no supports the options `assign_ltr` and `assign_rtl`.
+
+## [0.11.3] - 2024-07-31
+
+### Fix 🍕
+
+- Made `use_timeout_fn` SSR-safe
+
+## [0.11.2] - 2024-07-30
+
+### Change 🔥
+
+- `use_locale` has now a supported locale list.
+
+## (yanked) [0.11.1] - 2024-07-28 
+
+### New Functions 🚀
+
+- `use_locale` (thanks to @BrandonDyer64)
+- `use_locales` (thanks to @BrandonDyer64)
+- `header` – Standard implementations for reading a header on the server.
+
 ## [0.11.0] - 2024-07-27
 
 ### Breaking Changes 🛠
@@ -37,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the DOM controlled by a value from storage. This leads to hydration errors which can be fixed by setting this new
   option to `true`.
 - `cookie::SameSite` is now re-exported
-- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR. 
+- Changing the signal returned by `use_cookie` now tries and changes the headers during SSR.
 - New book chapter about codecs
 - The macro `use_derive_signal!` is now exported (thanks to @mscofield0).
 
@@ -72,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         - The new `UseWebSocketOptions::on_message` takes a `&T`.
         - `UseWebSocketOptions::on_error` now takes a `UseWebSocketError` instead of a `web_sys::Event`.
 - `use_storage` now always saves the default value to storage if the key doesn't exist yet.
-- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic` 
+- Renamed `BreakpointsSematic` to `BreakpointsSemantic` and `breakpoints_sematic` to `breakpoints_semantic`
   (note the `n`) (thanks to @mondeja).
 
 ### Fixes 🍕

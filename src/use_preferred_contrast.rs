@@ -28,6 +28,7 @@ use std::fmt::Display;
 ///
 /// * [`fn@crate::use_media_query`]
 /// * [`fn@crate::use_preferred_dark`]
+/// * [`fn@crate::use_prefers_reduced_motion`]
 pub fn use_preferred_contrast() -> Signal<PreferredContrast> {
     let is_more = use_media_query("(prefers-contrast: more)");
     let is_less = use_media_query("(prefers-contrast: less)");
@@ -55,7 +56,6 @@ pub enum PreferredContrast {
     #[default]
     NoPreference,
 }
-
 impl Display for PreferredContrast {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

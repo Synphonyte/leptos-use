@@ -1,6 +1,5 @@
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::diagnostics::SpecialNonReactiveZone;
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
@@ -32,6 +31,11 @@ use std::time::Duration;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## Server-Side Rendering
+///
+/// On the server the callback will never be run. The returned functions are all no-ops and
+/// `is_pending` will always be `false`.
 pub fn use_timeout_fn<CbFn, Arg, D>(
     callback: CbFn,
     delay: D,
@@ -45,59 +49,82 @@ where
 
     let (is_pending, set_pending) = signal(false);
 
-    let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+    let start;
+    let stop;
 
-    let clear = {
-        let timer = Arc::clone(&timer);
+    #[cfg(not(feature = "ssr"))]
+    {
+        use leptos::leptos_dom::helpers::TimeoutHandle;
+        use std::cell::Cell;
+        use std::rc::Rc;
+        use std::time::Duration;
 
-        move || {
-            let timer = timer.lock().unwrap();
-            if let Some(timer) = *timer {
-                timer.clear();
+        let delay = delay.into();
+
+        let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+
+        let clear = {
+            let timer = Arc::clone(&timer);
+
+            move || {
+                let timer = timer.lock().unwrap();
+                if let Some(timer) = *timer {
+                    timer.clear();
+                }
             }
-        }
-    };
+        };
 
-    let stop = {
-        let clear = clear.clone();
+        stop = {
+            let clear = clear.clone();
 
-        move || {
-            set_pending.set(false);
-            clear();
-        }
-    };
+            move || {
+                set_pending.set(false);
+                clear();
+            }
+        };
 
-    let start = {
-        let timer = Arc::clone(&timer);
-        let callback = callback.clone();
+        start = {
+            let timer = Arc::clone(&timer);
+            let callback = callback.clone();
 
-        move |arg: Arg| {
-            set_pending.set(true);
+            move |arg: Arg| {
+                set_pending.set(true);
 
-            let handle = set_timeout_with_handle(
-                {
-                    let timer = Arc::clone(&timer);
-                    let callback = callback.clone();
+                let handle = set_timeout_with_handle(
+                    {
+                        let timer = Arc::clone(&timer);
+                        let callback = callback.clone();
 
-                    move || {
-                        set_pending.set(false);
-                        *timer.lock().unwrap() = None;
+                        move || {
+                            set_pending.set(false);
+                            *timer.lock().unwrap() = None;
 
-                        #[cfg(debug_assertions)]
-                        let _z = SpecialNonReactiveZone::enter();
+                            #[cfg(debug_assertions)]
+                            let _z = SpecialNonReactiveZone::enter();
 
-                        callback(arg);
-                    }
-                },
-                Duration::from_millis(delay.get_untracked() as u64),
-            )
-            .ok();
+                            callback(arg);
+                        }
+                    },
+                    Duration::from_millis(delay.get_untracked() as u64),
+                )
+                .ok();
 
-            *timer.lock().unwrap() = handle;
-        }
-    };
+                *timer.lock().unwrap() = handle;
+            }
+        };
 
-    on_cleanup(clear);
+        on_cleanup(clear);
+    }
+
+    #[cfg(feature = "ssr")]
+    {
+        let _ = set_pending;
+        let _ = callback;
+        let _ = delay;
+
+        start = move |_: Arg| ();
+        stop = move || ();
+    }
 
     UseTimeoutFnReturn {
         is_pending: is_pending.into(),

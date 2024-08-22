@@ -11,9 +11,6 @@ use leptos::prelude::*;
 /// [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API).
 /// Without user permission, reading or altering the clipboard contents is not permitted.
 ///
-/// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
-///
 /// ## Demo
 ///
 /// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_clipboard)
@@ -80,10 +77,9 @@ pub fn use_clipboard_with_options(
     let update_text = move |_| {
         if is_supported.get() {
             leptos::spawn::spawn_local(async move {
-                if let Some(clipboard) = window().navigator().clipboard() {
-                    if let Ok(text) = js_fut!(clipboard.read_text()).await {
-                        set_text.set(text.as_string());
-                    }
+                let clipboard = window().navigator().clipboard();
+                if let Ok(text) = js_fut!(clipboard.read_text()).await {
+                    set_text.set(text.as_string());
                 }
             })
         }
@@ -103,12 +99,11 @@ pub fn use_clipboard_with_options(
                 let value = value.to_owned();
 
                 leptos::spawn::spawn_local(async move {
-                    if let Some(clipboard) = window().navigator().clipboard() {
-                        if js_fut!(clipboard.write_text(&value)).await.is_ok() {
-                            set_text.set(Some(value));
-                            set_copied.set(true);
-                            start(());
-                        }
+                    let clipboard = window().navigator().clipboard();
+                    if js_fut!(clipboard.write_text(&value)).await.is_ok() {
+                        set_text.set(Some(value));
+                        set_copied.set(true);
+                        start(());
                     }
                 });
             }

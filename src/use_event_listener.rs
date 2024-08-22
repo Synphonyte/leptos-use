@@ -237,11 +237,11 @@ impl UseEventListenerOptions {
             passive,
         } = self;
 
-        let mut options = web_sys::AddEventListenerOptions::new();
-        options.capture(*capture);
-        options.once(*once);
+        let options = web_sys::AddEventListenerOptions::new();
+        options.set_capture(*capture);
+        options.set_once(*once);
         if let Some(passive) = passive {
-            options.passive(*passive);
+            options.set_passive(*passive);
         }
 
         options
