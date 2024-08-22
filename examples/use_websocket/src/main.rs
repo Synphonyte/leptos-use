@@ -55,7 +55,7 @@ fn Demo() -> impl IntoView {
         close();
     };
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         message.with(move |message| {
             if let Some(m) = message {
                 update_history(&set_history, format!("[message]: {:?}", m));
@@ -105,10 +105,10 @@ fn Demo() -> impl IntoView {
         "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
             .immediate(false)
-            .on_open(on_open_callback.clone())
-            .on_close(on_close_callback.clone())
-            .on_error(on_error_callback.clone())
-            .on_message(on_message_callback.clone()),
+            .on_open(on_open_callback)
+            .on_close(on_close_callback)
+            .on_error(on_error_callback)
+            .on_message(on_message_callback),
     );
 
     let open_connection2 = move |_| {
@@ -126,7 +126,7 @@ fn Demo() -> impl IntoView {
 
     let status2 = move || ready_state2.get().to_string();
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(m) = message2.get() {
             update_history(&set_history2, format!("[message]: {:?}", m));
         };
@@ -154,7 +154,7 @@ fn Demo() -> impl IntoView {
                         <h3 class="text-2xl mr-2">"History"</h3>
                         <button
                             on:click=move |_| set_history(vec![])
-                            disabled=move || history.get().len() <= 0
+                            disabled=move || history2.with(Vec::is_empty)
                         >
                             "Clear"
                         </button>
@@ -185,7 +185,7 @@ fn Demo() -> impl IntoView {
                         <h3 class="text-2xl mr-2">"History"</h3>
                         <button
                             on:click=move |_| set_history2(vec![])
-                            disabled=move || history2.get().len() <= 0
+                            disabled=move || history2.with(Vec::is_empty)
                         >
                             "Clear"
                         </button>
@@ -210,7 +210,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Info);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

@@ -10,7 +10,7 @@ fn Demo() -> impl IntoView {
         log!("window keydown: '{}'", evt.key());
     });
 
-    let element = create_node_ref::<A>();
+    let element = NodeRef::<A>::new();
 
     let _ = use_event_listener(element, click, |evt| {
         log!(
@@ -61,7 +61,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to_body(|| {
+    leptos::mount::mount_to_body(|| {
         view! { <Demo/> }
     })
 }

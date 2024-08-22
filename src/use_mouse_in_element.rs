@@ -108,7 +108,7 @@ where
         let target = target.into();
         let window = window();
 
-        let stop = watch(
+        let effect = Effect::watch(
             move || (target.get(), x.get(), y.get()),
             move |(el, x, y), _, _| {
                 if let Some(el) = el {
@@ -145,6 +145,8 @@ where
             },
             false,
         );
+
+        let stop = move || effect.stop();
 
         let _ = use_event_listener(document(), mouseleave, move |_| set_outside.set(true));
     }}

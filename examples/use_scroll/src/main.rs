@@ -8,7 +8,7 @@ use web_sys::Event;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let el = create_node_ref::<Div>();
+    let el = NodeRef::<Div>::new();
     let (smooth, set_smooth) = signal(false);
     let behavior = Signal::derive(move || {
         if smooth.get() {
@@ -39,8 +39,8 @@ fn Demo() -> impl IntoView {
         el,
         UseScrollOptions::default()
             .behavior(behavior)
-            .on_stop(on_stop.clone())
-            .on_scroll(on_scroll.clone()),
+            .on_stop(on_stop)
+            .on_scroll(on_scroll),
     );
 
     view! {
@@ -101,7 +101,7 @@ fn Demo() -> impl IntoView {
                             />
                         </div>
                     </div>
-                    <label for_="smooth-scrolling-option" class="text-right opacity-75">
+                    <label for="smooth-scrolling-option" class="text-right opacity-75">
                         "Smooth scrolling"
                     </label>
                     <span>
@@ -140,7 +140,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

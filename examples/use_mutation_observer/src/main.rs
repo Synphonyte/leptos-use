@@ -6,7 +6,7 @@ use std::time::Duration;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let el = create_node_ref::<Div>();
+    let el = NodeRef::<Div>::new();
     let (messages, set_messages) = signal(vec![]);
     let (class_name, set_class_name) = signal(String::new());
     let (style, set_style) = signal(String::new());
@@ -58,7 +58,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

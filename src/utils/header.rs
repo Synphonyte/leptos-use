@@ -2,7 +2,7 @@
 use http0_2::HeaderName;
 #[cfg(any(feature = "axum", feature = "spin"))]
 use http1::HeaderName;
-use leptos::*;
+use leptos::prelude::*;
 
 /// Get the value of the header with the given name.
 ///

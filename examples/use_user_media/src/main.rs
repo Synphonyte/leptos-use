@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{use_user_media, UseUserMediaReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let video_ref = create_node_ref::<leptos::html::Video>();
+    let video_ref = NodeRef::<leptos::html::Video>::new();
 
     let UseUserMediaReturn {
         stream,
@@ -13,17 +13,25 @@ fn Demo() -> impl IntoView {
         ..
     } = use_user_media();
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         match stream.get() {
             Some(Ok(s)) => {
-                video_ref.get().map(|v| v.set_src_object(Some(&s)));
+                video_ref.with(|v| {
+                    if let Some(v) = v {
+                        v.set_src_object(Some(&s));
+                    }
+                });
                 return;
             }
-            Some(Err(e)) => logging::error!("Failed to get media stream: {:?}", e),
-            None => logging::log!("No stream yet"),
+            Some(Err(e)) => leptos::logging::error!("Failed to get media stream: {:?}", e),
+            None => leptos::logging::log!("No stream yet"),
         }
 
-        video_ref.get().map(|v| v.set_src_object(None));
+        video_ref.with(|v| {
+            if let Some(v) = v {
+                v.set_src_object(None);
+            }
+        });
     });
 
     view! {
@@ -51,7 +59,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

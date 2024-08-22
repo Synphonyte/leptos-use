@@ -124,7 +124,7 @@ where
             }
         });
 
-        let _ = watch(
+        Effect::watch(
             move || target.get(),
             {
                 let update = update.clone();

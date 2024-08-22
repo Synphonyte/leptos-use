@@ -8,8 +8,8 @@ use leptos_use::{
 
 #[component]
 fn Demo() -> impl IntoView {
-    let root = create_node_ref::<Div>();
-    let target = create_node_ref::<Div>();
+    let root = NodeRef::<Div>::new();
+    let target = NodeRef::<Div>::new();
     let (is_visible, set_visible) = signal(false);
 
     let UseIntersectionObserverReturn {
@@ -95,7 +95,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

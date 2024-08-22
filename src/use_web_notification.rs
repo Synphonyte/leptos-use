@@ -69,6 +69,7 @@ pub fn use_web_notification_with_options(
         use leptos::ev::visibilitychange;
         use wasm_bindgen::closure::Closure;
         use wasm_bindgen::JsCast;
+        use send_wrapper::SendWrapper;
 
         let on_click_closure = Closure::<dyn Fn(web_sys::Event)>::new({
             let on_click = Rc::clone(&options.on_click);
@@ -121,7 +122,7 @@ pub fn use_web_notification_with_options(
             let on_error_closure = on_error_closure.clone();
             let on_show_closure = on_show_closure.clone();
 
-            move |options_override: ShowOptions| {
+            let show = move |options_override: ShowOptions| {
                 if !is_supported.get_untracked() {
                     return;
                 }
@@ -132,7 +133,7 @@ pub fn use_web_notification_with_options(
                 let on_error_closure = on_error_closure.clone();
                 let on_show_closure = on_show_closure.clone();
 
-                spawn_local(async move {
+                leptos::spawn::spawn_local(async move {
                     set_permission.set(request_web_notification_permission().await);
 
                     let mut notification_options = web_sys::NotificationOptions::from(&options);
@@ -151,7 +152,9 @@ pub fn use_web_notification_with_options(
 
                     set_notification.set(Some(notification_value));
                 });
-            }
+            };
+            let wrapped_show = SendWrapper::new(show);
+            move |options_override: ShowOptions| wrapped_show(options_override)
         };
 
         let close = {
@@ -165,7 +168,7 @@ pub fn use_web_notification_with_options(
             }
         };
 
-        spawn_local(async move {
+        leptos::spawn::spawn_local(async move {
             set_permission.set(request_web_notification_permission().await);
         });
 
@@ -489,8 +492,8 @@ async fn request_web_notification_permission() -> NotificationPermission {
 /// Return type for [`use_web_notification`].
 pub struct UseWebNotificationReturn<ShowFn, CloseFn>
 where
-    ShowFn: Fn(ShowOptions) + Clone,
-    CloseFn: Fn() + Clone,
+    ShowFn: Fn(ShowOptions) + Clone + Send + Sync,
+    CloseFn: Fn() + Clone + Send + Sync,
 {
     pub is_supported: Signal<bool>,
     pub notification: Signal<Option<web_sys::Notification>, LocalStorage>,

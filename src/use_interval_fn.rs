@@ -3,11 +3,10 @@
 use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use send_wrapper::SendWrapper;
 use std::cell::Cell;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 
 /// Wrapper for `set_interval` with controls.
@@ -41,9 +40,9 @@ use std::time::Duration;
 pub fn use_interval_fn<CbFn, N>(
     callback: CbFn,
     interval: N,
-) -> Pausable<impl Fn() + Clone, impl Fn() + Clone>
+) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
-    CbFn: Fn() + Clone + 'static,
+    CbFn: Fn() + Clone + 'static + Send + Sync,
     N: Into<MaybeSignal<u64>>,
 {
     use_interval_fn_with_options(callback, interval, UseIntervalFnOptions::default())
@@ -64,15 +63,16 @@ where
         immediate_callback,
     } = options;
 
-    let timer: Rc<Cell<Option<IntervalHandle>>> = Rc::new(Cell::new(None));
+    let timer: Arc<SendWrapper<Cell<Option<IntervalHandle>>>> =
+        Arc::new(SendWrapper::new(Cell::new(None)));
 
     let (is_active, set_active) = signal(false);
 
     let clean = {
-        let timer = Rc::clone(&timer);
+        let timer = Arc::clone(&timer);
 
         move || {
-            if let Some(handle) = timer.take() {
+            if let Some(handle) = Cell::take(&timer) {
                 handle.clear();
             }
         }
@@ -104,7 +104,7 @@ where
 
                 move || {
                     #[cfg(debug_assertions)]
-                    let _z = SpecialNonReactiveZone::enter();
+                    let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                     callback();
                 }
@@ -127,6 +127,7 @@ where
     }
 
     if matches!(interval, MaybeSignal::Dynamic(_)) {
+        #[allow(clippy::clone_on_copy)]
         let resume = resume.clone();
 
         let effect = Effect::watch(
@@ -143,6 +144,7 @@ where
 
     on_cleanup({
         let pause = SendWrapper::new(pause.clone());
+        #[allow(clippy::redundant_closure)]
         move || pause()
     });
 

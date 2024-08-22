@@ -1,7 +1,6 @@
 use crate::utils::Pausable;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -86,6 +85,7 @@ pub fn use_raf_fn_with_options(
     };
 
     let loop_fn = {
+        #[allow(clippy::clone_on_copy)]
         let request_next_frame = request_next_frame.clone();
         let previous_frame_timestamp = Cell::new(0.0_f64);
 
@@ -102,7 +102,7 @@ pub fn use_raf_fn_with_options(
             };
 
             #[cfg(debug_assertions)]
-            let zone = SpecialNonReactiveZone::enter();
+            let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             callback(UseRafFnCallbackArgs { delta, timestamp });
 
@@ -140,6 +140,7 @@ pub fn use_raf_fn_with_options(
 
     on_cleanup({
         let pause = send_wrapper::SendWrapper::new(pause.clone());
+        #[allow(clippy::redundant_closure)]
         move || pause()
     });
 

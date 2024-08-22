@@ -6,7 +6,7 @@ use leptos_use::{use_draggable_with_options, use_window, UseDraggableOptions, Us
 
 #[component]
 fn Demo() -> impl IntoView {
-    let el = create_node_ref::<Div>();
+    let el = NodeRef::<Div>::new();
 
     let inner_width = use_window()
         .as_ref()
@@ -40,7 +40,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

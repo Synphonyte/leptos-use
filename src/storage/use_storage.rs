@@ -376,7 +376,7 @@ where
                     // Delete directly from storage
                     let result = storage
                         .remove_item(&key)
-                        .map_err(|e| UseStorageError::RemoveItemFailed(e));
+                        .map_err(UseStorageError::RemoveItemFailed);
                     let _ = handle_error(&on_error, result);
                     notify.trigger();
                     dispatch_storage_event();

@@ -1,7 +1,7 @@
 use crate::utils::get_header;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Reactive locales.
 ///
@@ -62,11 +62,12 @@ pub fn use_locales_with_options(options: UseLocalesOptions) -> Signal<Vec<String
                 .collect::<Vec<String>>()
         };
 
-        let (locales, set_locales) = create_signal(read_navigator_languages());
+        let (locales, set_locales) = signal(read_navigator_languages());
 
-        let _ = crate::use_event_listener(crate::use_window(), ev::languagechange, move |_| {
-            set_locales.update(|locales| *locales = read_navigator_languages());
-        });
+        let _ =
+            crate::use_event_listener(crate::use_window(), leptos::ev::languagechange, move |_| {
+                set_locales.update(|locales| *locales = read_navigator_languages());
+            });
 
         locales.into()
     }
@@ -100,13 +101,13 @@ pub struct UseLocalesOptions {
     /// Getter function to return the string value of the accept languange header.
     /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
     #[allow(dead_code)]
-    ssr_lang_header_getter: Rc<dyn Fn() -> Option<String>>,
+    ssr_lang_header_getter: Arc<dyn Fn() -> Option<String>>,
 }
 
 impl Default for UseLocalesOptions {
     fn default() -> Self {
         Self {
-            ssr_lang_header_getter: Rc::new(move || {
+            ssr_lang_header_getter: Arc::new(move || {
                 get_header!(ACCEPT_LANGUAGE, use_locale, ssr_lang_header_getter)
             }),
         }

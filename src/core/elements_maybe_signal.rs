@@ -315,7 +315,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: &[Option<T>]) -> Self {
-        Self::Static(SendWrapper::new(target.iter().map(|t| t.clone()).collect()))
+        Self::Static(SendWrapper::new(target.to_vec()))
     }
 }
 
@@ -335,7 +335,7 @@ where
     T: Into<E> + Clone + 'static,
 {
     fn from(target: Vec<Option<T>>) -> Self {
-        Self::Static(SendWrapper::new(target.into_iter().map(|t| t).collect()))
+        Self::Static(SendWrapper::new(target.into_iter().collect()))
     }
 }
 

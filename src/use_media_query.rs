@@ -96,6 +96,7 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
 
         on_cleanup({
             let cleanup = send_wrapper::SendWrapper::new(cleanup);
+            #[allow(clippy::redundant_closure)]
             move || cleanup()
         });
     }}

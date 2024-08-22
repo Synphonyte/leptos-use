@@ -125,7 +125,7 @@ where
         let stop_watch = {
             let cleanup = cleanup.clone();
 
-            leptos::prelude::watch(
+            let stop = Effect::watch(
                 move || targets.get(),
                 move |targets, _, _| {
                     cleanup();
@@ -144,7 +144,9 @@ where
                     }
                 },
                 false,
-            )
+            );
+
+            move || stop.stop()
         };
 
         let stop = move || {
@@ -154,6 +156,7 @@ where
 
         on_cleanup({
             let stop = SendWrapper::new(stop.clone());
+            #[allow(clippy::redundant_closure)]
             move || stop()
         });
 

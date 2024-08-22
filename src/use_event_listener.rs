@@ -190,6 +190,7 @@ where
 
         on_cleanup({
             let stop = SendWrapper::new(stop.clone());
+            #[allow(clippy::redundant_closure)]
             move || stop()
         });
 

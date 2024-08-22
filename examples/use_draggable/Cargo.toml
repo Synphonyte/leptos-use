@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leptos = { version = "0.6", features = ["nightly", "csr"] }
-console_error_panic_hook = "0.1"
-console_log = "1"
-log = "0.4"
-leptos-use = { path = "../..", features = ["use_draggable", "docs"] }
-web-sys = "0.3"
+leptos = { workspace = true, features = ["nightly", "csr"] }
+console_error_panic_hook = { workspace = true }
+console_log = { workspace = true }
+log = { workspace = true }
+leptos-use = { workspace = true, features = ["use_draggable", "docs"] }
+web-sys = { workspace = true }
 
 [dev-dependencies]
-wasm-bindgen = "0.2"
-wasm-bindgen-test = "0.3.0"
+wasm-bindgen = { workspace = true }
+wasm-bindgen-test = { workspace = true }
