@@ -6,7 +6,7 @@ use leptos_use::on_click_outside;
 #[component]
 fn Demo() -> impl IntoView {
     let (show_modal, set_show_modal) = signal(false);
-    let modal_ref = create_node_ref::<Div>();
+    let modal_ref = NodeRef::<Div>::new();
 
     let _ = on_click_outside(modal_ref, move |_| set_show_modal.set(false));
 
@@ -78,7 +78,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

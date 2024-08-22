@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::use_prefers_reduced_motion;
 
@@ -23,7 +23,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

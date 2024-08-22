@@ -22,6 +22,7 @@ fn Demo() -> impl IntoView {
 
     view! {
         <pre>
+            <>
             "accelerometer: " {move || accelerometer().to_string()}
             "\naccessibility_events: " {move || accessibility_events().to_string()}
             "\nambient_light_sensor: " {move || ambient_light_sensor().to_string()}
@@ -30,6 +31,7 @@ fn Demo() -> impl IntoView {
             "\nclipboard_read: " {move || clipboard_read().to_string()}
             "\nclipboard_write: " {move || clipboard_write().to_string()}
             "\ngyroscope: " {move || gyroscope().to_string()}
+            </><>
             "\nmagnetometer: " {move || magnetometer().to_string()}
             "\nmicrophone: " {move || microphone().to_string()}
             "\nnotifications: " {move || notifications().to_string()}
@@ -37,6 +39,7 @@ fn Demo() -> impl IntoView {
             "\npersistent_storage: " {move || persistent_storage().to_string()}
             "\npush: " {move || push().to_string()}
             "\nspeaker: " {move || speaker().to_string()}
+            </>
         </pre>
     }
 }
@@ -45,7 +48,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

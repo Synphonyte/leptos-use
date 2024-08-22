@@ -7,7 +7,7 @@ use leptos_use::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneRetu
 fn Demo() -> impl IntoView {
     let (dropped, set_dropped) = signal(false);
 
-    let drop_zone_el = create_node_ref::<Div>();
+    let drop_zone_el = NodeRef::<Div>::new();
 
     let UseDropZoneReturn {
         is_over_drop_zone,
@@ -50,7 +50,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

@@ -5,7 +5,7 @@ use leptos_use::use_resize_observer;
 
 #[component]
 fn Demo() -> impl IntoView {
-    let el = create_node_ref::<Textarea>();
+    let el = NodeRef::<Textarea>::new();
     let (text, set_text) = signal("".to_string());
 
     use_resize_observer(el, move |entries, _| {
@@ -32,7 +32,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

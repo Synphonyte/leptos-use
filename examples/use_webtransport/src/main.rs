@@ -41,7 +41,7 @@ fn Demo() -> impl IntoView {
         }
     };
 
-    let _ = watch(
+    Effect::watch(
         transport.datagrams,
         move |grams, _, _| {
             if let Some(grams) = grams {
@@ -64,7 +64,7 @@ fn Demo() -> impl IntoView {
         move |_| {
             let transport = transport.clone();
 
-            spawn_local(async move {
+            leptos::spawn::spawn_local(async move {
                 match transport.open_bidir_stream().await {
                     Ok(bidir_stream) => {
                         let i = id.get_value();
@@ -105,7 +105,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

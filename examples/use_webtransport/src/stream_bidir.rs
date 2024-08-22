@@ -14,7 +14,7 @@ pub fn StreamBidir(
         set_log.update(|log| log.push(format!("Sent: '{}'", msg)));
     };
 
-    let _ = watch(
+    Effect::watch(
         stream.bytes,
         move |bytes, _, _| {
             if let Some(bytes) = bytes {

@@ -5,7 +5,7 @@ use leptos_use::{watch_pausable, WatchPausableReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let input = create_node_ref::<Input>();
+    let input = NodeRef::<Input>::new();
     let (log, set_log) = signal("".to_string());
     let (source, set_source) = signal("".to_string());
 
@@ -61,7 +61,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

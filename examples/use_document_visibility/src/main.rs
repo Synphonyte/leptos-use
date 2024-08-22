@@ -9,7 +9,7 @@ fn Demo() -> impl IntoView {
     let (message, set_message) = signal(start_message);
     let visibility = use_document_visibility();
 
-    let _ = watch(
+    Effect::watch(
         visibility,
         move |cur, prev, _| {
             if let Some(prev) = prev {
@@ -37,7 +37,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }

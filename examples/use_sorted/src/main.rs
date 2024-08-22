@@ -3,7 +3,7 @@ use leptos_use::docs::demo_or_body;
 use leptos_use::use_sorted;
 
 fn string_list(list: &[i32]) -> String {
-    list.into_iter()
+    list.iter()
         .map(i32::to_string)
         .collect::<Vec<_>>()
         .join(",")
@@ -11,7 +11,7 @@ fn string_list(list: &[i32]) -> String {
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (list, set_list) = create_signal::<Vec<i32>>(vec![4, 2, 67, 34, 76, 22, 2, 4, 65, 23]);
+    let (list, set_list) = signal::<Vec<i32>>(vec![4, 2, 67, 34, 76, 22, 2, 4, 65, 23]);
 
     let sorted: Signal<Vec<i32>> = use_sorted(list);
 
@@ -38,7 +38,7 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let _ = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
 }
