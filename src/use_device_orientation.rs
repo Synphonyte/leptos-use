@@ -44,6 +44,7 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         use leptos::prelude::*;
         use crate::{use_event_listener_with_options, UseEventListenerOptions, use_supported, js};
         use leptos::ev::deviceorientation;
+        use send_wrapper::SendWrapper;
 
         let is_supported = use_supported(|| js!("DeviceOrientationEvent" in &window()));
         let (absolute, set_absolute) = signal(false);
@@ -75,12 +76,13 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         }
     }}
 
+    #[allow(clippy::useless_conversion)]
     UseDeviceOrientationReturn {
         is_supported,
-        absolute,
-        alpha,
-        beta,
-        gamma,
+        absolute: absolute.into(),
+        alpha: alpha.into(),
+        beta: beta.into(),
+        gamma: gamma.into(),
     }
 }
 

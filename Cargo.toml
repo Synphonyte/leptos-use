@@ -144,7 +144,6 @@ serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
-default = ["ssr"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = []
