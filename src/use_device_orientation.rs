@@ -1,6 +1,5 @@
 use cfg_if::cfg_if;
 use leptos::prelude::wrappers::read::Signal;
-use send_wrapper::SendWrapper;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
 /// Provide web developers with information from the physical orientation of
@@ -70,6 +69,7 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
 
             on_cleanup({
                 let cleanup = SendWrapper::new(cleanup);
+                #[allow(clippy::redundant_closure)]
                 move || cleanup()
             });
         }
@@ -77,10 +77,10 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
 
     UseDeviceOrientationReturn {
         is_supported,
-        absolute: absolute.into(),
-        alpha: alpha.into(),
-        beta: beta.into(),
-        gamma: gamma.into(),
+        absolute,
+        alpha,
+        beta,
+        gamma,
     }
 }
 

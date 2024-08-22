@@ -2,7 +2,11 @@ use crate::core::url;
 use crate::core::StorageType;
 use crate::core::{ElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, UseStorageOptions};
-use crate::{sync_signal_with_options, use_cookie, use_preferred_dark, SyncSignalOptions};
+use crate::utils::get_header;
+use crate::{
+    sync_signal_with_options, use_cookie, use_preferred_dark_with_options, SyncSignalOptions,
+    UsePreferredDarkOptions,
+};
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::wrappers::read::Signal;
@@ -84,7 +88,7 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
-/// ### Cookies
+/// ### Cookie
 ///
 /// To persist color mode in a cookie, use `use_cookie_with_options` and specify `.cookie_enabled(true)`.
 ///
@@ -113,9 +117,24 @@ use wasm_bindgen::JsCast;
 ///
 /// ## Server-Side Rendering
 ///
-/// On the server this will by default return `ColorMode::Light`. Persistence with storage is disabled.
+/// On the server this will try to read the
+/// [`Sec-CH-Prefers-Color-Scheme` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
+/// to determine the color mode. If the header is not present it will return `ColorMode::Light`.
+/// Please have a look at the linked documentation above for that header to see browser support
+/// as well as potential server requirements.
 ///
-/// If `cookie_enabled` is set to `true`, cookies will be used and if present this value will be used
+/// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
+/// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
+///
+/// ### Bring your own header
+///
+/// In case you're neither using Axum, Actix nor Spin, or the default implementation is not to your liking,
+/// you can provide your own way of reading the color scheme header value using the option
+/// [`crate::UseColorModeOptions::ssr_color_header_getter`].
+///
+/// ### Cookie
+///
+/// If `cookie_enabled` is set to `true`, a cookie will be used and if present this value will be used
 /// on the server as well as on the client. Please note that you have to add the `axum` or `actix`
 /// feature as described in [`fn@crate::use_cookie`].
 ///
@@ -152,6 +171,7 @@ where
         emit_auto,
         transition_enabled,
         listen_to_storage_changes,
+        ssr_color_header_getter,
         _marker,
     } = options;
 
@@ -163,7 +183,9 @@ where
         ])
         .collect();
 
-    let preferred_dark = use_preferred_dark();
+    let preferred_dark = use_preferred_dark_with_options(UsePreferredDarkOptions {
+        ssr_color_header_getter,
+    });
 
     let system = Signal::derive(move || {
         if preferred_dark.get() {
@@ -426,8 +448,8 @@ where
     /// If specified this will override the default behavior.
     /// To get the default behaviour back you can call the provided `default_handler` function.
     /// It takes two parameters:
-    /// - `mode: ColorMode`: The color mode to change to.
-    /// -`default_handler: Arc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
+    ///     - `mode: ColorMode`: The color mode to change to.
+    ///     -`default_handler: Arc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
     on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.
@@ -472,6 +494,14 @@ where
     /// Defaults to true.
     listen_to_storage_changes: bool,
 
+    /// Getter function to return the string value of the
+    /// [`Sec-CH-Prefers-Color-Scheme`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
+    /// header.
+    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default
+    /// implementation provided.
+    #[allow(dead_code)]
+    ssr_color_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
+
     #[builder(skip)]
     _marker: PhantomData<T>,
 }
@@ -497,6 +527,13 @@ impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
             emit_auto: false,
             transition_enabled: false,
             listen_to_storage_changes: true,
+            ssr_color_header_getter: Arc::new(move || {
+                get_header!(
+                    HeaderName::from_static("sec-ch-prefers-color-scheme"),
+                    use_locale,
+                    ssr_color_header_getter
+                )
+            }),
             _marker: PhantomData,
         }
     }

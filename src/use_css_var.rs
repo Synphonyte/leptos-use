@@ -155,7 +155,7 @@ where
             );
         }
 
-        let _ = watch(
+        Effect::watch(
                         move || variable.get(),
             move |val, _, _| {
                 if let Some(el) = el_signal.get() {

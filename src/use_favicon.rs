@@ -92,7 +92,7 @@ pub fn use_favicon_with_options(
             }
         };
 
-        let _ = watch(
+        Effect::watch(
                         move || favicon.get(),
             move |new_icon, prev_icon, _| {
                 if Some(new_icon) != prev_icon {

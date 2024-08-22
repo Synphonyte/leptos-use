@@ -39,6 +39,7 @@ use std::rc::Rc;
 ///
 /// * [`fn@crate::use_preferred_dark`]
 /// * [`fn@crate::use_preferred_contrast`]
+/// * [`fn@crate::use_prefers_reduced_motion`]
 pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
     let query = query.into();
 
@@ -95,6 +96,7 @@ pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
 
         on_cleanup({
             let cleanup = send_wrapper::SendWrapper::new(cleanup);
+            #[allow(clippy::redundant_closure)]
             move || cleanup()
         });
     }}

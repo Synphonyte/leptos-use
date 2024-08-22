@@ -127,6 +127,7 @@ where
     }
 
     if matches!(interval, MaybeSignal::Dynamic(_)) {
+        #[allow(clippy::clone_on_copy)]
         let resume = resume.clone();
 
         let effect = Effect::watch(
@@ -143,6 +144,7 @@ where
 
     on_cleanup({
         let pause = SendWrapper::new(pause.clone());
+        #[allow(clippy::redundant_closure)]
         move || pause()
     });
 

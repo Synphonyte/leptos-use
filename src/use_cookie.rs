@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use crate::core::now;
+use crate::utils::get_header;
 use codee::{CodecError, Decoder, Encoder};
 use cookie::time::{Duration, OffsetDateTime};
 pub use cookie::SameSite;
@@ -99,7 +100,7 @@ use std::sync::Arc;
 ///
 /// ### Bring your own header
 ///
-/// In case you're neither using Axum nor Actix, or the default implementation is not to your liking,
+/// In case you're neither using Axum, Actix nor Spin, or the default implementation is not to your liking,
 /// you can provide your own way of reading and writing the cookie header value.
 ///
 /// ```
@@ -495,78 +496,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
             path: None,
             same_site: None,
             ssr_cookies_header_getter: Arc::new(move || {
-                #[cfg(feature = "ssr")]
-                {
-                    #[cfg(all(feature = "actix", feature = "axum"))]
-                    compile_error!("You can only enable one of features \"actix\" and \"axum\" at the same time");
-
-                    #[cfg(all(feature = "actix", feature = "spin"))]
-                    compile_error!("You can only enable one of features \"actix\" and \"spin\" at the same time");
-
-                    #[cfg(all(feature = "axum", feature = "spin"))]
-                    compile_error!("You can only enable one of features \"axum\" and \"spin\" at the same time");
-
-                    #[cfg(feature = "actix")]
-                    const COOKIE: http0_2::HeaderName = http0_2::header::COOKIE;
-                    #[cfg(any(feature = "axum", feature = "spin"))]
-                    const COOKIE: http1::HeaderName = http1::header::COOKIE;
-
-                    #[cfg(feature = "actix")]
-                    type HeaderValue = http0_2::HeaderValue;
-                    #[cfg(feature = "axum")]
-                    type HeaderValue = http1::HeaderValue;
-
-                    #[cfg(any(feature = "axum", feature = "actix", feature = "spin"))]
-                    let headers;
-                    #[cfg(feature = "actix")]
-                    {
-                        headers = use_context::<actix_web::HttpRequest>()
-                            .map(|req| req.headers().clone());
-                    }
-                    #[cfg(feature = "axum")]
-                    {
-                        headers = use_context::<http1::request::Parts>().map(|parts| parts.headers);
-                    }
-                    #[cfg(feature = "spin")]
-                    {
-                        headers = use_context::<leptos_spin::RequestParts>()
-                            .map(|parts| parts.headers().clone());
-                    }
-
-                    #[cfg(all(
-                        not(feature = "axum"),
-                        not(feature = "actix"),
-                        not(feature = "spin")
-                    ))]
-                    {
-                        warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_cookies_header_getter`");
-                        None
-                    }
-
-                    #[cfg(any(feature = "axum", feature = "actix"))]
-                    {
-                        headers.map(|headers| {
-                            headers
-                                .get(COOKIE)
-                                .cloned()
-                                .unwrap_or_else(|| HeaderValue::from_static(""))
-                                .to_str()
-                                .unwrap_or_default()
-                                .to_owned()
-                        })
-                    }
-                    #[cfg(feature = "spin")]
-                    {
-                        headers.and_then(|headers| {
-                            headers
-                                .iter()
-                                .find(|(key, _)| **key == COOKIE)
-                                .and_then(|(_, value)| String::from_utf8(value.to_vec()).ok())
-                        })
-                    }
-                }
-                #[cfg(not(feature = "ssr"))]
-                None
+                get_header!(COOKIE, use_cookie, ssr_cookies_header_getter)
             }),
             ssr_set_cookie: Arc::new(|cookie: &Cookie| {
                 #[cfg(feature = "ssr")]

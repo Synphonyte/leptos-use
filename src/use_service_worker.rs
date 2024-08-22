@@ -84,7 +84,7 @@ pub fn use_service_worker_with_options(
         match a {
             Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
             None => match b {
-                Some(res) => res.map_err(|e| ServiceWorkerRegistrationError::Js(e)),
+                Some(res) => res.map_err(ServiceWorkerRegistrationError::Js),
                 None => Err(ServiceWorkerRegistrationError::NeverQueried),
             },
         }

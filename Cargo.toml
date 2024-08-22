@@ -1,10 +1,10 @@
 [package]
 name = "leptos-use"
-version = "0.11.0"
+version = "0.12.0"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
-description = "Collection of essential Leptos utilities inspired by SolidJS USE / VueUse"
+description = "Collection of essential Leptos utilities inspired by React-Use / VueUse / SolidJS-USE"
 exclude = ["examples/", "tests/"]
 keywords = ["leptos", "utilities"]
 license = "MIT OR Apache-2.0"
@@ -34,11 +34,12 @@ num = { version = "0.4", optional = true }
 paste = "1"
 send_wrapper = "0.6.0"
 thiserror = "1"
-wasm-bindgen = "0.2.92"
+unic-langid = "0.9"
+wasm-bindgen = "=0.2.93"
 wasm-bindgen-futures = "0.4"
 
 [dependencies.web-sys]
-version = "0.3"
+version = "=0.3.70"
 features = [
     "AddEventListenerOptions",
     "BinaryType",
@@ -130,13 +131,20 @@ features = [
 ]
 
 [dev-dependencies]
+codee = { version = "0.1", features = [
+    "json_serde",
+    "msgpack_serde",
+    "base64",
+    "prost",
+] }
 getrandom = { version = "0.2", features = ["js"] }
 leptos_meta = { git = "https://github.com/leptos-rs/leptos" }
 rand = "0.8"
-codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
 serde = { version = "1", features = ["derive"] }
+unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
+default = ["ssr"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = []

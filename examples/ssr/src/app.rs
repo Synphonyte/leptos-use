@@ -1,15 +1,15 @@
 use crate::error_template::{AppError, ErrorTemplate};
+use codee::string::FromToStringCodec;
 use leptos::ev::{keypress, KeyboardEvent};
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
-use codee::string::FromToStringCodec;
 use leptos_use::{
     use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
-    use_interval, use_intl_number_format, use_preferred_dark, use_timestamp, use_window, ColorMode,
-    UseColorModeOptions, UseColorModeReturn, UseCookieOptions, UseIntervalReturn,
-    UseIntlNumberFormatOptions,
+    use_interval, use_intl_number_format, use_locales, use_preferred_dark, use_timestamp,
+    use_window, ColorMode, UseColorModeOptions, UseColorModeReturn, UseCookieOptions,
+    UseIntervalReturn, UseIntlNumberFormatOptions,
 };
 
 #[component]
@@ -83,12 +83,13 @@ fn HomePage() -> impl IntoView {
             .default_value(Some("Bogus string".to_owned())),
     );
 
+    let locales = use_locales();
+
     view! {
         <Html class=move || mode.get().to_string()/>
 
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
-        <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
         <p>Press any key: {key}</p>
         <p>Debounced called: {debounce_value}</p>
         <p>Color mode: {move || format!("{:?}", mode.get())}</p>
@@ -99,7 +100,10 @@ fn HomePage() -> impl IntoView {
         <p>Dark preferred: {is_dark_preferred}</p>
         <LocalStorageTest/>
         <p>Test cookie: {move || test_cookie().unwrap_or("<Expired>".to_string())}</p>
+        <pre>{move || format!("Locales:\n    {}", locales().join("\n    "))}</pre>
 
+        <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
+        
         <Show when={move || count() > 0 }>
             <div>Greater than 0 </div>
         </Show>

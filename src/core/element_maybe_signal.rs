@@ -64,7 +64,7 @@ where
 
     fn with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => f(&t),
+            Self::Static(t) => f(t),
             Self::Dynamic(s) => {
                 let value = s.get();
                 f(&value)
@@ -75,7 +75,7 @@ where
 
     fn try_with<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => Some(f(&t)),
+            Self::Static(t) => Some(f(t)),
             Self::Dynamic(s) => s.try_with(f),
             _ => unreachable!(),
         }
@@ -90,7 +90,7 @@ where
 
     fn with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> O {
         match self {
-            Self::Static(t) => f(&t),
+            Self::Static(t) => f(t),
             Self::Dynamic(s) => s.with_untracked(f),
             _ => unreachable!(),
         }
@@ -98,7 +98,7 @@ where
 
     fn try_with_untracked<O>(&self, f: impl FnOnce(&Option<T>) -> O) -> Option<O> {
         match self {
-            Self::Static(t) => Some(f(&t)),
+            Self::Static(t) => Some(f(t)),
             Self::Dynamic(s) => s.try_with_untracked(f),
             _ => unreachable!(),
         }
