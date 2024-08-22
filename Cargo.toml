@@ -14,14 +14,14 @@ homepage = "https://leptos-use.rs"
 
 [dependencies]
 actix-web = { version = "4", optional = true, default-features = false }
-async-trait = "0.1"
+async-trait = { version = "0.1", optional = true }
 cfg-if = "1"
-codee = "0.1"
-cookie = { version = "0.18", features = ["percent-encode"] }
+codee = { version = "0.1", optional = true }
+cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
-futures-util = "0.3"
-gloo-timers = { version = "0.3.0", features = ["futures"] }
-gloo-utils = { version = "0.2.0" }
+futures-util = { version = "0.3", optional = true }
+gloo-timers = { version = "0.3.0", optional = true, features = ["futures"] }
+gloo-utils = { version = "0.2.0", optional = true }
 http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
@@ -33,101 +33,10 @@ leptos-spin = { version = "0.1", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 thiserror = "1"
-unic-langid = "0.9"
+unic-langid = { version = "0.9", optional = true }
 wasm-bindgen = "=0.2.93"
 wasm-bindgen-futures = "0.4"
-
-[dependencies.web-sys]
-version = "=0.3.70"
-features = [
-    "AddEventListenerOptions",
-    "BinaryType",
-    "BroadcastChannel",
-    "Coordinates",
-    "Clipboard",
-    "CloseEvent",
-    "CssStyleDeclaration",
-    "CustomEvent",
-    "CustomEventInit",
-    "DisplayMediaStreamConstraints",
-    "DomRect",
-    "DomRectReadOnly",
-    "DataTransfer",
-    "DragEvent",
-    "Element",
-    "EventListener",
-    "EventListenerOptions",
-    "EventSource",
-    "EventSourceInit",
-    "EventTarget",
-    "File",
-    "FileList",
-    "Geolocation",
-    "HtmlDocument",
-    "HtmlElement",
-    "HtmlLinkElement",
-    "HtmlStyleElement",
-    "IntersectionObserver",
-    "IntersectionObserverInit",
-    "IntersectionObserverEntry",
-    "Location",
-    "MediaDevices",
-    "MediaQueryList",
-    "MediaStream",
-    "MediaStreamConstraints",
-    "MediaStreamTrack",
-    "MessageEvent",
-    "MouseEvent",
-    "MutationObserver",
-    "MutationObserverInit",
-    "MutationRecord",
-    "Navigator",
-    "NodeList",
-    "Notification",
-    "NotificationDirection",
-    "NotificationOptions",
-    "NotificationPermission",
-    "Permissions",
-    "PermissionState",
-    "PermissionStatus",
-    "PointerEvent",
-    "Position",
-    "PositionError",
-    "PositionOptions",
-    "ReadableStream",
-    "ReadableStreamDefaultReader",
-    "ReadableStreamGetReaderOptions",
-    "ReadableStreamReaderMode",
-    "ResizeObserver",
-    "ResizeObserverBoxOptions",
-    "ResizeObserverEntry",
-    "ResizeObserverOptions",
-    "ResizeObserverSize",
-    "ScrollBehavior",
-    "ScrollToOptions",
-    "ServiceWorker",
-    "ServiceWorkerContainer",
-    "ServiceWorkerRegistration",
-    "ServiceWorkerState",
-    "Storage",
-    "StorageEvent",
-    "Touch",
-    "TouchEvent",
-    "TouchList",
-    "Url",
-    "UrlSearchParams",
-    "VisibilityState",
-    "WebSocket",
-    "WebTransport",
-    "WebTransportOptions",
-    "WebTransportDatagramDuplexStream",
-    "WebTransportBidirectionalStream",
-    "Window",
-    "WebTransportReceiveStream",
-    "WebTransportSendStream",
-    "WritableStream",
-    "WritableStreamDefaultWriter",
-]
+web-sys = { version = "=0.3.70", optional = true }
 
 [dev-dependencies]
 codee = { version = "0.1", features = ["json_serde", "msgpack_serde", "base64", "prost"] }
@@ -138,13 +47,303 @@ serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
+default = [
+    "is_err",
+    "is_none",
+    "is_ok",
+    "is_some",
+    "on_click_outside",
+    "signal_debounced",
+    "signal_throttled",
+    "storage",
+    "sync_signal",
+    "use_active_element",
+    "use_breakpoints",
+    "use_broadcast_channel",
+    "use_clipboard",
+    "use_color_mode",
+    "use_cookie",
+    "use_css_var",
+    "use_cycle_list",
+    "use_debounce_fn",
+    "use_device_orientation",
+    "use_device_pixel_ratio",
+    "use_display_media",
+    "use_document",
+    "use_document_visibility",
+    "use_draggable",
+    "use_drop_zone",
+    "use_element_bounding",
+    "use_element_hover",
+    "use_element_size",
+    "use_element_visibility",
+    "use_event_listener",
+    "use_event_source",
+    "use_favicon",
+    "use_geolocation",
+    "use_idle",
+    "use_infinite_scroll",
+    "use_intersection_observer",
+    "use_interval",
+    "use_interval_fn",
+    "use_intl_number_format",
+    "use_locale",
+    "use_locales",
+    "use_media_query",
+    "use_mouse",
+    "use_mouse_in_element",
+    "use_mutation_observer",
+    "use_permission",
+    "use_preferred_contrast",
+    "use_preferred_dark",
+    "use_prefers_reduced_motion",
+    "use_raf_fn",
+    "use_resize_observer",
+    "use_scroll",
+    "use_service_worker",
+    "use_sorted",
+    "use_supported",
+    "use_throttle_fn",
+    "use_timeout_fn",
+    "use_timestamp",
+    "use_to_string",
+    "use_user_media",
+    "use_web_notification",
+    "use_websocket",
+    "use_window",
+    "use_window_focus",
+    "use_window_scroll",
+    "watch_debounced",
+    "watch_pausable",
+    "watch_throttled",
+    "watch_with_options",
+    "whenever"
+]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
-docs = []
+docs = ["dep:web-sys"]
+element = ["use_document", "use_window", "dep:web-sys", "web-sys/EventTarget"]
+is = ["use_window"]
+is_err = []
+is_none = []
+is_ok = []
+is_some = []
 math = ["num"]
+on_click_outside = ["use_event_listener", "is"]
+signal_debounced = ["use_debounce_fn"]
+signal_throttled = ["use_throttle_fn"]
 spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
+storage = [
+    "use_event_listener",
+    "use_window",
+    "watch_with_options",
+    "dep:web-sys",
+    "dep:codee",
+    "web-sys/CustomEventInit",
+    "web-sys/Storage"
+]
+sync_signal = []
+use_active_element = ["use_event_listener"]
+use_breakpoints = ["use_media_query"]
+use_broadcast_channel = [
+    "use_event_listener",
+    "use_supported",
+    "dep:codee",
+    "web-sys/BroadcastChannel",
+]
+use_clipboard = [
+    "use_event_listener",
+    "use_permission",
+    "use_supported",
+    "use_timeout_fn",
+    "web-sys/Clipboard",
+]
+use_color_mode = [
+    "use_cookie",
+    "use_cycle_list",
+    "use_preferred_dark",
+    "storage",
+    "sync_signal"
+]
+use_cookie = [
+    "use_broadcast_channel",
+    "watch_pausable",
+    "dep:cookie",
+    "web-sys/HtmlDocument",
+]
+use_css_var = [
+    "use_mutation_observer",
+    "watch_with_options",
+]
+use_cycle_list = []
+use_debounce_fn = []
+use_device_orientation = ["use_event_listener", "use_supported"]
+use_device_pixel_ratio = ["use_event_listener", "web-sys/MediaQueryList"]
+use_display_media = [
+    "use_window",
+    "web-sys/DisplayMediaStreamConstraints",
+    "web-sys/MediaDevices",
+    "web-sys/MediaStream",
+    "web-sys/MediaStreamTrack",
+]
+use_document = [
+    "dep:web-sys",
+    "web-sys/VisibilityState",
+]
+use_document_visibility = ["use_event_listener", "web-sys/VisibilityState"]
+use_draggable = ["use_event_listener", "web-sys/DomRect"]
+use_drop_zone = [
+    "use_event_listener",
+    "web-sys/DataTransfer",
+    "web-sys/File",
+    "web-sys/FileList"
+]
+use_element_bounding = [
+    "use_event_listener",
+    "use_resize_observer",
+    "web-sys/DomRect",
+]
+use_element_hover = ["use_event_listener"]
+use_element_size = [
+    "use_resize_observer",
+    "watch_with_options",
+    "web-sys/ResizeObserverSize",
+]
+use_element_visibility = [
+    "use_intersection_observer",
+    "web-sys/DomRect",
+]
+use_event_listener = [
+    "element",
+    "watch_with_options",
+    "dep:web-sys",
+    "web-sys/EventTarget",
+    "web-sys/EventListenerOptions"
+]
+use_event_source = [
+    "use_event_listener",
+    "web-sys/EventSource",
+    "web-sys/EventSourceInit",
+    "dep:codee",
+]
+use_favicon = []
+use_geolocation = [
+    "use_window",
+    "web-sys/Coordinates",
+    "web-sys/Geolocation",
+    "web-sys/Position",
+    "web-sys/PositionError",
+    "web-sys/PositionOptions",
+]
+use_idle = [
+    "use_event_listener",
+    "use_document",
+    "use_timestamp",
+]
+use_infinite_scroll = [
+    "use_element_visibility",
+    "use_scroll",
+    "dep:gloo-timers",
+    "dep:futures-util",
+]
+use_intersection_observer = [
+    "element",
+    "watch_with_options",
+    "web-sys/IntersectionObserver",
+    "web-sys/IntersectionObserverEntry",
+    "web-sys/IntersectionObserverInit",
+]
+use_interval = ["use_interval_fn"]
+use_interval_fn = []
+use_intl_number_format = []
+use_locale = ["use_locales", "dep:unic-langid"]
+use_locales = ["use_event_listener", "use_window"]
+use_media_query = ["use_event_listener"]
+use_mouse = [
+    "element",
+    "use_event_listener",
+    "use_window",
+    "web-sys/Touch",
+    "web-sys/TouchList",
+]
+use_mouse_in_element = [
+    "use_mouse",
+    "web-sys/DomRect",
+]
+use_mutation_observer = [
+    "element",
+    "use_supported",
+    "web-sys/MutationObserver",
+    "web-sys/MutationObserverInit",
+    "web-sys/MutationRecord",
+]
+use_permission = [
+    "use_event_listener",
+    "web-sys/Permissions",
+    "web-sys/PermissionState",
+    "web-sys/PermissionStatus",
+]
+use_preferred_contrast = ["use_media_query"]
+use_preferred_dark = ["use_media_query"]
+use_prefers_reduced_motion = ["use_media_query"]
+use_raf_fn = []
+use_resize_observer = [
+    "element",
+    "use_supported",
+    "web-sys/DomRectReadOnly",
+    "web-sys/ResizeObserver",
+    "web-sys/ResizeObserverBoxOptions",
+    "web-sys/ResizeObserverEntry",
+    "web-sys/ResizeObserverOptions",
+]
+use_scroll = [
+    "element",
+    "use_event_listener",
+    "use_debounce_fn",
+    "use_throttle_fn",
+    "web-sys/ScrollBehavior",
+    "web-sys/ScrollToOptions",
+]
+use_service_worker = [
+    "use_window",
+    "web-sys/ServiceWorker",
+    "web-sys/ServiceWorkerContainer",
+    "web-sys/ServiceWorkerRegistration"
+]
+use_sorted = []
+use_supported = []
+use_throttle_fn = []
+use_timeout_fn = []
+use_timestamp = ["use_interval_fn", "use_raf_fn"]
+use_to_string = []
+use_user_media = [
+    "use_window",
+    "web-sys/MediaDevices",
+    "web-sys/MediaStream",
+    "web-sys/MediaStreamConstraints",
+    "web-sys/MediaStreamTrack",
+]
+use_web_notification = [
+    "use_supported",
+    "use_window",
+    "use_event_listener",
+    "web-sys/Notification",
+    "web-sys/NotificationOptions",
+    "web-sys/NotificationPermission",
+    "web-sys/NotificationDirection",
+    "web-sys/VisibilityState"
+]
+use_websocket = ["dep:codee"]
+use_window = ["use_document", "dep:web-sys", "web-sys/Navigator", "web-sys/MediaQueryList"]
+use_window_focus = ["use_event_listener"]
+use_window_scroll = ["use_event_listener", "use_window"]
 wasm_ssr = []
+watch_debounced = ["watch_with_options"]
+watch_pausable = ["watch_with_options"]
+watch_throttled = ["watch_with_options"]
+watch_with_options = []
+whenever = []
 
 [package.metadata.docs.rs]
 features = ["math", "docs", "ssr"]

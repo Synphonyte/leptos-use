@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::time::Duration;
 use thiserror::Error;
 
-use crate::core::ConnectionReadyState;
+use crate::{core::ConnectionReadyState, ReconnectLimit};
 use codee::{
     CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder, IsBinary,
 };
@@ -606,26 +606,6 @@ where
         open,
         close,
         send,
-    }
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum ReconnectLimit {
-    Infinite,
-    Limited(u64),
-}
-
-impl Default for ReconnectLimit {
-    fn default() -> Self {
-        ReconnectLimit::Limited(3)
-    }
-}
-
-impl ReconnectLimit {
-    pub fn is_exceeded_by(self, times: u64) -> bool {
-        match self {
-            ReconnectLimit::Infinite => false,
-            ReconnectLimit::Limited(limit) => times >= limit,
-        }
     }
 }
 

@@ -1,3 +1,5 @@
+#![allow(unused_macros, unused_imports)]
+
 macro_rules! js_value_from_to_string {
     ($name:ident) => {
         impl From<$name> for JsValue {

@@ -1,7 +1,4 @@
-use crate::{
-    core::{MaybeRwSignal, StorageType},
-    utils::FilterOptions,
-};
+use crate::{core::MaybeRwSignal, storage::StorageType, utils::FilterOptions};
 use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;

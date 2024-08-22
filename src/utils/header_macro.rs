@@ -1,3 +1,5 @@
+#![allow(unused_macros, unused_imports)]
+
 macro_rules! get_header {
     (
         $header_name:expr,
