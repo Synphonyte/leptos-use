@@ -3,7 +3,6 @@
 use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use send_wrapper::SendWrapper;
 use std::cell::Cell;
@@ -104,7 +103,7 @@ where
 
                 move || {
                     #[cfg(debug_assertions)]
-                    let _z = SpecialNonReactiveZone::enter();
+                    let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                     callback();
                 }

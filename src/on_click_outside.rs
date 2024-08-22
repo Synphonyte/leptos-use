@@ -114,7 +114,6 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
         let OnClickOutsideOptions {
             ignore,
             capture,
@@ -183,7 +182,7 @@ where
                     }
 
                     #[cfg(debug_assertions)]
-                    let _z = SpecialNonReactiveZone::enter();
+                    let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                     handler(event.into());
                 }

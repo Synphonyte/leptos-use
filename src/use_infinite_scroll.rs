@@ -6,7 +6,6 @@ use crate::{
 use default_struct_builder::DefaultBuilder;
 use futures_util::join;
 use gloo_timers::future::sleep;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::future::Future;
@@ -160,7 +159,7 @@ where
                     let measure = measure.clone();
                     leptos::spawn::spawn_local(async move {
                         #[cfg(debug_assertions)]
-                        let zone = SpecialNonReactiveZone::enter();
+                        let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                         join!(
                             on_load_more.with_value(|f| f(state)),

@@ -1,6 +1,5 @@
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::actions::Action;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
 use send_wrapper::SendWrapper;
@@ -55,7 +54,7 @@ pub fn use_service_worker_with_options(
         let on_controller_change = options.on_controller_change.clone();
         let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             on_controller_change();
         }) as Box<dyn FnMut(JsValue)>)

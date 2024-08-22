@@ -77,7 +77,6 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
         let UseDropZoneOptions {
             on_drop,
             on_enter,
@@ -109,7 +108,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -122,7 +121,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -140,7 +139,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -156,7 +155,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),

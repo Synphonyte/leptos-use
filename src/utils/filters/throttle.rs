@@ -4,7 +4,6 @@ use crate::core::now;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::cmp::max;
 use std::sync::{atomic::AtomicBool, Arc, Mutex};
@@ -59,7 +58,7 @@ where
         let last_return_val = Arc::clone(&last_return_value);
         let invoke = move || {
             #[cfg(debug_assertions)]
-            let zone = SpecialNonReactiveZone::enter();
+            let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             let return_value = _invoke();
 

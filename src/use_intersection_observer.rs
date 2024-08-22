@@ -101,7 +101,7 @@ where
         let stop = || {};
     } else {
         use send_wrapper::SendWrapper;
-        
+
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]

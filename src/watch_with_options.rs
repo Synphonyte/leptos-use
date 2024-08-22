@@ -1,7 +1,7 @@
 use crate::filter_builder_methods;
 use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::{diagnostics::SpecialNonReactiveZone, *};
+use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -111,7 +111,7 @@ where
 
         move || {
             #[cfg(debug_assertions)]
-            let _z = SpecialNonReactiveZone::enter();
+            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
             let ret = callback(
                 cur_deps_value

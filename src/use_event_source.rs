@@ -2,7 +2,6 @@ use crate::core::ConnectionReadyState;
 use crate::{js, use_event_listener, ReconnectLimit};
 use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::diagnostics::SpecialNonReactiveZone;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicBool, AtomicU32};
@@ -235,7 +234,7 @@ where
                             );
                         } else {
                             #[cfg(debug_assertions)]
-                            let _z = SpecialNonReactiveZone::enter();
+                            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
 
                             on_failed();
                         }
