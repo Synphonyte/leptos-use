@@ -1,4 +1,4 @@
-use crate::{watch_with_options, DebounceOptions, WatchOptions};
+use crate::{watch_with_options, utils::DebounceOptions, WatchOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 

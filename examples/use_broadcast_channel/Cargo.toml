@@ -9,7 +9,7 @@ codee = "0.1"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["docs"] }
+leptos-use = { path = "../..", features = ["use_broadcast_channel", "docs"] }
 web-sys = "0.3"
 
 [dev-dependencies]
