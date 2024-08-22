@@ -12,10 +12,14 @@ codee = "0.1"
 console_error_panic_hook = "0.1"
 console_log = "1"
 cfg-if = "1"
-leptos = { version = "0.6", features = ["nightly"] }
-leptos_axum = { version = "0.6", optional = true }
-leptos_meta = { version = "0.6", features = ["nightly"] }
-leptos_router = { version = "0.6", features = ["nightly"] }
+leptos = { git = "https://github.com/leptos-rs/leptos", features = ["nightly"] }
+leptos_axum = { git = "https://github.com/leptos-rs/leptos", optional = true }
+leptos_meta = { git = "https://github.com/leptos-rs/leptos", features = [
+    "nightly",
+] }
+leptos_router = { git = "https://github.com/leptos-rs/leptos", features = [
+    "nightly",
+] }
 leptos-use = { path = "../.." }
 log = "0.4"
 simple_logger = "4"

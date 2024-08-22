@@ -69,10 +69,7 @@ members = [
     "watch_throttled",
 ]
 
-exclude = [
-    "ssr",
-    "use_webtransport_with_server",
-]
+exclude = ["ssr", "use_webtransport_with_server"]
 
 [package]
 name = "leptos-use-examples"
@@ -84,6 +81,19 @@ opt-level = 'z'
 lto = true
 codegen-units = 1
 panic = "abort"
+
+[dependencies]
+leptos = { git = "https://github.com/leptos-rs/leptos" }
+console_error_panic_hook = "0.1"
+console_log = "1"
+log = "0.4"
+leptos-use = { path = "..", features = ["docs"] }
+web-sys = "0.3"
+
+[dev-dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-test = "0.3.0"
+
 
 [lib]
 
