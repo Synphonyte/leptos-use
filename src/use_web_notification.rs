@@ -228,7 +228,6 @@ impl From<NotificationDirection> for web_sys::NotificationDirection {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`
 #[derive(DefaultBuilder, Clone)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseWebNotificationOptions {
@@ -281,6 +280,10 @@ pub struct UseWebNotificationOptions {
     #[builder(into)]
     silent: Option<bool>,
 
+    /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
+    #[builder(into)]
+    vibrate: Option<wasm_bindgen::JsValue>,
+
     /// Called when the user clicks on displayed `Notification`.
     on_click: Rc<dyn Fn(web_sys::Event)>,
 
@@ -308,6 +311,7 @@ impl Default for UseWebNotificationOptions {
             require_interaction: false,
             renotify: false,
             silent: None,
+            vibrate: None,
             on_click: Rc::new(|_| {}),
             on_close: Rc::new(|_| {}),
             on_error: Rc::new(|_| {}),
@@ -345,6 +349,9 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
             web_sys_options.set_tag(tag);
         }
 
+        if let Some(vibrate) = &options.vibrate {
+            web_sys_options.set_vibrate(vibrate);
+        }
         web_sys_options
     }
 }
@@ -354,7 +361,6 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`
 #[derive(DefaultBuilder, Default)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct ShowOptions {
@@ -408,6 +414,10 @@ pub struct ShowOptions {
     /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
     #[builder(into)]
     silent: Option<bool>,
+
+    /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
+    #[builder(into)]
+    vibrate: Option<wasm_bindgen::JsValue>,
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -447,6 +457,10 @@ impl ShowOptions {
 
         if let Some(silent) = self.silent {
             options.set_silent(Some(silent));
+        }
+
+        if let Some(vibrate) = &self.vibrate {
+            options.set_vibrate(vibrate);
         }
     }
 }
