@@ -276,7 +276,7 @@ pub struct UseWebNotificationOptions {
     renotify: bool,
 
     /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
-    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    /// The default is `null`, which means the notification is not silent. If `true`, then the notification will be silent.
     #[builder(into)]
     silent: Option<bool>,
 
@@ -411,7 +411,7 @@ pub struct ShowOptions {
     renotify: Option<bool>,
 
     /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
-    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    /// The default is `null`, which means the notification is not silent. If `true`, then the notification will be silent.
     #[builder(into)]
     silent: Option<bool>,
 
