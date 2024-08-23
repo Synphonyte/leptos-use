@@ -188,21 +188,18 @@ where
     if !has_expired {
         let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
-        jar.update_value(|jar| {
-            if let Some(new_jar) = load_and_parse_cookie_jar(ssr_cookies_header_getter) {
-                *jar = new_jar;
-
-                set_cookie.set(
-                    jar.get(cookie_name)
-                        .and_then(|c| {
-                            C::decode(c.value())
-                                .map_err(|err| on_error(CodecError::Decode(err)))
-                                .ok()
-                        })
-                        .or(default_value),
-                );
-            }
+        let new_cookie = jar.try_update_value(|jar| {
+            *jar = load_and_parse_cookie_jar(ssr_cookies_header_getter)?;
+            jar.get(cookie_name)
+                .and_then(|c| {
+                    C::decode(c.value())
+                        .map_err(|err| on_error(CodecError::Decode(err)))
+                        .ok()
+                })
+                .or(default_value)
         });
+
+        set_cookie.set(new_cookie.flatten());
 
         handle_expiration(delay, set_cookie);
     } else {
