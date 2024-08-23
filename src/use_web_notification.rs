@@ -281,7 +281,7 @@ pub struct UseWebNotificationOptions {
     #[builder(into)]
     silent: Option<bool>,
 
-    /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
+    /// A `Vec<u16>` value specifying the vibration pattern in which the device is vibrating and not vibrating.
     #[builder(into)]
     vibrate: Option<Vec<u16>>,
 
@@ -416,7 +416,7 @@ pub struct ShowOptions {
     #[builder(into)]
     silent: Option<bool>,
 
-    /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
+    /// A `Vec<u16>` value specifying the vibration pattern in which the device is vibrating and not vibrating.
     #[builder(into)]
     vibrate: Option<Vec<u16>>,
 }
