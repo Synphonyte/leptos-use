@@ -447,8 +447,8 @@ where
     /// If specified this will override the default behavior.
     /// To get the default behaviour back you can call the provided `default_handler` function.
     /// It takes two parameters:
-    /// - `mode: ColorMode`: The color mode to change to.
-    /// -`default_handler: Arc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
+    ///     - `mode: ColorMode`: The color mode to change to.
+    ///     -`default_handler: Arc<dyn Fn(ColorMode)>`: The default handler that would have been called if the `on_changed` handler had not been specified.
     on_changed: OnChangedFn,
 
     /// When provided, `useStorage` will be skipped.

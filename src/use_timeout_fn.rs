@@ -52,11 +52,8 @@ where
     {
         use leptos::leptos_dom::helpers::TimeoutHandle;
         use leptos::prelude::diagnostics::SpecialNonReactiveZone;
-        use std::cell::Cell;
         use std::sync::{Arc, Mutex};
         use std::time::Duration;
-
-        let delay = delay.into();
 
         let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
 
