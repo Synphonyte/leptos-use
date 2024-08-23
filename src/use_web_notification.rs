@@ -3,6 +3,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::rc::Rc;
+use wasm_bindgen::JsValue;
 
 /// Reactive [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/Notification).
 ///
@@ -282,7 +283,7 @@ pub struct UseWebNotificationOptions {
 
     /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
     #[builder(into)]
-    vibrate: Option<wasm_bindgen::JsValue>,
+    vibrate: Option<Vec<u16>>,
 
     /// Called when the user clicks on displayed `Notification`.
     on_click: Rc<dyn Fn(web_sys::Event)>,
@@ -350,7 +351,7 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
         }
 
         if let Some(vibrate) = &options.vibrate {
-            web_sys_options.set_vibrate(vibrate);
+            web_sys_options.set_vibrate(&vibration_pattern_to_jsvalue(vibrate));
         }
         web_sys_options
     }
@@ -417,7 +418,7 @@ pub struct ShowOptions {
 
     /// A JsValue array specifying the vibration pattern in which the device is vibrating and not vibrating.
     #[builder(into)]
-    vibrate: Option<wasm_bindgen::JsValue>,
+    vibrate: Option<Vec<u16>>,
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -460,7 +461,7 @@ impl ShowOptions {
         }
 
         if let Some(vibrate) = &self.vibrate {
-            options.set_vibrate(vibrate);
+            options.set_vibrate(&vibration_pattern_to_jsvalue(vibrate));
         }
     }
 }
@@ -474,6 +475,15 @@ fn browser_supports_notifications() -> bool {
     }
 
     false
+}
+
+/// Helper function to convert `Vec<u16>` into a `JsValue` array that represents a vibration pattern
+fn vibration_pattern_to_jsvalue(pattern: &Vec<u16>) -> JsValue {
+    let array = js_sys::Array::new();
+    for &value in pattern.iter() {
+        array.push(&JsValue::from(value));
+    }
+    array.into()
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
