@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `use_prefers_reduced_motion`
 
+### Breaking Change 🛠
+
+- `use_websocket` now supports different types for sending and receiving messages
+
+### Change 🔥
+
+- There is now a feature for almost every function to get better compile and rust-analyzer times. 
+
 ## [0.12.0] - 2024-08-14
 
 > Make sure you also update `cargo-leptos` to the latest version if you use that.

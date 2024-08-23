@@ -33,7 +33,7 @@ fn Demo() -> impl IntoView {
         open,
         close,
         ..
-    } = use_websocket::<Apple, MsgpackSerdeCodec>("wss://echo.websocket.events/");
+    } = use_websocket::<Apple, Apple, MsgpackSerdeCodec>("wss://echo.websocket.events/");
 
     let send_message = move |_| {
         let m = Apple {
@@ -101,7 +101,7 @@ fn Demo() -> impl IntoView {
         close: close2,
         message: message2,
         ..
-    } = use_websocket_with_options::<String, FromToStringCodec>(
+    } = use_websocket_with_options::<String, String, FromToStringCodec>(
         "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
             .immediate(false)
