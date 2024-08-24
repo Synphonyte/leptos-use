@@ -302,7 +302,11 @@ where
     {
         let reconnect_ref: StoredValue<Option<Rc<dyn Fn()>>> = store_value(None);
         reconnect_ref.set_value({
+            let unmounted = Rc::clone(&unmounted);
+
             Some(Rc::new(move || {
+                let unmounted = Rc::clone(&unmounted);
+
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_ref
@@ -312,6 +316,9 @@ where
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
                             move || {
+                                if unmounted.get() {
+                                    return;
+                                }
                                 if let Some(connect) = connect_ref.get_value() {
                                     connect();
                                     reconnect_times_ref.update_value(|current| *current += 1);
