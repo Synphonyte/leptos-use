@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Functions 🚀
 
+- `use_toggle`
 - `use_prefers_reduced_motion`
 
 ### Breaking Change 🛠

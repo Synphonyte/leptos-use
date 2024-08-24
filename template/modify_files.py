@@ -13,6 +13,7 @@ def main():
 
     args = parser.parse_args()
 
+    modify_cargo_toml(args)
     modify_changelog(args)
     modify_librs(args)
     modify_modrs(args)
@@ -93,7 +94,7 @@ def modify_librs(args):
     with open("src/lib.rs", "r") as f:
         lib_source = f.read()
 
-    feature_prefix = "" if args.feature is None else f"#[cfg(feature = \"{args.feature}\"))]\n"
+    feature_prefix = "" if args.feature is None else f"#[cfg(feature = \"{args.feature}\")]\n"
 
     if args.module is None:
         lib_source = lib_source.replace("mod on_click_outside;",
@@ -139,6 +140,28 @@ def modify_changelog(args):
     with open("CHANGELOG.md", "w") as f:
         f.write("".join(changelog_source))
 
+
+def modify_cargo_toml(args):
+    with open("Cargo.toml", "r") as f:
+        cargo_toml_source = f.readlines()
+
+    in_features = False
+    in_default = False
+
+    for i, line in enumerate(cargo_toml_source):
+        if line.startswith("[features]"):
+            in_features = True
+
+        if in_features and line.startswith("default = ["):
+            in_default = True
+            cargo_toml_source.insert(i + 1, f"    \"{args.feature}\",\n")
+
+        if in_default and line.startswith("]"):
+            cargo_toml_source.insert(i + 1, f"{args.feature} = []\n")
+            break
+
+    with open("Cargo.toml", "w") as f:
+        f.write("".join(cargo_toml_source))
 
 if __name__ == '__main__':
     main()

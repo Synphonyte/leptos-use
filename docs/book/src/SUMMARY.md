@@ -111,6 +111,7 @@
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 - [use_to_string](utilities/use_to_string.md)
+- [use_toggle](utilities/use_toggle.md)
 
 # Intl
 

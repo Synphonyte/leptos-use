@@ -106,6 +106,7 @@ default = [
     "use_throttle_fn",
     "use_timeout_fn",
     "use_timestamp",
+    "use_toggle",
     "use_to_string",
     "use_user_media",
     "use_web_notification",
@@ -316,6 +317,7 @@ use_supported = []
 use_throttle_fn = []
 use_timeout_fn = []
 use_timestamp = ["use_interval_fn", "use_raf_fn"]
+use_toggle = []
 use_to_string = []
 use_user_media = [
     "use_window",
