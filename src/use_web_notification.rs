@@ -3,6 +3,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use std::rc::Rc;
+use wasm_bindgen::JsValue;
 
 /// Reactive [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/Notification).
 ///
@@ -228,7 +229,6 @@ impl From<NotificationDirection> for web_sys::NotificationDirection {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`
 #[derive(DefaultBuilder, Clone)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct UseWebNotificationOptions {
@@ -277,9 +277,14 @@ pub struct UseWebNotificationOptions {
     renotify: bool,
 
     /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
-    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    /// The default is `null`, which means the notification is not silent. If `true`, then the notification will be silent.
     #[builder(into)]
     silent: Option<bool>,
+
+    /// A `Vec<u16>` specifying the vibration pattern in milliseconds for vibrating and not vibrating.
+    /// The last entry can be a vibration since it stops automatically after each period.
+    #[builder(into)]
+    vibrate: Option<Vec<u16>>,
 
     /// Called when the user clicks on displayed `Notification`.
     on_click: Rc<dyn Fn(web_sys::Event)>,
@@ -308,6 +313,7 @@ impl Default for UseWebNotificationOptions {
             require_interaction: false,
             renotify: false,
             silent: None,
+            vibrate: None,
             on_click: Rc::new(|_| {}),
             on_close: Rc::new(|_| {}),
             on_error: Rc::new(|_| {}),
@@ -345,6 +351,9 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
             web_sys_options.set_tag(tag);
         }
 
+        if let Some(vibrate) = &options.vibrate {
+            web_sys_options.set_vibrate(&vibration_pattern_to_jsvalue(vibrate));
+        }
         web_sys_options
     }
 }
@@ -354,7 +363,6 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///
 /// The following implementations are missing:
-/// - `vibrate`
 #[derive(DefaultBuilder, Default)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct ShowOptions {
@@ -405,9 +413,14 @@ pub struct ShowOptions {
     renotify: Option<bool>,
 
     /// A boolean value specifying whether the notification should be silent, regardless of the device settings.
-    /// The default is `false`, which means the notification is not silent. If `true`, then the notification will be silent.
+    /// The default is `null`, which means the notification is not silent. If `true`, then the notification will be silent.
     #[builder(into)]
     silent: Option<bool>,
+
+    /// A `Vec<u16>` specifying the vibration pattern in milliseconds for vibrating and not vibrating.
+    /// The last entry can be a vibration since it stops automatically after each period.
+    #[builder(into)]
+    vibrate: Option<Vec<u16>>,
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -448,6 +461,10 @@ impl ShowOptions {
         if let Some(silent) = self.silent {
             options.set_silent(Some(silent));
         }
+
+        if let Some(vibrate) = &self.vibrate {
+            options.set_vibrate(&vibration_pattern_to_jsvalue(vibrate));
+        }
     }
 }
 
@@ -460,6 +477,15 @@ fn browser_supports_notifications() -> bool {
     }
 
     false
+}
+
+/// Helper function to convert a slice of `u16` into a `JsValue` array that represents a vibration pattern
+fn vibration_pattern_to_jsvalue(pattern: &[u16]) -> JsValue {
+    let array = js_sys::Array::new();
+    for &value in pattern.iter() {
+        array.push(&JsValue::from(value));
+    }
+    array.into()
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
