@@ -28,7 +28,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Pre>();
+/// let el = NodeRef::<Pre>::new();
 /// let (text, set_text) = signal("".to_string());
 ///
 /// use_mutation_observer_with_options(

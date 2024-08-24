@@ -30,7 +30,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 /// let (is_visible, set_visible) = signal(false);
 ///
 /// use_intersection_observer(

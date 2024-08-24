@@ -168,11 +168,11 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Arc<dyn Fn(&String)>,
+/// #     send: Arc<dyn Fn(&String) + Send + Sync>,
 /// # }
 /// #
 /// # impl WebsocketContext {
-/// #     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String)>) -> Self {
+/// #     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String) + Send + Sync>) -> Self {
 /// #         Self {
 /// #             message,
 /// #             send,
@@ -231,9 +231,9 @@ pub fn use_websocket<Tx, Rx, C>(
 ) -> UseWebSocketReturn<
     Tx,
     Rx,
-    impl Fn() + Clone + 'static,
-    impl Fn() + Clone + 'static,
-    impl Fn(&Tx) + Clone + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn(&Tx) + Clone + Send + Sync + 'static,
 >
 where
     Tx: Send + Sync + 'static,
@@ -257,9 +257,9 @@ pub fn use_websocket_with_options<Tx, Rx, C>(
 ) -> UseWebSocketReturn<
     Tx,
     Rx,
-    impl Fn() + Clone + 'static,
-    impl Fn() + Clone + 'static,
-    impl Fn(&Tx) + Clone + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn(&Tx) + Clone + Send + Sync + 'static,
 >
 where
     Tx: Send + Sync + 'static,
@@ -700,9 +700,9 @@ pub struct UseWebSocketReturn<Tx, Rx, OpenFn, CloseFn, SendFn>
 where
     Tx: Send + Sync + 'static,
     Rx: Send + Sync + 'static,
-    OpenFn: Fn() + Clone + 'static,
-    CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(&Tx) + Clone + 'static,
+    OpenFn: Fn() + Clone + Send + Sync + 'static,
+    CloseFn: Fn() + Clone + Send + Sync + 'static,
+    SendFn: Fn(&Tx) + Clone + Send + Sync + 'static,
 {
     /// The current state of the `WebSocket` connection.
     pub ready_state: Signal<ConnectionReadyState>,

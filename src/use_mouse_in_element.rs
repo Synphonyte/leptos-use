@@ -24,7 +24,7 @@ use std::marker::PhantomData;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let target = create_node_ref::<Div>();
+/// let target = NodeRef::<Div>::new();
 /// let UseMouseInElementReturn { x, y, is_outside, .. } = use_mouse_in_element(target);
 ///
 /// view! {

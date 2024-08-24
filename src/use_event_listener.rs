@@ -44,7 +44,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let element = create_node_ref();
+/// let element = NodeRef::new();
 ///
 /// use_event_listener(element, click, |evt| {
 ///     log!("click from element {:?}", event_target::<web_sys::HtmlDivElement>(&evt));

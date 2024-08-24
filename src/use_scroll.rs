@@ -38,7 +38,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let element = create_node_ref::<Div>();
+/// let element = NodeRef::<Div>::new();
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, is_scrolling, arrived_state, directions, ..
@@ -63,7 +63,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// # let element = create_node_ref::<Div>();
+/// # let element = NodeRef::<Div>::new();
 /// #
 /// let UseScrollReturn {
 ///     x,
@@ -101,7 +101,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let element = create_node_ref::<Div>();
+/// let element = NodeRef::<Div>::new();
 ///
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
@@ -129,7 +129,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// # let element = create_node_ref::<Div>();
+/// # let element = NodeRef::<Div>::new();
 /// #
 /// let UseScrollReturn {
 ///     x, y, set_x, set_y, ..
@@ -153,7 +153,7 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// # let element = create_node_ref::<Div>();
+/// # let element = NodeRef::<Div>::new();
 /// #
 /// let (smooth, set_smooth) = signal(false);
 ///

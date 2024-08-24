@@ -72,7 +72,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// #[component]
 /// fn Demo() -> impl IntoView {
-///     let element = create_node_ref::<Div>();
+///     let element = NodeRef::<Div>::new();
 ///
 ///     let UseMouseReturn {
 ///         x, y, source_type, ..

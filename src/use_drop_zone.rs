@@ -26,7 +26,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let drop_zone_el = create_node_ref::<Div>();
+/// let drop_zone_el = NodeRef::<Div>::new();
 ///
 /// let on_drop = |event| {
 ///     // called when files are dropped on zone

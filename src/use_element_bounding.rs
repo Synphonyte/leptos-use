@@ -19,7 +19,7 @@ use leptos::prelude::*;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 /// let UseElementBoundingReturn {
 ///     x, y, top,right,bottom,left, width, height, ..
 /// } = use_element_bounding(el);

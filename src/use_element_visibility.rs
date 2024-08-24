@@ -23,7 +23,7 @@ use leptos::prelude::wrappers::read::Signal;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 ///
 /// let is_visible = use_element_visibility(el);
 ///

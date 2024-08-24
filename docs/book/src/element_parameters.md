@@ -9,7 +9,7 @@ function [`use_element_size`](elements/use_element_size.md) returns the width an
 #
 # #[component]
 # pub fn Component() -> impl IntoView {
-let el = create_node_ref::<Div>();
+let el = NodeRef::<Div>::new();
 
 let UseElementSizeReturn { width, height } = use_element_size(el);
 
@@ -78,8 +78,8 @@ use_resize_observer([window().body(), document().query_selector("div > p.some-cl
 use_resize_observer(vec!["div > p.some-class", "p.some-class"]);
 
 // Slice of NodeRef
-let node_ref1 = create_node_ref::<Div>();
-let node_ref2 = create_node_ref::<Div>();
+let node_ref1 = NodeRef::<Div>::new();
+let node_ref2 = NodeRef::<Div>::new();
 use_resize_observer(vec![node_ref1, node_ref2].as_slice());
 ```
 

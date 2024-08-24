@@ -26,7 +26,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Button>();
+/// let el = NodeRef::<Button>::new();
 /// let is_hovered = use_element_hover(el);
 ///
 /// view! {

@@ -28,7 +28,7 @@ use wasm_bindgen::JsCast;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let el = create_node_ref::<Div>();
+/// let el = NodeRef::<Div>::new();
 ///
 /// let (data, set_data) = signal(vec![1, 2, 3, 4, 5, 6]);
 ///
