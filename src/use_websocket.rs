@@ -3,14 +3,13 @@
 use cfg_if::cfg_if;
 use leptos::{leptos_dom::helpers::TimeoutHandle, *};
 use std::cell::Cell;
+use std::marker::PhantomData;
 use std::rc::Rc;
 use std::time::Duration;
 use thiserror::Error;
 
 use crate::{core::ConnectionReadyState, ReconnectLimit};
-use codee::{
-    CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder, IsBinary,
-};
+use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
@@ -45,7 +44,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///     open,
 ///     close,
 ///     ..
-/// } = use_websocket::<String, FromToStringCodec>("wss://echo.websocket.events/");
+/// } = use_websocket::<String, String, FromToStringCodec>("wss://echo.websocket.events/");
 ///
 /// let send_message = move |_| {
 ///     send(&"Hello, world!".to_string());
@@ -98,7 +97,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///     message,
 ///     send,
 ///     ..
-/// } = use_websocket::<SomeData, MsgpackSerdeCodec>("wss://some.websocket.server/");
+/// } = use_websocket::<SomeData, SomeData, MsgpackSerdeCodec>("wss://some.websocket.server/");
 ///
 /// let send_data = move || {
 ///     send(&SomeData {
@@ -189,7 +188,7 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///     message,
 ///     send,
 ///     ..
-/// } = use_websocket::<String, FromToStringCodec>("ws:://some.websocket.io");
+/// } = use_websocket::<String, String, FromToStringCodec>("ws:://some.websocket.io");
 ///
 /// provide_context(WebsocketContext::new(message, Rc::new(send.clone())));
 /// #
@@ -229,45 +228,47 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// ## Server-Side Rendering
 ///
 /// On the server the returned functions amount to no-ops.
-pub fn use_websocket<T, C>(
+pub fn use_websocket<Tx, Rx, C>(
     url: &str,
 ) -> UseWebSocketReturn<
-    T,
+    Tx,
+    Rx,
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(&T) + Clone + 'static,
+    impl Fn(&Tx) + Clone + 'static,
 >
 where
-    T: 'static,
-    C: Encoder<T> + Decoder<T>,
-    C: IsBinary<T, <C as Decoder<T>>::Encoded>,
-    C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
-    C: HybridEncoder<T, <C as Encoder<T>>::Encoded, Error = <C as Encoder<T>>::Error>,
+    Tx: 'static,
+    Rx: 'static,
+    C: Encoder<Tx> + Decoder<Rx>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
-    use_websocket_with_options::<T, C>(url, UseWebSocketOptions::default())
+    use_websocket_with_options::<Tx, Rx, C>(url, UseWebSocketOptions::default())
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
 #[allow(clippy::type_complexity)]
-pub fn use_websocket_with_options<T, C>(
+pub fn use_websocket_with_options<Tx, Rx, C>(
     url: &str,
     options: UseWebSocketOptions<
-        T,
-        HybridCoderError<<C as Encoder<T>>::Error>,
-        HybridCoderError<<C as Decoder<T>>::Error>,
+        Rx,
+        HybridCoderError<<C as Encoder<Tx>>::Error>,
+        HybridCoderError<<C as Decoder<Rx>>::Error>,
     >,
 ) -> UseWebSocketReturn<
-    T,
+    Tx,
+    Rx,
     impl Fn() + Clone + 'static,
     impl Fn() + Clone + 'static,
-    impl Fn(&T) + Clone + 'static,
+    impl Fn(&Tx) + Clone + 'static,
 >
 where
-    T: 'static,
-    C: Encoder<T> + Decoder<T>,
-    C: IsBinary<T, <C as Decoder<T>>::Encoded>,
-    C: HybridDecoder<T, <C as Decoder<T>>::Encoded, Error = <C as Decoder<T>>::Error>,
-    C: HybridEncoder<T, <C as Encoder<T>>::Encoded, Error = <C as Encoder<T>>::Error>,
+    Tx: 'static,
+    Rx: 'static,
+    C: Encoder<Tx> + Decoder<Rx>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
     let url = normalize_url(url);
 
@@ -551,8 +552,8 @@ where
     let send = {
         let on_error = Rc::clone(&on_error);
 
-        move |value: &T| {
-            if C::is_binary() {
+        move |value: &Tx| {
+            if C::is_binary_encoder() {
                 match C::encode_bin(value) {
                     Ok(val) => send_bytes(&val),
                     Err(err) => on_error(CodecError::Encode(err).into()),
@@ -606,6 +607,7 @@ where
         open,
         close,
         send,
+        _marker: PhantomData,
     }
 }
 
@@ -613,15 +615,15 @@ type RcFnBytes = Rc<dyn Fn(&[u8])>;
 
 /// Options for [`use_websocket_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseWebSocketOptions<T, E, D>
+pub struct UseWebSocketOptions<Rx, E, D>
 where
-    T: ?Sized,
+    Rx: ?Sized,
 {
     /// `WebSocket` connect callback.
     on_open: Rc<dyn Fn(Event)>,
     /// `WebSocket` message callback for typed message decoded by codec.
     #[builder(skip)]
-    on_message: Rc<dyn Fn(&T)>,
+    on_message: Rc<dyn Fn(&Rx)>,
     /// `WebSocket` message callback for text.
     on_message_raw: Rc<dyn Fn(&str)>,
     /// `WebSocket` message callback for binary.
@@ -644,7 +646,7 @@ where
     protocols: Option<Vec<String>>,
 }
 
-impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
+impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {
     /// `WebSocket` error callback.
     pub fn on_error<F>(self, handler: F) -> Self
     where
@@ -659,7 +661,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
     /// `WebSocket` message callback for typed message decoded by codec.
     pub fn on_message<F>(self, handler: F) -> Self
     where
-        F: Fn(&T) + 'static,
+        F: Fn(&Rx) + 'static,
     {
         Self {
             on_message: Rc::new(handler),
@@ -668,7 +670,7 @@ impl<T: ?Sized, E, D> UseWebSocketOptions<T, E, D> {
     }
 }
 
-impl<T: ?Sized, E, D> Default for UseWebSocketOptions<T, E, D> {
+impl<Rx: ?Sized, E, D> Default for UseWebSocketOptions<Rx, E, D> {
     fn default() -> Self {
         Self {
             on_open: Rc::new(|_| {}),
@@ -687,17 +689,18 @@ impl<T: ?Sized, E, D> Default for UseWebSocketOptions<T, E, D> {
 
 /// Return type of [`use_websocket`].
 #[derive(Clone)]
-pub struct UseWebSocketReturn<T, OpenFn, CloseFn, SendFn>
+pub struct UseWebSocketReturn<Tx, Rx, OpenFn, CloseFn, SendFn>
 where
-    T: 'static,
+    Tx: 'static,
+    Rx: 'static,
     OpenFn: Fn() + Clone + 'static,
     CloseFn: Fn() + Clone + 'static,
-    SendFn: Fn(&T) + Clone + 'static,
+    SendFn: Fn(&Tx) + Clone + 'static,
 {
     /// The current state of the `WebSocket` connection.
     pub ready_state: Signal<ConnectionReadyState>,
     /// Latest message received from `WebSocket`.
-    pub message: Signal<Option<T>>,
+    pub message: Signal<Option<Rx>>,
     /// The `WebSocket` instance.
     pub ws: Option<WebSocket>,
     /// Opens the `WebSocket` connection
@@ -706,6 +709,8 @@ where
     pub close: CloseFn,
     /// Sends data through the socket
     pub send: SendFn,
+
+    _marker: PhantomData<Tx>,
 }
 
 #[derive(Error, Debug)]
