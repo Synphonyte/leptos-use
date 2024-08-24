@@ -94,5 +94,8 @@ panic = "abort"
 
 [lib]
 
+[workspace.dependencies]
+codee = { version = "0.2" }
+
 [package.metadata.leptos]
 lib-profile-release = "wasm-release"

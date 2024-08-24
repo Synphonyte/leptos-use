@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-codee = { version = "0.1", features = ["json_serde"] }
+codee = { workspace = true, features = ["json_serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 leptos = { git = "https://github.com/leptos-rs/leptos", features = [

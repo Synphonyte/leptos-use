@@ -16,7 +16,7 @@ homepage = "https://leptos-use.rs"
 actix-web = { version = "4", optional = true, default-features = false }
 async-trait = { version = "0.1", optional = true }
 cfg-if = "1"
-codee = { version = "0.1", optional = true }
+codee = { version = "0.2", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
 futures-util = { version = "0.3", optional = true }
@@ -40,7 +40,7 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "=0.3.70", optional = true }
 
 [dev-dependencies]
-codee = { version = "0.1", features = [
+codee = { version = "0.2", features = [
     "json_serde",
     "msgpack_serde",
     "base64",

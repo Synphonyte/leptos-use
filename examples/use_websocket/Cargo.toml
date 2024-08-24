@@ -8,7 +8,7 @@ leptos = { git = "https://github.com/leptos-rs/leptos", features = [
     "nightly",
     "csr",
 ] }
-codee = { version = "0.1", features = ["msgpack_serde"] }
+codee = { workspace = true, features = ["msgpack_serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
