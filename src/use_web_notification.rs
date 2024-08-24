@@ -281,7 +281,8 @@ pub struct UseWebNotificationOptions {
     #[builder(into)]
     silent: Option<bool>,
 
-    /// A `Vec<u16>` value specifying the vibration pattern in which the device is vibrating and not vibrating.
+    /// A `Vec<u16>` specifying the vibration pattern in milliseconds for vibrating and not vibrating.
+    /// The last entry can be a vibration since it stops automatically after each period.
     #[builder(into)]
     vibrate: Option<Vec<u16>>,
 
@@ -416,7 +417,8 @@ pub struct ShowOptions {
     #[builder(into)]
     silent: Option<bool>,
 
-    /// A `Vec<u16>` value specifying the vibration pattern in which the device is vibrating and not vibrating.
+    /// A `Vec<u16>` specifying the vibration pattern in milliseconds for vibrating and not vibrating.
+    /// The last entry can be a vibration since it stops automatically after each period.
     #[builder(into)]
     vibrate: Option<Vec<u16>>,
 }
@@ -477,8 +479,8 @@ fn browser_supports_notifications() -> bool {
     false
 }
 
-/// Helper function to convert `Vec<u16>` into a `JsValue` array that represents a vibration pattern
-fn vibration_pattern_to_jsvalue(pattern: &Vec<u16>) -> JsValue {
+/// Helper function to convert a slice of `u16` into a `JsValue` array that represents a vibration pattern
+fn vibration_pattern_to_jsvalue(pattern: &[u16]) -> JsValue {
     let array = js_sys::Array::new();
     for &value in pattern.iter() {
         array.push(&JsValue::from(value));
