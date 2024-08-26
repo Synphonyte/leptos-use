@@ -148,7 +148,7 @@ pub fn sync_signal<T>(
     right: impl Into<UseRwSignal<T>>,
 ) -> impl Fn() + Clone
 where
-    T: Clone + PartialEq + 'static,
+    T: Clone + 'static,
 {
     sync_signal_with_options(left, right, SyncSignalOptions::default())
 }
@@ -160,8 +160,8 @@ pub fn sync_signal_with_options<L, R>(
     options: SyncSignalOptions<L, R>,
 ) -> impl Fn() + Clone
 where
-    L: Clone + PartialEq + 'static,
-    R: Clone + PartialEq + 'static,
+    L: Clone + 'static,
+    R: Clone + 'static,
 {
     let SyncSignalOptions {
         immediate,
@@ -178,14 +178,18 @@ where
     let mut stop_watch_left = None;
     let mut stop_watch_right = None;
 
+    let is_sync_update = StoredValue::new(false);
+
     if matches!(direction, SyncDirection::Both | SyncDirection::LeftToRight) {
         stop_watch_left = Some(watch(
             move || left.get(),
             move |new_value, _, _| {
                 let new_value = (*transform_ltr)(new_value);
 
-                if right.with_untracked(|right| right != &new_value) {
+                if !is_sync_update.get_value() {
+                    is_sync_update.set_value(true);
                     right.update(|right| assign_ltr(right, new_value));
+                    is_sync_update.set_value(false);
                 }
             },
             immediate,
@@ -198,8 +202,10 @@ where
             move |new_value, _, _| {
                 let new_value = (*transform_rtl)(new_value);
 
-                if left.with_untracked(|left| left != &new_value) {
+                if !is_sync_update.get_value() {
+                    is_sync_update.set_value(true);
                     left.update(|left| assign_rtl(left, new_value));
+                    is_sync_update.set_value(false);
                 }
             },
             immediate,
