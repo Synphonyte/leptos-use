@@ -652,6 +652,11 @@ where
     /// Defaults to `true`.
     immediate: bool,
     /// Sub protocols. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket#protocols).
+    ///
+    /// Can be set as a signal to support protocols only available after the initial render.
+    ///
+    /// Note that protocols are only updated on the next websocket open() call, not whenever the signal is updated.
+    /// Therefore "lazy" protocols should use the `immediate(false)` option and manually call `open()`.
     #[builder(into)]
     protocols: MaybeSignal<Option<Vec<String>>>,
 }
