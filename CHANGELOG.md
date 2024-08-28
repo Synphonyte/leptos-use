@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `use_websocket` now supports different types for sending and receiving messages
 - `SyncSignalOptions` now can take now either transformations or assignment functions but not both.
+- updated to `codee` version 0.2.0
 
 ### Fixes 🍕
 
