@@ -51,7 +51,6 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use leptos::leptos_dom::helpers::TimeoutHandle;
-        use leptos::reactive_graph::diagnostics::SpecialNonReactiveZone;
         use std::sync::{Arc, Mutex};
         use std::time::Duration;
 
@@ -94,7 +93,9 @@ where
                             *timer.lock().unwrap() = None;
 
                             #[cfg(debug_assertions)]
-                            let _z = SpecialNonReactiveZone::enter();
+                            let _z =
+                                leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter(
+                                );
 
                             callback(arg);
                         }
