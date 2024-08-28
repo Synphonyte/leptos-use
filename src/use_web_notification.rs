@@ -1,7 +1,8 @@
 use crate::{use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::{wrappers::read::Signal, *};
+use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 
