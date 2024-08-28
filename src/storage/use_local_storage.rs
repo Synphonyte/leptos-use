@@ -1,6 +1,6 @@
 use super::{use_storage_with_options, StorageType, UseStorageOptions};
 use codee::{Decoder, Encoder};
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 
 #[allow(rustdoc::bare_urls)]

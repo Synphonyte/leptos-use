@@ -102,7 +102,7 @@ pub fn use_raf_fn_with_options(
             };
 
             #[cfg(debug_assertions)]
-            let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+            let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
             callback(UseRafFnCallbackArgs { delta, timestamp });
 

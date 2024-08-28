@@ -1,7 +1,7 @@
 use crate::{core::MaybeRwSignal, storage::StorageType, utils::FilterOptions};
 use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::sync::Arc;
 use thiserror::Error;

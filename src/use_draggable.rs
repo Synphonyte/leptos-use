@@ -2,8 +2,8 @@ use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
 use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
-use leptos::prelude::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use wasm_bindgen::JsCast;
@@ -137,7 +137,7 @@ where
                 };
 
                 #[cfg(debug_assertions)]
-                let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 if !on_start(UseDraggableCallbackArgs {
                     position,
@@ -172,7 +172,7 @@ where
                 set_position.set(position);
 
                 #[cfg(debug_assertions)]
-                let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_move(UseDraggableCallbackArgs {
                     position,
@@ -197,7 +197,7 @@ where
         set_start_position.set(None);
 
         #[cfg(debug_assertions)]
-        let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
         on_end(UseDraggableCallbackArgs {
             position: position.get_untracked(),

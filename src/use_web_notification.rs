@@ -75,7 +75,7 @@ pub fn use_web_notification_with_options(
             let on_click = Rc::clone(&options.on_click);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_click(e);
             }
@@ -86,7 +86,7 @@ pub fn use_web_notification_with_options(
             let on_close = Rc::clone(&options.on_close);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_close(e);
             }
@@ -97,7 +97,7 @@ pub fn use_web_notification_with_options(
             let on_error = Rc::clone(&options.on_error);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_error(e);
             }
@@ -108,7 +108,7 @@ pub fn use_web_notification_with_options(
             let on_show = Rc::clone(&options.on_show);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_show(e);
             }

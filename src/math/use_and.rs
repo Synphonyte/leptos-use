@@ -1,5 +1,5 @@
 use crate::math::shared::use_binary_logic;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use paste::paste;
 

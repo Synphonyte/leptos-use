@@ -1,6 +1,6 @@
 use crate::{use_media_query, use_window};
 use leptos::logging::error;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use paste::paste;
 use std::collections::HashMap;

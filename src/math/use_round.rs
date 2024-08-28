@@ -1,5 +1,5 @@
 use crate::math::shared::use_simple_math;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use num::Float;
 use paste::paste;

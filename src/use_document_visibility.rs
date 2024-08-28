@@ -3,7 +3,7 @@
 use crate::use_event_listener;
 use cfg_if::cfg_if;
 use leptos::ev::visibilitychange;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// Reactively track `document.visibilityState`

@@ -1,6 +1,6 @@
 use crate::utils::signal_filtered;
 use crate::{use_debounce_fn_with_options, DebounceOptions};
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use paste::paste;
 

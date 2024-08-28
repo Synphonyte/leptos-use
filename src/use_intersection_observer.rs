@@ -1,7 +1,7 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 
@@ -101,11 +101,11 @@ where
         let stop = || {};
     } else {
         use send_wrapper::SendWrapper;
-        
+
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 callback(
                     entries
