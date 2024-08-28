@@ -119,7 +119,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+        use leptos::reactive_graph::diagnostics::SpecialNonReactiveZone;
         use send_wrapper::SendWrapper;
         let event_name = event.name();
         let closure_js = Closure::wrap(Box::new(move |e| {

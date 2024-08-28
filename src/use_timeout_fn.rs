@@ -51,7 +51,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use leptos::leptos_dom::helpers::TimeoutHandle;
-        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+        use leptos::reactive_graph::diagnostics::SpecialNonReactiveZone;
         use std::sync::{Arc, Mutex};
         use std::time::Duration;
 

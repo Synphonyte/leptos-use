@@ -114,7 +114,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use leptos::prelude::diagnostics::SpecialNonReactiveZone;
+        use leptos::reactive_graph::diagnostics::SpecialNonReactiveZone;
         let OnClickOutsideOptions {
             ignore,
             capture,
