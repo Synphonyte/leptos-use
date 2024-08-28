@@ -336,7 +336,7 @@ use_web_notification = [
     "web-sys/NotificationDirection",
     "web-sys/VisibilityState"
 ]
-use_websocket = ["dep:codee"]
+use_websocket = ["dep:web-sys", "dep:codee"]
 use_window = ["use_document", "dep:web-sys", "web-sys/Navigator", "web-sys/MediaQueryList"]
 use_window_focus = ["use_event_listener"]
 use_window_scroll = ["use_event_listener", "use_window"]

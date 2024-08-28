@@ -344,17 +344,19 @@ where
                 }
 
                 let web_socket = {
-                    protocols.as_ref().map_or_else(
-                        || WebSocket::new(&url).unwrap_throw(),
-                        |protocols| {
-                            let array = protocols
-                                .iter()
-                                .map(|p| JsValue::from(p.clone()))
-                                .collect::<Array>();
-                            WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
-                                .unwrap_throw()
-                        },
-                    )
+                    protocols.with_untracked(|protocols| {
+                        protocols.as_ref().map_or_else(
+                            || WebSocket::new(&url).unwrap_throw(),
+                            |protocols| {
+                                let array = protocols
+                                    .iter()
+                                    .map(|p| JsValue::from(p.clone()))
+                                    .collect::<Array>();
+                                WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
+                                    .unwrap_throw()
+                            },
+                        )
+                    })
                 };
                 web_socket.set_binary_type(BinaryType::Arraybuffer);
                 set_ready_state.set(ConnectionReadyState::Connecting);
@@ -650,7 +652,13 @@ where
     /// Defaults to `true`.
     immediate: bool,
     /// Sub protocols. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket#protocols).
-    protocols: Option<Vec<String>>,
+    ///
+    /// Can be set as a signal to support protocols only available after the initial render.
+    ///
+    /// Note that protocols are only updated on the next websocket open() call, not whenever the signal is updated.
+    /// Therefore "lazy" protocols should use the `immediate(false)` option and manually call `open()`.
+    #[builder(into)]
+    protocols: MaybeSignal<Option<Vec<String>>>,
 }
 
 impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {
