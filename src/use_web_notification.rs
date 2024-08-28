@@ -359,7 +359,7 @@ impl From<&UseWebNotificationOptions> for web_sys::NotificationOptions {
 }
 
 /// Options for [`UseWebNotificationReturn::show`].
-/// 
+///
 /// This can be used to override options passed to [`use_web_notification`].
 /// See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/notification) for more info.
 ///

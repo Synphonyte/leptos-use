@@ -130,8 +130,8 @@ use std::rc::Rc;
 ///
 /// #### Different Types
 ///
-/// `SyncSignalOptions::default()` is only defined if the two signal types are identical. 
-/// Otherwise, you have to initialize the options with `with_transforms` or `with_assigns` instead 
+/// `SyncSignalOptions::default()` is only defined if the two signal types are identical.
+/// Otherwise, you have to initialize the options with `with_transforms` or `with_assigns` instead
 /// of `default`.
 ///
 /// ```
@@ -336,7 +336,7 @@ pub struct SyncSignalOptions<L, R> {
 
     /// How to transform or assign the values to each other
     /// If `L` and `R` are identical this defaults to the simple `=` operator. If the types are
-    /// not the same, then you have to choose to either use [`SyncSignalOptions::with_transforms`] 
+    /// not the same, then you have to choose to either use [`SyncSignalOptions::with_transforms`]
     /// or [`SyncSignalOptions::with_assigns`].
     #[builder(skip)]
     transforms: SyncTransforms<L, R>,
