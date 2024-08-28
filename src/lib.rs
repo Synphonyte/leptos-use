@@ -28,8 +28,6 @@ mod is_ok;
 mod is_some;
 #[cfg(feature = "on_click_outside")]
 mod on_click_outside;
-#[cfg(feature = "use_toggle")]
-mod use_toggle;
 #[cfg(feature = "signal_debounced")]
 mod signal_debounced;
 #[cfg(feature = "signal_throttled")]
@@ -136,6 +134,8 @@ mod use_timeout_fn;
 mod use_timestamp;
 #[cfg(feature = "use_to_string")]
 mod use_to_string;
+#[cfg(feature = "use_toggle")]
+mod use_toggle;
 #[cfg(feature = "use_user_media")]
 mod use_user_media;
 #[cfg(feature = "use_web_notification")]
@@ -169,8 +169,6 @@ pub use is_ok::*;
 pub use is_some::*;
 #[cfg(feature = "on_click_outside")]
 pub use on_click_outside::*;
-#[cfg(feature = "use_toggle")]
-pub use use_toggle::*;
 #[cfg(feature = "signal_debounced")]
 pub use signal_debounced::*;
 #[cfg(feature = "signal_throttled")]
@@ -277,6 +275,8 @@ pub use use_timeout_fn::*;
 pub use use_timestamp::*;
 #[cfg(feature = "use_to_string")]
 pub use use_to_string::*;
+#[cfg(feature = "use_toggle")]
+pub use use_toggle::*;
 #[cfg(feature = "use_user_media")]
 pub use use_user_media::*;
 #[cfg(feature = "use_web_notification")]

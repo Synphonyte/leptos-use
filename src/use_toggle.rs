@@ -1,5 +1,5 @@
-use leptos::*;
 use crate::core::MaybeRwSignal;
+use leptos::*;
 
 /// A boolean switcher with utility functions.
 ///
@@ -25,7 +25,9 @@ use crate::core::MaybeRwSignal;
 ///
 /// * [`fn@crate::use_cycle_list`]
 // #[doc(cfg(feature = "use_toggle"))]
-pub fn use_toggle(initial_value: impl Into<MaybeRwSignal<bool>>) -> UseToggleReturn<impl Fn() + Clone + 'static> {
+pub fn use_toggle(
+    initial_value: impl Into<MaybeRwSignal<bool>>,
+) -> UseToggleReturn<impl Fn() + Clone + 'static> {
     let initial_value = initial_value.into();
     let (value, set_value) = initial_value.into_signal();
 

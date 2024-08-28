@@ -7,8 +7,8 @@ use std::rc::Rc;
 ///
 /// > Note: Please consider first if you can achieve your goals with the
 /// > ["Good Options" described in the Leptos book](https://book.leptos.dev/reactivity/working_with_signals.html#making-signals-depend-on-each-other)
-/// > firstly. Only if you really have to, use this function. This is in effect the
-/// > ["If you really must..."](https://book.leptos.dev/reactivity/working_with_signals.html#if-you-really-must).
+/// > Only if you really have to, use this function. This is, in effect, the
+/// > ["If you really must..." option](https://book.leptos.dev/reactivity/working_with_signals.html#if-you-really-must).
 ///
 /// ## Demo
 ///
@@ -112,9 +112,10 @@ use std::rc::Rc;
 /// let stop = sync_signal_with_options(
 ///     (a, set_a),
 ///     (b, set_b),
-///     SyncSignalOptions::default()
-///         .transform_ltr(|left| *left * 2)
-///         .transform_rtl(|right| *right / 2)
+///     SyncSignalOptions::with_transforms(
+///         |left| *left * 2,
+///         |right| *right / 2,
+///     ),
 /// );
 ///
 /// logging::log!("a: {}, b: {}", a.get(), b.get()); // a: 10, b: 20
@@ -129,20 +130,60 @@ use std::rc::Rc;
 ///
 /// #### Different Types
 ///
-/// `SyncSignalOptions::default()` is only defined if the two signal types are identical or
-/// implement `From` for each other. Otherwise, you have to initialize the options with
-/// `with_transforms` instead of `default`.
+/// `SyncSignalOptions::default()` is only defined if the two signal types are identical. 
+/// Otherwise, you have to initialize the options with `with_transforms` or `with_assigns` instead 
+/// of `default`.
 ///
 /// ```
-/// # use leptos_use::SyncSignalOptions;
+/// # use leptos::*;
+/// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
 /// # use std::str::FromStr;
 /// #
-/// let options = SyncSignalOptions::with_transforms(
-///     |left: &String| i32::from_str(left).unwrap_or_default(),
-///     |right: &i32| right.to_string(),
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let (a, set_a) = create_signal("10".to_string());
+/// let (b, set_b) = create_signal(2);
+///
+/// let stop = sync_signal_with_options(
+///     (a, set_a),
+///     (b, set_b),
+///     SyncSignalOptions::with_transforms(
+///         |left: &String| i32::from_str(left).unwrap_or_default(),
+///         |right: &i32| right.to_string(),
+///     ),
 /// );
+/// #
+/// # view! { }
+/// # }
 /// ```
 ///
+/// ```
+/// # use leptos::*;
+/// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
+/// # use std::str::FromStr;
+/// #
+/// #[derive(Clone)]
+/// pub struct Foo {
+///     bar: i32,
+/// }
+///
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let (a, set_a) = create_signal(Foo { bar: 10 });
+/// let (b, set_b) = create_signal(2);
+///
+/// let stop = sync_signal_with_options(
+///     (a, set_a),
+///     (b, set_b),
+///     SyncSignalOptions::with_assigns(
+///         |b: &mut i32, a: &Foo| *b = a.bar,
+///         |a: &mut Foo, b: &i32| a.bar = *b,
+///     ),
+/// );
+/// #
+/// # view! { }
+/// # }
+/// ```
 pub fn sync_signal<T>(
     left: impl Into<UseRwSignal<T>>,
     right: impl Into<UseRwSignal<T>>,
@@ -166,7 +207,7 @@ where
     let SyncSignalOptions {
         immediate,
         direction,
-        transforms
+        transforms,
     } = options;
 
     let (assign_ltr, assign_rtl) = transforms.assigns();
@@ -228,13 +269,19 @@ pub enum SyncDirection {
 
 pub type AssignFn<T, S> = Rc<dyn Fn(&mut T, &S)>;
 
+/// Transforms or assigns for syncing.
 pub enum SyncTransforms<L, R> {
+    /// Transform the signal into each other by calling the transform functions.
+    /// The values are then simply assigned.
     Transforms {
         /// Transforms the left signal into the right signal.
         ltr: Rc<dyn Fn(&L) -> R>,
         /// Transforms the right signal into the left signal.
         rtl: Rc<dyn Fn(&R) -> L>,
     },
+
+    /// Assign the signals to each other. Instead of using `=` to assign the signals,
+    /// these functions are called.
     Assigns {
         /// Assigns the left signal to the right signal.
         ltr: AssignFn<R, L>,
@@ -256,13 +303,16 @@ where
 }
 
 impl<L, R> SyncTransforms<L, R>
-where L: 'static, R: 'static
+where
+    L: 'static,
+    R: 'static,
 {
+    /// Returns assign functions for both directions that respect the value of this enum.
     pub fn assigns(&self) -> (AssignFn<R, L>, AssignFn<L, R>) {
         match self {
             SyncTransforms::Transforms { ltr, rtl } => {
-                let ltr = Rc::clone(&ltr);
-                let rtl = Rc::clone(&rtl);
+                let ltr = Rc::clone(ltr);
+                let rtl = Rc::clone(rtl);
                 (
                     Rc::new(move |right, left| *right = ltr(left)),
                     Rc::new(move |left, right| *left = rtl(right)),
@@ -285,13 +335,15 @@ pub struct SyncSignalOptions<L, R> {
     direction: SyncDirection,
 
     /// How to transform or assign the values to each other
-    /// Defaults to identity.
+    /// If `L` and `R` are identical this defaults to the simple `=` operator. If the types are
+    /// not the same, then you have to choose to either use [`SyncSignalOptions::with_transforms`] 
+    /// or [`SyncSignalOptions::with_assigns`].
     #[builder(skip)]
     transforms: SyncTransforms<L, R>,
 }
 
 impl<L, R> SyncSignalOptions<L, R> {
-    /// Initializes options with transforms
+    /// Initializes options with transforms functions that convert the signals into each other.
     pub fn with_transforms(
         transform_ltr: impl Fn(&L) -> R + 'static,
         transform_rtl: impl Fn(&R) -> L + 'static,
@@ -306,6 +358,7 @@ impl<L, R> SyncSignalOptions<L, R> {
         }
     }
 
+    /// Initializes options with assign functions that replace the default `=` operator.
     pub fn with_assigns(
         assign_ltr: impl Fn(&mut R, &L) + 'static,
         assign_rtl: impl Fn(&mut L, &R) + 'static,

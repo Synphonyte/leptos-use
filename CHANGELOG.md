@@ -3,20 +3,27 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 
+## [0.13.0] - 2024-08-28
 
 ### New Functions 🚀
 
 - `use_toggle`
-- `use_prefers_reduced_motion`
+- `use_prefers_reduced_motion` (thanks to @hcandelaria)
 
-### Breaking Change 🛠
+### Breaking Changes 🛠
 
 - `use_websocket` now supports different types for sending and receiving messages
+- `SyncSignalOptions` now can take now either transformations or assignment functions but not both.
 
-### Change 🔥
+### Fixes 🍕
 
-- There is now a feature for almost every function to get better compile and rust-analyzer times. 
+- `use_websocket` fixed error with cleanup and reconnect (thanks to @BakerNet).
+
+### New Features 🚀
+
+- There is now a feature for almost every function to get better compile and rust-analyzer times.
+- `use_web_notification` now supports the `vibrate` option (thanks to @hcandelaria).
+- `UseDocument` now supports a whole bunch of methods more from `document` (thanks to @luckynumberke7in).
 
 ## [0.12.0] - 2024-08-14
 
