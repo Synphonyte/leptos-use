@@ -1,7 +1,7 @@
 use crate::{UseDocument, UseWindow};
 use cfg_if::cfg_if;
 use leptos::html::{CreateElement, ElementType};
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use send_wrapper::SendWrapper;
 use std::marker::PhantomData;

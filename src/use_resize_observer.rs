@@ -1,7 +1,7 @@
 use crate::core::ElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_supported;
@@ -91,7 +91,7 @@ where
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::ResizeObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                 callback(
                     entries

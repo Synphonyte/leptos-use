@@ -1,5 +1,5 @@
 use cfg_if::cfg_if;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
 /// Provide web developers with information from the physical orientation of

@@ -52,7 +52,7 @@ where
         let last_return_val = Arc::clone(&last_return_value);
         let invoke = move || {
             #[cfg(debug_assertions)]
-            let zone = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+            let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
             let return_value = _invoke();
 

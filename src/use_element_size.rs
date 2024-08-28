@@ -1,7 +1,7 @@
 use crate::core::{ElementMaybeSignal, Size};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {

@@ -4,7 +4,7 @@ use crate::{
     use_interval_fn_with_options, use_raf_fn_with_options, UseIntervalFnOptions, UseRafFnOptions,
 };
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
 
@@ -87,7 +87,7 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
             update();
 
             #[cfg(debug_assertions)]
-            let _z = leptos::prelude::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
             callback(ts.get_untracked());
         }

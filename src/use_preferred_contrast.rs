@@ -1,5 +1,5 @@
 use crate::use_media_query;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::fmt::Display;
 

@@ -1,7 +1,7 @@
 use crate::utils::Pausable;
 use crate::{use_interval_fn_with_options, UseIntervalFnOptions};
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::wrappers::read::Signal;
+use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
 use std::rc::Rc;
 
