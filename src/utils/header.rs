@@ -41,7 +41,8 @@ where
     let headers;
     #[cfg(feature = "actix")]
     {
-        headers = use_context::<actix_web::HttpRequest>().map(|req| req.headers().clone());
+        headers =
+            use_context::<leptos_actix::Request>().map(|req| req.into_inner().headers().clone());
     }
     #[cfg(feature = "axum")]
     {
