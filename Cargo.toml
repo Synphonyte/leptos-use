@@ -48,6 +48,7 @@ unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
 default = [
+    "use_window_size",
     "is_err",
     "is_none",
     "is_ok",
@@ -120,6 +121,7 @@ default = [
     "watch_with_options",
     "whenever"
 ]
+use_window_size = ["use_media_query"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = ["dep:web-sys"]

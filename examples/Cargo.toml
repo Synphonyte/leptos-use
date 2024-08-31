@@ -65,6 +65,7 @@ members = [
     "use_webtransport",
     "use_window_focus",
     "use_window_scroll",
+    "use_window_size",
     "watch_debounced",
     "watch_pausable",
     "watch_throttled",

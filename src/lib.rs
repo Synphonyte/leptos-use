@@ -28,6 +28,8 @@ mod is_ok;
 mod is_some;
 #[cfg(feature = "on_click_outside")]
 mod on_click_outside;
+#[cfg(feature = "use_window_size")]
+mod use_window_size;
 #[cfg(feature = "signal_debounced")]
 mod signal_debounced;
 #[cfg(feature = "signal_throttled")]
@@ -169,6 +171,8 @@ pub use is_ok::*;
 pub use is_some::*;
 #[cfg(feature = "on_click_outside")]
 pub use on_click_outside::*;
+#[cfg(feature = "use_window_size")]
+pub use use_window_size::*;
 #[cfg(feature = "signal_debounced")]
 pub use signal_debounced::*;
 #[cfg(feature = "signal_throttled")]

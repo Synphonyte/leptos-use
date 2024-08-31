@@ -32,6 +32,7 @@
 - [use_window](elements/use_window.md)
 - [use_window_focus](elements/use_window_focus.md)
 - [use_window_scroll](elements/use_window_scroll.md)
+- [use_window_size](elements/use_window_size.md)
 
 # Browser
 
