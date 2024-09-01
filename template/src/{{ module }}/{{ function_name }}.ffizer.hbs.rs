@@ -4,7 +4,7 @@ use leptos::*;
 ///{{#if (eq unstable_apis "true")}}
 ///
 /// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).{{/if}}
+/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).{{/if}}
 ///
 /// ## Demo
 ///

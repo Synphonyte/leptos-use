@@ -13,7 +13,7 @@
     <a href="https://crates.io/crates/leptos-use"><img src="https://img.shields.io/crates/v/leptos-use.svg?label=&color=%232C1275" alt="Crates.io"/></a>
     <a href="https://leptos-use.rs/server_side_rendering.html"><img src="https://img.shields.io/badge/-SSR-%236a214b" alt="SSR"></a> 
     <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-docs%20%26%20demos-%239A233F" alt="Docs & Demos"></a> 
-    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-84%20functions-%23EF3939" alt="84 Functions" /></a>
+    <a href="https://leptos-use.rs"><img src="https://img.shields.io/badge/-86%20functions-%23EF3939" alt="86 Functions" /></a>
 </p>
 
 <br/>

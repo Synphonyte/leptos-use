@@ -28,10 +28,6 @@ mod is_ok;
 mod is_some;
 #[cfg(feature = "on_click_outside")]
 mod on_click_outside;
-#[cfg(feature = "use_web_lock")]
-mod use_web_lock;
-#[cfg(feature = "use_window_size")]
-mod use_window_size;
 #[cfg(feature = "signal_debounced")]
 mod signal_debounced;
 #[cfg(feature = "signal_throttled")]
@@ -142,6 +138,8 @@ mod use_to_string;
 mod use_toggle;
 #[cfg(feature = "use_user_media")]
 mod use_user_media;
+#[cfg(feature = "use_web_lock")]
+mod use_web_lock;
 #[cfg(feature = "use_web_notification")]
 mod use_web_notification;
 #[cfg(feature = "use_websocket")]
@@ -152,6 +150,8 @@ mod use_window;
 mod use_window_focus;
 #[cfg(feature = "use_window_scroll")]
 mod use_window_scroll;
+#[cfg(feature = "use_window_size")]
+mod use_window_size;
 #[cfg(feature = "watch_debounced")]
 mod watch_debounced;
 #[cfg(feature = "watch_pausable")]
@@ -173,10 +173,6 @@ pub use is_ok::*;
 pub use is_some::*;
 #[cfg(feature = "on_click_outside")]
 pub use on_click_outside::*;
-#[cfg(feature = "use_web_lock")]
-pub use use_web_lock::*;
-#[cfg(feature = "use_window_size")]
-pub use use_window_size::*;
 #[cfg(feature = "signal_debounced")]
 pub use signal_debounced::*;
 #[cfg(feature = "signal_throttled")]
@@ -287,6 +283,8 @@ pub use use_to_string::*;
 pub use use_toggle::*;
 #[cfg(feature = "use_user_media")]
 pub use use_user_media::*;
+#[cfg(feature = "use_web_lock")]
+pub use use_web_lock::*;
 #[cfg(feature = "use_web_notification")]
 pub use use_web_notification::*;
 #[cfg(feature = "use_websocket")]
@@ -297,6 +295,8 @@ pub use use_window::*;
 pub use use_window_focus::*;
 #[cfg(feature = "use_window_scroll")]
 pub use use_window_scroll::*;
+#[cfg(feature = "use_window_size")]
+pub use use_window_size::*;
 #[cfg(feature = "watch_debounced")]
 pub use watch_debounced::*;
 #[cfg(feature = "watch_pausable")]

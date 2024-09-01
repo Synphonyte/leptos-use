@@ -6,13 +6,13 @@ pub use web_sys::LockMode;
 
 /// Rustified [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API).   
 ///
-/// The **Web Locks API** allows scripts running in one tab or worker to asynchronously acquire a 
-/// lock, hold it while work is performed, then release it. While held, no other script executing 
-/// in the same origin can acquire the same lock, which allows a web app running in multiple tabs or 
+/// The **Web Locks API** allows scripts running in one tab or worker to asynchronously acquire a
+/// lock, hold it while work is performed, then release it. While held, no other script executing
+/// in the same origin can acquire the same lock, which allows a web app running in multiple tabs or
 /// workers to coordinate work and the use of resources.
-/// 
+///
 /// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
+/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).
 ///
 /// ## Demo
 ///
