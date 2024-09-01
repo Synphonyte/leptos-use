@@ -26,9 +26,9 @@ http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
-leptos = { git = "https://github.com/leptos-rs/leptos" }
-leptos_axum = { optional = true, git = "https://github.com/leptos-rs/leptos" }
-leptos_actix = { optional = true, git = "https://github.com/leptos-rs/leptos" }
+leptos = { git = "https://github.com/leptos-rs/leptos", branch = "leptos_0.7" }
+leptos_axum = { optional = true, git = "https://github.com/leptos-rs/leptos", branch = "leptos_0.7" }
+leptos_actix = { optional = true, git = "https://github.com/leptos-rs/leptos", branch = "leptos_0.7" }
 leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
@@ -47,7 +47,7 @@ codee = { version = "0.2", features = [
     "prost",
 ] }
 getrandom = { version = "0.2", features = ["js"] }
-leptos_meta = { git = "https://github.com/leptos-rs/leptos" }
+leptos_meta = { git = "https://github.com/leptos-rs/leptos", branch = "leptos_0.7" }
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
