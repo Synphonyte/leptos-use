@@ -60,6 +60,7 @@ members = [
     "use_timestamp",
     "use_toggle",
     "use_user_media",
+    "use_web_lock",
     "use_web_notification",
     "use_websocket",
     "use_webtransport",

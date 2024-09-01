@@ -52,6 +52,7 @@
 - [use_prefers_reduced_motion](browser/use_prefers_reduced_motion.md)
 - [use_service_worker](browser/use_service_worker.md)
 - [use_user_media](browser/use_user_media.md)
+- [use_web_lock](browser/use_web_lock.md)
 - [use_web_notification](browser/use_web_notification.md)
 
 # Sensors

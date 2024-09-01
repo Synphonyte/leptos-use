@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.13.0"
+version = "0.13.1"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -48,6 +48,7 @@ unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
 default = [
+    "use_web_lock",
     "use_window_size",
     "is_err",
     "is_none",
@@ -120,6 +121,14 @@ default = [
     "watch_throttled",
     "watch_with_options",
     "whenever"
+]
+use_web_lock = [
+    "web-sys/AbortSignal",
+    "web-sys/Lock",
+    "web-sys/LockManager",
+    "web-sys/LockMode",
+    "web-sys/LockOptions",
+    "web-sys/Navigator",
 ]
 use_window_size = ["use_media_query"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
