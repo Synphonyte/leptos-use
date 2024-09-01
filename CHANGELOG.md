@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `use_window_size`
 
+### Changes 🔥
+
+- `UseWebsocket::protocols` now supports a signal. It is read right before `open` is called. (thanks to @zakstucke) 
+
 ## [0.13.0] - 2024-08-28
 
 ### New Functions 🚀
