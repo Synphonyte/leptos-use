@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Ported everything to Leptos 0.7
 Some example don't run yet.
 
+## [0.13.3] - 2024-09-02
+
+### Fix 🍕
+
+- Fixed `use_color_mode` with cookies enabled
+
 ## [0.13.2] - 2024-09-02
 
 ### Fix 🍕

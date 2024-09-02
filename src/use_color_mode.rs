@@ -216,11 +216,15 @@ where
         let _ = sync_signal_with_options(
             (cookie, set_cookie),
             (store, set_store),
-            SyncSignalOptions::with_transforms(
-                move |cookie: &Option<ColorMode>| {
-                    cookie.clone().unwrap_or_else(|| store.get_untracked())
+            SyncSignalOptions::with_assigns(
+                move |store: &mut ColorMode, cookie: &Option<ColorMode>| {
+                    if let Some(cookie) = cookie {
+                        *store = cookie.clone();
+                    }
                 },
-                move |store: &ColorMode| Some(store.clone()),
+                move |cookie: &mut Option<ColorMode>, store: &ColorMode| {
+                    *cookie = Some(store.clone())
+                },
             ),
         );
     }
