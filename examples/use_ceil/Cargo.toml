@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leptos = { git = "https://github.com/leptos-rs/leptos", features = [
+leptos = { workspace = true, features = [
     "nightly",
     "csr",
 ] }

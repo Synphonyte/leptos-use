@@ -72,8 +72,8 @@ members = [
 exclude = ["ssr", "use_webtransport_with_server"]
 
 [workspace.dependencies]
-leptos = { git = "https://github.com/leptos-rs/leptos" }
-codee = { version = "0.2" }
+leptos = "0.7.0-beta"
+codee = "0.2"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
