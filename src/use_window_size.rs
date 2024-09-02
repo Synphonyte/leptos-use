@@ -4,7 +4,7 @@ use crate::{
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::resize;
-use leptos::*;
+use leptos::prelude::*;
 
 /// Reactive window size.
 ///
@@ -45,8 +45,8 @@ pub fn use_window_size_with_options(options: UseWindowSizeOptions) -> UseWindowS
         measure_type,
     } = options;
 
-    let (width, set_width) = create_signal(initial_size.width);
-    let (height, set_height) = create_signal(initial_size.height);
+    let (width, set_width) = signal(initial_size.width);
+    let (height, set_height) = signal(initial_size.height);
 
     let update;
 
@@ -126,8 +126,8 @@ pub fn use_window_size_with_options(options: UseWindowSizeOptions) -> UseWindowS
     if listen_orientation {
         let matches = use_media_query("(orientation: portrait)");
 
-        create_effect(move |_| {
-            matches.track();
+        Effect::new(move |_| {
+            let _ = matches.get();
 
             update();
         });

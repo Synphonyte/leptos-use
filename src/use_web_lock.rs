@@ -21,7 +21,7 @@ pub use web_sys::LockMode;
 /// ## Usage
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::use_web_lock;
 /// #
 /// async fn my_process(_lock: web_sys::Lock) -> i32 {
@@ -31,7 +31,7 @@ pub use web_sys::LockMode;
 ///
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// spawn_local(async {
+/// leptos::spawn::spawn_local(async {
 ///     let res = use_web_lock("my_lock", my_process).await;
 ///     assert!(matches!(res, Ok(42)));
 /// });

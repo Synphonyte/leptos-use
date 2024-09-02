@@ -135,14 +135,14 @@ use std::rc::Rc;
 /// of `default`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
 /// # use std::str::FromStr;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal("10".to_string());
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal("10".to_string());
+/// let (b, set_b) = signal(2);
 ///
 /// let stop = sync_signal_with_options(
 ///     (a, set_a),
@@ -158,7 +158,7 @@ use std::rc::Rc;
 /// ```
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
 /// # use std::str::FromStr;
 /// #
@@ -169,8 +169,8 @@ use std::rc::Rc;
 ///
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let (a, set_a) = create_signal(Foo { bar: 10 });
-/// let (b, set_b) = create_signal(2);
+/// let (a, set_a) = signal(Foo { bar: 10 });
+/// let (b, set_b) = signal(2);
 ///
 /// let stop = sync_signal_with_options(
 ///     (a, set_a),

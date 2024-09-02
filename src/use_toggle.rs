@@ -1,5 +1,5 @@
 use crate::core::MaybeRwSignal;
-use leptos::*;
+use leptos::prelude::*;
 
 /// A boolean switcher with utility functions.
 ///
