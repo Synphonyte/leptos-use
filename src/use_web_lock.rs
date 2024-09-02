@@ -78,7 +78,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::js_fut;
-        use leptos::window;
+        use leptos::prelude::window;
         use std::sync::{Arc, Mutex};
         use wasm_bindgen::closure::Closure;
         use wasm_bindgen::JsCast;
