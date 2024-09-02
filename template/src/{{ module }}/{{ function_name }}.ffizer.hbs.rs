@@ -27,7 +27,6 @@ use leptos::*;
 /// ## Server-Side Rendering
 ///
 // #[doc(cfg(feature = "{{feature}}"))]
-
 pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
     {{ function_name }}_with_options({{ to_pascal_case function_name }}Options::default())
 }

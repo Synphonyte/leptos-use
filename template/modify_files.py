@@ -10,6 +10,7 @@ def main():
     parser.add_argument("category")
     parser.add_argument("--module", type=str)
     parser.add_argument("--feature", type=str)
+    parser.add_argument("--unstable_apis", type=lambda x: x.lower() == "true")
 
     args = parser.parse_args()
 
@@ -94,7 +95,14 @@ def modify_librs(args):
     with open("src/lib.rs", "r") as f:
         lib_source = f.read()
 
-    feature_prefix = "" if args.feature is None else f"#[cfg(feature = \"{args.feature}\")]\n"
+    feature_prefix = []
+    if args.feature is not None:
+        feature_prefix.append(f"#[cfg(feature = \"{args.feature}\")]\n")
+
+    if args.unstable_apis:
+        feature_prefix.append("#[cfg(web_sys_unstable_apis)]\n")
+
+    feature_prefix = "".join(feature_prefix)
 
     if args.module is None:
         lib_source = lib_source.replace("mod on_click_outside;",
@@ -162,6 +170,7 @@ def modify_cargo_toml(args):
 
     with open("Cargo.toml", "w") as f:
         f.write("".join(cargo_toml_source))
+
 
 if __name__ == '__main__':
     main()

@@ -19,4 +19,4 @@ ignores:
   - createfn.sh
 
 scripts:
-  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}} --feature {{ feature }}
+  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}} --feature {{ feature }} --unstable_apis {{ unstable_apis }}
