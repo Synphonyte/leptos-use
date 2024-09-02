@@ -8,8 +8,8 @@ use crate::{
 };
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::str::FromStr;

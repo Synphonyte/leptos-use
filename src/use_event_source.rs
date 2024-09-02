@@ -234,7 +234,9 @@ where
                             );
                         } else {
                             #[cfg(debug_assertions)]
-                            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                            let _z =
+                                leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter(
+                                );
 
                             on_failed();
                         }

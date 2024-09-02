@@ -1,8 +1,8 @@
 use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::marker::PhantomData;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {

@@ -1,5 +1,5 @@
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 
 /// Reactive `NOT` condition.
 ///

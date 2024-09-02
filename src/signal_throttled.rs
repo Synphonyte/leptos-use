@@ -1,7 +1,7 @@
 use crate::utils::signal_filtered;
 use crate::{use_throttle_fn_with_options, ThrottleOptions};
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use paste::paste;
 
 signal_filtered!(

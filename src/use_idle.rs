@@ -3,8 +3,8 @@ use crate::filter_builder_methods;
 use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 
 ///
 ///

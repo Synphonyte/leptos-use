@@ -1,5 +1,5 @@
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::fmt::Display;
 
 /// Reactive [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API).

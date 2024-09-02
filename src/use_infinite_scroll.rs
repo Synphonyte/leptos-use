@@ -6,8 +6,8 @@ use crate::{
 use default_struct_builder::DefaultBuilder;
 use futures_util::join;
 use gloo_timers::future::sleep;
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;

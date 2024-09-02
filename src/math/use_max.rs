@@ -1,6 +1,6 @@
 use crate::math::shared::use_partial_cmp;
-use leptos::reactive_graph::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive_graph::wrappers::read::Signal;
 use std::cmp::Ordering;
 
 use_partial_cmp!(
