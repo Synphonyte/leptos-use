@@ -134,8 +134,13 @@ mod use_timeout_fn;
 mod use_timestamp;
 #[cfg(feature = "use_to_string")]
 mod use_to_string;
+#[cfg(feature = "use_toggle")]
+mod use_toggle;
 #[cfg(feature = "use_user_media")]
 mod use_user_media;
+#[cfg(feature = "use_web_lock")]
+#[cfg(web_sys_unstable_apis)]
+mod use_web_lock;
 #[cfg(feature = "use_web_notification")]
 mod use_web_notification;
 #[cfg(feature = "use_websocket")]
@@ -146,6 +151,8 @@ mod use_window;
 mod use_window_focus;
 #[cfg(feature = "use_window_scroll")]
 mod use_window_scroll;
+#[cfg(feature = "use_window_size")]
+mod use_window_size;
 #[cfg(feature = "watch_debounced")]
 mod watch_debounced;
 #[cfg(feature = "watch_pausable")]
@@ -273,8 +280,13 @@ pub use use_timeout_fn::*;
 pub use use_timestamp::*;
 #[cfg(feature = "use_to_string")]
 pub use use_to_string::*;
+#[cfg(feature = "use_toggle")]
+pub use use_toggle::*;
 #[cfg(feature = "use_user_media")]
 pub use use_user_media::*;
+#[cfg(feature = "use_web_lock")]
+#[cfg(web_sys_unstable_apis)]
+pub use use_web_lock::*;
 #[cfg(feature = "use_web_notification")]
 pub use use_web_notification::*;
 #[cfg(feature = "use_websocket")]
@@ -285,6 +297,8 @@ pub use use_window::*;
 pub use use_window_focus::*;
 #[cfg(feature = "use_window_scroll")]
 pub use use_window_scroll::*;
+#[cfg(feature = "use_window_size")]
+pub use use_window_size::*;
 #[cfg(feature = "watch_debounced")]
 pub use watch_debounced::*;
 #[cfg(feature = "watch_pausable")]

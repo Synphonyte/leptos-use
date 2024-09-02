@@ -11,12 +11,12 @@ variables:
     default_value: ""
     ask: Module [optional]
   - name: feature
-    default_value: ""
-    ask: cfg feature [optional]
+    default_value: "{{ function_name }}"
+    ask: cfg feature
 
 ignores:
   - modify_files.py
   - createfn.sh
 
 scripts:
-  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}}{{#if feature}} --feature {{ feature }}{{/if}}
+  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}} --feature {{ feature }} --unstable_apis {{ unstable_apis }}

@@ -32,6 +32,7 @@
 - [use_window](elements/use_window.md)
 - [use_window_focus](elements/use_window_focus.md)
 - [use_window_scroll](elements/use_window_scroll.md)
+- [use_window_size](elements/use_window_size.md)
 
 # Browser
 
@@ -51,6 +52,7 @@
 - [use_prefers_reduced_motion](browser/use_prefers_reduced_motion.md)
 - [use_service_worker](browser/use_service_worker.md)
 - [use_user_media](browser/use_user_media.md)
+- [use_web_lock](browser/use_web_lock.md)
 - [use_web_notification](browser/use_web_notification.md)
 
 # Sensors
@@ -111,6 +113,7 @@
 - [use_supported](utilities/use_supported.md)
 - [use_throttle_fn](utilities/use_throttle_fn.md)
 - [use_to_string](utilities/use_to_string.md)
+- [use_toggle](utilities/use_toggle.md)
 
 # Intl
 

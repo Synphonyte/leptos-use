@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.12.0"
+version = "0.13.2"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -54,6 +54,8 @@ unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
 default = [
+    "use_web_lock",
+    "use_window_size",
     "is_err",
     "is_none",
     "is_ok",
@@ -112,6 +114,7 @@ default = [
     "use_throttle_fn",
     "use_timeout_fn",
     "use_timestamp",
+    "use_toggle",
     "use_to_string",
     "use_user_media",
     "use_web_notification",
@@ -125,6 +128,15 @@ default = [
     "watch_with_options",
     "whenever"
 ]
+use_web_lock = [
+    "web-sys/AbortSignal",
+    "web-sys/Lock",
+    "web-sys/LockManager",
+    "web-sys/LockMode",
+    "web-sys/LockOptions",
+    "web-sys/Navigator",
+]
+use_window_size = ["use_media_query"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = ["dep:web-sys"]
@@ -323,6 +335,7 @@ use_supported = []
 use_throttle_fn = []
 use_timeout_fn = []
 use_timestamp = ["use_interval_fn", "use_raf_fn"]
+use_toggle = []
 use_to_string = []
 use_user_media = [
     "use_window",
@@ -341,7 +354,7 @@ use_web_notification = [
     "web-sys/NotificationDirection",
     "web-sys/VisibilityState"
 ]
-use_websocket = ["dep:codee"]
+use_websocket = ["dep:web-sys", "dep:codee"]
 use_window = ["use_document", "dep:web-sys", "web-sys/Navigator", "web-sys/MediaQueryList"]
 use_window_focus = ["use_event_listener"]
 use_window_scroll = ["use_event_listener", "use_window"]

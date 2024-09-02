@@ -4,7 +4,7 @@ use leptos::prelude::*;
 ///{{#if (eq unstable_apis "true")}}
 ///
 /// > This function requires `--cfg=web_sys_unstable_apis` to be activated as
-/// [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).{{/if}}
+/// > [described in the wasm-bindgen guide](https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html).{{/if}}
 ///
 /// ## Demo
 ///
@@ -25,9 +25,8 @@ use leptos::prelude::*;
 /// ```
 ///
 /// ## Server-Side Rendering
-/// {{#if feature}}
-// #[doc(cfg(feature = "{{feature}}"))]{{/if}}
-
+///
+// #[doc(cfg(feature = "{{feature}}"))]
 pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
     {{ function_name }}_with_options({{ to_pascal_case function_name }}Options::default())
 }

@@ -151,6 +151,7 @@ async fn create_media(video: bool, audio: bool) -> Result<web_sys::MediaStream, 
 }
 
 /// Options for [`use_user_media_with_options`].
+///
 /// Either or both constraints must be specified.
 /// If the browser cannot find all media tracks with the specified types that meet the constraints given,
 /// then the returned promise is rejected with `NotFoundError`
