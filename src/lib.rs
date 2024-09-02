@@ -139,6 +139,7 @@ mod use_toggle;
 #[cfg(feature = "use_user_media")]
 mod use_user_media;
 #[cfg(feature = "use_web_lock")]
+#[cfg(web_sys_unstable_apis)]
 mod use_web_lock;
 #[cfg(feature = "use_web_notification")]
 mod use_web_notification;
@@ -284,6 +285,7 @@ pub use use_toggle::*;
 #[cfg(feature = "use_user_media")]
 pub use use_user_media::*;
 #[cfg(feature = "use_web_lock")]
+#[cfg(web_sys_unstable_apis)]
 pub use use_web_lock::*;
 #[cfg(feature = "use_web_notification")]
 pub use use_web_notification::*;
