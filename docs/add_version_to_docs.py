@@ -8,10 +8,10 @@ def main():
     with open("Cargo.toml", "r") as f:
         cargo_text = f.read()
 
-        m = re.search(r'leptos = "([^"]+)"', cargo_text)
-        leptos_version = m.group(1)
+        m = re.search(r'leptos = "(\d+)\.(\d+)', cargo_text)
+        leptos_version = f"{m.group(1)}.{m.group(2)}"
 
-        m = re.search(r'version = "(\d+)\.(\d+)\.(\d+)"', cargo_text)
+        m = re.search(r'version = "(\d+)\.(\d+)\.(\d+)', cargo_text)
         crate_version_short = f"{m.group(1)}.{m.group(2)}"
         crate_version_long = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
 

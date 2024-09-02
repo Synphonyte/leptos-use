@@ -34,7 +34,7 @@ use leptos_use::{use_mouse, UseMouseReturn};
 #[component]
 fn Demo() -> impl IntoView {
     let UseMouseReturn { x, y, .. } = use_mouse();
-    
+
     view! { cx,
         {x} " x " {y}
     }
@@ -93,3 +93,4 @@ This will create the function file in the src directory, scaffold an example dir
 | 0.4, 0.5, 0.6 | 0.4                       |
 | 0.7, 0.8, 0.9 | 0.5                       |
 | 0.10 – 0.13   | 0.6                       |
+| 0.14          | 0.7                       |
