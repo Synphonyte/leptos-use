@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0-beta2] - 2024-09-09
+
+### Change 🔥
+
+- Latest Leptos 0.7 beta changed the trigger trait method (thanks to @BakerNet)
+- Latest changes from version 0.13.3 ported
+
 ## [0.14.0-beta1] - 2024-09-02
 
 Ported everything to Leptos 0.7
