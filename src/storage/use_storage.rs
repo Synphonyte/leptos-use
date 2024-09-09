@@ -350,7 +350,7 @@ where
                 let ev_key = ev.key();
                 // Key matches or all keys deleted (None)
                 if ev_key == Some(check_key.clone()) || ev_key.is_none() {
-                    storage_notify.trigger()
+                    storage_notify.notify()
                 }
             });
             // Listen to internal storage events
@@ -361,7 +361,7 @@ where
                 {
                     move |ev: web_sys::CustomEvent| {
                         if Some(check_key.clone()) == ev.detail().as_string() {
-                            custom_notify.trigger()
+                            custom_notify.notify()
                         }
                     }
                 },
@@ -378,7 +378,7 @@ where
                         .remove_item(&key)
                         .map_err(UseStorageError::RemoveItemFailed);
                     let _ = handle_error(&on_error, result);
-                    notify.trigger();
+                    notify.notify();
                     dispatch_storage_event();
                 });
             }
