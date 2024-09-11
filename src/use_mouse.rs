@@ -164,8 +164,12 @@ where
             mouse_handler,
             event_listener_options,
         );
-        let _ =
-            use_event_listener_with_options(target.clone(), dragover, drag_handler, event_listener_options);
+        let _ = use_event_listener_with_options(
+            target.clone(),
+            dragover,
+            drag_handler,
+            event_listener_options,
+        );
 
         if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
