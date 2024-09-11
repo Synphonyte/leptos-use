@@ -1,10 +1,14 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{use_toggle, UseToggleReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
-    let UseToggleReturn { toggle, value, set_value } = use_toggle(true);
+    let UseToggleReturn {
+        toggle,
+        value,
+        set_value,
+    } = use_toggle(true);
 
     view! {
         <p>Value: <BooleanDisplay value=value /></p>
@@ -18,7 +22,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = mount_to(demo_or_body(), || {
         view! { <Demo /> }
-    })
+    });
+
+    unmount_handle.forget();
 }

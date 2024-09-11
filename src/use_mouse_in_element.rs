@@ -1,9 +1,8 @@
-use crate::core::{ElementMaybeSignal, Position};
+use crate::core::{IntoElementMaybeSignal, Position};
 use crate::{
     use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
     UseMouseReturn, UseMouseSourceType, UseWindow,
 };
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::convert::Infallible;
@@ -39,24 +38,21 @@ use std::marker::PhantomData;
 ///
 /// On the server this returns simple Signals with the `initial_value` for `x` and `y`,
 /// no-op for `stop`, `is_outside = true` and `0.0` for the rest of the signals.
-pub fn use_mouse_in_element<El, T>(target: El) -> UseMouseInElementReturn<impl Fn() + Clone>
+pub fn use_mouse_in_element<El, M>(target: El) -> UseMouseInElementReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     use_mouse_in_element_with_options(target, Default::default())
 }
 
 /// Version of [`use_mouse_in_element`] that takes a `UseMouseInElementOptions`. See [`use_mouse_in_element`] for how to use.
-pub fn use_mouse_in_element_with_options<El, T, OptEl, OptT, OptEx>(
+pub fn use_mouse_in_element_with_options<El, M, OptEl, OptM, OptEx>(
     target: El,
-    options: UseMouseInElementOptions<OptEl, OptT, OptEx>,
+    options: UseMouseInElementOptions<OptEl, OptM, OptEx>,
 ) -> UseMouseInElementReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
-    OptEl: Into<ElementMaybeSignal<OptT, web_sys::EventTarget>> + Clone,
-    OptT: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+    OptEl: IntoElementMaybeSignal<web_sys::EventTarget, OptM>,
     OptEx: UseMouseEventExtractor + Clone + 'static,
 {
     let UseMouseInElementOptions {
@@ -88,8 +84,11 @@ where
     let (element_height, set_element_height) = signal(0.0);
     let (is_outside, set_outside) = signal(true);
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
-        let stop = || ();
+    let stop;
+
+    #[cfg(feature = "ssr")]
+    {
+        stop = || ();
 
         let _ = handle_outside;
 
@@ -101,18 +100,21 @@ where
         let _ = set_element_height;
         let _ = set_outside;
         let _ = target;
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         use crate::use_event_listener;
         use leptos::ev::mouseleave;
 
-        let target = target.into();
+        let target = target.into_element_maybe_signal();
         let window = window();
 
         let effect = Effect::watch(
             move || (target.get(), x.get(), y.get()),
             move |(el, x, y), _, _| {
                 if let Some(el) = el {
-                    let el: web_sys::Element = el.clone().into();
+                    let el = el.clone();
                     let rect = el.get_bounding_client_rect();
                     let left = rect.left();
                     let top = rect.top();
@@ -146,10 +148,10 @@ where
             false,
         );
 
-        let stop = move || effect.stop();
+        stop = move || effect.stop();
 
         let _ = use_event_listener(document(), mouseleave, move |_| set_outside.set(true));
-    }}
+    }
 
     UseMouseInElementReturn {
         x,
@@ -168,10 +170,9 @@ where
 
 /// Options for [`use_mouse_in_element_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseMouseInElementOptions<El, T, Ex>
+pub struct UseMouseInElementOptions<El, M, Ex>
 where
-    El: Clone + Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     Ex: UseMouseEventExtractor + Clone,
 {
     /// How to extract the x, y coordinates from mouse events or touches
@@ -195,10 +196,13 @@ where
     handle_outside: bool,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
-impl Default for UseMouseInElementOptions<UseWindow, web_sys::Window, Infallible> {
+impl<M> Default for UseMouseInElementOptions<UseWindow, M, Infallible>
+where
+    UseWindow: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+{
     fn default() -> Self {
         Self {
             coord_type: UseMouseCoordType::default(),

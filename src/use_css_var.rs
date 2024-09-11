@@ -1,11 +1,10 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::core::ElementMaybeSignal;
+use crate::core::IntoElementMaybeSignal;
 use crate::{
     use_mutation_observer_with_options, watch_with_options, UseMutationObserverOptions,
     WatchOptions,
 };
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::marker::PhantomData;
@@ -85,15 +84,14 @@ pub fn use_css_var(
 }
 
 /// Version of [`use_css_var`] that takes a `UseCssVarOptions`. See [`use_css_var`] for how to use.
-pub fn use_css_var_with_options<P, El, T>(
+pub fn use_css_var_with_options<P, El, M>(
     prop: P,
-    options: UseCssVarOptions<El, T>,
+    options: UseCssVarOptions<El, M>,
 ) -> (ReadSignal<String>, WriteSignal<String>)
 where
     P: Into<MaybeSignal<String>>,
     El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     let UseCssVarOptions {
         target,
@@ -104,8 +102,9 @@ where
 
     let (variable, set_variable) = signal(initial_value.clone());
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let el_signal = target.into();
+    #[cfg(not(feature = "ssr"))]
+    {
+        let el_signal = target.into_element_maybe_signal();
         let prop = prop.into();
 
         let update_css_var = {
@@ -116,7 +115,7 @@ where
                 let key = prop.get_untracked();
 
                 if let Some(el) = el_signal.get_untracked() {
-                    if let Ok(Some(style)) = window().get_computed_style(&el.into()) {
+                    if let Ok(Some(style)) = window().get_computed_style(&el) {
                         if let Ok(value) = style.get_property_value(&key) {
                             set_variable.update(|var| *var = value.trim().to_string());
                             return;
@@ -133,11 +132,10 @@ where
             let update_css_var = update_css_var.clone();
             let el_signal = el_signal.clone();
 
-            use_mutation_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, T, _>(
-                                el_signal,
+            use_mutation_observer_with_options(
+                el_signal,
                 move |_, _| update_css_var(),
-                UseMutationObserverOptions::default()
-                    .attribute_filter(vec!["style".to_string()]),
+                UseMutationObserverOptions::default().attribute_filter(vec!["style".to_string()]),
             );
         }
 
@@ -149,35 +147,33 @@ where
             let prop = prop.clone();
 
             let _ = watch_with_options(
-                                move || (el_signal.get(), prop.get()),
+                move || (el_signal.get(), prop.get()),
                 move |_, _, _| update_css_var(),
                 WatchOptions::default().immediate(true),
             );
         }
 
         Effect::watch(
-                        move || variable.get(),
+            move || variable.get(),
             move |val, _, _| {
                 if let Some(el) = el_signal.get() {
-                    let el = el.into().unchecked_into::<web_sys::HtmlElement>();
+                    let el = el.unchecked_into::<web_sys::HtmlElement>();
                     let style = el.style();
                     let _ = style.set_property(&prop.get_untracked(), val);
                 }
             },
             false,
         );
-    }}
+    }
 
     (variable, set_variable)
 }
 
 /// Options for [`use_css_var_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseCssVarOptions<El, T>
+pub struct UseCssVarOptions<El, M>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     /// The target element to read the variable from and set the variable on.
     /// Defaults to the `document.documentElement`.
@@ -192,29 +188,35 @@ where
     observe: bool,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
-cfg_if! { if #[cfg(feature = "ssr")] {
-    impl Default for UseCssVarOptions<Option<web_sys::Element>, web_sys::Element> {
-        fn default() -> Self {
-            Self {
-                target: None,
-                initial_value: "".into(),
-                observe: false,
-                _marker: PhantomData,
-            }
+#[cfg(feature = "ssr")]
+impl<M> Default for UseCssVarOptions<Option<web_sys::Element>, M>
+where
+    Option<web_sys::Element>: IntoElementMaybeSignal<web_sys::Element, M>,
+{
+    fn default() -> Self {
+        Self {
+            target: None,
+            initial_value: "".into(),
+            observe: false,
+            _marker: PhantomData,
         }
     }
-} else {
-    impl Default for UseCssVarOptions<web_sys::Element, web_sys::Element> {
-        fn default() -> Self {
-            Self {
-                target: document().document_element().expect("No document element"),
-                initial_value: "".into(),
-                observe: false,
-                _marker: PhantomData,
-            }
+}
+
+#[cfg(not(feature = "ssr"))]
+impl<M> Default for UseCssVarOptions<web_sys::Element, M>
+where
+    web_sys::Element: IntoElementMaybeSignal<web_sys::Element, M>,
+{
+    fn default() -> Self {
+        Self {
+            target: document().document_element().expect("No document element"),
+            initial_value: "".into(),
+            observe: false,
+            _marker: PhantomData,
         }
     }
-}}
+}

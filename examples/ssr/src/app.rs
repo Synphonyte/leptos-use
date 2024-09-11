@@ -1,9 +1,9 @@
-use crate::error_template::{AppError, ErrorTemplate};
 use codee::string::FromToStringCodec;
 use leptos::ev::{keypress, KeyboardEvent};
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::components::*;
+use leptos_router::path;
 use leptos_use::storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
 use leptos_use::{
     use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
@@ -11,6 +11,25 @@ use leptos_use::{
     use_window, ColorMode, UseColorModeOptions, UseColorModeReturn, UseCookieOptions,
     UseIntervalReturn, UseIntlNumberFormatOptions,
 };
+
+pub fn shell(options: LeptosOptions) -> impl IntoView {
+    view! {
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <MetaTags/>
+                <AutoReload options=options.clone()/>
+                <HydrationScripts options/>
+                <link rel="stylesheet" id="leptos" href="/pkg/leptos_use_ssr.css"/>
+            </head>
+            <body>
+                <App/>
+            </body>
+        </html>
+    }
+}
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -22,14 +41,10 @@ pub fn App() -> impl IntoView {
 
         <Title text="Leptos-Use SSR Example"/>
 
-        <Router fallback=|| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! { <ErrorTemplate outside_errors/> }.into_view()
-        }>
+        <Router>
             <main>
-                <Routes>
-                    <Route path="" view=|| view! { <HomePage/> }/>
+                <Routes fallback=|| "This page could not be found.">
+                    <Route path=path!("") view=|| view! { <HomePage/> }/>
                 </Routes>
             </main>
         </Router>
@@ -86,7 +101,7 @@ fn HomePage() -> impl IntoView {
     let locales = use_locales();
 
     view! {
-        <Html class=move || mode.get().to_string()/>
+        <Html {..} class=move || mode.get().to_string()/>
 
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
@@ -103,7 +118,7 @@ fn HomePage() -> impl IntoView {
         <pre>{move || format!("Locales:\n    {}", locales().join("\n    "))}</pre>
 
         <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
-        
+
         <Show when={move || count() > 0 }>
             <div>Greater than 0 </div>
         </Show>

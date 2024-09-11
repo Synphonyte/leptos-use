@@ -1,4 +1,5 @@
-use crate::core::{ElementMaybeSignal, Size};
+use crate::core::IntoElementMaybeSignal;
+use crate::core::Size;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -47,23 +48,21 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## See also
 ///
 /// - [`fn@crate::use_resize_observer`]
-pub fn use_element_size<El, T>(target: El) -> UseElementSizeReturn
+pub fn use_element_size<El, M>(target: El) -> UseElementSizeReturn
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     use_element_size_with_options(target, UseElementSizeOptions::default())
 }
 
 /// Version of [`use_element_size`] that takes a `UseElementSizeOptions`. See [`use_element_size`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_element_size_with_options<El, T>(
+pub fn use_element_size_with_options<El, M>(
     target: El,
     options: UseElementSizeOptions,
 ) -> UseElementSizeReturn
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     let UseElementSizeOptions { box_, initial_size } = options;
 
@@ -74,7 +73,7 @@ where
     {
         let box_ = box_.unwrap_or(web_sys::ResizeObserverBoxOptions::ContentBox);
 
-        let target = target.into();
+        let target = target.into_element_maybe_signal();
 
         let is_svg = {
             let target = target.clone();
@@ -82,7 +81,6 @@ where
             move || {
                 if let Some(target) = target.get_untracked() {
                     target
-                        .into()
                         .namespace_uri()
                         .map(|ns| ns.contains("svg"))
                         .unwrap_or(false)
@@ -92,11 +90,11 @@ where
             }
         };
 
-        {
-            let target = target.clone();
+        let _ = use_resize_observer_with_options(
+            target.clone(),
+            {
+                let target = target.clone();
 
-            let _ = use_resize_observer_with_options::<ElementMaybeSignal<T, web_sys::Element>, _, _>(
-                target.clone(),
                 move |entries, _| {
                     let entry = &entries[0];
 
@@ -111,7 +109,7 @@ where
 
                     if is_svg() {
                         if let Some(target) = target.get() {
-                            if let Ok(Some(styles)) = window().get_computed_style(&target.into()) {
+                            if let Ok(Some(styles)) = window().get_computed_style(&target) {
                                 set_height.set(
                                     styles
                                         .get_property_value("height")
@@ -155,10 +153,10 @@ where
                         set_width.set(entry.content_rect().width());
                         set_height.set(entry.content_rect().height())
                     }
-                },
-                UseResizeObserverOptions::default().box_(box_),
-            );
-        }
+                }
+            },
+            UseResizeObserverOptions::default().box_(box_),
+        );
 
         let _ = watch_with_options(
             move || target.get(),

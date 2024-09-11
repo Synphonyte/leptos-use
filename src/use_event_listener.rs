@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::IntoElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
@@ -88,11 +88,10 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a noop.
-pub fn use_event_listener<Ev, El, T, F>(target: El, event: Ev, handler: F) -> impl Fn() + Clone
+pub fn use_event_listener<Ev, El, M, F>(target: El, event: Ev, handler: F) -> impl Fn() + Clone
 where
     Ev: EventDescriptor + 'static,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
 {
     use_event_listener_with_options(target, event, handler, UseEventListenerOptions::default())
@@ -101,7 +100,7 @@ where
 /// Version of [`use_event_listener`] that takes `web_sys::AddEventListenerOptions`. See the docs for [`use_event_listener`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
 #[allow(unused_mut)]
-pub fn use_event_listener_with_options<Ev, El, T, F>(
+pub fn use_event_listener_with_options<Ev, El, M, F>(
     target: El,
     event: Ev,
     mut handler: F,
@@ -109,8 +108,7 @@ pub fn use_event_listener_with_options<Ev, El, T, F>(
 ) -> impl Fn() + Clone
 where
     Ev: EventDescriptor + 'static,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
 {
     #[cfg(feature = "ssr")]
@@ -145,7 +143,7 @@ where
 
         let event_name = event.name();
 
-        let signal = target.into();
+        let signal = target.into_element_maybe_signal();
 
         let prev_element = Rc::new(RefCell::new(None::<web_sys::EventTarget>));
 
@@ -163,7 +161,7 @@ where
             let cleanup_prev_element = cleanup_prev_element.clone();
 
             watch_with_options(
-                move || signal.get().map(|e| e.into()),
+                move || signal.get(),
                 move |element, _, _| {
                     cleanup_prev_element();
                     prev_element.replace(element.clone());

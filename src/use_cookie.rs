@@ -233,7 +233,7 @@ where
                     return;
                 }
 
-                let value = cookie.with_untracked(|cookie| {
+                let value = cookie.try_with_untracked(|cookie| {
                     cookie.as_ref().and_then(|cookie| {
                         C::encode(cookie)
                             .map_err(|err| on_error(CodecError::Encode(err)))
@@ -241,29 +241,31 @@ where
                     })
                 });
 
-                if value
-                    == jar.with_value(|jar| jar.get(&cookie_name).map(|c| c.value().to_owned()))
-                {
-                    return;
+                if let Some(value) = value {
+                    if value
+                        == jar.with_value(|jar| jar.get(&cookie_name).map(|c| c.value().to_owned()))
+                    {
+                        return;
+                    }
+
+                    jar.update_value(|jar| {
+                        write_client_cookie(
+                            &cookie_name,
+                            &value,
+                            jar,
+                            max_age,
+                            expires,
+                            &domain,
+                            &path,
+                            same_site,
+                            secure,
+                            http_only,
+                            Arc::clone(&ssr_cookies_header_getter),
+                        );
+                    });
+
+                    post(&value);
                 }
-
-                jar.update_value(|jar| {
-                    write_client_cookie(
-                        &cookie_name,
-                        &value,
-                        jar,
-                        max_age,
-                        expires,
-                        &domain,
-                        &path,
-                        same_site,
-                        secure,
-                        http_only,
-                        Arc::clone(&ssr_cookies_header_getter),
-                    );
-                });
-
-                post(&value);
             }
         };
 
@@ -272,7 +274,7 @@ where
             resume,
             stop,
             ..
-        } = watch_pausable(move || cookie.get(), {
+        } = watch_pausable(move || cookie.track(), {
             let on_cookie_change = on_cookie_change.clone();
 
             move |_, _, _| {
@@ -365,30 +367,29 @@ where
                     let domain = domain.clone();
                     let path = path.clone();
 
-                    let value = cookie
-                        .with(|cookie| {
-                            cookie.as_ref().map(|cookie| {
-                                C::encode(cookie)
-                                    .map_err(|err| on_error(CodecError::Encode(err)))
-                                    .ok()
-                            })
+                    if let Some(value) = cookie.try_with(|cookie| {
+                        cookie.as_ref().map(|cookie| {
+                            C::encode(cookie)
+                                .map_err(|err| on_error(CodecError::Encode(err)))
+                                .ok()
                         })
-                        .flatten();
-                    jar.update_value(|jar| {
-                        write_server_cookie(
-                            &cookie_name,
-                            value,
-                            jar,
-                            max_age,
-                            expires,
-                            domain,
-                            path,
-                            same_site,
-                            secure,
-                            http_only,
-                            Arc::clone(&ssr_set_cookie),
-                        )
-                    });
+                    }) {
+                        jar.update_value(|jar| {
+                            write_server_cookie(
+                                &cookie_name,
+                                value.flatten(),
+                                jar,
+                                max_age,
+                                expires,
+                                domain,
+                                path,
+                                same_site,
+                                secure,
+                                http_only,
+                                Arc::clone(&ssr_set_cookie),
+                            )
+                        });
+                    }
                 }
             });
         }

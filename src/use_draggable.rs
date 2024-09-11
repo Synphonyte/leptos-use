@@ -1,4 +1,4 @@
-use crate::core::{ElementMaybeSignal, MaybeRwSignal, PointerType, Position};
+use crate::core::{IntoElementMaybeSignal, MaybeRwSignal, PointerType, Position};
 use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
@@ -45,34 +45,22 @@ use web_sys::PointerEvent;
 /// }
 /// # }
 /// ```
-pub fn use_draggable<El, T>(target: El) -> UseDraggableReturn
+pub fn use_draggable<El, M>(target: El) -> UseDraggableReturn
 where
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
-    use_draggable_with_options::<
-        El,
-        T,
-        UseWindow,
-        web_sys::Window,
-        web_sys::EventTarget,
-        web_sys::EventTarget,
-    >(target, UseDraggableOptions::default())
+    use_draggable_with_options::<El, M, _, _, _, _>(target, UseDraggableOptions::default())
 }
 
 /// Version of [`use_draggable`] that takes a `UseDraggableOptions`. See [`use_draggable`] for how to use.
-pub fn use_draggable_with_options<El, T, DragEl, DragT, HandleEl, HandleT>(
+pub fn use_draggable_with_options<El, M, DragEl, DragM, HandleEl, HandleM>(
     target: El,
-    options: UseDraggableOptions<DragEl, DragT, HandleEl, HandleT>,
+    options: UseDraggableOptions<DragEl, DragM, HandleEl, HandleM>,
 ) -> UseDraggableReturn
 where
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
-    DragEl: Clone,
-    DragEl: Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
-    DragT: Into<web_sys::EventTarget> + Clone + 'static,
-    HandleEl: Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
-    HandleT: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+    DragEl: IntoElementMaybeSignal<web_sys::EventTarget, DragM>,
+    HandleEl: IntoElementMaybeSignal<web_sys::EventTarget, HandleM>,
 {
     let UseDraggableOptions {
         exact,
@@ -88,14 +76,12 @@ where
         ..
     } = options;
 
-    let target = target.into();
+    let target = target.into_element_maybe_signal();
 
     let dragging_handle = if let Some(handle) = handle {
-        let handle: ElementMaybeSignal<_, _> = handle.into();
-        Signal::derive_local(move || handle.get().map(|handle| handle.into()))
+        handle.into_element_maybe_signal()
     } else {
-        let target = target.clone();
-        Signal::derive_local(move || target.get().map(|target| target.into()))
+        target.clone()
     };
 
     let (position, set_position) = initial_value.into_signal();
@@ -124,7 +110,7 @@ where
             }
 
             if let Some(target) = target.get_untracked() {
-                let target: web_sys::Element = target.into().unchecked_into();
+                let target: web_sys::Element = target.unchecked_into();
 
                 if exact.get_untracked() && event_target::<web_sys::Element>(&event) != target {
                     return;
@@ -210,6 +196,8 @@ where
         handle_event(event);
     };
 
+    let dragging_element = dragging_element.into_element_maybe_signal();
+
     let listener_options = UseEventListenerOptions::default().capture(true);
 
     let _ = use_event_listener_with_options(
@@ -246,12 +234,10 @@ where
 
 /// Options for [`use_draggable_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseDraggableOptions<DragEl, DragT, HandleEl, HandleT>
+pub struct UseDraggableOptions<DragEl, DragM, HandleEl, HandleM>
 where
-    DragEl: Into<ElementMaybeSignal<DragT, web_sys::EventTarget>>,
-    DragT: Into<web_sys::EventTarget> + Clone + 'static,
-    HandleEl: Into<ElementMaybeSignal<HandleT, web_sys::EventTarget>>,
-    HandleT: Into<web_sys::EventTarget> + Clone + 'static,
+    DragEl: IntoElementMaybeSignal<web_sys::EventTarget, DragM>,
+    HandleEl: IntoElementMaybeSignal<web_sys::EventTarget, HandleM>,
 {
     /// Only start the dragging when click on the element directly. Defaults to `false`.
     #[builder(into)]
@@ -288,13 +274,16 @@ where
     on_end: Arc<dyn Fn(UseDraggableCallbackArgs) + Send + Sync>,
 
     #[builder(skip)]
-    _marker1: PhantomData<DragT>,
+    _marker1: PhantomData<DragM>,
     #[builder(skip)]
-    _marker2: PhantomData<HandleT>,
+    _marker2: PhantomData<HandleM>,
 }
 
-impl Default
-    for UseDraggableOptions<UseWindow, web_sys::Window, web_sys::EventTarget, web_sys::EventTarget>
+impl<DragM, HandleM> Default
+    for UseDraggableOptions<UseWindow, DragM, Option<web_sys::EventTarget>, HandleM>
+where
+    UseWindow: IntoElementMaybeSignal<web_sys::EventTarget, DragM>,
+    Option<web_sys::EventTarget>: IntoElementMaybeSignal<web_sys::EventTarget, HandleM>,
 {
     fn default() -> Self {
         Self {

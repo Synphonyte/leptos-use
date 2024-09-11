@@ -1,4 +1,4 @@
-use crate::core::ElementsMaybeSignal;
+use crate::core::IntoElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive_graph::wrappers::read::Signal;
@@ -52,13 +52,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## See also
 ///
 /// * [`fn@crate::use_element_size`]
-pub fn use_resize_observer<El, T, F>(
-    target: El, // TODO : multiple elements?
+pub fn use_resize_observer<Els, M, F>(
+    target: Els,
     callback: F,
 ) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
     use_resize_observer_with_options(target, callback, UseResizeObserverOptions::default())
@@ -66,14 +65,13 @@ where
 
 /// Version of [`use_resize_observer`] that takes a `web_sys::ResizeObserverOptions`. See [`use_resize_observer`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
-pub fn use_resize_observer_with_options<El, T, F>(
-    target: El, // TODO : multiple elements?
+pub fn use_resize_observer_with_options<Els, M, F>(
+    target: Els,
     mut callback: F,
     options: UseResizeObserverOptions,
 ) -> UseResizeObserverReturn<impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
 {
     #[cfg(feature = "ssr")]
@@ -121,7 +119,7 @@ where
             }
         };
 
-        let targets = target.into();
+        let targets = target.into_elements_maybe_signal();
 
         let stop_watch = {
             let cleanup = cleanup.clone();
@@ -138,7 +136,7 @@ where
                         .expect("failed to create ResizeObserver");
 
                         for target in targets.iter().flatten() {
-                            let target: web_sys::Element = target.clone().into();
+                            let target = target.clone();
                             obs.observe_with_options(&target, &options.clone().into());
                         }
                         observer.replace(Some(obs));

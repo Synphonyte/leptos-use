@@ -1,5 +1,4 @@
-use crate::core::ElementMaybeSignal;
-use cfg_if::cfg_if;
+use crate::core::IntoElementMaybeSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive_graph::wrappers::read::Signal;
@@ -30,22 +29,20 @@ use leptos::reactive_graph::wrappers::read::Signal;
 /// ## Server-Side Rendering
 ///
 /// On the server the returned signals always are `0.0` and `update` is a no-op.
-pub fn use_element_bounding<El, T>(target: El) -> UseElementBoundingReturn<impl Fn() + Clone>
+pub fn use_element_bounding<El, M>(target: El) -> UseElementBoundingReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     use_element_bounding_with_options(target, UseElementBoundingOptions::default())
 }
 
 /// Version of [`use_element_bounding`] that takes a `UseElementBoundingOptions`. See [`use_element_bounding`] for how to use.
-pub fn use_element_bounding_with_options<El, T>(
+pub fn use_element_bounding_with_options<El, M>(
     target: El,
     options: UseElementBoundingOptions,
 ) -> UseElementBoundingReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     let (height, set_height) = signal(0.0);
     let (width, set_width) = signal(0.0);
@@ -56,7 +53,10 @@ where
     let (x, set_x) = signal(0.0);
     let (y, set_y) = signal(0.0);
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
+    let update;
+
+    #[cfg(feature = "ssr")]
+    {
         let _ = target;
         let _ = options;
 
@@ -69,8 +69,11 @@ where
         let _ = set_x;
         let _ = set_y;
 
-        let update = move || ();
-    } else {
+        update = move || ();
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         use crate::{
             use_event_listener_with_options, use_resize_observer, use_window,
             UseEventListenerOptions,
@@ -84,16 +87,16 @@ where
             immediate,
         } = options;
 
-        let target = target.into();
+        let target = target.into_element_maybe_signal();
 
-        let update = {
+        update = {
             let target = target.clone();
 
             move || {
                 let el = target.get_untracked();
 
                 if let Some(el) = el {
-                    let rect = el.into().get_bounding_client_rect();
+                    let rect = el.get_bounding_client_rect();
 
                     set_height.set(rect.height());
                     set_width.set(rect.width());
@@ -164,7 +167,7 @@ where
         if immediate {
             update();
         }
-    }}
+    }
 
     UseElementBoundingReturn {
         height: height.into(),

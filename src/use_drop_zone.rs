@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::IntoElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -52,25 +52,21 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// On the server the returned `file` signal always contains an empty `Vec` and
 /// `is_over_drop_zone` contains always `false`
-pub fn use_drop_zone<El, T>(target: El) -> UseDropZoneReturn
+pub fn use_drop_zone<El, M>(target: El) -> UseDropZoneReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
     use_drop_zone_with_options(target, UseDropZoneOptions::default())
 }
 
 /// Version of [`use_drop_zone`] that takes a `UseDropZoneOptions`. See [`use_drop_zone`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_drop_zone_with_options<El, T>(
+pub fn use_drop_zone_with_options<El, M>(
     target: El,
     options: UseDropZoneOptions,
 ) -> UseDropZoneReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
     let (is_over_drop_zone, set_over_drop_zone) = signal(false);
     let (files, set_files) = signal_local(Vec::<web_sys::File>::new());
@@ -99,6 +95,8 @@ where
                 set_files.update(move |f| *f = files);
             }
         };
+
+        let target = target.into_element_maybe_signal();
 
         let _ = use_event_listener(target.clone(), dragenter, move |event| {
             event.prevent_default();

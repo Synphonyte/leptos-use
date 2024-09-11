@@ -1,8 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::core::{ElementMaybeSignal, Position};
+use crate::core::{IntoElementMaybeSignal, Position};
 use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::prelude::*;
@@ -93,10 +92,9 @@ pub fn use_mouse() -> UseMouseReturn {
 }
 
 /// Variant of [`use_mouse`] that accepts options. Please see [`use_mouse`] for how to use.
-pub fn use_mouse_with_options<El, T, Ex>(options: UseMouseOptions<El, T, Ex>) -> UseMouseReturn
+pub fn use_mouse_with_options<El, M, Ex>(options: UseMouseOptions<El, M, Ex>) -> UseMouseReturn
 where
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>> + Clone,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     Ex: UseMouseEventExtractor + Clone + 'static,
 {
     let (x, set_x) = signal(options.initial_value.x);
@@ -155,45 +153,43 @@ where
 
     // TODO : event filters?
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
-        let target = options.target;
+    #[cfg(not(feature = "ssr"))]
+    {
+        let target = options.target.into_element_maybe_signal();
         let event_listener_options = UseEventListenerOptions::default().passive(true);
 
         let _ = use_event_listener_with_options(
-                        target.clone(),
+            target.clone(),
             mousemove,
             mouse_handler,
             event_listener_options,
         );
-        let _ = use_event_listener_with_options(
-                        target.clone(),
-            dragover,
-            drag_handler,
-            event_listener_options,
-        );
+        let _ =
+            use_event_listener_with_options(target.clone(), dragover, drag_handler, event_listener_options);
+
         if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
-                                target.clone(),
+                target.clone(),
                 touchstart,
                 touch_handler.clone(),
                 event_listener_options,
             );
             let _ = use_event_listener_with_options(
-                                target.clone(),
+                target.clone(),
                 touchmove,
                 touch_handler,
                 event_listener_options,
             );
             if options.reset_on_touch_ends {
                 let _ = use_event_listener_with_options(
-                                        target,
+                    target,
                     touchend,
                     move |_| reset(),
                     event_listener_options,
                 );
             }
         }
-    }}
+    }
 
     UseMouseReturn {
         x: x.into(),
@@ -206,10 +202,9 @@ where
 
 #[derive(DefaultBuilder)]
 /// Options for [`use_mouse_with_options`].
-pub struct UseMouseOptions<El, T, Ex>
+pub struct UseMouseOptions<El, M, Ex>
 where
-    El: Clone + Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     Ex: UseMouseEventExtractor + Clone,
 {
     /// How to extract the x, y coordinates from mouse events or touches
@@ -228,10 +223,13 @@ where
     initial_value: Position,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
-impl Default for UseMouseOptions<UseWindow, web_sys::Window, Infallible> {
+impl<M> Default for UseMouseOptions<UseWindow, M, Infallible>
+where
+    UseWindow: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+{
     fn default() -> Self {
         Self {
             coord_type: UseMouseCoordType::default(),

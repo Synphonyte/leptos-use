@@ -1,4 +1,4 @@
-use crate::core::{Direction, Directions, ElementMaybeSignal};
+use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use crate::UseEventListenerOptions;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
@@ -176,27 +176,23 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// ## Server-Side Rendering
 ///
 /// On the server this returns signals that don't change and setters that are noops.
-pub fn use_scroll<El, T>(
+pub fn use_scroll<El, M>(
     element: El,
 ) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     use_scroll_with_options(element, Default::default())
 }
 
 /// Version of [`use_scroll`] with options. See [`use_scroll`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_scroll_with_options<El, T>(
+pub fn use_scroll_with_options<El, M>(
     element: El,
     options: UseScrollOptions,
 ) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     let (internal_x, set_internal_x) = signal(0.0);
     let (internal_y, set_internal_y) = signal(0.0);
@@ -216,12 +212,20 @@ where
         bottom: false,
     });
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
-        let set_x = |_| {};
-        let set_y = |_| {};
-        let measure = || {};
-    } else {
-        let signal = element.into();
+    let set_x;
+    let set_y;
+    let measure;
+
+    #[cfg(feature = "ssr")]
+    {
+        set_x = |_| {};
+        set_y = |_| {};
+        measure = || {};
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        let signal = element.into_element_maybe_signal();
         let behavior = options.behavior;
 
         let scroll_to = {
@@ -231,8 +235,6 @@ where
                 let element = signal.get_untracked();
 
                 if let Some(element) = element {
-                    let element = element.into();
-
                     let scroll_options = web_sys::ScrollToOptions::new();
                     scroll_options.set_behavior(behavior.get_untracked().into());
 
@@ -248,12 +250,12 @@ where
             }
         };
 
-        let set_x = {
+        set_x = {
             let scroll_to = scroll_to.clone();
             move |x| scroll_to(Some(x), None)
         };
 
-        let set_y = move |y| scroll_to(None, Some(y));
+        set_y = move |y| scroll_to(None, Some(y));
 
         let on_scroll_end = {
             let on_stop = Rc::clone(&options.on_stop);
@@ -367,14 +369,14 @@ where
             }
         };
 
-        let target = {
+        let target = Signal::derive_local({
             let signal = signal.clone();
 
-            Signal::derive_local(move || {
+            move || {
                 let element = signal.get();
-                element.map(|element| element.into().unchecked_into::<web_sys::EventTarget>())
-            })
-        };
+                element.map(|element| element.unchecked_into::<web_sys::EventTarget>())
+            }
+        });
 
         if throttle >= 0.0 {
             let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(
@@ -393,14 +395,14 @@ where
             let _ = use_event_listener_with_options::<
                 _,
                 Signal<Option<web_sys::EventTarget>, LocalStorage>,
-                web_sys::EventTarget,
+                _,
                 _,
             >(target, ev::scroll, handler, options.event_listener_options);
         } else {
             let _ = use_event_listener_with_options::<
                 _,
                 Signal<Option<web_sys::EventTarget>, LocalStorage>,
-                web_sys::EventTarget,
+                _,
                 _,
             >(
                 target,
@@ -413,7 +415,7 @@ where
         let _ = use_event_listener_with_options::<
             _,
             Signal<Option<web_sys::EventTarget>, LocalStorage>,
-            web_sys::EventTarget,
+            _,
             _,
         >(
             target,
@@ -422,13 +424,12 @@ where
             options.event_listener_options,
         );
 
-        let measure = move || {
+        measure = move || {
             if let Some(el) = signal.try_get_untracked().flatten() {
-                let el = el.into();
                 set_arrived_state(el);
             }
         };
-    }}
+    }
 
     UseScrollReturn {
         x: internal_x.into(),

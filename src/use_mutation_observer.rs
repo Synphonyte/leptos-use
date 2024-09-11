@@ -1,4 +1,4 @@
-use crate::core::ElementsMaybeSignal;
+use crate::core::IntoElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive_graph::wrappers::read::Signal;
@@ -50,13 +50,12 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
-pub fn use_mutation_observer<El, T, F>(
+pub fn use_mutation_observer<El, M, F>(
     target: El,
     callback: F,
 ) -> UseMutationObserverReturn<impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
 {
     use_mutation_observer_with_options(target, callback, UseMutationObserverOptions::default())
@@ -64,14 +63,13 @@ where
 
 /// Version of [`use_mutation_observer`] that takes a `UseMutationObserverOptions`. See [`use_mutation_observer`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
-pub fn use_mutation_observer_with_options<El, T, F>(
+pub fn use_mutation_observer_with_options<El, M, F>(
     target: El,
     mut callback: F,
     options: UseMutationObserverOptions,
 ) -> UseMutationObserverReturn<impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
 {
     #[cfg(feature = "ssr")]
@@ -120,7 +118,7 @@ where
             }
         };
 
-        let targets = target.into();
+        let targets = target.into_elements_maybe_signal();
 
         let stop_watch = {
             let cleanup = cleanup.clone();
@@ -136,7 +134,7 @@ where
                                 .expect("failed to create MutationObserver");
 
                         for target in targets.iter().flatten() {
-                            let target: web_sys::Element = target.clone().into();
+                            let target = target.clone();
                             let _ = obs.observe_with_options(&target, &options.clone().into());
                         }
 

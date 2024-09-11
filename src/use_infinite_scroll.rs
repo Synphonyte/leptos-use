@@ -1,4 +1,4 @@
-use crate::core::{Direction, Directions, ElementMaybeSignal};
+use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use crate::{
     use_element_visibility, use_scroll_with_options, ScrollOffset, UseEventListenerOptions,
     UseScrollOptions, UseScrollReturn,
@@ -50,10 +50,9 @@ use wasm_bindgen::JsCast;
 /// ```
 ///
 /// The returned signal is `true` while new data is being loaded.
-pub fn use_infinite_scroll<El, T, LFn, LFut>(el: El, on_load_more: LFn) -> Signal<bool>
+pub fn use_infinite_scroll<El, M, LFn, LFut>(el: El, on_load_more: LFn) -> Signal<bool>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone + 'static,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M> + 'static,
     LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
     LFut: Future<Output = ()>,
 {
@@ -61,14 +60,13 @@ where
 }
 
 /// Version of [`use_infinite_scroll`] that takes a `UseInfiniteScrollOptions`. See [`use_infinite_scroll`] for how to use.
-pub fn use_infinite_scroll_with_options<El, T, LFn, LFut>(
+pub fn use_infinite_scroll_with_options<El, M, LFn, LFut>(
     el: El,
     on_load_more: LFn,
     options: UseInfiniteScrollOptions,
 ) -> Signal<bool>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone + 'static,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M> + 'static,
     LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
     LFut: Future<Output = ()>,
 {
@@ -81,6 +79,8 @@ where
     } = options;
 
     let on_load_more = StoredValue::new(on_load_more);
+
+    let el = el.into_element_maybe_signal();
 
     let UseScrollReturn {
         x,
@@ -108,13 +108,10 @@ where
 
     let (is_loading, set_loading) = signal(false);
 
-    let el = el.into();
     let observed_element = Signal::derive_local(move || {
         let el = el.get();
 
         el.map(|el| {
-            let el = el.into();
-
             if el.is_instance_of::<web_sys::Window>() || el.is_instance_of::<web_sys::Document>() {
                 document()
                     .document_element()

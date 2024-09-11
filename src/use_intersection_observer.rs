@@ -1,4 +1,4 @@
-use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
+use crate::core::{IntoElementMaybeSignal, IntoElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -55,16 +55,16 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## See also
 ///
 /// * [`fn@crate::use_element_visibility`]
-pub fn use_intersection_observer<El, T, F>(
-    target: El,
+pub fn use_intersection_observer<Els, M, F, RootM>(
+    target: Els,
     callback: F,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
+    web_sys::Element: IntoElementMaybeSignal<web_sys::Element, RootM>,
 {
-    use_intersection_observer_with_options::<El, T, web_sys::Element, web_sys::Element, F>(
+    use_intersection_observer_with_options::<Els, M, web_sys::Element, RootM, F>(
         target,
         callback,
         UseIntersectionObserverOptions::default(),
@@ -73,16 +73,14 @@ where
 
 /// Version of [`use_intersection_observer`] that takes a [`UseIntersectionObserverOptions`]. See [`use_intersection_observer`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
-pub fn use_intersection_observer_with_options<El, T, RootEl, RootT, F>(
-    target: El,
+pub fn use_intersection_observer_with_options<Els, M, RootEl, RootM, F>(
+    target: Els,
     mut callback: F,
-    options: UseIntersectionObserverOptions<RootEl, RootT>,
+    options: UseIntersectionObserverOptions<RootEl, RootM>,
 ) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    El: Into<ElementsMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
-    RootEl: Into<ElementMaybeSignal<RootT, web_sys::Element>>,
-    RootT: Into<web_sys::Element> + Clone + 'static,
+    Els: IntoElementsMaybeSignal<web_sys::Element, M>,
+    RootEl: IntoElementMaybeSignal<web_sys::Element, RootM>,
     F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
 {
     let UseIntersectionObserverOptions {
@@ -132,8 +130,8 @@ where
             }
         };
 
-        let targets = target.into();
-        let root = root.map(|root| (root).into());
+        let targets = target.into_elements_maybe_signal();
+        let root = root.map(|root| root.into_element_maybe_signal());
 
         let stop_watch = {
             let cleanup = cleanup.clone();
@@ -166,7 +164,7 @@ where
                     );
 
                     if let Some(Some(root)) = root {
-                        let root: web_sys::Element = root.clone().into();
+                        let root = root.clone();
                         options.set_root(Some(&root));
                     }
 
@@ -177,7 +175,7 @@ where
                     .expect("failed to create IntersectionObserver");
 
                     for target in targets.iter().flatten() {
-                        let target: web_sys::Element = target.clone().into();
+                        let target = target.clone();
                         obs.observe(&target);
                     }
 
@@ -221,10 +219,9 @@ where
 
 /// Options for [`use_intersection_observer_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseIntersectionObserverOptions<El, T>
+pub struct UseIntersectionObserverOptions<El, M>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     /// If `true`, the `IntersectionObserver` will be attached immediately. Otherwise it
     /// will only be attached after the returned `resume` closure is called. That is
@@ -257,10 +254,13 @@ where
     thresholds: Vec<f64>,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
-impl Default for UseIntersectionObserverOptions<web_sys::Element, web_sys::Element> {
+impl<M> Default for UseIntersectionObserverOptions<web_sys::Element, M>
+where
+    web_sys::Element: IntoElementMaybeSignal<web_sys::Element, M>,
+{
     fn default() -> Self {
         Self {
             immediate: true,

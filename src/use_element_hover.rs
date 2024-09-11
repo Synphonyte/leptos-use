@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::IntoElementMaybeSignal;
 use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
@@ -38,11 +38,9 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Server-Side Rendering
 ///
 /// On the server this returns a `Signal` that always contains the value `false`.
-pub fn use_element_hover<El, T>(el: El) -> Signal<bool>
+pub fn use_element_hover<El, M>(el: El) -> Signal<bool>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
     use_element_hover_with_options(el, UseElementHoverOptions::default())
 }
@@ -50,14 +48,12 @@ where
 /// Version of [`use_element_hover`] that takes a `UseElementHoverOptions`. See [`use_element_hover`] for how to use.
 
 #[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
-pub fn use_element_hover_with_options<El, T>(
+pub fn use_element_hover_with_options<El, M>(
     el: El,
     options: UseElementHoverOptions,
 ) -> Signal<bool>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
     let UseElementHoverOptions {
         delay_enter,
@@ -89,6 +85,8 @@ where
     };
 
     let listener_options = UseEventListenerOptions::default().passive(true);
+
+    let el = el.into_element_maybe_signal();
 
     let _ = use_event_listener_with_options(
         el.clone(),

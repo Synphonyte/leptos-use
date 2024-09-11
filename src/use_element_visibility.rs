@@ -1,4 +1,4 @@
-use crate::core::ElementMaybeSignal;
+use crate::core::IntoElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -42,12 +42,11 @@ use leptos::reactive_graph::wrappers::read::Signal;
 /// ## See also
 ///
 /// * [`fn@crate::use_intersection_observer`]
-pub fn use_element_visibility<El, T>(target: El) -> Signal<bool>
+pub fn use_element_visibility<El, M>(target: El) -> Signal<bool>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
-    use_element_visibility_with_options::<El, T, web_sys::Element, web_sys::Element>(
+    use_element_visibility_with_options::<El, M, web_sys::Element, _>(
         target,
         UseElementVisibilityOptions::default(),
     )
@@ -55,21 +54,19 @@ where
 
 /// Version of [`use_element_visibility`] with that takes a `UseElementVisibilityOptions`. See [`use_element_visibility`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_element_visibility_with_options<El, T, ContainerEl, ContainerT>(
+pub fn use_element_visibility_with_options<El, M, ContainerEl, ContainerM>(
     target: El,
-    options: UseElementVisibilityOptions<ContainerEl, ContainerT>,
+    options: UseElementVisibilityOptions<ContainerEl, ContainerM>,
 ) -> Signal<bool>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
-    ContainerEl: Into<ElementMaybeSignal<ContainerT, web_sys::Element>>,
-    ContainerT: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+    ContainerEl: IntoElementMaybeSignal<web_sys::Element, ContainerM>,
 {
     let (is_visible, set_visible) = signal(false);
 
     cfg_if! { if #[cfg(not(feature = "ssr"))] {
         use_intersection_observer_with_options(
-            target.into(),
+            target.into_element_maybe_signal(),
             move |entries, _| {
                 // In some circumstances Chrome passes a first (or only) entry which has a zero bounding client rect
                 // and returns `is_intersecting` erroneously as `false`.
@@ -89,10 +86,9 @@ where
 
 /// Options for [`use_element_visibility_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseElementVisibilityOptions<El, T>
+pub struct UseElementVisibilityOptions<El, M>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
     /// A `web_sys::Element` or `web_sys::Document` object which is an ancestor of the intended `target`,
     /// whose bounding rectangle will be considered the viewport.
@@ -104,10 +100,13 @@ where
     viewport: Option<El>,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
-impl Default for UseElementVisibilityOptions<web_sys::Element, web_sys::Element> {
+impl<M> Default for UseElementVisibilityOptions<web_sys::Element, M>
+where
+    web_sys::Element: IntoElementMaybeSignal<web_sys::Element, M>,
+{
     fn default() -> Self {
         Self {
             viewport: None,

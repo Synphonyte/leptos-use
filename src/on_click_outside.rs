@@ -1,4 +1,4 @@
-use crate::core::{ElementMaybeSignal, ElementsMaybeSignal};
+use crate::core::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 
@@ -79,33 +79,24 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
-pub fn on_click_outside<El, T, F>(target: El, handler: F) -> impl FnOnce() + Clone
+pub fn on_click_outside<El, M, F>(target: El, handler: F) -> impl FnOnce() + Clone
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(web_sys::Event) + Clone + 'static,
 {
-    on_click_outside_with_options::<_, _, _, web_sys::EventTarget>(
-        target,
-        handler,
-        OnClickOutsideOptions::default(),
-    )
+    on_click_outside_with_options(target, handler, OnClickOutsideOptions::default())
 }
 
 /// Version of `on_click_outside` that takes an `OnClickOutsideOptions`. See `on_click_outside` for more details.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn on_click_outside_with_options<El, T, F, I>(
+pub fn on_click_outside_with_options<El, M, F>(
     target: El,
     handler: F,
-    options: OnClickOutsideOptions<I>,
+    options: OnClickOutsideOptions,
 ) -> impl FnOnce() + Clone
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::EventTarget>>,
-    T: Into<web_sys::EventTarget> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(web_sys::Event) + Clone + 'static,
-    I: Into<web_sys::EventTarget> + Clone + 'static,
 {
     #[cfg(feature = "ssr")]
     {
@@ -148,25 +139,21 @@ where
             let ignore = ignore.get_untracked();
 
             ignore.into_iter().flatten().any(|element| {
-                let element: web_sys::EventTarget = element.into();
-
                 event_target::<web_sys::EventTarget>(event) == element
                     || event.composed_path().includes(element.as_ref(), 0)
             })
         };
 
-        let target = target.into();
+        let target = target.into_element_maybe_signal();
 
         let listener = {
             let should_listen = Rc::clone(&should_listen);
             let mut handler = handler.clone();
-            let target = target.clone();
             let should_ignore = should_ignore.clone();
+            let target = target.clone();
 
             move |event: web_sys::UiEvent| {
                 if let Some(el) = target.get_untracked() {
-                    let el = el.into();
-
                     if el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0)
                     {
                         return;
@@ -211,10 +198,8 @@ where
                 pointerdown,
                 move |event| {
                     if let Some(el) = target.get_untracked() {
-                        should_listen.set(
-                            !event.composed_path().includes(el.into().as_ref(), 0)
-                                && !should_ignore(&event),
-                        );
+                        should_listen
+                            .set(!event.composed_path().includes(&el, 0) && !should_ignore(&event));
                     }
                 },
                 UseEventListenerOptions::default().passive(true),
@@ -235,7 +220,6 @@ where
                                 if let Some(active_element) = document().active_element() {
                                     if active_element.tag_name() == "IFRAME"
                                         && !el
-                                            .into()
                                             .unchecked_into::<web_sys::Node>()
                                             .contains(Some(&active_element.into()))
                                     {
@@ -265,13 +249,10 @@ where
 /// Options for [`on_click_outside_with_options`].
 #[derive(Clone, DefaultBuilder)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
-pub struct OnClickOutsideOptions<T>
-where
-    T: Into<web_sys::EventTarget> + Clone + 'static,
-{
+pub struct OnClickOutsideOptions {
     /// List of elementss that should not trigger the callback. Defaults to `[]`.
     #[builder(skip)]
-    ignore: ElementsMaybeSignal<T, web_sys::EventTarget>,
+    ignore: ElementsMaybeSignal<web_sys::EventTarget>,
 
     /// Use capturing phase for internal event listener. Defaults to `true`.
     capture: bool,
@@ -280,28 +261,25 @@ where
     detect_iframes: bool,
 }
 
-impl<T> Default for OnClickOutsideOptions<T>
-where
-    T: Into<web_sys::EventTarget> + Clone + 'static,
-{
+impl Default for OnClickOutsideOptions {
     fn default() -> Self {
         Self {
-            ignore: Default::default(),
+            ignore: Vec::<web_sys::EventTarget>::new().into_elements_maybe_signal(),
             capture: true,
             detect_iframes: false,
         }
     }
 }
 
-impl<T> OnClickOutsideOptions<T>
-where
-    T: Into<web_sys::EventTarget> + Clone + 'static,
-{
-    /// List of elementss that should not trigger the callback. Defaults to `[]`.
+impl OnClickOutsideOptions {
+    /// List of elements that should not trigger the callback. Defaults to `[]`.
     #[cfg_attr(feature = "ssr", allow(dead_code))]
-    pub fn ignore(self, ignore: impl Into<ElementsMaybeSignal<T, web_sys::EventTarget>>) -> Self {
+    pub fn ignore<M: ?Sized>(
+        self,
+        ignore: impl IntoElementsMaybeSignal<web_sys::EventTarget, M>,
+    ) -> Self {
         Self {
-            ignore: ignore.into(),
+            ignore: ignore.into_elements_maybe_signal(),
             ..self
         }
     }

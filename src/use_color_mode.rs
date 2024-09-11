@@ -1,5 +1,5 @@
 use crate::core::url;
-use crate::core::{ElementMaybeSignal, MaybeRwSignal};
+use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, StorageType, UseStorageOptions};
 use crate::utils::get_header;
 use crate::{
@@ -147,11 +147,10 @@ pub fn use_color_mode() -> UseColorModeReturn {
 }
 
 /// Version of [`use_color_mode`] that takes a `UseColorModeOptions`. See [`use_color_mode`] for how to use.
-pub fn use_color_mode_with_options<El, T>(options: UseColorModeOptions<El, T>) -> UseColorModeReturn
+pub fn use_color_mode_with_options<El, M>(options: UseColorModeOptions<El, M>) -> UseColorModeReturn
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+    M: ?Sized,
 {
     let UseColorModeOptions {
         target,
@@ -247,17 +246,13 @@ where
         }
     });
 
-    let target = target.into();
+    let target = target.into_element_maybe_signal();
 
     let update_html_attrs = {
-        move |target: ElementMaybeSignal<T, web_sys::Element>,
-              attribute: String,
-              value: ColorMode| {
+        move |target: ElementMaybeSignal<web_sys::Element>, attribute: String, value: ColorMode| {
             let el = target.get_untracked();
 
             if let Some(el) = el {
-                let el = el.into();
-
                 let mut style: Option<web_sys::HtmlStyleElement> = None;
                 if !transition_enabled {
                     if let Ok(styl) = document().create_element("style") {
@@ -418,11 +413,10 @@ impl FromStr for ColorMode {
 }
 
 #[derive(DefaultBuilder)]
-pub struct UseColorModeOptions<El, T>
+pub struct UseColorModeOptions<El, M>
 where
-    El: Clone,
-    El: Into<ElementMaybeSignal<T, web_sys::Element>>,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+    M: ?Sized,
 {
     /// Element that the color mode will be applied to. Defaults to `"html"`.
     target: El,
@@ -506,12 +500,12 @@ where
     ssr_color_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 
     #[builder(skip)]
-    _marker: PhantomData<T>,
+    _marker: PhantomData<M>,
 }
 
 type OnChangedFn = Arc<dyn Fn(ColorMode, Arc<dyn Fn(ColorMode) + Send + Sync>) + Send + Sync>;
 
-impl Default for UseColorModeOptions<&'static str, web_sys::Element> {
+impl Default for UseColorModeOptions<&'static str, str> {
     fn default() -> Self {
         Self {
             target: "html",
