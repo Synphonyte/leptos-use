@@ -1,5 +1,4 @@
 use crate::core::MaybeRwSignal;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::*;
 use wasm_bindgen::{JsCast, JsValue};
@@ -62,7 +61,8 @@ pub fn use_user_media_with_options(
     let (stream, set_stream) = create_signal(None::<Result<web_sys::MediaStream, JsValue>>);
 
     let _start = move || async move {
-        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        #[cfg(not(feature = "ssr"))]
+        {
             if stream.get_untracked().is_some() {
                 return;
             }
@@ -70,10 +70,13 @@ pub fn use_user_media_with_options(
             let stream = create_media(video, audio).await;
 
             set_stream.update(|s| *s = Some(stream));
-        } else {
+        }
+
+        #[cfg(feature = "ssr")]
+        {
             let _ = video;
             let _ = audio;
-        }}
+        }
     };
 
     let _stop = move || {
@@ -87,7 +90,8 @@ pub fn use_user_media_with_options(
     };
 
     let start = move || {
-        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+        #[cfg(not(feature = "ssr"))]
+        {
             spawn_local(async move {
                 _start().await;
                 stream.with_untracked(move |stream| {
@@ -96,7 +100,7 @@ pub fn use_user_media_with_options(
                     }
                 });
             });
-        }}
+        }
     };
 
     let stop = move || {

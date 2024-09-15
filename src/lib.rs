@@ -126,6 +126,8 @@ mod use_service_worker;
 mod use_sorted;
 #[cfg(feature = "use_supported")]
 mod use_supported;
+#[cfg(feature = "use_textarea_autosize")]
+mod use_textarea_autosize;
 #[cfg(feature = "use_throttle_fn")]
 mod use_throttle_fn;
 #[cfg(feature = "use_timeout_fn")]
@@ -272,6 +274,8 @@ pub use use_service_worker::*;
 pub use use_sorted::*;
 #[cfg(feature = "use_supported")]
 pub use use_supported::*;
+#[cfg(feature = "use_textarea_autosize")]
+pub use use_textarea_autosize::*;
 #[cfg(feature = "use_throttle_fn")]
 pub use use_throttle_fn::*;
 #[cfg(feature = "use_timeout_fn")]
