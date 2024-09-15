@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.14.0-beta3"
+version = "0.14.0-beta4"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming", "wasm"]
@@ -27,7 +27,7 @@ http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.7.0-beta5"
-leptos_axum = { version = "0.7.0-beta5", optional = true, }
+leptos_axum = { version = "0.7.0-beta5", optional = true }
 leptos_actix = { version = "0.7.0-beta5", optional = true }
 leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }

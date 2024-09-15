@@ -285,7 +285,7 @@ where
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
-    let ws_signal = RwSignal::new(None::<WebSocket>);
+    let ws_signal = RwSignal::new_local(None::<WebSocket>);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
@@ -716,7 +716,7 @@ where
     /// Latest message received from `WebSocket`.
     pub message: Signal<Option<Rx>>,
     /// The `WebSocket` instance.
-    pub ws: Signal<Option<WebSocket>>,
+    pub ws: Signal<Option<WebSocket>, LocalStorage>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection

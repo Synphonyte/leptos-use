@@ -1,7 +1,7 @@
-use crate::core::{ElementMaybeSignal, MaybeRwSignal};
+use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
 use default_struct_builder::DefaultBuilder;
-use leptos::*;
-use std::rc::Rc;
+use leptos::prelude::*;
+use std::sync::Arc;
 
 /// Automatically update the height of a textarea depending on the content.
 ///
@@ -14,13 +14,13 @@ use std::rc::Rc;
 /// ### Simple example
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Textarea;
 /// # use leptos_use::{use_textarea_autosize, UseTextareaAutosizeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let textarea = create_node_ref::<Textarea>();
+/// let textarea = NodeRef::new();
 ///
 /// let UseTextareaAutosizeReturn {
 ///     content,
@@ -30,7 +30,7 @@ use std::rc::Rc;
 ///
 /// view! {
 ///     <textarea
-///         value=content
+///         prop:value=content
 ///         on:input=move |evt| set_content.set(event_target_value(&evt))
 ///         node_ref=textarea
 ///         class="resize-none"
@@ -62,13 +62,13 @@ use std::rc::Rc;
 /// `style_prop` option to `"min-height"`.
 ///
 /// ```
-/// # use leptos::*;
+/// # use leptos::prelude::*;
 /// # use leptos::html::Textarea;
 /// # use leptos_use::{use_textarea_autosize_with_options, UseTextareaAutosizeOptions, UseTextareaAutosizeReturn};
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let textarea = create_node_ref::<Textarea>();
+/// let textarea = NodeRef::new();
 ///
 /// let UseTextareaAutosizeReturn {
 ///     content,
@@ -81,7 +81,7 @@ use std::rc::Rc;
 ///
 /// view! {
 ///     <textarea
-///         value=content
+///         prop:value=content
 ///         on:input=move |evt| set_content.set(event_target_value(&evt))
 ///         node_ref=textarea
 ///         class="resize-none"
@@ -96,36 +96,30 @@ use std::rc::Rc;
 ///
 /// On the server this will always return an empty string as ´content` and a no-op `trigger_resize`.
 // #[doc(cfg(feature = "use_textarea_autosize"))]
-pub fn use_textarea_autosize<El, T>(el: El) -> UseTextareaAutosizeReturn<impl Fn() + Clone>
+pub fn use_textarea_autosize<El, M>(el: El) -> UseTextareaAutosizeReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M> + Clone,
 {
-    use_textarea_autosize_with_options::<El, T, web_sys::Element>(
-        el,
-        UseTextareaAutosizeOptions::default(),
-    )
+    use_textarea_autosize_with_options::<El, M>(el, UseTextareaAutosizeOptions::default())
 }
 
 /// Version of [`fn@crate::use_textarea_autosize`] that takes a `UseTextareaAutosizeOptions`. See [`fn@crate::use_textarea_autosize`] for how to use.
 // #[doc(cfg(feature = "use_textarea_autosize"))]
-pub fn use_textarea_autosize_with_options<El, T, StyleT>(
+pub fn use_textarea_autosize_with_options<El, M>(
     el: El,
-    options: UseTextareaAutosizeOptions<StyleT>,
+    options: UseTextareaAutosizeOptions,
 ) -> UseTextareaAutosizeReturn<impl Fn() + Clone>
 where
-    El: Into<ElementMaybeSignal<T, web_sys::Element>> + Clone,
-    T: Into<web_sys::Element> + Clone + 'static,
-    StyleT: Into<web_sys::Element> + Clone + 'static,
+    El: IntoElementMaybeSignal<web_sys::Element, M> + Clone,
 {
     #[cfg(not(feature = "ssr"))]
     {
         use wasm_bindgen::JsCast;
 
-        let el = el.into();
-        let textarea = Signal::derive(move || {
+        let el = el.into_element_maybe_signal();
+        let textarea = Signal::derive_local(move || {
             el.get()
-                .map(|el| el.into().unchecked_into::<web_sys::HtmlTextAreaElement>())
+                .map(|el| el.unchecked_into::<web_sys::HtmlTextAreaElement>())
         });
 
         let UseTextareaAutosizeOptions {
@@ -138,11 +132,11 @@ where
 
         let (content, set_content) = content.into_signal();
 
-        let (textarea_scroll_height, set_textarea_scroll_height) = create_signal(1);
-        let (textarea_old_width, set_textarea_old_width) = create_signal(0.0);
+        let (textarea_scroll_height, set_textarea_scroll_height) = signal(1);
+        let (textarea_old_width, set_textarea_old_width) = signal(0.0);
 
         let trigger_resize = move || {
-            textarea.with(|textarea| {
+            textarea.with_untracked(|textarea| {
                 if let Some(textarea) = textarea {
                     let mut height = "".to_string();
 
@@ -161,13 +155,14 @@ where
                             0
                         };
 
-                    textarea.style().set_property(&style_prop, "1px").ok();
+                    web_sys::HtmlElement::style(textarea)
+                        .set_property(&style_prop, "1px")
+                        .ok();
                     set_textarea_scroll_height.set(textarea.scroll_height() + border_offset + 1);
 
                     if let Some(style_target) = style_target.get() {
                         // If style target is provided update its height
                         style_target
-                            .into()
                             .unchecked_into::<web_sys::HtmlElement>()
                             .style()
                             .set_property(
@@ -180,15 +175,17 @@ where
                         height = format!("{}px", textarea_scroll_height.get_untracked());
                     }
 
-                    textarea.style().set_property(&style_prop, &height).ok();
+                    web_sys::HtmlElement::style(textarea)
+                        .set_property(&style_prop, &height)
+                        .ok();
                 }
             })
         };
 
-        let _ = watch(
+        Effect::watch(
             move || {
-                content.track();
-                textarea.track();
+                content.with(|_| ());
+                textarea.with(|_| ());
             },
             {
                 let trigger_resize = trigger_resize.clone();
@@ -200,7 +197,7 @@ where
             true,
         );
 
-        let _ = watch(
+        Effect::watch(
             move || textarea_scroll_height.track(),
             move |_, _, _| {
                 on_resize();
@@ -223,7 +220,7 @@ where
             }
         });
 
-        let _ = watch(
+        Effect::watch(
             move || watch_fn(),
             {
                 let trigger_resize = trigger_resize.clone();
@@ -247,7 +244,7 @@ where
         let _ = el;
         let _ = options;
 
-        let (content, set_content) = create_signal("".to_string());
+        let (content, set_content) = signal("".to_string());
 
         UseTextareaAutosizeReturn {
             content: content.into(),
@@ -261,24 +258,21 @@ where
 // #[doc(cfg(feature = "use_textarea_autosize"))]
 #[derive(DefaultBuilder)]
 #[cfg_attr(feature = "ssr", allow(dead_code))]
-pub struct UseTextareaAutosizeOptions<T>
-where
-    T: Into<web_sys::Element> + Clone + 'static,
-{
+pub struct UseTextareaAutosizeOptions {
     /// Textarea content
     #[builder(into)]
     content: MaybeRwSignal<String>,
 
     /// Watch sources that should trigger a textarea resize
-    watch: Rc<dyn Fn()>,
+    watch: Arc<dyn Fn() + Send + Sync>,
 
     /// Function called when the textarea size changes
-    on_resize: Rc<dyn Fn()>,
+    on_resize: Arc<dyn Fn() + Send + Sync>,
 
     /// Specify style target to apply the height based on textarea content.
     /// If not provided it will use textarea it self.
     #[builder(skip)]
-    style_target: ElementMaybeSignal<T, web_sys::Element>,
+    style_target: ElementMaybeSignal<web_sys::Element>,
 
     /// Specify the style property that will be used to manipulate height.
     /// Should be `"height"` or `"min-height"`. Default value is `"height"`.
@@ -286,37 +280,28 @@ where
     style_prop: String,
 }
 
-impl Default for UseTextareaAutosizeOptions<web_sys::Element> {
+impl Default for UseTextareaAutosizeOptions {
     fn default() -> Self {
         Self {
             content: MaybeRwSignal::default(),
-            watch: Rc::new(|| ()),
-            on_resize: Rc::new(|| ()),
+            watch: Arc::new(|| ()),
+            on_resize: Arc::new(|| ()),
             style_target: Default::default(),
             style_prop: "height".to_string(),
         }
     }
 }
 
-impl<T> UseTextareaAutosizeOptions<T>
-where
-    T: Into<web_sys::Element> + Clone + 'static,
-{
+impl UseTextareaAutosizeOptions {
     /// List of elementss that should not trigger the callback. Defaults to `[]`.
     #[cfg_attr(feature = "ssr", allow(dead_code))]
-    pub fn style_target<NewT>(
+    pub fn style_target<M>(
         self,
-        style_target: impl Into<ElementMaybeSignal<NewT, web_sys::Element>>,
-    ) -> UseTextareaAutosizeOptions<NewT>
-    where
-        NewT: Into<web_sys::Element> + Clone + 'static,
-    {
-        UseTextareaAutosizeOptions {
-            content: self.content,
-            watch: self.watch,
-            on_resize: self.on_resize,
-            style_target: style_target.into(),
-            style_prop: self.style_prop,
+        style_target: impl IntoElementMaybeSignal<web_sys::Element, M>,
+    ) -> Self {
+        Self {
+            style_target: style_target.into_element_maybe_signal(),
+            ..self
         }
     }
 }
