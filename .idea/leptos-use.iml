@@ -85,6 +85,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/use_web_lock/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/use_window_size/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/aaaaa/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/use_textarea_autosize/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/examples/use_event_listener/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/docs/book/book" />

@@ -27,8 +27,8 @@ http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.7.0-beta5"
-leptos_axum = { optional = true, version = "0.7.0-beta5" }
-leptos_actix = { optional = true, version = "0.7.0-beta5" }
+leptos_axum = { version = "0.7.0-beta5", optional = true, }
+leptos_actix = { version = "0.7.0-beta5", optional = true }
 leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
@@ -54,6 +54,7 @@ unic-langid = { version = "0.9", features = ["macros"] }
 
 [features]
 default = [
+    "use_textarea_autosize",
     "use_web_lock",
     "use_window_size",
     "is_err",
@@ -127,6 +128,12 @@ default = [
     "watch_throttled",
     "watch_with_options",
     "whenever"
+]
+use_textarea_autosize = [
+    "use_resize_observer",
+    "web-sys/CssStyleDeclaration",
+    "web-sys/HtmlElement",
+    "web-sys/HtmlTextAreaElement",
 ]
 use_web_lock = [
     "web-sys/AbortSignal",

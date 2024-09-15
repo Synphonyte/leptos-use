@@ -79,7 +79,8 @@
 
 .demo-container input[type="text"],
 .demo-container input[type="search"],
-.demo-container input[type="number"] {
+.demo-container input[type="number"],
+.demo-container textarea {
     display: block;
     font-size: 90%;
     padding: .5em 1em .4em;
@@ -96,6 +97,7 @@
 .demo-container textarea {
     background: var(--bg);
     border: 1px solid var(--theme-popup-border);
+    line-height: 1.5;
 }
 
 .demo-container input[type=range],

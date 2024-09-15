@@ -52,6 +52,7 @@ members = [
     "use_service_worker",
     "use_sorted",
     "use_storage",
+    "use_textarea_autosize",
     "use_throttle_fn",
     "use_timeout_fn",
     "use_timestamp",

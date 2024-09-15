@@ -285,7 +285,7 @@ where
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
-    let ws_ref: StoredValue<Option<WebSocket>, _> = StoredValue::new_local(None);
+    let ws_signal = RwSignal::new(None::<WebSocket>);
 
     let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
@@ -308,8 +308,8 @@ where
 
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
-                    && ws_ref
-                        .get_value()
+                    && ws_signal
+                        .get_untracked()
                         .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                 {
                     reconnect_timer_ref.set_value(
@@ -338,7 +338,7 @@ where
             Some(Arc::new(move || {
                 reconnect_timer_ref.set_value(None);
 
-                if let Some(web_socket) = ws_ref.get_value() {
+                if let Some(web_socket) = ws_signal.get_untracked() {
                     let _ = web_socket.close();
                 }
 
@@ -532,7 +532,7 @@ where
                     onclose_closure.forget();
                 }
 
-                ws_ref.set_value(Some(web_socket));
+                ws_signal.set(Some(web_socket));
             }))
         });
     }
@@ -541,7 +541,7 @@ where
     let send_str = {
         Box::new(move |data: &str| {
             if ready_state.get_untracked() == ConnectionReadyState::Open {
-                if let Some(web_socket) = ws_ref.get_value() {
+                if let Some(web_socket) = ws_signal.get_untracked() {
                     let _ = web_socket.send_with_str(data);
                 }
             }
@@ -551,7 +551,7 @@ where
     // Send bytes
     let send_bytes = move |data: &[u8]| {
         if ready_state.get_untracked() == ConnectionReadyState::Open {
-            if let Some(web_socket) = ws_ref.get_value() {
+            if let Some(web_socket) = ws_signal.get_untracked() {
                 let _ = web_socket.send_with_u8_array(data);
             }
         }
@@ -589,7 +589,7 @@ where
 
         move || {
             manually_closed_ref.set_value(true);
-            if let Some(web_socket) = ws_ref.get_value() {
+            if let Some(web_socket) = ws_signal.get_untracked() {
                 let _ = web_socket.close();
             }
         }
@@ -611,7 +611,7 @@ where
     UseWebSocketReturn {
         ready_state: ready_state.into(),
         message: message.into(),
-        ws: ws_ref.get_value(),
+        ws: ws_signal.into(),
         open,
         close,
         send,
@@ -716,7 +716,7 @@ where
     /// Latest message received from `WebSocket`.
     pub message: Signal<Option<Rx>>,
     /// The `WebSocket` instance.
-    pub ws: Option<WebSocket>,
+    pub ws: Signal<Option<WebSocket>>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection
