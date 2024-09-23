@@ -22,6 +22,7 @@
 
 ## Usage
 
+![Crates.io Total Downloads](https://img.shields.io/crates/d/leptos-use)
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
 [![Build Status](https://github.com/synphonyte/leptos-use/actions/workflows/cd.yml/badge.svg)](https://github.com/synphonyte/leptos-use/actions/workflows/cd.yml)
