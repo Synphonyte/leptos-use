@@ -1,6 +1,6 @@
 use crate::math::shared::use_simple_math;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use num::Float;
 use paste::paste;
 

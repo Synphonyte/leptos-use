@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::cmp::Ordering;
 use std::ops::DerefMut;
 

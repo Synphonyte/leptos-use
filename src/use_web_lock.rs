@@ -31,7 +31,7 @@ pub use web_sys::LockMode;
 ///
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// leptos::spawn::spawn_local(async {
+/// leptos::task::spawn_local(async {
 ///     let res = use_web_lock("my_lock", my_process).await;
 ///     assert!(matches!(res, Ok(42)));
 /// });

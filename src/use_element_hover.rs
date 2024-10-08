@@ -5,7 +5,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use std::time::Duration;

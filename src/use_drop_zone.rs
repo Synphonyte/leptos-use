@@ -2,7 +2,7 @@ use crate::core::IntoElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
@@ -106,7 +106,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -119,7 +119,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -137,7 +137,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),
@@ -153,7 +153,7 @@ where
             update_files(&event);
 
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
                 files: files.get_untracked().into_iter().collect(),

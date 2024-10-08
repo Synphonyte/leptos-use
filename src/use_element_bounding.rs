@@ -1,7 +1,7 @@
 use crate::core::IntoElementMaybeSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive [bounding box](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) of an HTML element
 ///

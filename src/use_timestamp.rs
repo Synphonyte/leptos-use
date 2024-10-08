@@ -5,7 +5,7 @@ use crate::{
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::rc::Rc;
 
 /// Reactive current timestamp.
@@ -87,7 +87,7 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
             update();
 
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             callback(ts.get_untracked());
         }

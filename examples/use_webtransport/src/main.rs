@@ -64,7 +64,7 @@ fn Demo() -> impl IntoView {
         move |_| {
             let transport = transport.clone();
 
-            leptos::spawn::spawn_local(async move {
+            leptos::task::spawn_local(async move {
                 match transport.open_bidir_stream().await {
                     Ok(bidir_stream) => {
                         let i = id.get_value();

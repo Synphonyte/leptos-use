@@ -2,7 +2,7 @@ use crate::{use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 
@@ -76,7 +76,7 @@ pub fn use_web_notification_with_options(
             let on_click = Rc::clone(&options.on_click);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_click(e);
             }
@@ -87,7 +87,7 @@ pub fn use_web_notification_with_options(
             let on_close = Rc::clone(&options.on_close);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_close(e);
             }
@@ -98,7 +98,7 @@ pub fn use_web_notification_with_options(
             let on_error = Rc::clone(&options.on_error);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_error(e);
             }
@@ -109,7 +109,7 @@ pub fn use_web_notification_with_options(
             let on_show = Rc::clone(&options.on_show);
             move |e: web_sys::Event| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                 on_show(e);
             }
@@ -134,7 +134,7 @@ pub fn use_web_notification_with_options(
                 let on_error_closure = on_error_closure.clone();
                 let on_show_closure = on_show_closure.clone();
 
-                leptos::spawn::spawn_local(async move {
+                leptos::task::spawn_local(async move {
                     set_permission.set(request_web_notification_permission().await);
 
                     let mut notification_options = web_sys::NotificationOptions::from(&options);
@@ -169,7 +169,7 @@ pub fn use_web_notification_with_options(
             }
         };
 
-        leptos::spawn::spawn_local(async move {
+        leptos::task::spawn_local(async move {
             set_permission.set(request_web_notification_permission().await);
         });
 

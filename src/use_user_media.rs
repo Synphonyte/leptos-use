@@ -92,7 +92,7 @@ pub fn use_user_media_with_options(
     let start = move || {
         #[cfg(not(feature = "ssr"))]
         {
-            leptos::spawn::spawn_local(async move {
+            leptos::task::spawn_local(async move {
                 _start().await;
                 stream.with_untracked(move |stream| {
                     if let Some(Ok(_)) = stream {
@@ -112,7 +112,7 @@ pub fn use_user_media_with_options(
         move || enabled.get(),
         move |enabled, _, _| {
             if *enabled {
-                leptos::spawn::spawn_local(async move {
+                leptos::task::spawn_local(async move {
                     _start().await;
                 });
             } else {

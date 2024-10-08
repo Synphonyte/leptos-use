@@ -122,7 +122,7 @@ where
         let event_name = event.name();
         let closure_js = Closure::wrap(Box::new(move |e| {
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             handler(e);
         }) as Box<dyn FnMut(_)>)

@@ -1,7 +1,7 @@
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::actions::Action;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::actions::Action;
+use leptos::reactive::wrappers::read::Signal;
 use send_wrapper::SendWrapper;
 use std::sync::Arc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -54,7 +54,7 @@ pub fn use_service_worker_with_options(
         let on_controller_change = options.on_controller_change.clone();
         let js_closure = Closure::wrap(Box::new(move |_event: JsValue| {
             #[cfg(debug_assertions)]
-            let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_controller_change();
         }) as Box<dyn FnMut(JsValue)>)

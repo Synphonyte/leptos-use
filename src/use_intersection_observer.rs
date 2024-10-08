@@ -2,7 +2,7 @@ use crate::core::{IntoElementMaybeSignal, IntoElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::marker::PhantomData;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -103,7 +103,7 @@ where
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
             move |entries: js_sys::Array, observer| {
                 #[cfg(debug_assertions)]
-                let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                 callback(
                     entries

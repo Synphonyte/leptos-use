@@ -3,7 +3,7 @@ use crate::core::Size;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
