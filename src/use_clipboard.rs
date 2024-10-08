@@ -2,7 +2,7 @@ use crate::{js, js_fut, use_event_listener, use_supported, UseTimeoutFnReturn};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{copy, cut};
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API).
 ///
@@ -77,7 +77,7 @@ pub fn use_clipboard_with_options(
 
     let update_text = move |_| {
         if is_supported.get() {
-            leptos::spawn::spawn_local(async move {
+            leptos::task::spawn_local(async move {
                 let clipboard = window().navigator().clipboard();
                 if let Ok(text) = js_fut!(clipboard.read_text()).await {
                     set_text.set(text.as_string());
@@ -99,7 +99,7 @@ pub fn use_clipboard_with_options(
                 let start = start.clone();
                 let value = value.to_owned();
 
-                leptos::spawn::spawn_local(async move {
+                leptos::task::spawn_local(async move {
                     let clipboard = window().navigator().clipboard();
                     if js_fut!(clipboard.write_text(&value)).await.is_ok() {
                         set_text.set(Some(value));

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::fmt::Display;
 
 /// Reactive [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API).
@@ -46,7 +46,7 @@ pub fn use_permission(permission_name: &str) -> Signal<PermissionState> {
             }
         };
 
-        leptos::spawn::spawn_local({
+        leptos::task::spawn_local({
             let permission_name = permission_name.to_owned();
 
             async move {

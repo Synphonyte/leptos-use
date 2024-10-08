@@ -7,7 +7,7 @@ use default_struct_builder::DefaultBuilder;
 use futures_util::join;
 use gloo_timers::future::sleep;
 use leptos::prelude::*;
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
@@ -154,10 +154,10 @@ where
                     set_loading.set(true);
 
                     let measure = measure.clone();
-                    leptos::spawn::spawn_local(async move {
+                    leptos::task::spawn_local(async move {
                         #[cfg(debug_assertions)]
                         let zone =
-                            leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                            leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                         join!(
                             on_load_more.with_value(|f| f(state)),

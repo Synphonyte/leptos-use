@@ -1,4 +1,4 @@
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 
 /// Pausable effect
 pub struct Pausable<PauseFn, ResumeFn>

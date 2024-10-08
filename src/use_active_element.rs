@@ -3,7 +3,7 @@
 use crate::{use_document, use_event_listener_with_options, use_window, UseEventListenerOptions};
 use leptos::ev::{blur, focus};
 use leptos::html::{AnyElement, ToHtmlElement};
-use leptos::reactive_graph::wrappers::read::Signal;
+use leptos::reactive::wrappers::read::Signal;
 use leptos::prelude::*;
 
 /// Reactive `document.activeElement`

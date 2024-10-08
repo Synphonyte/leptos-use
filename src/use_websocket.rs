@@ -371,7 +371,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_open(e);
 
@@ -412,7 +412,7 @@ where
                                         let txt = String::from(&txt);
 
                                         #[cfg(debug_assertions)]
-                                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message_raw(&txt);
 
@@ -422,7 +422,7 @@ where
                                         match C::decode_str(&txt) {
                                             Ok(val) => {
                                                 #[cfg(debug_assertions)]
-                                                let prev = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                                                let prev = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                                                 on_message(&val);
 
@@ -443,7 +443,7 @@ where
                                 let array = array.to_vec();
 
                                 #[cfg(debug_assertions)]
-                                let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                                let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                                 on_message_raw_bytes(&array);
 
@@ -453,7 +453,7 @@ where
                                 match C::decode_bin(array.as_slice()) {
                                     Ok(val) => {
                                         #[cfg(debug_assertions)]
-                                        let prev = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                                        let prev = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message(&val);
 
@@ -489,7 +489,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_error(UseWebSocketError::Event(e));
 
@@ -518,7 +518,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_close(e);
 

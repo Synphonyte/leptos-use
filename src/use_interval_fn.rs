@@ -104,7 +104,7 @@ where
 
                 move || {
                     #[cfg(debug_assertions)]
-                    let _z = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
+                    let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                     callback();
                 }
