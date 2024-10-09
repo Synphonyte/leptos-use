@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::wasm_bindgen::JsCast;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::use_active_element;
 
@@ -10,7 +11,10 @@ fn Demo() -> impl IntoView {
             "{:?}",
             active_element
                 .get()
-                .map(|el| el.dataset().get("id"))
+                .map(|el| el
+                    .unchecked_ref::<web_sys::HtmlElement>()
+                    .dataset()
+                    .get("id"))
                 .unwrap_or_default()
         )
     };

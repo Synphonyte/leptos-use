@@ -7,6 +7,7 @@ members = [
     "signal_throttled",
     "sync_signal",
     "use_abs",
+    "use_active_element",
     "use_and",
     "use_breakpoints",
     "use_broadcast_channel",
@@ -68,7 +69,6 @@ members = [
     "watch_debounced",
     "watch_pausable",
     "watch_throttled",
-    # "use_active_element",
     # "use_drop_zone",
     # "use_webtransport",
 ]

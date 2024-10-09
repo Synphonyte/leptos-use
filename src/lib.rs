@@ -35,7 +35,7 @@ mod signal_throttled;
 #[cfg(feature = "sync_signal")]
 mod sync_signal;
 #[cfg(feature = "use_active_element")]
-// mod use_active_element;
+mod use_active_element;
 #[cfg(feature = "use_breakpoints")]
 mod use_breakpoints;
 #[cfg(feature = "use_broadcast_channel")]
@@ -183,7 +183,7 @@ pub use signal_throttled::*;
 #[cfg(feature = "sync_signal")]
 pub use sync_signal::*;
 #[cfg(feature = "use_active_element")]
-// pub use use_active_element::*;
+pub use use_active_element::*;
 #[cfg(feature = "use_breakpoints")]
 pub use use_breakpoints::*;
 #[cfg(feature = "use_broadcast_channel")]

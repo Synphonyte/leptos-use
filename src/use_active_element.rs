@@ -2,7 +2,6 @@
 
 use crate::{use_document, use_event_listener_with_options, use_window, UseEventListenerOptions};
 use leptos::ev::{blur, focus};
-use leptos::html::{AnyElement, ToHtmlElement};
 use leptos::reactive::wrappers::read::Signal;
 use leptos::prelude::*;
 
@@ -16,8 +15,7 @@ use leptos::prelude::*;
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos::logging::log;
-/// use leptos_use::use_active_element;
+/// # use leptos_use::use_active_element;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -34,14 +32,13 @@ use leptos::prelude::*;
 /// ## Server-Side Rendering
 ///
 /// On the server this returns a `Signal` that always contains the value `None`.
-pub fn use_active_element() -> Signal<Option<HtmlElement<AnyElement>>> {
+pub fn use_active_element() -> Signal<Option<web_sys::Element>, LocalStorage> {
     let get_active_element = move || {
         use_document()
             .active_element()
-            .map(|el| el.to_leptos_element())
     };
 
-    let (active_element, set_active_element) = signal(get_active_element());
+    let (active_element, set_active_element) = signal_local(get_active_element());
 
     let listener_options = UseEventListenerOptions::default().capture(true);
 
