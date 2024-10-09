@@ -1,4 +1,3 @@
-use leptos::html::html;
 use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
 use leptos_use::{
@@ -16,7 +15,13 @@ fn Demo() -> impl IntoView {
                 "navy".into(),
                 "ayu".into(),
             ])
-            .initial_value(ColorMode::from(html().class_name())),
+            .initial_value(ColorMode::from(
+                document()
+                    .query_selector("html")
+                    .unwrap()
+                    .unwrap()
+                    .class_name(),
+            )),
     );
 
     let UseCycleListReturn { state, next, .. } = use_cycle_list_with_options(

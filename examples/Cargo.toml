@@ -12,6 +12,7 @@ members = [
     "use_broadcast_channel",
     "use_ceil",
     "use_clipboard",
+    "use_color_mode",
     "use_cookie",
     "use_css_var",
     "use_cycle_list",
@@ -68,7 +69,6 @@ members = [
     "watch_pausable",
     "watch_throttled",
     # "use_active_element",
-    # "use_color_mode",
     # "use_drop_zone",
     # "use_webtransport",
 ]
