@@ -23,6 +23,7 @@ members = [
     "use_display_media",
     "use_document_visibility",
     "use_draggable",
+    "use_drop_zone",
     "use_element_bounding",
     "use_element_hover",
     "use_element_size",
@@ -69,7 +70,6 @@ members = [
     "watch_debounced",
     "watch_pausable",
     "watch_throttled",
-    # "use_drop_zone",
     # "use_webtransport",
 ]
 

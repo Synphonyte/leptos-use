@@ -3,6 +3,7 @@ use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
@@ -69,10 +70,12 @@ where
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
 {
     let (is_over_drop_zone, set_over_drop_zone) = signal(false);
-    let (files, set_files) = signal_local(Vec::<web_sys::File>::new());
+    let (files, set_files) = signal(Vec::<SendWrapper<web_sys::File>>::new());
 
     #[cfg(not(feature = "ssr"))]
     {
+        use std::ops::Deref;
+
         let UseDropZoneOptions {
             on_drop,
             on_enter,
@@ -90,6 +93,7 @@ where
                     .unwrap_or_default()
                     .into_iter()
                     .map(web_sys::File::from)
+                    .map(SendWrapper::new)
                     .collect();
 
                 set_files.update(move |f| *f = files);
@@ -109,7 +113,8 @@ where
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_enter(UseDropZoneEvent {
-                files: files.get_untracked().into_iter().collect(),
+                files: files
+                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -122,7 +127,8 @@ where
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_over(UseDropZoneEvent {
-                files: files.get_untracked().into_iter().collect(),
+                files: files
+                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -140,7 +146,8 @@ where
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_leave(UseDropZoneEvent {
-                files: files.get_untracked().into_iter().collect(),
+                files: files
+                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -156,7 +163,8 @@ where
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
             on_drop(UseDropZoneEvent {
-                files: files.get_untracked().into_iter().collect(),
+                files: files
+                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -211,7 +219,7 @@ pub struct UseDropZoneEvent {
 /// Return type of [`use_drop_zone`].
 pub struct UseDropZoneReturn {
     /// Files being handled
-    pub files: Signal<Vec<web_sys::File>, LocalStorage>,
+    pub files: Signal<Vec<SendWrapper<web_sys::File>>>,
     /// Whether the files (dragged by the pointer) are over the drop zone
     pub is_over_drop_zone: Signal<bool>,
 }

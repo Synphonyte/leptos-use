@@ -21,7 +21,7 @@ use leptos::prelude::*;
 /// # fn Demo() -> impl IntoView {
 /// let active_element = use_active_element();
 ///
-/// create_effect(move |_| {
+/// Effect::new(move || {
 ///     log!("focus changed to {:?}", active_element.get());
 /// });
 /// #
