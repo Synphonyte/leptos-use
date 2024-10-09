@@ -2,8 +2,8 @@
 
 use crate::{use_document, use_event_listener_with_options, use_window, UseEventListenerOptions};
 use leptos::ev::{blur, focus};
-use leptos::reactive::wrappers::read::Signal;
 use leptos::prelude::*;
+use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive `document.activeElement`
 ///
@@ -33,10 +33,7 @@ use leptos::prelude::*;
 ///
 /// On the server this returns a `Signal` that always contains the value `None`.
 pub fn use_active_element() -> Signal<Option<web_sys::Element>, LocalStorage> {
-    let get_active_element = move || {
-        use_document()
-            .active_element()
-    };
+    let get_active_element = move || use_document().active_element();
 
     let (active_element, set_active_element) = signal_local(get_active_element());
 

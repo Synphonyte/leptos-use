@@ -114,7 +114,7 @@ where
 
             on_enter(UseDropZoneEvent {
                 files: files
-                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
+                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -128,7 +128,7 @@ where
 
             on_over(UseDropZoneEvent {
                 files: files
-                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
+                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -147,7 +147,7 @@ where
 
             on_leave(UseDropZoneEvent {
                 files: files
-                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
+                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });
@@ -164,7 +164,7 @@ where
 
             on_drop(UseDropZoneEvent {
                 files: files
-                    .with_untracked(|files| files.into_iter().map(|f| f.deref().clone()).collect()),
+                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
                 event,
             });
         });

@@ -97,13 +97,6 @@ pub trait IntoElementMaybeSignalType<T, Marker: ?Sized> {
     fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T>;
 }
 
-/// Identity
-// impl<T> IntoElementMaybeSignalType<T, ()> for ElementMaybeSignal<T> {
-//     fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T> {
-//         self.inner
-//     }
-// }
-
 // From static element //////////////////////////////////////////////////////////////
 
 /// Handles `window()` or `document()`

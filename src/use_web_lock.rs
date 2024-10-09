@@ -44,7 +44,6 @@ pub use web_sys::LockMode;
 ///
 /// On the server this returns `Err(UseWebLockError::Server)` and the task is not executed.
 // #[doc(cfg(feature = "use_web_lock"))]
-
 pub async fn use_web_lock<C, F, R>(name: &str, callback: C) -> Result<R, UseWebLockError>
 where
     C: FnOnce(web_sys::Lock) -> F + 'static,

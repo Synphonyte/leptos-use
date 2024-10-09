@@ -72,13 +72,7 @@ use wasm_bindgen::JsValue;
 /// ```
 pub fn use_broadcast_channel<T, C>(
     name: &str,
-) -> UseBroadcastChannelReturn<
-    T,
-    impl Fn(&T) + Clone,
-    impl Fn() + Clone,
-    <C as Encoder<T>>::Error,
-    <C as Decoder<T>>::Error,
->
+) -> UseBroadcastChannelReturn<T, impl Fn(&T) + Clone, impl Fn() + Clone, C>
 where
     T: Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -179,13 +173,12 @@ where
 }
 
 /// Return type of [`use_broadcast_channel`].
-pub struct UseBroadcastChannelReturn<T, PFn, CFn, E, D>
+pub struct UseBroadcastChannelReturn<T, PFn, CFn, C>
 where
     T: Send + Sync + 'static,
     PFn: Fn(&T) + Clone,
     CFn: Fn() + Clone,
-    E: Send + Sync + 'static,
-    D: Send + Sync + 'static,
+    C: Encoder<T> + Decoder<T>,
 {
     /// `true` if this browser supports `BroadcastChannel`s.
     pub is_supported: Signal<bool>,
@@ -203,11 +196,13 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<UseBroadcastChannelError<E, D>>, LocalStorage>,
+    pub error: Signal<Option<ErrorType<T, C>>, LocalStorage>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,
 }
+
+type ErrorType<T, C> = UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>;
 
 #[derive(Debug, Error)]
 pub enum UseBroadcastChannelError<E, D> {
