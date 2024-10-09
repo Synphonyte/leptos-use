@@ -156,8 +156,7 @@ where
                     let measure = measure.clone();
                     leptos::task::spawn_local(async move {
                         #[cfg(debug_assertions)]
-                        let zone =
-                            leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                         join!(
                             on_load_more.with_value(|f| f(state)),

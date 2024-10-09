@@ -93,9 +93,7 @@ where
                             *timer.lock().unwrap() = None;
 
                             #[cfg(debug_assertions)]
-                            let _z =
-                                leptos::reactive::diagnostics::SpecialNonReactiveZone::enter(
-                                );
+                            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                             callback(arg);
                         }
