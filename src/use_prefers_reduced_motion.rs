@@ -14,6 +14,7 @@ use std::sync::Arc;
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::use_prefers_reduced_motion;
+/// # #[cfg(feature = "docs")]
 /// # use leptos_use::docs::BooleanDisplay;
 /// #
 /// # #[component]

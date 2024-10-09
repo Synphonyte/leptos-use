@@ -126,6 +126,8 @@ use std::sync::Arc;
 ///             {
 ///                 Some("Somehow get the value of the cookie header as a string".to_owned())
 ///             }
+///             #[cfg(not(feature = "ssr"))]
+///             None
 ///         })
 ///         .ssr_set_cookie(|cookie: &Cookie| {
 ///             #[cfg(feature = "ssr")]
