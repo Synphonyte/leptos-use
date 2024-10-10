@@ -1,5 +1,6 @@
 use gloo_timers::future::sleep;
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_web_lock;
 use std::time::Duration;
@@ -12,7 +13,7 @@ async fn my_process(_lock: web_sys::Lock) -> i32 {
 
 #[component]
 fn Demo() -> impl IntoView {
-    let (res, set_res) = create_signal("Not started yet".to_string());
+    let (res, set_res) = signal("Not started yet".to_string());
 
     let on_click = move |_| {
         set_res.set("Running...".to_string());
@@ -41,7 +42,9 @@ fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    mount_to(demo_or_body(), || {
+    let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
         view! { <Demo/> }
-    })
+    });
+
+    unmount_handle.forget();
 }

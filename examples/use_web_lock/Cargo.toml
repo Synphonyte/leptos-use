@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 gloo-timers = { version = "0.3", features = ["futures"] }
-leptos = { version = "0.6", features = ["nightly", "csr"] }
+leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
