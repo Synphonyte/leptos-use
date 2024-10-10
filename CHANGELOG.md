@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0-gamma1] - 2024-10-10
+
+- Adapted to the latest changes in Leptos (thanks to @BakerNet and @nikessel)
+- Fixed all the examples
+- `use_active_element` ported
+- `use_drop_zone` now returns `Signal<Vec<SendSignal<web_sys::File>>>` instead of `Signal<Vec<web_sys::File>, LocalStorage>` 
+  to make it easier to use with `<For>`
+
 ## [0.14.0-beta4] - 2024-09-15
 
 - Latest changes from version 0.13.4 and 0.13.5 ported
