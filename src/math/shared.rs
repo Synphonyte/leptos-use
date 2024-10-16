@@ -6,7 +6,7 @@ macro_rules! use_partial_cmp {
         $(#[$outer])*
         pub fn $fn_name<C, S, N>(container: S) -> Signal<Option<N>>
         where
-            S: Into<MaybeSignal<C>>,
+            S: Into<Signal<C>>,
             C: Send + Sync + 'static,
             for<'a> &'a C: IntoIterator<Item = &'a N>,
             N: PartialOrd + Clone + Send + Sync + 'static,
