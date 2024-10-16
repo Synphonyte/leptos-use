@@ -11,11 +11,11 @@ use leptos::reactive::wrappers::read::Signal;
 /// While data doesn't expire the user can view, modify and delete all data stored.
 /// Browsers allow 5MB of data to be stored.
 ///
-/// This is contrast to [`fn@crate::storage::use_session_storage`] which clears data when the page session ends and is not shared.
+/// This is in contrast to [`use_session_storage`](https://leptos-use.rs/storage/use_session_storage.html) which clears data when the page session ends and is not shared.
 ///
 /// ## Usage
 ///
-/// See [`fn@crate::storage::use_storage`] for more details on how to use.
+/// See [`use_storage`](https://leptos-use.rs/storage/use_storage.html) for more details on how to use.
 pub fn use_local_storage<T, C>(
     key: impl AsRef<str>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
