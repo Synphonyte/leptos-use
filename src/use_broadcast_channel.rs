@@ -71,13 +71,7 @@ use wasm_bindgen::JsValue;
 /// ```
 pub fn use_broadcast_channel<T, C>(
     name: &str,
-) -> UseBroadcastChannelReturn<
-    T,
-    impl Fn(&T) + Clone,
-    impl Fn() + Clone,
-    <C as Encoder<T>>::Error,
-    <C as Decoder<T>>::Error,
->
+) -> UseBroadcastChannelReturnType<C, T, impl Fn(&T) + Clone, impl Fn() + Clone>
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
@@ -173,6 +167,9 @@ where
         is_closed: is_closed.into(),
     }
 }
+
+pub type UseBroadcastChannelReturnType<C, T, PFn, CFn> =
+    UseBroadcastChannelReturn<T, PFn, CFn, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>;
 
 /// Return type of [`use_broadcast_channel`].
 pub struct UseBroadcastChannelReturn<T, PFn, CFn, E, D>
