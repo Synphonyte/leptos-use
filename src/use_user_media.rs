@@ -131,21 +131,43 @@ pub fn use_user_media_with_options(
 }
 
 #[cfg(not(feature = "ssr"))]
-async fn create_media(video: bool, audio: bool) -> Result<web_sys::MediaStream, JsValue> {
+async fn create_media(video: MediaTrackConstraints, audio: MediaTrackConstraints) -> Result<web_sys::MediaStream, JsValue> {
     use crate::js_fut;
     use crate::use_window::use_window;
 
     let media = use_window()
-        .navigator()
-        .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
-        .and_then(|n| n.media_devices())?;
+      .navigator()
+      .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
+      .and_then(|n| n.media_devices())?;
 
     let constraints = web_sys::MediaStreamConstraints::new();
-    if video {
-        constraints.set_video(&JsValue::from(true));
+    if video.value.unwrap_or_default() {
+
+        let video_constraints = web_sys::MediaTrackConstraints::new();
+
+        video_constraints.set_facing_mode(&JsValue::from_str(video.facing_mode.unwrap_or(FacingMode::Environment).as_str())); // Use "environment" for the back camera
+
+        constraints.set_video(&JsValue::from(video_constraints));
+
+        // constraints.set_video(&JsValue::from(true));
+        //
+        //
+        //
+        // let facing_mode = match video.facing_mode {
+        //     Some(facing_mode) => web_sys::VideoFacingModeEnum::unchecked_from_js((facing_mode as u32).into()).unchecked_into(),
+        //     None => web_sys::VideoFacingModeEnum::Environment,
+        // };
+        //
+        // track_constraints.set_facing_mode(&JsValue::from(facing_mode));
+        //
+        // constraints.set_video(&track_constraints);
     }
-    if audio {
-        constraints.set_audio(&JsValue::from(true));
+    if audio.value.unwrap_or_default() {
+        let audio_constraints = web_sys::MediaTrackConstraints::new();
+
+        audio_constraints.set_facing_mode(&JsValue::from_str(video.facing_mode.unwrap_or(FacingMode::Environment).as_str())); // Use "environment" for the back camera
+
+        constraints.set_audio(&JsValue::from(audio_constraints));
     }
 
     let promise = media.get_user_media_with_constraints(&constraints)?;
@@ -165,18 +187,18 @@ pub struct UseUserMediaOptions {
     enabled: MaybeRwSignal<bool>,
     /// Constraint parameter describing video media type requested
     /// The default value is `false`.
-    video: bool,
+    video: MediaTrackConstraints,
     /// Constraint parameter describing audio media type requested
     /// The default value is `false`.
-    audio: bool,
+    audio: MediaTrackConstraints,
 }
 
 impl Default for UseUserMediaOptions {
     fn default() -> Self {
         Self {
             enabled: false.into(),
-            video: true,
-            audio: false,
+            video: MediaTrackConstraintsBuilder::new().build(),
+            audio: MediaTrackConstraintsBuilder::new().build(),
         }
     }
 }
@@ -185,8 +207,8 @@ impl Default for UseUserMediaOptions {
 #[derive(Clone)]
 pub struct UseUserMediaReturn<StartFn, StopFn>
 where
-    StartFn: Fn() + Clone,
-    StopFn: Fn() + Clone,
+  StartFn: Fn() + Clone,
+  StopFn: Fn() + Clone,
 {
     /// The current [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) if it exists.
     /// Initially this is `None` until `start` resolved successfully.
@@ -206,4 +228,77 @@ where
 
     /// A value of `true` is the same as calling `start()` whereas `false` is the same as calling `stop()`.
     pub set_enabled: WriteSignal<bool>,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum FacingMode {
+    User,
+    Environment,
+    Left,
+    Right,
+}
+
+impl FacingMode {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            FacingMode::User => "user",
+            FacingMode::Environment => "environment",
+            FacingMode::Left => "left",
+            FacingMode::Right => "right",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct MediaTrackConstraints {
+    pub facing_mode: Option<FacingMode>,
+    pub value: Option<bool>,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+    pub frame_rate: Option<i32>,
+    pub exact: Option<bool>,
+}
+
+impl MediaTrackConstraints {
+    pub fn builder() -> MediaTrackConstraintsBuilder {
+        MediaTrackConstraintsBuilder::default()
+    }
+}
+
+#[derive(Default)]
+pub struct MediaTrackConstraintsBuilder {
+    facing_mode: Option<FacingMode>,
+    value: Option<bool>,
+    width: Option<i32>,
+    height: Option<i32>,
+    frame_rate: Option<i32>,
+    exact: Option<bool>,
+}
+
+impl MediaTrackConstraintsBuilder {
+    pub fn new() -> MediaTrackConstraintsBuilder {
+        MediaTrackConstraintsBuilder {
+            exact: false.into(),
+            frame_rate: None,
+            height: None,
+            width: None,
+            facing_mode: None,
+            value: None,
+        }
+    }
+
+    pub fn facing_mode(mut self, facing_mode: FacingMode) -> MediaTrackConstraintsBuilder {
+        self.facing_mode = Some(facing_mode);
+        self
+    }
+
+    pub fn value(mut self, value: bool) -> MediaTrackConstraintsBuilder {
+        self.value = Some(value);
+        self
+    }
+
+    pub fn build(self) -> MediaTrackConstraints {
+        MediaTrackConstraints { facing_mode: self.facing_mode, value: self.value, width: self.width, height: self.height, frame_rate: self.frame_rate, exact: self.exact }
+    }
+
 }
