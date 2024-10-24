@@ -283,67 +283,34 @@ where
 }
 
 #[derive(Clone, Copy, Debug)]
-pub enum Constrain<T> {
-    Single(Option<T>), // A single value (exact constraint)
-    Range {
-        min: Option<T>,   // For numeric types (e.g., u64, f64)
-        max: Option<T>,   // For numeric types
-        exact: Option<T>, // Exact constraint
-        ideal: Option<T>, // Ideal constraint
-    },
+pub enum ConstraintExactIdeal<T> {
+    Single(Option<T>),
     ExactIdeal {
-        exact: Option<T>, // Optional exact constraint for boolean, string, etc.
-        ideal: Option<T>, // Optional ideal constraint for boolean, string, etc.
+        exact: Option<T>,
+        ideal: Option<T>,
     },
 }
 
-impl<T> Constrain<T>
-where
-    T: Clone + std::fmt::Debug,
-{
-    // Constructor for a single exact value
-    pub fn new(value: Option<T>) -> Self {
-        Constrain::Single(value)
+#[derive(Clone, Copy, Debug)]
+pub enum ConstraintRange<T> {
+    Single(Option<T>),
+    Range {
+        min: Option<T>,
+        max: Option<T>,
+        exact: Option<T>,
+        ideal: Option<T>,
+    },
+}
+
+impl<T> ConstraintExactIdeal<T> {
+    
+    pub fn default() -> Self {
+        ConstraintExactIdeal::Single(None)
     }
 
-    // Constructor for a range of numeric constraints
-    pub fn range() -> Self {
-        Constrain::Range {
-            min: None,
-            max: None,
-            exact: None,
-            ideal: None,
-        }
-    }
-
-    // Constructor for exact/ideal types (boolean, string, etc.)
-    pub fn exact_ideal(exact: Option<T>, ideal: Option<T>) -> Self {
-        Constrain::ExactIdeal { exact, ideal }
-    }
-
-    // Set the `min` constraint for numeric types
-    pub fn min(mut self, value: T) -> Self {
-        if let Constrain::Range { ref mut min, .. } = self {
-            *min = Some(value);
-        }
-        self
-    }
-
-    // Set the `max` constraint for numeric types
-    pub fn max(mut self, value: T) -> Self {
-        if let Constrain::Range { ref mut max, .. } = self {
-            *max = Some(value);
-        }
-        self
-    }
-
-    // Set the `exact` constraint
     pub fn exact(mut self, value: T) -> Self {
         match &mut self {
-            Constrain::Range { ref mut exact, .. } => {
-                *exact = Some(value);
-            }
-            Constrain::ExactIdeal {
+            ConstraintExactIdeal::ExactIdeal {
                 exact: ref mut e, ..
             } => {
                 *e = Some(value);
@@ -353,13 +320,9 @@ where
         self
     }
 
-    // Set the `ideal` constraint
     pub fn ideal(mut self, value: T) -> Self {
         match &mut self {
-            Constrain::Range { ref mut ideal, .. } => {
-                *ideal = Some(value);
-            }
-            Constrain::ExactIdeal {
+            ConstraintExactIdeal::ExactIdeal {
                 ideal: ref mut i, ..
             } => {
                 *i = Some(value);
@@ -370,41 +333,83 @@ where
     }
 }
 
-impl<T> Default for Constrain<T>
+impl<T> ConstraintRange<T>
+where
+    T: Clone + std::fmt::Debug,
+{
+    pub fn new(value: Option<T>) -> Self {
+        ConstraintRange::Single(value)
+    }
+
+    pub fn default() -> Self {
+        ConstraintRange::Range {
+            min: None,
+            max: None,
+            exact: None,
+            ideal: None,
+        }
+    }
+
+    pub fn min(mut self, value: T) -> Self {
+        if let ConstraintRange::Range { ref mut min, .. } = self {
+            *min = Some(value);
+        }
+        self
+    }
+
+    pub fn max(mut self, value: T) -> Self {
+        if let ConstraintRange::Range { ref mut max, .. } = self {
+            *max = Some(value);
+        }
+        self
+    }
+
+    pub fn exact(mut self, value: T) -> Self {
+        match &mut self {
+            ConstraintRange::Range { ref mut exact, .. } => {
+                *exact = Some(value);
+            }
+            _ => {}
+        }
+        self
+    }
+
+    pub fn ideal(mut self, value: T) -> Self {
+        match &mut self {
+            ConstraintRange::Range { ref mut ideal, .. } => {
+                *ideal = Some(value);
+            }
+            _ => {}
+        }
+        self
+    }
+}
+
+impl<T> Default for ConstraintExactIdeal<T>
 where
   T: Default,
 {
     fn default() -> Self {
-        Constrain::Single(Some(T::default()))
+        ConstraintExactIdeal::Single(Some(T::default()))
     }
 }
 
-impl ConstrainFacingMode
+impl<T> Default for ConstraintRange<T>
+where
+  T: Default,
+{
+    fn default() -> Self {
+        ConstraintRange::Single(Some(T::default()))
+    }
+}
+
+impl ConstraintFacingMode
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            Constrain::Single(value) => JsValue::from_str(value.clone().unwrap().as_str()),  // Convert single value directly to JsValue
-            Constrain::Range { min, max, exact, ideal } => {
-                // Create a JavaScript object for the range constraints
-                let obj = Object::new();
-
-                if let Some(min_value) = min {
-                    Reflect::set(&obj, &JsValue::from_str("min"), &JsValue::from_str(min_value.as_str())).unwrap();
-                }
-                if let Some(max_value) = max {
-                    Reflect::set(&obj, &JsValue::from_str("max"), &JsValue::from_str(max_value.as_str())).unwrap();
-                }
-                if let Some(exact_value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &JsValue::from_str(exact_value.as_str())).unwrap();
-                }
-                if let Some(ideal_value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &JsValue::from_str(ideal_value.as_str())).unwrap();
-                }
-
-                JsValue::from(obj)
-            }
-            Constrain::ExactIdeal { exact, ideal } => {
-                // Create a JavaScript object for the exact/ideal constraints
+            ConstraintExactIdeal::Single(value) => JsValue::from_str(value.clone().unwrap().as_str()),
+            ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
+                
                 let obj = Object::new();
 
                 if let Some(exact_value) = exact {
@@ -420,16 +425,14 @@ impl ConstrainFacingMode
     }
 }
 
-impl<T> Constrain<T>
+impl<T> ConstraintRange<T>
 where
   T: Into<JsValue> + Clone,
 {
-    // Convert the Constrain<T> to a JsValue (for JS interop)
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            Constrain::Single(value) => JsValue::from(value.clone().unwrap().into()),  // Convert single value directly to JsValue
-            Constrain::Range { min, max, exact, ideal } => {
-                // Create a JavaScript object for the range constraints
+            ConstraintRange::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintRange::Range { min, max, exact, ideal } => {
                 let obj = Object::new();
 
                 if let Some(min_value) = min {
@@ -447,8 +450,18 @@ where
 
                 JsValue::from(obj)
             }
-            Constrain::ExactIdeal { exact, ideal } => {
-                // Create a JavaScript object for the exact/ideal constraints
+        }
+    }
+}
+
+impl<T> ConstraintExactIdeal<T>
+where
+  T: Into<JsValue> + Clone,
+{
+    pub fn to_jsvalue(&self) -> JsValue {
+        match self {
+            ConstraintExactIdeal::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
                 let obj = Object::new();
 
                 if let Some(exact_value) = exact {
@@ -464,14 +477,14 @@ where
     }
 }
 
-pub type ConstrainDouble = Constrain<f64>;
-pub type ConstrainULong = Constrain<u32>;
+pub type ConstraintDouble = ConstraintRange<f64>;
+pub type ConstraintULong = ConstraintRange<u32>;
 
-pub type ConstrainBool = Constrain<bool>;
+pub type ConstraintBool = ConstraintExactIdeal<bool>;
 
-pub type ConstrainDOMString = Constrain<&'static str>;
+pub type ConstraintDOMString = ConstraintExactIdeal<&'static str>; // TODO: implement String
 
-pub type ConstrainFacingMode = Constrain<FacingMode>;
+pub type ConstraintFacingMode = ConstraintExactIdeal<FacingMode>;
 
 #[derive(Clone, Copy, Debug)]
 pub enum FacingMode {
@@ -546,207 +559,215 @@ impl Into<AudioConstraints> for AudioTrackConstraints {
     }
 }
 
+pub trait IntoConstraintFacingMode {
+    fn into_constraint(self) -> ConstraintFacingMode;
+}
+
+impl IntoConstraintFacingMode for FacingMode {
+    fn into_constraint(self) -> ConstraintFacingMode {
+        ConstraintExactIdeal::Single(Some(self))
+    }
+}
+
+impl IntoConstraintFacingMode for ConstraintExactIdeal<FacingMode> {
+    fn into_constraint(self) -> ConstraintFacingMode {
+        self
+    }
+}
+
+pub trait IntoConstraintDouble {
+    fn into_constraint(self) -> ConstraintDouble;
+}
+
+impl IntoConstraintDouble for f64 {
+    fn into_constraint(self) -> ConstraintDouble {
+        ConstraintRange::Single(Some(self))
+    }
+}
+impl IntoConstraintDouble for ConstraintRange<f64> {
+    fn into_constraint(self) -> ConstraintDouble {
+        self
+    }
+}
+
+pub trait IntoConstrainULong {
+    fn into_constraint(self) -> ConstraintULong;
+}
+impl IntoConstrainULong for u32 {
+    fn into_constraint(self) -> ConstraintULong {
+        ConstraintRange::Single(Some(self))
+    }
+}
+impl IntoConstrainULong for ConstraintRange<u32> {
+    fn into_constraint(self) -> ConstraintULong {
+        self
+    }
+}
+
+pub trait IntoConstrainBool {
+    fn into_constraint(self) -> ConstraintBool;
+}
+
+impl IntoConstrainBool for bool {
+    fn into_constraint(self) -> ConstraintBool {
+        ConstraintExactIdeal::Single(Some(self))
+    }
+}
+impl IntoConstrainBool for ConstraintExactIdeal<bool> {
+    fn into_constraint(self) -> ConstraintBool {
+        self
+    }
+}
+
+pub trait IntoConstrainDOMString {
+    fn into_constraint(self) -> ConstraintDOMString;
+}
+impl IntoConstrainDOMString for &'static str {
+    fn into_constraint(self) -> ConstraintDOMString {
+        ConstraintExactIdeal::Single(Some(self))
+    }
+}
+impl IntoConstrainDOMString for ConstraintExactIdeal<&'static str> {
+    fn into_constraint(self) -> ConstraintDOMString {
+        self
+    }
+}
+
 #[derive(Default, Copy, Clone, Debug)]
 pub struct AudioTrackConstraints {
-    pub device_id: Option<ConstrainDOMString>,
+    pub device_id: Option<ConstraintDOMString>,
 
-    pub auto_gain_control: Option<ConstrainBool>,
-    pub channel_count: Option<ConstrainBool>,
-    pub echo_cancellation: Option<ConstrainBool>,
-    pub noise_suppression: Option<ConstrainBool>,
+    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
+    // pub device_ids: Option<Vec<ConstrainDOMString>>,
 
-    // pub group_id: Option<ConstrainDOMString>,
-    // pub latency: Option<ConstrainDouble>,
-    // pub sample_rate: Option<ConstrainULong>,
-    // pub sample_size: Option<ConstrainULong>,
-    // pub volume: Option<ConstrainDouble>, // deprecated
+    pub auto_gain_control: Option<ConstraintBool>,
+    pub channel_count: Option<ConstraintULong>,
+    pub echo_cancellation: Option<ConstraintBool>,
+    pub noise_suppression: Option<ConstraintBool>,
+
 }
 
 impl AudioTrackConstraints {
-    // Constructor for a new instance
+
     pub fn new() -> Self {
-        AudioTrackConstraints::default() // Start with default empty constraints
+        AudioTrackConstraints::default()
     }
 
-    // Builder methods accepting `Constrain<T>` directly
-    pub fn device_id(mut self, value: &'static str) -> Self {
-        self.device_id = Some(ConstrainDOMString::new(Some(&value)));
+    pub fn device_id<T: IntoConstrainDOMString>(mut self, value: T) -> Self {
+        self.device_id = Some(value.into_constraint());
         self
     }
 
-    pub fn auto_gain_control(mut self, value: bool) -> Self {
-        self.auto_gain_control = Some(ConstrainBool::new(Some(value)));
-        self
-    }
+    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
 
-    pub fn auto_gain_control_range(mut self, exact: Option<bool>, ideal: Option<bool>) -> Self {
-        self.auto_gain_control = Some(Constrain::ExactIdeal { exact, ideal });
-        self
-    }
-
-    pub fn channel_count(mut self, value: bool) -> Self {
-        self.channel_count = Some(ConstrainBool::new(Some(value)));
-        self
-    }
-
-    pub fn channel_count_range(mut self, exact: Option<bool>, ideal: Option<bool>) -> Self {
-        self.channel_count = Some(Constrain::ExactIdeal { exact, ideal });
-        self
-    }
-
-    pub fn echo_cancellation(mut self, value: bool) -> Self {
-        self.echo_cancellation = Some(ConstrainBool::new(Some(value)));
-        self
-    }
-
-    pub fn echo_cancellation_range(mut self, exact: Option<bool>, ideal: Option<bool>) -> Self {
-        self.echo_cancellation = Some(Constrain::ExactIdeal { exact, ideal });
-        self
-    }
-
-    pub fn noise_suppression(mut self, value: bool) -> Self {
-        self.noise_suppression = Some(ConstrainBool::new(Some(value)));
-        self
-    }
-
-    pub fn noise_suppression_range(mut self, exact: Option<bool>, ideal: Option<bool>) -> Self {
-        self.noise_suppression = Some(Constrain::ExactIdeal { exact, ideal });
-        self
-    }
-
-    // pub fn group_id(mut self, value: &'static str) -> Self {
-    //     self.group_id = Some(ConstrainDOMString::new(Some(&value)));
+    // pub fn device_ids(mut self, values: Vec<&'static str>) -> Self {
+    //     let constraints = values
+    //       .into_iter()
+    //       .map(|value| Constrain::Single(Some(value)))
+    //       .collect::<Vec<ConstrainDOMString>>();
+    //
+    //     self.device_ids = Some(constraints);
     //     self
     // }
-    //
-    // pub fn latency(mut self, value: ConstrainDouble) -> Self {
-    //     self.latency = Some(value);
-    //     self
-    // }
-    //
-    //
-    // pub fn sample_rate(mut self, value: ConstrainULong) -> Self {
-    //     self.sample_rate = Some(value);
-    //     self
-    // }
-    //
-    // pub fn sample_size(mut self, value: ConstrainULong) -> Self {
-    //     self.sample_size = Some(value);
-    //     self
-    // }
-    //
-    // // Deprecated field for volume
-    // pub fn volume(mut self, value: ConstrainDouble) -> Self {
-    //     self.volume = Some(value);
-    //     self
-    // }
+
+    pub fn auto_gain_control<T: IntoConstrainBool>(mut self, value: T) -> Self {
+        self.auto_gain_control = Some(value.into_constraint());
+        self
+    }
+
+    pub fn channel_count<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.channel_count = Some(value.into_constraint());
+        self
+    }
+
+    pub fn echo_cancellation<T: IntoConstrainBool>(mut self, value: T) -> Self {
+        self.echo_cancellation = Some(value.into_constraint());
+        self
+    }
+
+    pub fn noise_suppression<T: IntoConstrainBool>(mut self, value: T) -> Self {
+        self.noise_suppression = Some(value.into_constraint());
+        self
+    }
 }
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct VideoTrackConstraints {
-    pub device_id: Option<ConstrainDOMString>,
+    pub device_id: Option<ConstraintDOMString>,
 
-    // pub group_id: Option<&'static str>,  // Static string for group ID
+    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
+    // pub device_ids: Option<Vec<ConstrainDOMString>>,
 
-    pub facing_mode: Option<ConstrainFacingMode>,
-    pub frame_rate: Option<ConstrainDouble>,
-    pub height: Option<ConstrainULong>,
-    pub width: Option<ConstrainULong>,
-    pub viewport_offset_x: Option<ConstrainULong>,
-    pub viewport_offset_y: Option<ConstrainULong>,
-    pub viewport_height: Option<ConstrainULong>,
-    pub viewport_width: Option<ConstrainULong>,
+    pub facing_mode: Option<ConstraintFacingMode>,
+    pub frame_rate: Option<ConstraintDouble>,
+    pub height: Option<ConstraintULong>,
+    pub width: Option<ConstraintULong>,
+    pub viewport_offset_x: Option<ConstraintULong>,
+    pub viewport_offset_y: Option<ConstraintULong>,
+    pub viewport_height: Option<ConstraintULong>,
+    pub viewport_width: Option<ConstraintULong>,
 }
 
 impl VideoTrackConstraints {
 
-    // Constructor for a new instance
     pub fn new() -> Self {
         VideoTrackConstraints::default() // Start with default empty constraints
     }
 
-    pub fn device_id(mut self, value: &'static str) -> Self {
-        self.device_id = Some(ConstrainDOMString::new(Some(&value)));
+    pub fn device_id<T: IntoConstrainDOMString>(mut self, value: T) -> Self {
+        self.device_id = Some(value.into_constraint());
         self
     }
 
-    pub fn facing_mode(mut self, value: FacingMode) -> Self {
-        self.facing_mode = Some(ConstrainFacingMode::Single(Some(value)));
+    // TODO: implement array of device ids
+
+    // pub fn device_ids(mut self, values: Vec<&'static str>) -> Self {
+    //     let constraints = values
+    //       .into_iter()
+    //       .map(|value| ConstraintExactIdeal::Single(Some(value)))
+    //       .collect::<Vec<ConstraintDOMString>>();
+    //
+    //     self.device_ids = Some(constraints);
+    //     self
+    // }
+
+    pub fn facing_mode<T: IntoConstraintFacingMode>(mut self, value: T) -> Self {
+        self.facing_mode = Some(value.into_constraint());
         self
     }
 
-    pub fn facing_mode_range(mut self, exact: Option<FacingMode>, ideal: Option<FacingMode>) -> Self {
-        self.facing_mode = Some(Constrain::ExactIdeal { exact, ideal });
+    pub fn frame_rate<T: IntoConstraintDouble>(mut self, value: T) -> Self {
+        self.frame_rate = Some(value.into_constraint());
         self
     }
 
-    pub fn frame_rate(mut self, value: f64) -> Self {
-        self.frame_rate = Some(ConstrainDouble::new(Some(value)));
+    pub fn height<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.height = Some(value.into_constraint());
+        self
+    }
+    pub fn width<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.width = Some(value.into_constraint());
         self
     }
 
-    pub fn frame_rate_range(mut self, min: Option<f64>, max: Option<f64>, exact: Option<f64>, ideal: Option<f64>) -> Self {
-        self.frame_rate = Some(Constrain::Range { min, max, exact, ideal });
+    pub fn viewport_offset_x<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.viewport_offset_x = Some(value.into_constraint());
         self
     }
 
-    pub fn height(mut self, value: u32) -> Self {
-        self.height = Some(ConstrainULong::new(Some(value)));
+    pub fn viewport_offset_y<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.viewport_offset_y = Some(value.into_constraint());
         self
     }
 
-    pub fn height_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.height = Some(Constrain::Range { min, max, exact, ideal });
+    pub fn viewport_height<T: IntoConstrainULong >(mut self, value: T) -> Self {
+        self.viewport_height = Some(value.into_constraint());
         self
     }
 
-    pub fn width(mut self, value: u32) -> Self {
-        self.width = Some(ConstrainULong::new(Some(value)));
+    pub fn viewport_width<T: IntoConstrainULong>(mut self, value: T) -> Self {
+        self.viewport_width = Some(value.into_constraint());
         self
     }
 
-    pub fn width_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.width = Some(Constrain::Range { min, max, exact, ideal });
-        self
-    }
-
-    pub fn viewport_offset_x(mut self, value: u32) -> Self {
-        self.viewport_offset_x = Some(ConstrainULong::new(Some(value)));
-        self
-    }
-
-    pub fn viewport_offset_x_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.viewport_offset_x = Some(Constrain::Range { min, max, exact, ideal });
-        self
-    }
-
-    pub fn viewport_offset_y(mut self, value: u32) -> Self {
-        self.viewport_offset_y = Some(ConstrainULong::new(Some(value)));
-        self
-    }
-
-    pub fn viewport_offset_y_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.viewport_offset_y = Some(Constrain::Range { min, max, exact, ideal });
-        self
-    }
-
-    pub fn viewport_height(mut self, value: u32) -> Self {
-        self.viewport_height = Some(ConstrainULong::new(Some(value)));
-        self
-    }
-
-    pub fn viewport_height_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.viewport_height = Some(Constrain::Range { min, max, exact, ideal });
-        self
-    }
-
-    pub fn viewport_width(mut self, value: u32) -> Self {
-        self.viewport_width = Some(ConstrainULong::new(Some(value)));
-        self
-    }
-
-    pub fn viewport_width_range(mut self, min: Option<u32>, max: Option<u32>, exact: Option<u32>, ideal: Option<u32>) -> Self {
-        self.viewport_width = Some(Constrain::Range { min, max, exact, ideal });
-        self
-    }
 }
