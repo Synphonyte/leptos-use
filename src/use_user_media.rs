@@ -1,7 +1,7 @@
 use crate::core::MaybeRwSignal;
+use js_sys::{Object, Reflect};
 use leptos::*;
 use wasm_bindgen::{JsCast, JsValue};
-use js_sys::{Object, Reflect};
 
 /// Reactive [`mediaDevices.getUserMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) streaming.
 ///
@@ -182,22 +182,24 @@ async fn create_media(
             AudioConstraints::Constraints(a) => {
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
-
-                if let  Some(device_id) = a.device_id {
-
+                if let Some(device_id) = a.device_id {
                     audio_constraints.set_device_id(&JsValue::from(&device_id.to_jsvalue()));
                 }
                 if let Some(auto_gain_control) = a.auto_gain_control {
-                    audio_constraints.set_auto_gain_control(&JsValue::from(&auto_gain_control.to_jsvalue()));
+                    audio_constraints
+                        .set_auto_gain_control(&JsValue::from(&auto_gain_control.to_jsvalue()));
                 }
                 if let Some(channel_count) = a.channel_count {
-                    audio_constraints.set_channel_count(&JsValue::from(&channel_count.to_jsvalue()));
+                    audio_constraints
+                        .set_channel_count(&JsValue::from(&channel_count.to_jsvalue()));
                 }
                 if let Some(echo_cancellation) = a.echo_cancellation {
-                    audio_constraints.set_echo_cancellation(&JsValue::from(&echo_cancellation.to_jsvalue()));
+                    audio_constraints
+                        .set_echo_cancellation(&JsValue::from(&echo_cancellation.to_jsvalue()));
                 }
                 if let Some(noise_suppression) = a.noise_suppression {
-                    audio_constraints.set_noise_suppression(&JsValue::from(&noise_suppression.to_jsvalue()));
+                    audio_constraints
+                        .set_noise_suppression(&JsValue::from(&noise_suppression.to_jsvalue()));
                 }
 
                 // Not yet implemented
@@ -285,10 +287,7 @@ where
 #[derive(Clone, Copy, Debug)]
 pub enum ConstraintExactIdeal<T> {
     Single(Option<T>),
-    ExactIdeal {
-        exact: Option<T>,
-        ideal: Option<T>,
-    },
+    ExactIdeal { exact: Option<T>, ideal: Option<T> },
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -303,7 +302,6 @@ pub enum ConstraintRange<T> {
 }
 
 impl<T> ConstraintExactIdeal<T> {
-    
     pub fn default() -> Self {
         ConstraintExactIdeal::Single(None)
     }
@@ -387,7 +385,7 @@ where
 
 impl<T> Default for ConstraintExactIdeal<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintExactIdeal::Single(Some(T::default()))
@@ -396,27 +394,37 @@ where
 
 impl<T> Default for ConstraintRange<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintRange::Single(Some(T::default()))
     }
 }
 
-impl ConstraintFacingMode
-{
+impl ConstraintFacingMode {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            ConstraintExactIdeal::Single(value) => JsValue::from_str(value.clone().unwrap().as_str()),
+            ConstraintExactIdeal::Single(value) => {
+                JsValue::from_str(value.clone().unwrap().as_str())
+            }
             ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
-                
                 let obj = Object::new();
 
                 if let Some(exact_value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &JsValue::from_str(exact_value.as_str())).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("exact"),
+                        &JsValue::from_str(exact_value.as_str()),
+                    )
+                    .unwrap();
                 }
                 if let Some(ideal_value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &JsValue::from_str(ideal_value.as_str())).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("ideal"),
+                        &JsValue::from_str(ideal_value.as_str()),
+                    )
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -427,25 +435,42 @@ impl ConstraintFacingMode
 
 impl<T> ConstraintRange<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
             ConstraintRange::Single(value) => JsValue::from(value.clone().unwrap().into()),
-            ConstraintRange::Range { min, max, exact, ideal } => {
+            ConstraintRange::Range {
+                min,
+                max,
+                exact,
+                ideal,
+            } => {
                 let obj = Object::new();
 
                 if let Some(min_value) = min {
-                    Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into()).unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
+                        .unwrap();
                 }
                 if let Some(max_value) = max {
-                    Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into()).unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
+                        .unwrap();
                 }
                 if let Some(exact_value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &exact_value.clone().into()).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("exact"),
+                        &exact_value.clone().into(),
+                    )
+                    .unwrap();
                 }
                 if let Some(ideal_value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &ideal_value.clone().into()).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("ideal"),
+                        &ideal_value.clone().into(),
+                    )
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -456,7 +481,7 @@ where
 
 impl<T> ConstraintExactIdeal<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
@@ -465,10 +490,20 @@ where
                 let obj = Object::new();
 
                 if let Some(exact_value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &exact_value.clone().into()).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("exact"),
+                        &exact_value.clone().into(),
+                    )
+                    .unwrap();
                 }
                 if let Some(ideal_value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &ideal_value.clone().into()).unwrap();
+                    Reflect::set(
+                        &obj,
+                        &JsValue::from_str("ideal"),
+                        &ideal_value.clone().into(),
+                    )
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -637,18 +672,15 @@ impl IntoConstrainDOMString for ConstraintExactIdeal<&'static str> {
 pub struct AudioTrackConstraints {
     pub device_id: Option<ConstraintDOMString>,
 
-    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
+    // TODO: implement array of device ids
     // pub device_ids: Option<Vec<ConstrainDOMString>>,
-
     pub auto_gain_control: Option<ConstraintBool>,
     pub channel_count: Option<ConstraintULong>,
     pub echo_cancellation: Option<ConstraintBool>,
     pub noise_suppression: Option<ConstraintBool>,
-
 }
 
 impl AudioTrackConstraints {
-
     pub fn new() -> Self {
         AudioTrackConstraints::default()
     }
@@ -658,7 +690,7 @@ impl AudioTrackConstraints {
         self
     }
 
-    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
+    // TODO: implement array of device ids
 
     // pub fn device_ids(mut self, values: Vec<&'static str>) -> Self {
     //     let constraints = values
@@ -695,9 +727,8 @@ impl AudioTrackConstraints {
 pub struct VideoTrackConstraints {
     pub device_id: Option<ConstraintDOMString>,
 
-    // TODO: implement array of device ids. currently it is not compatible with Copy trait.
+    // TODO: implement array of device ids
     // pub device_ids: Option<Vec<ConstrainDOMString>>,
-
     pub facing_mode: Option<ConstraintFacingMode>,
     pub frame_rate: Option<ConstraintDouble>,
     pub height: Option<ConstraintULong>,
@@ -709,7 +740,6 @@ pub struct VideoTrackConstraints {
 }
 
 impl VideoTrackConstraints {
-
     pub fn new() -> Self {
         VideoTrackConstraints::default() // Start with default empty constraints
     }
@@ -760,7 +790,7 @@ impl VideoTrackConstraints {
         self
     }
 
-    pub fn viewport_height<T: IntoConstrainULong >(mut self, value: T) -> Self {
+    pub fn viewport_height<T: IntoConstrainULong>(mut self, value: T) -> Self {
         self.viewport_height = Some(value.into_constraint());
         self
     }
@@ -769,5 +799,4 @@ impl VideoTrackConstraints {
         self.viewport_width = Some(value.into_constraint());
         self
     }
-
 }
