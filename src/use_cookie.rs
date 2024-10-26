@@ -539,7 +539,6 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                             if let Ok(header_value) =
                                 HeaderValue::from_str(&cookie.encoded().to_string())
                             {
-                                println!("lululululu {:#?}\n", header_value);
                                 response_options.append_header(SET_COOKIE, header_value);
                             }
                         }
