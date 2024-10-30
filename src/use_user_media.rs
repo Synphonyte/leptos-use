@@ -1,4 +1,5 @@
 use crate::core::MaybeRwSignal;
+use default_struct_builder::DefaultBuilder;
 use js_sys::{Object, Reflect};
 use leptos::*;
 use wasm_bindgen::{JsCast, JsValue};
@@ -60,22 +61,27 @@ pub fn use_user_media_with_options(
 
     let (stream, set_stream) = create_signal(None::<Result<web_sys::MediaStream, JsValue>>);
 
-    let _start = move || async move {
-        #[cfg(not(feature = "ssr"))]
-        {
-            if stream.get_untracked().is_some() {
-                return;
+    let _start = {
+        let audio = audio.clone();
+        let video = video.clone();
+
+        move || async move {
+            #[cfg(not(feature = "ssr"))]
+            {
+                if stream.get_untracked().is_some() {
+                    return;
+                }
+
+                let stream = create_media(Some(video), Some(audio)).await;
+
+                set_stream.update(|s| *s = Some(stream));
             }
 
-            let stream = create_media(Some(video), Some(audio)).await;
-
-            set_stream.update(|s| *s = Some(stream));
-        }
-
-        #[cfg(feature = "ssr")]
-        {
-            let _ = video;
-            let _ = audio;
+            #[cfg(feature = "ssr")]
+            {
+                let _ = video;
+                let _ = audio;
+            }
         }
     };
 
@@ -89,17 +95,23 @@ pub fn use_user_media_with_options(
         set_stream.set(None);
     };
 
-    let start = move || {
-        #[cfg(not(feature = "ssr"))]
-        {
-            spawn_local(async move {
-                _start().await;
-                stream.with_untracked(move |stream| {
-                    if let Some(Ok(_)) = stream {
-                        set_enabled.set(true);
+    let start = {
+        let _start = _start.clone();
+        move || {
+            #[cfg(not(feature = "ssr"))]
+            {
+                spawn_local({
+                    let _start = _start.clone();
+                    async move {
+                        _start().await;
+                        stream.with_untracked(move |stream| {
+                            if let Some(Ok(_)) = stream {
+                                set_enabled.set(true);
+                            }
+                        });
                     }
                 });
-            });
+            }
         }
     };
 
@@ -108,19 +120,24 @@ pub fn use_user_media_with_options(
         set_enabled.set(false);
     };
 
-    let _ = watch(
-        move || enabled.get(),
-        move |enabled, _, _| {
-            if *enabled {
-                spawn_local(async move {
-                    _start().await;
-                });
-            } else {
-                _stop();
-            }
-        },
-        true,
-    );
+    let _ = {
+        watch(
+            move || enabled.get(),
+            move |enabled, _, _| {
+                if *enabled {
+                    spawn_local({
+                        let _start = _start.clone();
+                        async move {
+                            _start().await;
+                        }
+                    });
+                } else {
+                    _stop();
+                }
+            },
+            true,
+        )
+    };
     UseUserMediaReturn {
         stream: stream.into(),
         start,
@@ -139,29 +156,29 @@ async fn create_media(
     use crate::use_window::use_window;
 
     let media = use_window()
-      .navigator()
-      .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
-      .and_then(|n| n.media_devices())?;
+        .navigator()
+        .ok_or_else(|| JsValue::from_str("Failed to access window.navigator"))
+        .and_then(|n| n.media_devices())?;
 
     let constraints = web_sys::MediaStreamConstraints::new();
     if let Some(video_shadow_constraints) = video {
         match video_shadow_constraints {
             VideoConstraints::Bool(b) => constraints.set_video(&JsValue::from(b)),
             VideoConstraints::Constraints(VideoTrackConstraints {
-                                              device_id,
-                                              facing_mode,
-                                              frame_rate,
-                                              height,
-                                              width,
-                                              viewport_height,
-                                              viewport_width,
-                                              viewport_offset_x,
-                                              viewport_offset_y
-                                          }) => {
+                device_id,
+                facing_mode,
+                frame_rate,
+                height,
+                width,
+                viewport_height,
+                viewport_width,
+                viewport_offset_x,
+                viewport_offset_y,
+            }) => {
                 let video_constraints = web_sys::MediaTrackConstraints::new();
 
                 if let Some(value) = device_id {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_device_id(&value.to_jsvalue());
                 }
 
                 if let Some(value) = facing_mode {
@@ -169,30 +186,30 @@ async fn create_media(
                 }
 
                 if let Some(value) = frame_rate {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_frame_rate(&value.to_jsvalue());
                 }
 
                 if let Some(value) = height {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_height(&value.to_jsvalue());
                 }
 
                 if let Some(value) = width {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_width(&value.to_jsvalue());
                 }
 
                 if let Some(value) = viewport_height {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_viewport_height(&value.to_jsvalue());
                 }
 
-                if let Some(value) = viewport_height {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                if let Some(value) = viewport_width {
+                    video_constraints.set_viewport_width(&value.to_jsvalue());
                 }
                 if let Some(value) = viewport_offset_x {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_viewport_offset_x(&value.to_jsvalue());
                 }
 
                 if let Some(value) = viewport_offset_y {
-                    video_constraints.set_facing_mode(&value.to_jsvalue());
+                    video_constraints.set_viewport_offset_y(&value.to_jsvalue());
                 }
 
                 constraints.set_video(&JsValue::from(video_constraints));
@@ -203,32 +220,28 @@ async fn create_media(
         match audio_shadow_constraints {
             AudioConstraints::Bool(b) => constraints.set_audio(&JsValue::from(b)),
             AudioConstraints::Constraints(AudioTrackConstraints {
-                                              device_id,
-                                              auto_gain_control,
-                                              channel_count,
-                                              echo_cancellation,
-                                              noise_suppression
-                                          }) => {
+                device_id,
+                auto_gain_control,
+                channel_count,
+                echo_cancellation,
+                noise_suppression
+            }) => {
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
                 if let Some(value) = device_id {
                     audio_constraints.set_device_id(&JsValue::from(&value.to_jsvalue()));
                 }
                 if let Some(value) = auto_gain_control {
-                    audio_constraints
-                      .set_auto_gain_control(&JsValue::from(&value.to_jsvalue()));
+                    audio_constraints.set_auto_gain_control(&JsValue::from(&value.to_jsvalue()));
                 }
                 if let Some(value) = channel_count {
-                    audio_constraints
-                      .set_channel_count(&JsValue::from(&value.to_jsvalue()));
+                    audio_constraints.set_channel_count(&JsValue::from(&value.to_jsvalue()));
                 }
                 if let Some(value) = echo_cancellation {
-                    audio_constraints
-                      .set_echo_cancellation(&JsValue::from(&value.to_jsvalue()));
+                    audio_constraints.set_echo_cancellation(&JsValue::from(&value.to_jsvalue()));
                 }
                 if let Some(value) = noise_suppression {
-                    audio_constraints
-                      .set_noise_suppression(&JsValue::from(&value.to_jsvalue()));
+                    audio_constraints.set_noise_suppression(&JsValue::from(&value.to_jsvalue()));
                 }
 
                 constraints.set_audio(&JsValue::from(audio_constraints));
@@ -247,15 +260,17 @@ async fn create_media(
 /// Either or both constraints must be specified.
 /// If the browser cannot find all media tracks with the specified types that meet the constraints given,
 /// then the returned promise is rejected with `NotFoundError`
-#[derive(Clone, Copy, Debug)]
+#[derive(DefaultBuilder, Clone, Debug)]
 pub struct UseUserMediaOptions {
     /// If the stream is enabled. Defaults to `false`.
     enabled: MaybeRwSignal<bool>,
     /// Constraint parameter describing video media type requested
     /// The default value is `false`.
+    #[builder(into)]
     video: VideoConstraints,
     /// Constraint parameter describing audio media type requested
     /// The default value is `false`.
+    #[builder(into)]
     audio: AudioConstraints,
 }
 
@@ -273,8 +288,8 @@ impl Default for UseUserMediaOptions {
 #[derive(Clone)]
 pub struct UseUserMediaReturn<StartFn, StopFn>
 where
-  StartFn: Fn() + Clone,
-  StopFn: Fn() + Clone,
+    StartFn: Fn() + Clone,
+    StopFn: Fn() + Clone,
 {
     /// The current [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) if it exists.
     /// Initially this is `None` until `start` resolved successfully.
@@ -313,6 +328,12 @@ pub enum ConstraintRange<T> {
     },
 }
 
+#[derive(Clone, Debug)]
+pub enum ConstraintDeviceId {
+    Single(Option<String>),
+    Multiple(Vec<String>),
+}
+
 impl<T> ConstraintExactIdeal<T> {
     pub fn default() -> Self {
         ConstraintExactIdeal::Single(None)
@@ -345,7 +366,7 @@ impl<T> ConstraintExactIdeal<T> {
 
 impl<T> ConstraintRange<T>
 where
-  T: Clone + std::fmt::Debug,
+    T: Clone + std::fmt::Debug,
 {
     pub fn new(value: Option<T>) -> Self {
         ConstraintRange::Single(value)
@@ -397,7 +418,7 @@ where
 
 impl<T> Default for ConstraintExactIdeal<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintExactIdeal::Single(Some(T::default()))
@@ -406,7 +427,7 @@ where
 
 impl<T> Default for ConstraintRange<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintRange::Single(Some(T::default()))
@@ -428,7 +449,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("exact"),
                         &JsValue::from_str(value.as_str()),
                     )
-                      .unwrap();
+                    .unwrap();
                 }
                 if let Some(value) = ideal {
                     Reflect::set(
@@ -436,7 +457,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("ideal"),
                         &JsValue::from_str(value.as_str()),
                     )
-                      .unwrap();
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -447,7 +468,7 @@ impl ConstraintFacingMode {
 
 impl<T> ConstraintRange<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
@@ -462,27 +483,17 @@ where
 
                 if let Some(min_value) = min {
                     Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
-                      .unwrap();
+                        .unwrap();
                 }
                 if let Some(max_value) = max {
                     Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
-                      .unwrap();
+                        .unwrap();
                 }
                 if let Some(value) = exact {
-                    Reflect::set(
-                        &obj,
-                        &JsValue::from_str("exact"),
-                        &value.clone().into(),
-                    )
-                      .unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
                 }
                 if let Some(value) = ideal {
-                    Reflect::set(
-                        &obj,
-                        &JsValue::from_str("ideal"),
-                        &value.clone().into(),
-                    )
-                      .unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
                 }
 
                 JsValue::from(obj)
@@ -493,7 +504,7 @@ where
 
 impl<T> ConstraintExactIdeal<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
@@ -502,20 +513,10 @@ where
                 let obj = Object::new();
 
                 if let Some(value) = exact {
-                    Reflect::set(
-                        &obj,
-                        &JsValue::from_str("exact"),
-                        &value.clone().into(),
-                    )
-                      .unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
                 }
                 if let Some(value) = ideal {
-                    Reflect::set(
-                        &obj,
-                        &JsValue::from_str("ideal"),
-                        &value.clone().into(),
-                    )
-                      .unwrap();
+                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
                 }
 
                 JsValue::from(obj)
@@ -524,12 +525,18 @@ where
     }
 }
 
+impl ConstraintDeviceId {
+    pub fn to_jsvalue(&self) -> JsValue {
+        match self {
+            ConstraintDeviceId::Single(value) => JsValue::from(value.clone().unwrap()),
+            ConstraintDeviceId::Multiple(value) => JsValue::from(value.clone()),
+        }
+    }
+}
+
 pub type ConstraintDouble = ConstraintRange<f64>;
 pub type ConstraintULong = ConstraintRange<u32>;
-
 pub type ConstraintBool = ConstraintExactIdeal<bool>;
-
-pub type ConstraintDOMString = ConstraintExactIdeal<&'static str>; // TODO: implement String
 
 pub type ConstraintFacingMode = ConstraintExactIdeal<FacingMode>;
 
@@ -552,140 +559,100 @@ impl FacingMode {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum AudioConstraints {
     Bool(bool),
     Constraints(AudioTrackConstraints),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum VideoConstraints {
     Bool(bool),
     Constraints(VideoTrackConstraints),
 }
 
-impl UseUserMediaOptions {
-    pub fn video<T>(mut self, input: T) -> Self
-    where
-      T: Into<VideoConstraints>,
-    {
-        self.video = input.into();
-        self
-    }
-
-    pub fn audio<T>(mut self, input: T) -> Self
-    where
-      T: Into<AudioConstraints>,
-    {
-        self.audio = input.into();
-        self
+impl From<bool> for VideoConstraints {
+    fn from(value: bool) -> Self {
+        VideoConstraints::Bool(value)
     }
 }
 
-impl Into<VideoConstraints> for bool {
-    fn into(self) -> VideoConstraints {
-        VideoConstraints::Bool(self)
+impl From<VideoTrackConstraints> for VideoConstraints {
+    fn from(value: VideoTrackConstraints) -> Self {
+        VideoConstraints::Constraints(value)
     }
 }
 
-impl Into<VideoConstraints> for VideoTrackConstraints {
-    fn into(self) -> VideoConstraints {
-        VideoConstraints::Constraints(self)
+impl From<bool> for AudioConstraints {
+    fn from(value: bool) -> Self {
+        AudioConstraints::Bool(value)
     }
 }
 
-impl Into<AudioConstraints> for bool {
-    fn into(self) -> AudioConstraints {
-        AudioConstraints::Bool(self)
+impl From<AudioTrackConstraints> for AudioConstraints {
+    fn from(value: AudioTrackConstraints) -> Self {
+        AudioConstraints::Constraints(value)
     }
 }
 
-impl Into<AudioConstraints> for AudioTrackConstraints {
-    fn into(self) -> AudioConstraints {
-        AudioConstraints::Constraints(self)
+impl From<FacingMode> for ConstraintFacingMode {
+    fn from(value: FacingMode) -> Self {
+        ConstraintFacingMode::Single(Some(value)) // Wrap FacingMode into the Single variant
     }
 }
 
-pub trait IntoConstraintFacingMode {
-    fn into_constraint(self) -> ConstraintFacingMode;
-}
-
-impl IntoConstraintFacingMode for FacingMode {
-    fn into_constraint(self) -> ConstraintFacingMode {
-        ConstraintExactIdeal::Single(Some(self))
+impl From<f64> for ConstraintRange<f64> {
+    fn from(value: f64) -> Self {
+        ConstraintRange::Single(Some(value)) // Wrap `f64` in the `Single` variant
     }
 }
 
-impl IntoConstraintFacingMode for ConstraintExactIdeal<FacingMode> {
-    fn into_constraint(self) -> ConstraintFacingMode {
-        self
+impl From<u32> for ConstraintRange<u32> {
+    fn from(value: u32) -> Self {
+        ConstraintRange::Single(Some(value)) // Wrap `u32` in the `Single` variant
     }
 }
 
-pub trait IntoConstraintDouble {
-    fn into_constraint(self) -> ConstraintDouble;
-}
-
-impl IntoConstraintDouble for f64 {
-    fn into_constraint(self) -> ConstraintDouble {
-        ConstraintRange::Single(Some(self))
-    }
-}
-impl IntoConstraintDouble for ConstraintRange<f64> {
-    fn into_constraint(self) -> ConstraintDouble {
-        self
+impl From<bool> for ConstraintExactIdeal<bool> {
+    fn from(value: bool) -> Self {
+        ConstraintExactIdeal::Single(Some(value)) // Wrap `bool` in the `Single` variant
     }
 }
 
-pub trait IntoConstrainULong {
-    fn into_constraint(self) -> ConstraintULong;
-}
-impl IntoConstrainULong for u32 {
-    fn into_constraint(self) -> ConstraintULong {
-        ConstraintRange::Single(Some(self))
-    }
-}
-impl IntoConstrainULong for ConstraintRange<u32> {
-    fn into_constraint(self) -> ConstraintULong {
-        self
+impl From<&'static str> for ConstraintExactIdeal<&'static str> {
+    fn from(value: &'static str) -> Self {
+        ConstraintExactIdeal::Single(Some(value)) // Wrap `&'static str` in the `Single` variant
     }
 }
 
-pub trait IntoConstrainBool {
-    fn into_constraint(self) -> ConstraintBool;
+pub trait IntoDeviceIds<M> {
+    fn into_device_ids(self) -> ConstraintDeviceId;
 }
 
-impl IntoConstrainBool for bool {
-    fn into_constraint(self) -> ConstraintBool {
-        ConstraintExactIdeal::Single(Some(self))
-    }
-}
-impl IntoConstrainBool for ConstraintExactIdeal<bool> {
-    fn into_constraint(self) -> ConstraintBool {
-        self
+impl<T> IntoDeviceIds<String> for T
+where
+    T: Into<String>,
+{
+    fn into_device_ids(self) -> ConstraintDeviceId {
+        ConstraintDeviceId::Single(Some(self.into()))
     }
 }
 
-pub trait IntoConstrainDOMString {
-    fn into_constraint(self) -> ConstraintDOMString;
-}
-impl IntoConstrainDOMString for &'static str {
-    fn into_constraint(self) -> ConstraintDOMString {
-        ConstraintExactIdeal::Single(Some(self))
-    }
-}
-impl IntoConstrainDOMString for ConstraintExactIdeal<&'static str> {
-    fn into_constraint(self) -> ConstraintDOMString {
-        self
+pub struct VecMarker;
+
+impl<T, I> IntoDeviceIds<VecMarker> for T
+where
+    T: IntoIterator<Item = I>,
+    I: Into<String>,
+{
+    fn into_device_ids(self) -> ConstraintDeviceId {
+        ConstraintDeviceId::Multiple(self.into_iter().map(Into::into).collect())
     }
 }
 
-#[derive(Default, Copy, Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct AudioTrackConstraints {
-    pub device_id: Option<ConstraintDOMString>,
-
-    // TODO: implement array of device ids
-    // pub device_ids: Option<Vec<ConstrainDOMString>>,
+    pub device_id: Option<ConstraintDeviceId>,
     pub auto_gain_control: Option<ConstraintBool>,
     pub channel_count: Option<ConstraintULong>,
     pub echo_cancellation: Option<ConstraintBool>,
@@ -697,47 +664,35 @@ impl AudioTrackConstraints {
         AudioTrackConstraints::default()
     }
 
-    pub fn device_id<T: IntoConstrainDOMString>(mut self, value: T) -> Self {
-        self.device_id = Some(value.into_constraint());
+    pub fn device_id<M>(mut self, value: impl IntoDeviceIds<M>) -> Self {
+        self.device_id = Some(value.into_device_ids());
         self
     }
 
-    // TODO: implement array of device ids
-
-    // pub fn device_ids(mut self, values: Vec<&'static str>) -> Self {
-    //     let constraints = values
-    //       .into_iter()
-    //       .map(|value| Constrain::Single(Some(value)))
-    //       .collect::<Vec<ConstrainDOMString>>();
-    //
-    //     self.device_ids = Some(constraints);
-    //     self
-    // }
-
-    pub fn auto_gain_control<T: IntoConstrainBool>(mut self, value: T) -> Self {
-        self.auto_gain_control = Some(value.into_constraint());
+    pub fn auto_gain_control<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
+        self.auto_gain_control = Some(value.into());
         self
     }
 
-    pub fn channel_count<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.channel_count = Some(value.into_constraint());
+    pub fn channel_count<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.channel_count = Some(value.into());
         self
     }
 
-    pub fn echo_cancellation<T: IntoConstrainBool>(mut self, value: T) -> Self {
-        self.echo_cancellation = Some(value.into_constraint());
+    pub fn echo_cancellation<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
+        self.echo_cancellation = Some(value.into());
         self
     }
 
-    pub fn noise_suppression<T: IntoConstrainBool>(mut self, value: T) -> Self {
-        self.noise_suppression = Some(value.into_constraint());
+    pub fn noise_suppression<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
+        self.noise_suppression = Some(value.into());
         self
     }
 }
 
-#[derive(Default, Copy, Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct VideoTrackConstraints {
-    pub device_id: Option<ConstraintDOMString>,
+    pub device_id: Option<ConstraintDeviceId>,
 
     // TODO: implement array of device ids
     // pub device_ids: Option<Vec<ConstrainDOMString>>,
@@ -756,8 +711,8 @@ impl VideoTrackConstraints {
         VideoTrackConstraints::default() // Start with default empty constraints
     }
 
-    pub fn device_id<T: IntoConstrainDOMString>(mut self, value: T) -> Self {
-        self.device_id = Some(value.into_constraint());
+    pub fn device_id<M>(mut self, value: impl IntoDeviceIds<M>) -> Self {
+        self.device_id = Some(value.into_device_ids());
         self
     }
 
@@ -773,42 +728,42 @@ impl VideoTrackConstraints {
     //     self
     // }
 
-    pub fn facing_mode<T: IntoConstraintFacingMode>(mut self, value: T) -> Self {
-        self.facing_mode = Some(value.into_constraint());
+    pub fn facing_mode<T: Into<ConstraintFacingMode>>(mut self, value: T) -> Self {
+        self.facing_mode = Some(value.into());
         self
     }
 
-    pub fn frame_rate<T: IntoConstraintDouble>(mut self, value: T) -> Self {
-        self.frame_rate = Some(value.into_constraint());
+    pub fn frame_rate<T: Into<ConstraintDouble>>(mut self, value: T) -> Self {
+        self.frame_rate = Some(value.into());
         self
     }
 
-    pub fn height<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.height = Some(value.into_constraint());
+    pub fn height<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.height = Some(value.into());
         self
     }
-    pub fn width<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.width = Some(value.into_constraint());
-        self
-    }
-
-    pub fn viewport_offset_x<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.viewport_offset_x = Some(value.into_constraint());
+    pub fn width<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.width = Some(value.into());
         self
     }
 
-    pub fn viewport_offset_y<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.viewport_offset_y = Some(value.into_constraint());
+    pub fn viewport_offset_x<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.viewport_offset_x = Some(value.into());
         self
     }
 
-    pub fn viewport_height<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.viewport_height = Some(value.into_constraint());
+    pub fn viewport_offset_y<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.viewport_offset_y = Some(value.into());
         self
     }
 
-    pub fn viewport_width<T: IntoConstrainULong>(mut self, value: T) -> Self {
-        self.viewport_width = Some(value.into_constraint());
+    pub fn viewport_height<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.viewport_height = Some(value.into());
+        self
+    }
+
+    pub fn viewport_width<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
+        self.viewport_width = Some(value.into());
         self
     }
 }
