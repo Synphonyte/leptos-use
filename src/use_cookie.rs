@@ -362,7 +362,7 @@ where
         if !readonly {
             let cookie_name = cookie_name.to_owned();
 
-            create_isomorphic_effect(move |_| {
+            create_isomorphic_effect(move |previous_effect_value| {
                 let value = cookie
                     .with(|cookie| {
                         cookie.as_ref().map(|cookie| {
@@ -373,27 +373,31 @@ where
                     })
                     .flatten();
 
-                jar.update_value({
-                    let domain = domain.clone();
-                    let path = path.clone();
-                    let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
+                if previous_effect_value.is_some() {
+                    jar.update_value({
+                        let domain = domain.clone();
+                        let path = path.clone();
+                        let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
 
-                    |jar| {
-                        write_server_cookie(
-                            &cookie_name,
-                            value,
-                            jar,
-                            max_age,
-                            expires,
-                            domain,
-                            path,
-                            same_site,
-                            secure,
-                            http_only,
-                            ssr_set_cookie,
-                        )
-                    }
-                });
+                        |jar| {
+                            write_server_cookie(
+                                &cookie_name,
+                                value,
+                                jar,
+                                max_age,
+                                expires,
+                                domain,
+                                path,
+                                same_site,
+                                secure,
+                                http_only,
+                                ssr_set_cookie,
+                            )
+                        }
+                    });
+                }
+
+                Some(())
             });
         }
     }
@@ -535,7 +539,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                             if let Ok(header_value) =
                                 HeaderValue::from_str(&cookie.encoded().to_string())
                             {
-                                response_options.insert_header(SET_COOKIE, header_value);
+                                response_options.append_header(SET_COOKIE, header_value);
                             }
                         }
                     }
@@ -543,7 +547,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                     {
                         if let Some(response_options) = use_context::<ResponseOptions>() {
                             let header_value = cookie.encoded().to_string().as_bytes().to_vec();
-                            response_options.insert_header(SET_COOKIE.as_str(), header_value);
+                            response_options.append_header(SET_COOKIE.as_str(), &header_value);
                         }
                     }
                 }
