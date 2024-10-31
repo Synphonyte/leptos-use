@@ -154,6 +154,7 @@ async fn create_media(
 ) -> Result<web_sys::MediaStream, JsValue> {
     use crate::js_fut;
     use crate::use_window::use_window;
+    use js_sys::Array;
 
     let media = use_window()
         .navigator()
@@ -177,8 +178,8 @@ async fn create_media(
             }) => {
                 let video_constraints = web_sys::MediaTrackConstraints::new();
 
-                if let Some(value) = device_id {
-                    video_constraints.set_device_id(&value.to_jsvalue());
+                if device_id.len() > 0 {
+                    video_constraints.set_device_id(&Array::from_iter(device_id.into_iter().map(JsValue::from)).into());
                 }
 
                 if let Some(value) = facing_mode {
@@ -228,8 +229,8 @@ async fn create_media(
             }) => {
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
-                if let Some(value) = device_id {
-                    audio_constraints.set_device_id(&JsValue::from(&value.to_jsvalue()));
+                if device_id.len() > 0 {
+                    audio_constraints.set_device_id(&Array::from_iter(device_id.into_iter().map(JsValue::from)).into());
                 }
                 if let Some(value) = auto_gain_control {
                     audio_constraints.set_auto_gain_control(&JsValue::from(&value.to_jsvalue()));
@@ -311,27 +312,19 @@ where
     pub set_enabled: WriteSignal<bool>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum ConstraintExactIdeal<T> {
     Single(Option<T>),
     ExactIdeal { exact: Option<T>, ideal: Option<T> },
 }
 
-#[derive(Clone, Copy, Debug)]
-pub enum ConstraintRange<T> {
-    Single(Option<T>),
-    Range {
-        min: Option<T>,
-        max: Option<T>,
-        exact: Option<T>,
-        ideal: Option<T>,
-    },
-}
-
-#[derive(Clone, Debug)]
-pub enum ConstraintDeviceId {
-    Single(Option<String>),
-    Multiple(Vec<String>),
+impl<T> Default for ConstraintExactIdeal<T>
+where
+  T: Default,
+{
+    fn default() -> Self {
+        ConstraintExactIdeal::Single(Some(T::default()))
+    }
 }
 
 impl<T> ConstraintExactIdeal<T> {
@@ -361,6 +354,55 @@ impl<T> ConstraintExactIdeal<T> {
             _ => {}
         }
         self
+    }
+}
+
+impl<T> ConstraintExactIdeal<T>
+where
+  T: Into<JsValue> + Clone,
+{
+    pub fn to_jsvalue(&self) -> JsValue {
+        match self {
+            ConstraintExactIdeal::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
+                let obj = Object::new();
+
+                if let Some(value) = exact {
+                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
+                }
+                if let Some(value) = ideal {
+                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
+                }
+
+                JsValue::from(obj)
+            }
+        }
+    }
+}
+
+impl From<&'static str> for ConstraintExactIdeal<&'static str> {
+    fn from(value: &'static str) -> Self {
+        ConstraintExactIdeal::Single(Some(value))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum ConstraintRange<T> {
+    Single(Option<T>),
+    Range {
+        min: Option<T>,
+        max: Option<T>,
+        exact: Option<T>,
+        ideal: Option<T>,
+    },
+}
+
+impl<T> Default for ConstraintRange<T>
+where
+  T: Default,
+{
+    fn default() -> Self {
+        ConstraintRange::Single(Some(T::default()))
     }
 }
 
@@ -416,21 +458,90 @@ where
     }
 }
 
-impl<T> Default for ConstraintExactIdeal<T>
+impl<T> ConstraintRange<T>
 where
-    T: Default,
+  T: Into<JsValue> + Clone,
 {
-    fn default() -> Self {
-        ConstraintExactIdeal::Single(Some(T::default()))
+    pub fn to_jsvalue(&self) -> JsValue {
+        match self {
+            ConstraintRange::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintRange::Range {
+                min,
+                max,
+                exact,
+                ideal,
+            } => {
+                let obj = Object::new();
+
+                if let Some(min_value) = min {
+                    Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
+                      .unwrap();
+                }
+                if let Some(max_value) = max {
+                    Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
+                      .unwrap();
+                }
+                if let Some(value) = exact {
+                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
+                }
+                if let Some(value) = ideal {
+                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
+                }
+
+                JsValue::from(obj)
+            }
+        }
     }
 }
 
-impl<T> Default for ConstraintRange<T>
-where
-    T: Default,
-{
-    fn default() -> Self {
-        ConstraintRange::Single(Some(T::default()))
+impl From<f64> for ConstraintDouble {
+    fn from(value: f64) -> Self {
+        ConstraintRange::Single(Some(value))
+    }
+}
+
+impl From<u32> for ConstraintULong {
+    fn from(value: u32) -> Self {
+        ConstraintRange::Single(Some(value))
+    }
+}
+
+pub type ConstraintBool = ConstraintExactIdeal<bool>;
+
+impl From<bool> for ConstraintBool {
+    fn from(value: bool) -> Self {
+        ConstraintExactIdeal::Single(Some(value))
+    }
+}
+
+pub type ConstraintDouble = ConstraintRange<f64>;
+pub type ConstraintULong = ConstraintRange<u32>;
+
+#[derive(Clone, Copy, Debug)]
+pub enum FacingMode {
+    User,
+    Environment,
+    Left,
+    Right,
+}
+
+
+impl FacingMode {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            FacingMode::User => "user",
+            FacingMode::Environment => "environment",
+            FacingMode::Left => "left",
+            FacingMode::Right => "right",
+        }
+    }
+}
+
+pub type ConstraintFacingMode = ConstraintExactIdeal<FacingMode>;
+
+impl From<FacingMode> for ConstraintFacingMode {
+    fn from(value: FacingMode) -> Self {
+        ConstraintFacingMode::Single(Some(value))
     }
 }
 
@@ -449,7 +560,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("exact"),
                         &JsValue::from_str(value.as_str()),
                     )
-                    .unwrap();
+                      .unwrap();
                 }
                 if let Some(value) = ideal {
                     Reflect::set(
@@ -457,104 +568,11 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("ideal"),
                         &JsValue::from_str(value.as_str()),
                     )
-                    .unwrap();
+                      .unwrap();
                 }
 
                 JsValue::from(obj)
             }
-        }
-    }
-}
-
-impl<T> ConstraintRange<T>
-where
-    T: Into<JsValue> + Clone,
-{
-    pub fn to_jsvalue(&self) -> JsValue {
-        match self {
-            ConstraintRange::Single(value) => JsValue::from(value.clone().unwrap().into()),
-            ConstraintRange::Range {
-                min,
-                max,
-                exact,
-                ideal,
-            } => {
-                let obj = Object::new();
-
-                if let Some(min_value) = min {
-                    Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
-                        .unwrap();
-                }
-                if let Some(max_value) = max {
-                    Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
-                        .unwrap();
-                }
-                if let Some(value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
-                }
-                if let Some(value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
-                }
-
-                JsValue::from(obj)
-            }
-        }
-    }
-}
-
-impl<T> ConstraintExactIdeal<T>
-where
-    T: Into<JsValue> + Clone,
-{
-    pub fn to_jsvalue(&self) -> JsValue {
-        match self {
-            ConstraintExactIdeal::Single(value) => JsValue::from(value.clone().unwrap().into()),
-            ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
-                let obj = Object::new();
-
-                if let Some(value) = exact {
-                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
-                }
-                if let Some(value) = ideal {
-                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
-                }
-
-                JsValue::from(obj)
-            }
-        }
-    }
-}
-
-impl ConstraintDeviceId {
-    pub fn to_jsvalue(&self) -> JsValue {
-        match self {
-            ConstraintDeviceId::Single(value) => JsValue::from(value.clone().unwrap()),
-            ConstraintDeviceId::Multiple(value) => JsValue::from(value.clone()),
-        }
-    }
-}
-
-pub type ConstraintDouble = ConstraintRange<f64>;
-pub type ConstraintULong = ConstraintRange<u32>;
-pub type ConstraintBool = ConstraintExactIdeal<bool>;
-
-pub type ConstraintFacingMode = ConstraintExactIdeal<FacingMode>;
-
-#[derive(Clone, Copy, Debug)]
-pub enum FacingMode {
-    User,
-    Environment,
-    Left,
-    Right,
-}
-
-impl FacingMode {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            FacingMode::User => "user",
-            FacingMode::Environment => "environment",
-            FacingMode::Left => "left",
-            FacingMode::Right => "right",
         }
     }
 }
@@ -563,6 +581,18 @@ impl FacingMode {
 pub enum AudioConstraints {
     Bool(bool),
     Constraints(AudioTrackConstraints),
+}
+
+impl From<bool> for AudioConstraints {
+    fn from(value: bool) -> Self {
+        AudioConstraints::Bool(value)
+    }
+}
+
+impl From<AudioTrackConstraints> for AudioConstraints {
+    fn from(value: AudioTrackConstraints) -> Self {
+        AudioConstraints::Constraints(value)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -583,58 +613,16 @@ impl From<VideoTrackConstraints> for VideoConstraints {
     }
 }
 
-impl From<bool> for AudioConstraints {
-    fn from(value: bool) -> Self {
-        AudioConstraints::Bool(value)
-    }
-}
-
-impl From<AudioTrackConstraints> for AudioConstraints {
-    fn from(value: AudioTrackConstraints) -> Self {
-        AudioConstraints::Constraints(value)
-    }
-}
-
-impl From<FacingMode> for ConstraintFacingMode {
-    fn from(value: FacingMode) -> Self {
-        ConstraintFacingMode::Single(Some(value)) // Wrap FacingMode into the Single variant
-    }
-}
-
-impl From<f64> for ConstraintRange<f64> {
-    fn from(value: f64) -> Self {
-        ConstraintRange::Single(Some(value)) // Wrap `f64` in the `Single` variant
-    }
-}
-
-impl From<u32> for ConstraintRange<u32> {
-    fn from(value: u32) -> Self {
-        ConstraintRange::Single(Some(value)) // Wrap `u32` in the `Single` variant
-    }
-}
-
-impl From<bool> for ConstraintExactIdeal<bool> {
-    fn from(value: bool) -> Self {
-        ConstraintExactIdeal::Single(Some(value)) // Wrap `bool` in the `Single` variant
-    }
-}
-
-impl From<&'static str> for ConstraintExactIdeal<&'static str> {
-    fn from(value: &'static str) -> Self {
-        ConstraintExactIdeal::Single(Some(value)) // Wrap `&'static str` in the `Single` variant
-    }
-}
-
 pub trait IntoDeviceIds<M> {
-    fn into_device_ids(self) -> ConstraintDeviceId;
+    fn into_device_ids(self) -> Vec<String>;
 }
 
 impl<T> IntoDeviceIds<String> for T
 where
     T: Into<String>,
 {
-    fn into_device_ids(self) -> ConstraintDeviceId {
-        ConstraintDeviceId::Single(Some(self.into()))
+    fn into_device_ids(self) -> Vec<String> {
+        vec![self.into()]
     }
 }
 
@@ -642,21 +630,27 @@ pub struct VecMarker;
 
 impl<T, I> IntoDeviceIds<VecMarker> for T
 where
-    T: IntoIterator<Item = I>,
-    I: Into<String>,
+  T: IntoIterator<Item = I>,
+  I: Into<String>,
 {
-    fn into_device_ids(self) -> ConstraintDeviceId {
-        ConstraintDeviceId::Multiple(self.into_iter().map(Into::into).collect())
+    fn into_device_ids(self) -> Vec<String> {
+        self.into_iter().map(Into::into).collect()
     }
 }
 
-#[derive(Default, Clone, Debug)]
+#[derive(DefaultBuilder, Default, Clone, Debug)]
 pub struct AudioTrackConstraints {
-    pub device_id: Option<ConstraintDeviceId>,
-    pub auto_gain_control: Option<ConstraintBool>,
-    pub channel_count: Option<ConstraintULong>,
-    pub echo_cancellation: Option<ConstraintBool>,
-    pub noise_suppression: Option<ConstraintBool>,
+    #[builder(skip)]
+    device_id: Vec<String>,
+
+    #[builder(into)]
+    auto_gain_control: Option<ConstraintBool>,
+    #[builder(into)]
+    channel_count: Option<ConstraintULong>,
+    #[builder(into)]
+    echo_cancellation: Option<ConstraintBool>,
+    #[builder(into)]
+    noise_suppression: Option<ConstraintBool>,
 }
 
 impl AudioTrackConstraints {
@@ -664,106 +658,44 @@ impl AudioTrackConstraints {
         AudioTrackConstraints::default()
     }
 
-    pub fn device_id<M>(mut self, value: impl IntoDeviceIds<M>) -> Self {
-        self.device_id = Some(value.into_device_ids());
+    pub fn device_id<M>(mut self, value:  impl IntoDeviceIds<M>) -> Self {
+        self.device_id = value.into_device_ids();
         self
     }
 
-    pub fn auto_gain_control<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
-        self.auto_gain_control = Some(value.into());
-        self
-    }
-
-    pub fn channel_count<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.channel_count = Some(value.into());
-        self
-    }
-
-    pub fn echo_cancellation<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
-        self.echo_cancellation = Some(value.into());
-        self
-    }
-
-    pub fn noise_suppression<T: Into<ConstraintBool>>(mut self, value: T) -> Self {
-        self.noise_suppression = Some(value.into());
-        self
-    }
 }
 
-#[derive(Default, Clone, Debug)]
+#[derive(DefaultBuilder, Default, Clone, Debug)]
 pub struct VideoTrackConstraints {
-    pub device_id: Option<ConstraintDeviceId>,
+    #[builder(skip)]
+    pub device_id: Vec<String>,
 
-    // TODO: implement array of device ids
-    // pub device_ids: Option<Vec<ConstrainDOMString>>,
+    #[builder(into)]
     pub facing_mode: Option<ConstraintFacingMode>,
+    #[builder(into)]
     pub frame_rate: Option<ConstraintDouble>,
+    #[builder(into)]
     pub height: Option<ConstraintULong>,
+    #[builder(into)]
     pub width: Option<ConstraintULong>,
+    #[builder(into)]
     pub viewport_offset_x: Option<ConstraintULong>,
+    #[builder(into)]
     pub viewport_offset_y: Option<ConstraintULong>,
+    #[builder(into)]
     pub viewport_height: Option<ConstraintULong>,
+    #[builder(into)]
     pub viewport_width: Option<ConstraintULong>,
 }
 
 impl VideoTrackConstraints {
+
     pub fn new() -> Self {
-        VideoTrackConstraints::default() // Start with default empty constraints
+        VideoTrackConstraints::default()
     }
 
     pub fn device_id<M>(mut self, value: impl IntoDeviceIds<M>) -> Self {
-        self.device_id = Some(value.into_device_ids());
-        self
-    }
-
-    // TODO: implement array of device ids
-
-    // pub fn device_ids(mut self, values: Vec<&'static str>) -> Self {
-    //     let constraints = values
-    //       .into_iter()
-    //       .map(|value| ConstraintExactIdeal::Single(Some(value)))
-    //       .collect::<Vec<ConstraintDOMString>>();
-    //
-    //     self.device_ids = Some(constraints);
-    //     self
-    // }
-
-    pub fn facing_mode<T: Into<ConstraintFacingMode>>(mut self, value: T) -> Self {
-        self.facing_mode = Some(value.into());
-        self
-    }
-
-    pub fn frame_rate<T: Into<ConstraintDouble>>(mut self, value: T) -> Self {
-        self.frame_rate = Some(value.into());
-        self
-    }
-
-    pub fn height<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.height = Some(value.into());
-        self
-    }
-    pub fn width<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.width = Some(value.into());
-        self
-    }
-
-    pub fn viewport_offset_x<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.viewport_offset_x = Some(value.into());
-        self
-    }
-
-    pub fn viewport_offset_y<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.viewport_offset_y = Some(value.into());
-        self
-    }
-
-    pub fn viewport_height<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.viewport_height = Some(value.into());
-        self
-    }
-
-    pub fn viewport_width<T: Into<ConstraintULong>>(mut self, value: T) -> Self {
-        self.viewport_width = Some(value.into());
+        self.device_id = value.into_device_ids();
         self
     }
 }
