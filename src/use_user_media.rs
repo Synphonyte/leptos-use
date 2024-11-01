@@ -137,15 +137,15 @@ pub fn use_user_media_with_options(
             }
         },
         true,
-    )
-};
-UseUserMediaReturn {
-stream: stream.into(),
-start,
-stop,
-enabled,
-set_enabled,
-}
+    );
+
+    UseUserMediaReturn {
+        stream: stream.into(),
+        start,
+        stop,
+        enabled,
+        set_enabled,
+    }
 }
 
 #[cfg(not(feature = "ssr"))]
@@ -547,7 +547,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("exact"),
                         &JsValue::from_str(value.as_str()),
                     )
-                        .unwrap();
+                    .unwrap();
                 }
                 if let Some(value) = ideal {
                     Reflect::set(
@@ -555,7 +555,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("ideal"),
                         &JsValue::from_str(value.as_str()),
                     )
-                        .unwrap();
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -617,7 +617,7 @@ pub struct VecMarker;
 
 impl<T, I> IntoDeviceIds<VecMarker> for T
 where
-    T: IntoIterator<Item=I>,
+    T: IntoIterator<Item = I>,
     I: Into<String>,
 {
     fn into_device_ids(self) -> Vec<String> {

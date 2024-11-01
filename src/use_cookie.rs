@@ -141,7 +141,7 @@ use std::sync::Arc;
 /// ```
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: Encoder<T, Encoded=String> + Decoder<T, Encoded=str>,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone + Send + Sync + 'static,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
@@ -153,7 +153,7 @@ pub fn use_cookie_with_options<T, C>(
     options: UseCookieOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: Encoder<T, Encoded=String> + Decoder<T, Encoded=str>,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone + Send + Sync + 'static,
 {
     let UseCookieOptions {
@@ -380,7 +380,7 @@ where
                             jar.update_value({
                                 let domain = domain.clone();
                                 let path = path.clone();
-                                let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
+                                let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
                                 |jar| {
                                     write_server_cookie(
@@ -400,16 +400,14 @@ where
                             });
                         }
                     }
+
+                    ()
                 }
             });
         }
+    }
 
-        Some(())
-    });
-}
-}
-
-(cookie.into(), set_cookie)
+    (cookie.into(), set_cookie)
 }
 
 /// Options for [`use_cookie_with_options`].
@@ -659,7 +657,7 @@ where
                         },
                         std::time::Duration::from_millis(timeout_length as u64),
                     )
-                        .ok();
+                    .ok();
                 }
             }));
 
