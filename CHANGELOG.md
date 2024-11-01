@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.13.7] - 2024-10-20
 
 - Added video and audio options to `use_user_media` (thanks to @sauloco).
+- Fixed cookies in SSR (thanks to @jim-taylor-business).
 
 ## [0.13.6] - 2024-10-20
 
