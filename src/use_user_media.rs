@@ -165,17 +165,19 @@ async fn create_media(
     if let Some(video_shadow_constraints) = video {
         match video_shadow_constraints {
             VideoConstraints::Bool(b) => constraints.set_video(&JsValue::from(b)),
-            VideoConstraints::Constraints(VideoTrackConstraints {
-                device_id,
-                facing_mode,
-                frame_rate,
-                height,
-                width,
-                viewport_height,
-                viewport_width,
-                viewport_offset_x,
-                viewport_offset_y,
-            }) => {
+            VideoConstraints::Constraints(boxed_constraints) => {
+                let VideoTrackConstraints {
+                    device_id,
+                    facing_mode,
+                    frame_rate,
+                    height,
+                    width,
+                    viewport_height,
+                    viewport_width,
+                    viewport_offset_x,
+                    viewport_offset_y,
+                } = *boxed_constraints;
+
                 let video_constraints = web_sys::MediaTrackConstraints::new();
 
                 if !device_id.is_empty() {
@@ -222,16 +224,18 @@ async fn create_media(
     if let Some(audio_shadow_constraints) = audio {
         match audio_shadow_constraints {
             AudioConstraints::Bool(b) => constraints.set_audio(&JsValue::from(b)),
-            AudioConstraints::Constraints(AudioTrackConstraints {
-                device_id,
-                auto_gain_control,
-                channel_count,
-                echo_cancellation,
-                noise_suppression,
-            }) => {
+            AudioConstraints::Constraints(boxed_constraints) => {
+                let AudioTrackConstraints {
+                    device_id,
+                    auto_gain_control,
+                    channel_count,
+                    echo_cancellation,
+                    noise_suppression,
+                } = *boxed_constraints;
+
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
-                if !device_id.is_empty() > 0 {
+                if !device_id.is_empty() {
                     audio_constraints.set_device_id(
                         &Array::from_iter(device_id.into_iter().map(JsValue::from)).into(),
                     );
@@ -573,7 +577,7 @@ impl From<bool> for AudioConstraints {
 
 impl From<AudioTrackConstraints> for AudioConstraints {
     fn from(value: AudioTrackConstraints) -> Self {
-        AudioConstraints::Constraints(value.into())
+        AudioConstraints::Constraints(Box::new(value.into()))
     }
 }
 
@@ -591,7 +595,7 @@ impl From<bool> for VideoConstraints {
 
 impl From<VideoTrackConstraints> for VideoConstraints {
     fn from(value: VideoTrackConstraints) -> Self {
-        VideoConstraints::Constraints(value.into())
+        VideoConstraints::Constraints(Box::new(value.into()))
     }
 }
 
