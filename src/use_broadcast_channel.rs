@@ -172,6 +172,9 @@ where
     }
 }
 
+pub type UseBroadcastChannelReturnType<C, T, PFn, CFn> =
+    UseBroadcastChannelReturn<T, PFn, CFn, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>;
+
 /// Return type of [`use_broadcast_channel`].
 pub struct UseBroadcastChannelReturn<T, PFn, CFn, C>
 where

@@ -38,6 +38,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Ported everything to Leptos 0.7
 Some example don't run yet.
 
+## [0.13.7] - 2024-10-20
+
+- Added video and audio options to `use_user_media` (thanks to @sauloco).
+- Fixed cookies in SSR (thanks to @jim-taylor-business).
+
+## [0.13.6] - 2024-10-20
+
+- Updated leptos-spin version to 0.2 (thanks to @tqq1994516).
+
 ## [0.13.5] - 2024-09-15
 
 ### New Function 🚀
@@ -142,12 +151,6 @@ Some example don't run yet.
 - `header` – Standard implementations for reading a header on the server.
 
 ## [0.11.0] - 2024-07-27
-
-### Breaking Changes 🛠
-
-- Updated to Leptos 0.7
-
-## [Unreleased]
 
 ### New Functions 🚀
 

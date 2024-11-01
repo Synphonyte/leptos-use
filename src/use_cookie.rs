@@ -141,7 +141,7 @@ use std::sync::Arc;
 /// ```
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
+    C: Encoder<T, Encoded=String> + Decoder<T, Encoded=str>,
     T: Clone + Send + Sync + 'static,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
@@ -153,7 +153,7 @@ pub fn use_cookie_with_options<T, C>(
     options: UseCookieOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
-    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
+    C: Encoder<T, Encoded=String> + Decoder<T, Encoded=str>,
     T: Clone + Send + Sync + 'static,
 {
     let UseCookieOptions {
@@ -365,7 +365,7 @@ where
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-                move |_| {
+                move |previous_effect_value| {
                     let domain = domain.clone();
                     let path = path.clone();
 
@@ -376,28 +376,40 @@ where
                                 .ok()
                         })
                     }) {
-                        jar.update_value(|jar| {
-                            write_server_cookie(
-                                &cookie_name,
-                                value.flatten(),
-                                jar,
-                                max_age,
-                                expires,
-                                domain,
-                                path,
-                                same_site,
-                                secure,
-                                http_only,
-                                Arc::clone(&ssr_set_cookie),
-                            )
-                        });
+                        if previous_effect_value.is_some() {
+                            jar.update_value({
+                                let domain = domain.clone();
+                                let path = path.clone();
+                                let ssr_set_cookie = Rc::clone(&ssr_set_cookie);
+
+                                |jar| {
+                                    write_server_cookie(
+                                        &cookie_name,
+                                        value.flatten(),
+                                        jar,
+                                        max_age,
+                                        expires,
+                                        domain,
+                                        path,
+                                        same_site,
+                                        secure,
+                                        http_only,
+                                        Arc::clone(&ssr_set_cookie),
+                                    )
+                                }
+                            });
+                        }
                     }
                 }
             });
         }
-    }
 
-    (cookie.into(), set_cookie)
+        Some(())
+    });
+}
+}
+
+(cookie.into(), set_cookie)
 }
 
 /// Options for [`use_cookie_with_options`].
@@ -534,7 +546,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                             if let Ok(header_value) =
                                 HeaderValue::from_str(&cookie.encoded().to_string())
                             {
-                                response_options.insert_header(SET_COOKIE, header_value);
+                                response_options.append_header(SET_COOKIE, header_value);
                             }
                         }
                     }
@@ -542,7 +554,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                     {
                         if let Some(response_options) = use_context::<ResponseOptions>() {
                             let header_value = cookie.encoded().to_string().as_bytes().to_vec();
-                            response_options.insert_header(SET_COOKIE.as_str(), header_value);
+                            response_options.append_header(SET_COOKIE.as_str(), &header_value);
                         }
                     }
                 }
@@ -647,7 +659,7 @@ where
                         },
                         std::time::Duration::from_millis(timeout_length as u64),
                     )
-                    .ok();
+                        .ok();
                 }
             }));
 

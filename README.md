@@ -7,7 +7,7 @@
 </p>
 
 <h4 align="center">Collection of essential Leptos utilities</h4>
-<p align="center">Inspired by React-Use / VueUse / SolidJS-USE</p>
+<p align="center">Inspired by React-Use / VueUse</p>
 
 <p align="center">
     <a href="https://crates.io/crates/leptos-use"><img src="https://img.shields.io/crates/v/leptos-use.svg?label=&color=%232C1275" alt="Crates.io"/></a>
