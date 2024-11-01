@@ -365,7 +365,7 @@ where
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-                move |previous_effect_value| {
+                move |previous_effect_value: Option<()>| {
                     let domain = domain.clone();
                     let path = path.clone();
 
@@ -394,7 +394,7 @@ where
                                         same_site,
                                         secure,
                                         http_only,
-                                        Arc::clone(&ssr_set_cookie),
+                                        ssr_set_cookie,
                                     )
                                 }
                             });

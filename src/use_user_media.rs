@@ -626,6 +626,7 @@ where
 }
 
 #[derive(DefaultBuilder, Default, Clone, Debug)]
+#[allow(dead_code)]
 pub struct AudioTrackConstraints {
     #[builder(skip)]
     device_id: Vec<String>,
