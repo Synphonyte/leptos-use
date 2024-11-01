@@ -179,7 +179,9 @@ async fn create_media(
                 let video_constraints = web_sys::MediaTrackConstraints::new();
 
                 if device_id.len() > 0 {
-                    video_constraints.set_device_id(&Array::from_iter(device_id.into_iter().map(JsValue::from)).into());
+                    video_constraints.set_device_id(
+                        &Array::from_iter(device_id.into_iter().map(JsValue::from)).into(),
+                    );
                 }
 
                 if let Some(value) = facing_mode {
@@ -225,12 +227,14 @@ async fn create_media(
                 auto_gain_control,
                 channel_count,
                 echo_cancellation,
-                noise_suppression
+                noise_suppression,
             }) => {
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
                 if device_id.len() > 0 {
-                    audio_constraints.set_device_id(&Array::from_iter(device_id.into_iter().map(JsValue::from)).into());
+                    audio_constraints.set_device_id(
+                        &Array::from_iter(device_id.into_iter().map(JsValue::from)).into(),
+                    );
                 }
                 if let Some(value) = auto_gain_control {
                     audio_constraints.set_auto_gain_control(&JsValue::from(&value.to_jsvalue()));
@@ -320,7 +324,7 @@ pub enum ConstraintExactIdeal<T> {
 
 impl<T> Default for ConstraintExactIdeal<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintExactIdeal::Single(Some(T::default()))
@@ -359,7 +363,7 @@ impl<T> ConstraintExactIdeal<T> {
 
 impl<T> ConstraintExactIdeal<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
@@ -399,7 +403,7 @@ pub enum ConstraintRange<T> {
 
 impl<T> Default for ConstraintRange<T>
 where
-  T: Default,
+    T: Default,
 {
     fn default() -> Self {
         ConstraintRange::Single(Some(T::default()))
@@ -460,7 +464,7 @@ where
 
 impl<T> ConstraintRange<T>
 where
-  T: Into<JsValue> + Clone,
+    T: Into<JsValue> + Clone,
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
@@ -475,11 +479,11 @@ where
 
                 if let Some(min_value) = min {
                     Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
-                      .unwrap();
+                        .unwrap();
                 }
                 if let Some(max_value) = max {
                     Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
-                      .unwrap();
+                        .unwrap();
                 }
                 if let Some(value) = exact {
                     Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
@@ -525,7 +529,6 @@ pub enum FacingMode {
     Right,
 }
 
-
 impl FacingMode {
     pub fn as_str(self) -> &'static str {
         match self {
@@ -560,7 +563,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("exact"),
                         &JsValue::from_str(value.as_str()),
                     )
-                      .unwrap();
+                    .unwrap();
                 }
                 if let Some(value) = ideal {
                     Reflect::set(
@@ -568,7 +571,7 @@ impl ConstraintFacingMode {
                         &JsValue::from_str("ideal"),
                         &JsValue::from_str(value.as_str()),
                     )
-                      .unwrap();
+                    .unwrap();
                 }
 
                 JsValue::from(obj)
@@ -630,8 +633,8 @@ pub struct VecMarker;
 
 impl<T, I> IntoDeviceIds<VecMarker> for T
 where
-  T: IntoIterator<Item = I>,
-  I: Into<String>,
+    T: IntoIterator<Item = I>,
+    I: Into<String>,
 {
     fn into_device_ids(self) -> Vec<String> {
         self.into_iter().map(Into::into).collect()
@@ -658,11 +661,10 @@ impl AudioTrackConstraints {
         AudioTrackConstraints::default()
     }
 
-    pub fn device_id<M>(mut self, value:  impl IntoDeviceIds<M>) -> Self {
+    pub fn device_id<M>(mut self, value: impl IntoDeviceIds<M>) -> Self {
         self.device_id = value.into_device_ids();
         self
     }
-
 }
 
 #[derive(DefaultBuilder, Default, Clone, Debug)]
@@ -689,7 +691,6 @@ pub struct VideoTrackConstraints {
 }
 
 impl VideoTrackConstraints {
-
     pub fn new() -> Self {
         VideoTrackConstraints::default()
     }
