@@ -577,7 +577,7 @@ impl From<bool> for AudioConstraints {
 
 impl From<AudioTrackConstraints> for AudioConstraints {
     fn from(value: AudioTrackConstraints) -> Self {
-        AudioConstraints::Constraints(Box::new(value.into()))
+        AudioConstraints::Constraints(Box::new(value))
     }
 }
 
@@ -595,7 +595,7 @@ impl From<bool> for VideoConstraints {
 
 impl From<VideoTrackConstraints> for VideoConstraints {
     fn from(value: VideoTrackConstraints) -> Self {
-        VideoConstraints::Constraints(Box::new(value.into()))
+        VideoConstraints::Constraints(Box::new(value))
     }
 }
 
