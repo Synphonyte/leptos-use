@@ -178,7 +178,7 @@ async fn create_media(
             }) => {
                 let video_constraints = web_sys::MediaTrackConstraints::new();
 
-                if device_id.len() > 0 {
+                if !device_id.is_empty() {
                     video_constraints.set_device_id(
                         &Array::from_iter(device_id.into_iter().map(JsValue::from)).into(),
                     );
@@ -231,7 +231,7 @@ async fn create_media(
             }) => {
                 let audio_constraints = web_sys::MediaTrackConstraints::new();
 
-                if device_id.len() > 0 {
+                if !device_id.is_empty() > 0 {
                     audio_constraints.set_device_id(
                         &Array::from_iter(device_id.into_iter().map(JsValue::from)).into(),
                     );
@@ -332,31 +332,25 @@ where
 }
 
 impl<T> ConstraintExactIdeal<T> {
-    pub fn default() -> Self {
-        ConstraintExactIdeal::Single(None)
-    }
-
     pub fn exact(mut self, value: T) -> Self {
-        match &mut self {
-            ConstraintExactIdeal::ExactIdeal {
-                exact: ref mut e, ..
-            } => {
-                *e = Some(value);
-            }
-            _ => {}
+        if let ConstraintExactIdeal::ExactIdeal {
+            exact: ref mut e, ..
+        } = &mut self
+        {
+            *e = Some(value);
         }
+
         self
     }
 
     pub fn ideal(mut self, value: T) -> Self {
-        match &mut self {
-            ConstraintExactIdeal::ExactIdeal {
-                ideal: ref mut i, ..
-            } => {
-                *i = Some(value);
-            }
-            _ => {}
+        if let ConstraintExactIdeal::ExactIdeal {
+            ideal: ref mut i, ..
+        } = &mut self
+        {
+            *i = Some(value);
         }
+
         self
     }
 }
@@ -367,7 +361,7 @@ where
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            ConstraintExactIdeal::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintExactIdeal::Single(value) => value.clone().unwrap().into(),
             ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
                 let obj = Object::new();
 
@@ -418,15 +412,6 @@ where
         ConstraintRange::Single(value)
     }
 
-    pub fn default() -> Self {
-        ConstraintRange::Range {
-            min: None,
-            max: None,
-            exact: None,
-            ideal: None,
-        }
-    }
-
     pub fn min(mut self, value: T) -> Self {
         if let ConstraintRange::Range { ref mut min, .. } = self {
             *min = Some(value);
@@ -442,22 +427,18 @@ where
     }
 
     pub fn exact(mut self, value: T) -> Self {
-        match &mut self {
-            ConstraintRange::Range { ref mut exact, .. } => {
-                *exact = Some(value);
-            }
-            _ => {}
+        if let ConstraintRange::Range { ref mut exact, .. } = &mut self {
+            *exact = Some(value);
         }
+
         self
     }
 
     pub fn ideal(mut self, value: T) -> Self {
-        match &mut self {
-            ConstraintRange::Range { ref mut ideal, .. } => {
-                *ideal = Some(value);
-            }
-            _ => {}
+        if let ConstraintRange::Range { ref mut ideal, .. } = &mut self {
+            *ideal = Some(value);
         }
+
         self
     }
 }
@@ -468,7 +449,7 @@ where
 {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            ConstraintRange::Single(value) => JsValue::from(value.clone().unwrap().into()),
+            ConstraintRange::Single(value) => value.clone().unwrap().into(),
             ConstraintRange::Range {
                 min,
                 max,
@@ -551,9 +532,7 @@ impl From<FacingMode> for ConstraintFacingMode {
 impl ConstraintFacingMode {
     pub fn to_jsvalue(&self) -> JsValue {
         match self {
-            ConstraintExactIdeal::Single(value) => {
-                JsValue::from_str(value.clone().unwrap().as_str())
-            }
+            ConstraintExactIdeal::Single(value) => JsValue::from_str((*value).unwrap().as_str()),
             ConstraintExactIdeal::ExactIdeal { exact, ideal } => {
                 let obj = Object::new();
 
@@ -583,7 +562,7 @@ impl ConstraintFacingMode {
 #[derive(Clone, Debug)]
 pub enum AudioConstraints {
     Bool(bool),
-    Constraints(AudioTrackConstraints),
+    Constraints(Box<AudioTrackConstraints>),
 }
 
 impl From<bool> for AudioConstraints {
@@ -594,14 +573,14 @@ impl From<bool> for AudioConstraints {
 
 impl From<AudioTrackConstraints> for AudioConstraints {
     fn from(value: AudioTrackConstraints) -> Self {
-        AudioConstraints::Constraints(value)
+        AudioConstraints::Constraints(value.into())
     }
 }
 
 #[derive(Clone, Debug)]
 pub enum VideoConstraints {
     Bool(bool),
-    Constraints(VideoTrackConstraints),
+    Constraints(Box<VideoTrackConstraints>),
 }
 
 impl From<bool> for VideoConstraints {
@@ -612,7 +591,7 @@ impl From<bool> for VideoConstraints {
 
 impl From<VideoTrackConstraints> for VideoConstraints {
     fn from(value: VideoTrackConstraints) -> Self {
-        VideoConstraints::Constraints(value)
+        VideoConstraints::Constraints(value.into())
     }
 }
 
