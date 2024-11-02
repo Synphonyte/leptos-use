@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0-rc0] - 2024-11-03
+
+- Latest changes up to version 0.13.7 ported
+- Updated to Leptos 0.7.0-rc0
+
 ## [0.14.0-gamma2] - 2024-10-16
 
 - Updated to Leptos 0.7.0-gamma3 by using `Signal` instead of `MaybeSignal`
