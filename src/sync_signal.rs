@@ -243,9 +243,7 @@ where
             move |new_value, _, _| {
                 if !is_sync_update.get_value() {
                     is_sync_update.set_value(true);
-                    left.try_update(|left| {
-                        assign_rtl(left, new_value)
-                    });
+                    left.try_update(|left| assign_rtl(left, new_value));
                 } else {
                     is_sync_update.set_value(false);
                 }
