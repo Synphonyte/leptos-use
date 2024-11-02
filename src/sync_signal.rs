@@ -226,7 +226,10 @@ where
             move |new_value, _, _| {
                 if !is_sync_update.get_value() {
                     is_sync_update.set_value(true);
-                    right.try_update(|right| assign_ltr(right, new_value));
+                    right.try_update(|right| {
+                        assign_ltr(right, new_value);
+                    });
+                } else {
                     is_sync_update.set_value(false);
                 }
             },
@@ -240,7 +243,10 @@ where
             move |new_value, _, _| {
                 if !is_sync_update.get_value() {
                     is_sync_update.set_value(true);
-                    left.try_update(|left| assign_rtl(left, new_value));
+                    left.try_update(|left| {
+                        assign_rtl(left, new_value)
+                    });
+                } else {
                     is_sync_update.set_value(false);
                 }
             },
