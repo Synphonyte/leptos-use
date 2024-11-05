@@ -83,80 +83,49 @@ where
 
     let (state, set_state) = get_initial_value().into_signal();
 
-    let index = {
-        let list = list.clone();
+    let index = Signal::derive(move || {
+        let index = get_position(&state.get(), &list.read());
 
-        Signal::derive(move || {
-            list.with(|list| {
-                let index = get_position(&state.get(), list);
-
-                if let Some(index) = index {
-                    index
-                } else {
-                    fallback_index
-                }
-            })
-        })
-    };
-
-    let set = {
-        let list = list.clone();
-
-        move |i: usize| {
-            list.with(|list| {
-                let length = list.len();
-
-                let index = i % length;
-                let value = list[index].clone();
-
-                set_state.update({
-                    let value = value.clone();
-
-                    move |v| *v = value
-                });
-
-                value
-            })
+        if let Some(index) = index {
+            index
+        } else {
+            fallback_index
         }
+    });
+
+    let set = move |i: usize| {
+        let length = list.read().len();
+
+        let index = i % length;
+        let value = list.read()[index].clone();
+
+        set_state.update({
+            let value = value.clone();
+
+            move |v| *v = value
+        });
+
+        value
     };
 
-    let shift = {
-        let list = list.clone();
-        let set = set.clone();
+    let shift = move |delta: i64| {
+        let length = list.read().len() as i64;
 
-        move |delta: i64| {
-            let index = list.with(|list| {
-                let length = list.len() as i64;
+        let i = index.get_untracked() as i64 + delta;
+        let index = (i % length) + length;
 
-                let i = index.get_untracked() as i64 + delta;
-                (i % length) + length
-            });
-
-            set(index as usize)
-        }
+        set(index as usize)
     };
 
-    let next = {
-        let shift = shift.clone();
-
-        move || {
-            shift(1);
-        }
+    let next = move || {
+        shift(1);
     };
 
-    let prev = {
-        let shift = shift.clone();
-
-        move || {
-            shift(-1);
-        }
+    let prev = move || {
+        shift(-1);
     };
 
-    let _ = {
-        let set = set.clone();
-
-        Effect::watch(move || list.get(), move |_, _, _| set(index.get()), false)
-    };
+    let _ = Effect::watch(move || list.get(), move |_, _, _| set(index.get()), false);
 
     UseCycleListReturn {
         state,

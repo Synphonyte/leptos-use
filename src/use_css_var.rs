@@ -106,15 +106,12 @@ where
         let prop = prop.into();
 
         let update_css_var = {
-            let prop = prop.clone();
             let el_signal = el_signal.clone();
 
             move || {
-                let key = prop.get_untracked();
-
                 if let Some(el) = el_signal.get_untracked() {
                     if let Ok(Some(style)) = window().get_computed_style(&el) {
-                        if let Ok(value) = style.get_property_value(&key) {
+                        if let Ok(value) = style.get_property_value(&prop.read_untracked()) {
                             set_variable.update(|var| *var = value.trim().to_string());
                             return;
                         }
@@ -142,7 +139,6 @@ where
 
         {
             let el_signal = el_signal.clone();
-            let prop = prop.clone();
 
             let _ = watch_with_options(
                 move || (el_signal.get(), prop.get()),
