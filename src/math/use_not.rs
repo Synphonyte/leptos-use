@@ -31,7 +31,7 @@ use leptos::reactive::wrappers::read::Signal;
 // #[doc(cfg(feature = "math"))]
 pub fn use_not<S>(a: S) -> Signal<bool>
 where
-    S: Into<MaybeSignal<bool>>,
+    S: Into<Signal<bool>>,
 {
     let a = a.into();
     Signal::derive(move || !a.get())
