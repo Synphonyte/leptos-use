@@ -1,5 +1,5 @@
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::*;
+use leptos::{logging::{warn, debug_warn}, prelude::*};
 use leptos::reactive::actions::Action;
 use leptos::reactive::wrappers::read::Signal;
 use send_wrapper::SendWrapper;

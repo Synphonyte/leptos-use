@@ -7,7 +7,7 @@ use cookie::time::{Duration, OffsetDateTime};
 pub use cookie::SameSite;
 use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::*;
+use leptos::{logging::{debug_warn, error}, prelude::*};
 use std::sync::Arc;
 
 /// SSR-friendly and reactive cookie access.

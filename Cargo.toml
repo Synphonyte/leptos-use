@@ -35,7 +35,7 @@ paste = "1"
 send_wrapper = "0.6.0"
 thiserror = "1"
 unic-langid = { version = "0.9", optional = true }
-wasm-bindgen = "=0.2.93"
+wasm-bindgen = "0.2.95"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "=0.3.70", optional = true }
 
