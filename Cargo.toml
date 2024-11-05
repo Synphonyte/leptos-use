@@ -350,6 +350,7 @@ use_user_media = [
     "web-sys/MediaStream",
     "web-sys/MediaStreamConstraints",
     "web-sys/MediaStreamTrack",
+    "web-sys/MediaTrackConstraints",
     "web-sys/VideoFacingModeEnum",
 ]
 use_web_notification = [
@@ -360,7 +361,6 @@ use_web_notification = [
     "web-sys/NotificationOptions",
     "web-sys/NotificationPermission",
     "web-sys/NotificationDirection",
-    "web-sys/MediaTrackConstraints",
     "web-sys/VisibilityState"
 ]
 use_websocket = ["dep:web-sys", "dep:codee"]
