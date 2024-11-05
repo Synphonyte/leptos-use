@@ -41,7 +41,7 @@ pub fn use_cycle_list<T, L>(
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
-    L: Into<MaybeSignal<Vec<T>>>,
+    L: Into<Signal<Vec<T>>>,
 {
     use_cycle_list_with_options(list, UseCycleListOptions::default())
 }
@@ -58,7 +58,7 @@ pub fn use_cycle_list_with_options<T, L>(
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
-    L: Into<MaybeSignal<Vec<T>>>,
+    L: Into<Signal<Vec<T>>>,
 {
     let UseCycleListOptions {
         initial_value,

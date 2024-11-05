@@ -39,7 +39,7 @@ pub fn use_timeout_fn<CbFn, Arg, D>(
 where
     CbFn: Fn(Arg) + Clone + 'static,
     Arg: 'static,
-    D: Into<MaybeSignal<f64>>,
+    D: Into<Signal<f64>>,
 {
     let delay = delay.into();
 

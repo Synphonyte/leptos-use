@@ -40,7 +40,7 @@ use std::rc::Rc;
 /// * [`fn@crate::use_preferred_dark`]
 /// * [`fn@crate::use_preferred_contrast`]
 /// * [`fn@crate::use_prefers_reduced_motion`]
-pub fn use_media_query(query: impl Into<MaybeSignal<String>>) -> Signal<bool> {
+pub fn use_media_query(query: impl Into<Signal<String>>) -> Signal<bool> {
     let query = query.into();
 
     let (matches, set_matches) = signal(false);

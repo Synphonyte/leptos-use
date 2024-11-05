@@ -657,7 +657,7 @@ where
     /// Note that protocols are only updated on the next websocket open() call, not whenever the signal is updated.
     /// Therefore "lazy" protocols should use the `immediate(false)` option and manually call `open()`.
     #[builder(into)]
-    protocols: MaybeSignal<Option<Vec<String>>>,
+    protocols: Signal<Option<Vec<String>>>,
 }
 
 impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {

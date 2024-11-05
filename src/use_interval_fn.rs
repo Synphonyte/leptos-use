@@ -43,7 +43,7 @@ pub fn use_interval_fn<CbFn, N>(
 ) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
     CbFn: Fn() + Clone + 'static + Send + Sync,
-    N: Into<MaybeSignal<u64>>,
+    N: Into<Signal<u64>>,
 {
     use_interval_fn_with_options(callback, interval, UseIntervalFnOptions::default())
 }
@@ -56,7 +56,7 @@ pub fn use_interval_fn_with_options<CbFn, N>(
 ) -> Pausable<impl Fn() + Clone, impl Fn() + Clone>
 where
     CbFn: Fn() + Clone + 'static,
-    N: Into<MaybeSignal<u64>>,
+    N: Into<Signal<u64>>,
 {
     let UseIntervalFnOptions {
         immediate,
@@ -126,7 +126,7 @@ where
         resume();
     }
 
-    if matches!(interval, MaybeSignal::Dynamic(_)) {
+    {
         #[allow(clippy::clone_on_copy)]
         let resume = resume.clone();
 

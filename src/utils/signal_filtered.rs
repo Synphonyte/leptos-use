@@ -13,7 +13,7 @@ macro_rules! signal_filtered {
             #[track_caller]
             pub fn [<signal_ $filter_name d>]<S, T>(
                 value: S,
-                ms: impl Into<MaybeSignal<f64>> + 'static,
+                ms: impl Into<Signal<f64>> + 'static,
             ) -> Signal<T>
             where
                 S: Into<Signal<T>>,
@@ -33,7 +33,7 @@ macro_rules! signal_filtered {
             #[track_caller]
             pub fn [<signal_ $filter_name d_with_options>]<S, T>(
                 value: S,
-                ms: impl Into<MaybeSignal<f64>> + 'static,
+                ms: impl Into<Signal<f64>> + 'static,
                 options: [<$filter_name:camel Options>],
             ) -> Signal<T>
             where

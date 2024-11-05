@@ -4,7 +4,7 @@ mod throttle;
 pub use debounce::*;
 pub use throttle::*;
 
-use leptos::prelude::MaybeSignal;
+use leptos::prelude::Signal;
 use std::sync::{Arc, Mutex};
 
 macro_rules! ArcFilterFn {
@@ -45,24 +45,24 @@ pub enum FilterOptions {
     #[default]
     None,
     Debounce {
-        ms: MaybeSignal<f64>,
+        ms: Signal<f64>,
         options: DebounceOptions,
     },
     Throttle {
-        ms: MaybeSignal<f64>,
+        ms: Signal<f64>,
         options: ThrottleOptions,
     },
 }
 
 impl FilterOptions {
-    pub fn debounce(ms: impl Into<MaybeSignal<f64>>) -> Self {
+    pub fn debounce(ms: impl Into<Signal<f64>>) -> Self {
         Self::Debounce {
             ms: ms.into(),
             options: DebounceOptions::default(),
         }
     }
 
-    pub fn throttle(ms: impl Into<MaybeSignal<f64>>) -> Self {
+    pub fn throttle(ms: impl Into<Signal<f64>>) -> Self {
         Self::Throttle {
             ms: ms.into(),
             options: ThrottleOptions::default(),
@@ -93,7 +93,7 @@ macro_rules! filter_builder_methods {
         /// Debounce
         #[$filter_docs]
         /// by `ms` milliseconds.
-        pub fn debounce(self, ms: impl Into<MaybeSignal<f64>>) -> Self {
+        pub fn debounce(self, ms: impl Into<Signal<f64>>) -> Self {
             self.debounce_with_options(ms, DebounceOptions::default())
         }
 
@@ -102,7 +102,7 @@ macro_rules! filter_builder_methods {
         /// by `ms` milliseconds with additional options.
         pub fn debounce_with_options(
             self,
-            ms: impl Into<MaybeSignal<f64>>,
+            ms: impl Into<Signal<f64>>,
             options: DebounceOptions,
         ) -> Self {
             Self {
@@ -117,7 +117,7 @@ macro_rules! filter_builder_methods {
         /// Throttle
         #[$filter_docs]
         /// by `ms` milliseconds.
-        pub fn throttle(self, ms: impl Into<MaybeSignal<f64>>) -> Self {
+        pub fn throttle(self, ms: impl Into<Signal<f64>>) -> Self {
             self.throttle_with_options(ms, ThrottleOptions::default())
         }
 
@@ -126,7 +126,7 @@ macro_rules! filter_builder_methods {
         /// by `ms` milliseconds with additional options.
         pub fn throttle_with_options(
             self,
-            ms: impl Into<MaybeSignal<f64>>,
+            ms: impl Into<Signal<f64>>,
             options: ThrottleOptions,
         ) -> Self {
             Self {

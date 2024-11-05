@@ -37,7 +37,7 @@ pub fn use_interval<N>(
     interval: N,
 ) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    N: Into<MaybeSignal<u64>>,
+    N: Into<Signal<u64>>,
 {
     use_interval_with_options(interval, UseIntervalOptions::default())
 }
@@ -48,7 +48,7 @@ pub fn use_interval_with_options<N>(
     options: UseIntervalOptions,
 ) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
 where
-    N: Into<MaybeSignal<u64>>,
+    N: Into<Signal<u64>>,
 {
     let UseIntervalOptions {
         immediate,

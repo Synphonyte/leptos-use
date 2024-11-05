@@ -27,7 +27,7 @@ impl Default for ThrottleOptions {
 }
 
 pub fn throttle_filter<R>(
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<Signal<f64>>,
     options: ThrottleOptions,
 ) -> impl Fn(Arc<dyn Fn() -> R>) -> Arc<Mutex<Option<R>>> + Clone
 where
