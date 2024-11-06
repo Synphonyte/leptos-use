@@ -43,7 +43,7 @@ use wasm_bindgen::{JsCast, JsValue};
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
 pub fn use_user_media() -> UseUserMediaReturn<impl Fn() + Clone, impl Fn() + Clone> {
-    use_user_media_with_options(UseUserMediaOptions::default())
+    use_user_media_with_options(UseUserMediaOptions::default().video(true))
 }
 
 /// Version of [`use_user_media`] that takes a `UseUserMediaOptions`. See [`use_user_media`] for how to use.
