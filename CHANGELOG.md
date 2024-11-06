@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.8] - 2024-11-06
+
+- Backported fixes from 0.14.0-rc1
+
 ## [0.13.7] - 2024-10-20
 
 - Added video and audio options to `use_user_media` (thanks to @sauloco).
