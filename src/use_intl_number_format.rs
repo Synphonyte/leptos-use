@@ -610,7 +610,7 @@ pub struct UseIntlNumberFormatOptions {
     ///         .style(NumberStyle::Currency)
     ///         .currency("USD")
     ///         .maximum_fraction_digits(2)
-    ///         .rounding_increment(5),    
+    ///         .rounding_increment(5),
     /// );
     ///
     /// let formatted = nf.format(11.29); // "$11.30"
@@ -775,7 +775,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
     /// See [`use_intl_number_format`] for more information.
-    pub fn format<N>(&self, number: impl Into<MaybeSignal<N>>) -> Signal<String, LocalStorage>
+    pub fn format<N>(&self, number: impl Into<Signal<N>>) -> Signal<String, LocalStorage>
     where
         N: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<N>,
@@ -850,8 +850,8 @@ impl UseIntlNumberFormatReturn {
     /// ```
     pub fn format_range<NStart, NEnd>(
         &self,
-        start: impl Into<MaybeSignal<NStart>>,
-        end: impl Into<MaybeSignal<NEnd>>,
+        start: impl Into<Signal<NStart>>,
+        end: impl Into<Signal<NEnd>>,
     ) -> Signal<String, LocalStorage>
     where
         NStart: Clone + Display + Send + Sync + 'static,
@@ -891,7 +891,7 @@ impl UseIntlNumberFormatReturn {
     // pub fn format_to_parts<N>(
     //     &self,
     //     ,
-    //     number: impl Into<MaybeSignal<N>>,
+    //     number: impl Into<Signal<N>>,
     // ) -> Signal<Vec<String>>
     // where
     //     N: Clone + 'static,

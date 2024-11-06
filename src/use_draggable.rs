@@ -241,15 +241,15 @@ where
 {
     /// Only start the dragging when click on the element directly. Defaults to `false`.
     #[builder(into)]
-    exact: MaybeSignal<bool>,
+    exact: Signal<bool>,
 
     /// Prevent events defaults. Defaults to `false`.
     #[builder(into)]
-    prevent_default: MaybeSignal<bool>,
+    prevent_default: Signal<bool>,
 
     /// Prevent events propagation. Defaults to `false`.
     #[builder(into)]
-    stop_propagation: MaybeSignal<bool>,
+    stop_propagation: Signal<bool>,
 
     /// Element to attach `pointermove` and `pointerup` events to. Defaults to `window`.
     dragging_element: DragEl,
@@ -287,9 +287,9 @@ where
 {
     fn default() -> Self {
         Self {
-            exact: MaybeSignal::default(),
-            prevent_default: MaybeSignal::default(),
-            stop_propagation: MaybeSignal::default(),
+            exact: Signal::default(),
+            prevent_default: Signal::default(),
+            stop_propagation: Signal::default(),
             dragging_element: use_window(),
             handle: None,
             pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],

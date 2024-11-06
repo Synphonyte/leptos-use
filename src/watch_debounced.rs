@@ -117,5 +117,5 @@ pub struct WatchDebouncedOptions {
     /// In milliseconds.
     /// Same as [`DebounceOptions::max_wait`]
     #[builder(into)]
-    pub max_wait: MaybeSignal<Option<f64>>,
+    pub max_wait: Signal<Option<f64>>,
 }

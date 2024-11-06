@@ -47,7 +47,7 @@ macro_rules! use_simple_math {
             $(#[$outer])*
             pub fn [<use_ $fn_name>]<S, N>(x: S) -> Signal<N>
             where
-                S: Into<MaybeSignal<N>> + Send + Sync,
+                S: Into<Signal<N>> + Send + Sync,
                 N: Float + Send + Sync + 'static,
             {
                 let x = x.into();
@@ -67,8 +67,8 @@ macro_rules! use_binary_logic {
             $(#[$outer])*
             pub fn [<use_ $fn_name>]<S1, S2>(a: S1, b: S2) -> Signal<bool>
             where
-                S1: Into<MaybeSignal<bool>>,
-                S2: Into<MaybeSignal<bool>>,
+                S1: Into<Signal<bool>>,
+                S2: Into<Signal<bool>>,
             {
                 let a = a.into();
                 let b = b.into();

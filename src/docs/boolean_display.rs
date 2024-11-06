@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 #[component]
 pub fn BooleanDisplay(
-    #[prop(into)] value: MaybeSignal<bool>,
+    #[prop(into)] value: Signal<bool>,
     #[prop(optional, into)] class: String,
     #[prop(default = "true")] true_str: &'static str,
     #[prop(default = "false")] false_str: &'static str,

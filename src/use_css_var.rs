@@ -77,9 +77,7 @@ use wasm_bindgen::JsCast;
 /// ## Server-Side Rendering
 ///
 /// On the server this simply returns `signal(options.initial_value)`.
-pub fn use_css_var(
-    prop: impl Into<MaybeSignal<String>>,
-) -> (ReadSignal<String>, WriteSignal<String>) {
+pub fn use_css_var(prop: impl Into<Signal<String>>) -> (ReadSignal<String>, WriteSignal<String>) {
     use_css_var_with_options(prop, UseCssVarOptions::default())
 }
 
@@ -89,7 +87,7 @@ pub fn use_css_var_with_options<P, El, M>(
     options: UseCssVarOptions<El, M>,
 ) -> (ReadSignal<String>, WriteSignal<String>)
 where
-    P: Into<MaybeSignal<String>>,
+    P: Into<Signal<String>>,
     El: Clone,
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -108,15 +106,12 @@ where
         let prop = prop.into();
 
         let update_css_var = {
-            let prop = prop.clone();
             let el_signal = el_signal.clone();
 
             move || {
-                let key = prop.get_untracked();
-
                 if let Some(el) = el_signal.get_untracked() {
                     if let Ok(Some(style)) = window().get_computed_style(&el) {
-                        if let Ok(value) = style.get_property_value(&key) {
+                        if let Ok(value) = style.get_property_value(&prop.read_untracked()) {
                             set_variable.update(|var| *var = value.trim().to_string());
                             return;
                         }
@@ -144,7 +139,6 @@ where
 
         {
             let el_signal = el_signal.clone();
-            let prop = prop.clone();
 
             let _ = watch_with_options(
                 move || (el_signal.get(), prop.get()),

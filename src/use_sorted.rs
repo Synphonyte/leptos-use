@@ -76,7 +76,7 @@ use std::ops::DerefMut;
 /// Please note that these two ways of sorting are equivalent.
 pub fn use_sorted<S, I, T>(iterable: S) -> Signal<I>
 where
-    S: Into<MaybeSignal<I>>,
+    S: Into<Signal<I>>,
     T: Ord,
     I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
 {
@@ -92,7 +92,7 @@ where
 /// Version of [`use_sorted`] with a compare function.
 pub fn use_sorted_by<S, I, T, F>(iterable: S, cmp_fn: F) -> Signal<I>
 where
-    S: Into<MaybeSignal<I>>,
+    S: Into<Signal<I>>,
     I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
     F: FnMut(&T, &T) -> Ordering + Clone + Send + Sync + 'static,
 {
@@ -108,7 +108,7 @@ where
 /// Version of [`use_sorted`] by key.
 pub fn use_sorted_by_key<S, I, T, K, F>(iterable: S, key_fn: F) -> Signal<I>
 where
-    S: Into<MaybeSignal<I>>,
+    S: Into<Signal<I>>,
     I: DerefMut<Target = [T]> + Clone + PartialEq + Send + Sync + 'static,
     K: Ord,
     F: FnMut(&T) -> K + Clone + Send + Sync + 'static,

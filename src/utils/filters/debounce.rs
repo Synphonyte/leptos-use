@@ -12,11 +12,11 @@ pub struct DebounceOptions {
     /// The maximum time allowed to be delayed before it's invoked.
     /// In milliseconds.
     #[builder(into)]
-    pub max_wait: MaybeSignal<Option<f64>>,
+    pub max_wait: Signal<Option<f64>>,
 }
 
 pub fn debounce_filter<R>(
-    ms: impl Into<MaybeSignal<f64>>,
+    ms: impl Into<Signal<f64>>,
     options: DebounceOptions,
 ) -> impl Fn(Arc<dyn Fn() -> R>) -> Arc<Mutex<Option<R>>> + Clone
 where

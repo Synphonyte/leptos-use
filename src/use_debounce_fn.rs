@@ -1,6 +1,6 @@
 pub use crate::utils::DebounceOptions;
 use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter};
-use leptos::prelude::MaybeSignal;
+use leptos::prelude::Signal;
 use std::sync::{Arc, Mutex};
 
 /// Debounce execution of a function.
@@ -75,7 +75,7 @@ use std::sync::{Arc, Mutex};
 /// a debounced function on the server will simply be ignored.
 pub fn use_debounce_fn<F, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>> + 'static,
+    ms: impl Into<Signal<f64>> + 'static,
 ) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn() -> R + Clone + 'static,
@@ -87,7 +87,7 @@ where
 /// Version of [`use_debounce_fn`] with debounce options. See the docs for [`use_debounce_fn`] for how to use.
 pub fn use_debounce_fn_with_options<F, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>> + 'static,
+    ms: impl Into<Signal<f64>> + 'static,
     options: DebounceOptions,
 ) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
 where
@@ -100,7 +100,7 @@ where
 /// Version of [`use_debounce_fn`] with an argument for the debounced function. See the docs for [`use_debounce_fn`] for how to use.
 pub fn use_debounce_fn_with_arg<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>> + 'static,
+    ms: impl Into<Signal<f64>> + 'static,
 ) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
 where
     F: Fn(Arg) -> R + Clone + 'static,
@@ -113,7 +113,7 @@ where
 /// Version of [`use_debounce_fn_with_arg`] with debounce options.
 pub fn use_debounce_fn_with_arg_and_options<F, Arg, R>(
     func: F,
-    ms: impl Into<MaybeSignal<f64>> + 'static,
+    ms: impl Into<Signal<f64>> + 'static,
     options: DebounceOptions,
 ) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
 where

@@ -470,7 +470,7 @@ pub struct UseScrollOptions {
     /// When changing the `x` or `y` signals this specifies the scroll behaviour.
     /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.
     #[builder(into)]
-    behavior: MaybeSignal<ScrollBehavior>,
+    behavior: Signal<ScrollBehavior>,
 }
 
 impl Default for UseScrollOptions {
