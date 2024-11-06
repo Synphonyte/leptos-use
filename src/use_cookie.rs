@@ -8,7 +8,7 @@ pub use cookie::SameSite;
 use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
 use leptos::{
-    logging::{debug_warn, error, warn},
+    logging::{debug_warn, error},
     prelude::*,
 };
 use std::sync::Arc;
@@ -537,6 +537,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                         not(feature = "spin")
                     ))]
                     {
+                        use leptos::logging::warn;
                         let _ = cookie;
                         warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
                     }
