@@ -53,32 +53,32 @@ use wasm_bindgen::{JsCast, JsValue};
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("de-DE"),
 /// );
-/// let formatted = number_format.format(number); // 123.456,789
+/// let formatted = number_format.format::<f32>(number); // 123.456,789
 ///
 /// // Arabic in most Arabic speaking countries uses real Arabic digits
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("ar-EG"),
 /// );
-/// let formatted = number_format.format(number); // ١٢٣٤٥٦٫٧٨٩
+/// let formatted = number_format.format::<f32>(number); // ١٢٣٤٥٦٫٧٨٩
 ///
 /// // India uses thousands/lakh/crore separators
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("en-IN"),
 /// );
-/// let formatted = number_format.format(number); // 1,23,456.789
+/// let formatted = number_format.format::<f32>(number); // 1,23,456.789
 ///
 /// // the nu extension key requests a numbering system, e.g. Chinese decimal
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locale("zh-Hans-CN-u-nu-hanidec"),
 /// );
-/// let formatted = number_format.format(number); // 一二三,四五六.七八九
+/// let formatted = number_format.format::<f32>(number); // 一二三,四五六.七八九
 ///
 /// // when requesting a language that may not be supported, such as
 /// // Balinese, include a fallback language, in this case Indonesian
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default().locales(vec!["ban".to_string(), "id".to_string()]),
 /// );
-/// let formatted = number_format.format(number); // 123.456,789
+/// let formatted = number_format.format::<f32>(number); // 123.456,789
 ///
 /// #
 /// # view! { }
@@ -104,7 +104,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Currency)
 ///         .currency("EUR"),
 /// );
-/// let formatted = number_format.format(number); // 123.456,79 €
+/// let formatted = number_format.format::<f64>(number); // 123.456,79 €
 ///
 /// // the Japanese yen doesn't use a minor unit
 /// let number_format = use_intl_number_format(
@@ -113,7 +113,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Currency)
 ///         .currency("JPY"),
 /// );
-/// let formatted = number_format.format(number); // ￥123,457
+/// let formatted = number_format.format::<f64>(number); // ￥123,457
 ///
 /// // limit to three significant digits
 /// let number_format = use_intl_number_format(
@@ -121,7 +121,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .locale("en-IN")
 ///         .maximum_significant_digits(3),
 /// );
-/// let formatted = number_format.format(number); // 1,23,000
+/// let formatted = number_format.format::<f64>(number); // 1,23,000
 ///
 /// // Formatting with units
 /// let number_format = use_intl_number_format(
@@ -130,7 +130,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .style(NumberStyle::Unit)
 ///         .unit("kilometer-per-hour"),
 /// );
-/// let formatted = number_format.format(50); // 50 km/h
+/// let formatted = number_format.format::<i32>(50); // 50 km/h
 ///
 /// let number_format = use_intl_number_format(
 ///     UseIntlNumberFormatOptions::default()
@@ -139,7 +139,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///         .unit("liter")
 ///         .unit_display(UnitDisplay::Long),
 /// );
-/// let formatted = number_format.format(16); // 16 litres
+/// let formatted = number_format.format::<i32>(16); // 16 litres
 /// #
 /// # view! { }
 /// # }
@@ -613,9 +613,9 @@ pub struct UseIntlNumberFormatOptions {
     ///         .rounding_increment(5),
     /// );
     ///
-    /// let formatted = nf.format(11.29); // "$11.30"
-    /// let formatted = nf.format(11.25); // "$11.25"
-    /// let formatted = nf.format(11.22); // "$11.20"
+    /// let formatted = nf.format::<f64>(11.29); // "$11.30"
+    /// let formatted = nf.format::<f64>(11.25); // "$11.25"
+    /// let formatted = nf.format::<f64>(11.22); // "$11.20"
     /// #
     /// # view! { }
     /// # }
@@ -818,11 +818,11 @@ impl UseIntlNumberFormatReturn {
     ///         .maximum_fraction_digits(0),
     /// );
     ///
-    /// let formatted = nf.format_range(3, 5); // "$3 – $5"
+    /// let formatted = nf.format_range::<i32, i32>(3, 5); // "$3 – $5"
     ///
     /// // Note: the "approximately equals" symbol is added if
     /// // startRange and endRange round to the same values.
-    /// let formatted = nf.format_range(2.9, 3.1); // "~$3"
+    /// let formatted = nf.format_range::<f64, f64>(2.9, 3.1); // "~$3"
     /// #
     /// # view! { }
     /// # }
@@ -842,8 +842,8 @@ impl UseIntlNumberFormatReturn {
     ///         .maximum_fraction_digits(0),
     /// );
     ///
-    /// let formatted = nf.format_range(3, 5); // "3-5 €"
-    /// let formatted = nf.format_range(2.9, 3.1); // "~3 €"
+    /// let formatted = nf.format_range::<i32, i32>(3, 5); // "3-5 €"
+    /// let formatted = nf.format_range::<f64, f64>(2.9, 3.1); // "~3 €"
     /// #
     /// # view! { }
     /// # }
