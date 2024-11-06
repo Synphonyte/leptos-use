@@ -18,7 +18,7 @@ use std::ops::DerefMut;
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let source = vec![10, 3, 5, 7, 2, 1, 8, 6, 9, 4];
-/// let sorted = use_sorted(source); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+/// let sorted: Signal<Vec<i32>> = use_sorted(source); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 /// #
 /// # view! { }
 /// # }
@@ -58,15 +58,15 @@ use std::ops::DerefMut;
 /// ];
 ///
 /// // sort by key
-/// let sorted = use_sorted_by_key(
+/// let sorted: Signal<Vec<Person>> = use_sorted_by_key(
 ///     source.clone(),
-///     |person| person.age,
+///     |person: &Person| person.age,
 /// );
 ///
 /// // sort with compare function
-/// let sorted = use_sorted_by(
+/// let sorted: Signal<Vec<Person>> = use_sorted_by(
 ///     source,
-///     |p1, p2| p1.age.cmp(&p2.age),
+///     |p1: &Person, p2: &Person| p1.age.cmp(&p2.age),
 /// );
 /// #
 /// # view! { }
