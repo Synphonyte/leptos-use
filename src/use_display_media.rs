@@ -15,6 +15,7 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ```
 /// # use leptos::prelude::*;
+/// # use leptos::logging::{log, error};
 /// # use leptos_use::{use_display_media, UseDisplayMediaReturn};
 /// #
 /// # #[component]

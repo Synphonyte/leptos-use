@@ -15,6 +15,7 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ```
 /// # use leptos::prelude::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::use_active_element;
 /// #
 /// # #[component]

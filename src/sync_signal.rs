@@ -18,6 +18,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::prelude::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::sync_signal;
 /// #
 /// # #[component]
@@ -71,6 +72,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::prelude::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions, SyncDirection};
 /// #
 /// # #[component]
@@ -102,6 +104,7 @@ use std::rc::Rc;
 ///
 /// ```
 /// # use leptos::prelude::*;
+/// # use leptos::logging::log;
 /// # use leptos_use::{sync_signal_with_options, SyncSignalOptions};
 /// #
 /// # #[component]
