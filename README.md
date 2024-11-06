@@ -49,7 +49,20 @@ Missing a function? Open a ticket or PR!
 To run all tests run
 
 ```shell
-cargo test --all-features
+# Run tests (general)
+cargo test --features math,docs,ssr
+
+# Run tests (axum) use_cookie
+cargo test --features math,docs,ssr,axum --doc use_cookie
+
+# Run tests (axum) use_locale
+cargo test --features math,docs,ssr,axum --doc use_locale
+
+# Run tests (actix) use_cookie
+cargo test --features math,docs,ssr,actix --doc use_cookie
+
+# Run tests (actix) use_locale
+cargo test --features math,docs,ssr,actix --doc use_locale
 ```
 
 ### Book
