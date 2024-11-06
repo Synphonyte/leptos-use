@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.14.0-rc0"
+version = "0.14.0-rc1"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming", "wasm"]
