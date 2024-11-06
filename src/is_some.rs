@@ -15,7 +15,7 @@ crate::use_derive_signal!(
     ///     if js_sys::Math::random() < 0.5 { Some("Example") } else { None }
     /// );
     ///
-    /// let not_empty = is_some(example);
+    /// let not_empty = is_some::<ReadSignal<Option<&str>>, &str>(example);
     /// #
     /// # view! { }
     /// # }

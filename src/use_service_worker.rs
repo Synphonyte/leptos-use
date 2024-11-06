@@ -1,7 +1,10 @@
 use default_struct_builder::DefaultBuilder;
-use leptos::prelude::*;
 use leptos::reactive::actions::Action;
 use leptos::reactive::wrappers::read::Signal;
+use leptos::{
+    logging::{debug_warn, warn},
+    prelude::*,
+};
 use send_wrapper::SendWrapper;
 use std::sync::Arc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
