@@ -1,5 +1,5 @@
 target
-Cargo.lock
+/examples/**/Cargo.lock
 dist
 node_modules
 package*.json
