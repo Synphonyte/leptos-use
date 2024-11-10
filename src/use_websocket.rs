@@ -241,8 +241,8 @@ where
     Tx: 'static,
     Rx: 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
 {
     use_websocket_with_options::<Tx, Rx, C>(url, UseWebSocketOptions::default())
 }
@@ -267,8 +267,8 @@ where
     Tx: 'static,
     Rx: 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
 {
     let url = normalize_url(url);
 
@@ -310,8 +310,9 @@ where
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_signal
-                        .get_untracked()
-                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                    .get_untracked()
+                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                    && reconnect_timer_ref.get_value().is_none()
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -326,7 +327,7 @@ where
                             },
                             Duration::from_millis(reconnect_interval),
                         )
-                        .ok(),
+                            .ok(),
                     );
                 }
             }))
@@ -337,7 +338,10 @@ where
             let on_error = Rc::clone(&on_error);
 
             Some(Rc::new(move || {
-                reconnect_timer_ref.set_value(None);
+                if let Some(reconnect_timer) = reconnect_timer_ref.get_value() {
+                    reconnect_timer.clear();
+                    reconnect_timer_ref.set_value(None);
+                }
 
                 if let Some(web_socket) = ws_signal.get_untracked() {
                     let _ = web_socket.close();
