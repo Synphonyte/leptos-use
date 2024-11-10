@@ -47,4 +47,4 @@ jobs:
       - name: Deploy book to github pages
         id: deployment
         if: github.event_name != 'pull_request'
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
