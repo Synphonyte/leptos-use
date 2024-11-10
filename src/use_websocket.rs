@@ -239,8 +239,8 @@ where
     Tx: Send + Sync + 'static,
     Rx: Send + Sync + 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
     use_websocket_with_options::<Tx, Rx, C>(url, UseWebSocketOptions::default())
 }
@@ -265,8 +265,8 @@ where
     Tx: Send + Sync + 'static,
     Rx: Send + Sync + 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
     let url = normalize_url(url);
 
@@ -309,8 +309,8 @@ where
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_signal
-                    .get_untracked()
-                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                        .get_untracked()
+                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                     && reconnect_timer_ref.get_value().is_none()
                 {
                     reconnect_timer_ref.set_value(
@@ -326,7 +326,7 @@ where
                             },
                             Duration::from_millis(reconnect_interval),
                         )
-                            .ok(),
+                        .ok(),
                     );
                 }
             }))
