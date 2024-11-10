@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated to Leptos 0.7.0-rc1
 - Updated to web-sys 0.3.72 and unpinned version (thanks to @sabify)
 - Added dependabot (thanks to @sabify)
+- Reverted use_user_media to have video enabled by default
 
 ## [0.14.0-rc1] - 2024-11-06
 
