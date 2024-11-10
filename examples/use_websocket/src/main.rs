@@ -1,9 +1,6 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{
-    core::ConnectionReadyState, use_websocket, use_websocket_with_options, UseWebSocketError,
-    UseWebSocketOptions, UseWebSocketReturn,
-};
+use leptos_use::{core::ConnectionReadyState, use_websocket, use_websocket_with_options, ReconnectLimit, UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn};
 use serde::{Deserialize, Serialize};
 
 use codee::{binary::MsgpackSerdeCodec, string::FromToStringCodec};
@@ -105,6 +102,7 @@ fn Demo() -> impl IntoView {
         "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
             .immediate(false)
+            .reconnect_limit(ReconnectLimit::Infinite)
             .on_open(on_open_callback)
             .on_close(on_close_callback)
             .on_error(on_error_callback)
