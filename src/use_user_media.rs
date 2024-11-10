@@ -276,7 +276,7 @@ pub struct UseUserMediaOptions {
     /// If the stream is enabled. Defaults to `false`.
     enabled: MaybeRwSignal<bool>,
     /// Constraint parameter describing video media type requested
-    /// The default value is `false`.
+    /// The default value is `true`.
     #[builder(into)]
     video: VideoConstraints,
     /// Constraint parameter describing audio media type requested
@@ -289,7 +289,7 @@ impl Default for UseUserMediaOptions {
     fn default() -> Self {
         Self {
             enabled: false.into(),
-            video: false.into(),
+            video: true.into(),
             audio: false.into(),
         }
     }
