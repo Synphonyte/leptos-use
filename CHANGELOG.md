@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.13.9] - 2024-11-10
 
 - Reverted use_user_media to have video enabled by default
+- Fixed exponential increase on websocket reconnects
 
 ## [0.13.8] - 2024-11-06
 
