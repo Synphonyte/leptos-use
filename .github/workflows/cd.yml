@@ -69,7 +69,7 @@ jobs:
           path: ./docs/book/book
       - name: Deploy book to github pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
       ##### mdbook end
 
       - name: Publish crate leptos-use
