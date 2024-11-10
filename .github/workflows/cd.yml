@@ -64,7 +64,7 @@ jobs:
           mdbook build
           python3 post_build.py
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs/book/book
       - name: Deploy book to github pages
