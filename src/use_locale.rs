@@ -69,7 +69,7 @@ where
             // Checked it's not empty above.
             let first_supported = *supported_iter.peek().unwrap();
 
-            for ref s in supported_iter {
+            for s in supported_iter {
                 for client_locale in client_locales {
                     let client_locale = client_locale.parse::<LanguageIdentifier>();
 
