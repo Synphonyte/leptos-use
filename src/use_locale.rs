@@ -1,5 +1,5 @@
 use crate::{use_locales_with_options, UseLocalesOptions};
-use leptos::prelude::*;
+use leptos::{logging::warn, prelude::*};
 use unic_langid::LanguageIdentifier;
 
 /// Reactive locale matching.
@@ -63,27 +63,27 @@ where
     assert!(!supported.is_empty(), "{}", EMPTY_ERR_MSG);
 
     Signal::derive(move || {
-        let supported = supported.clone();
-
         client_locales.with(|client_locales| {
-            let mut first_supported = None;
+            let mut supported_iter = supported.iter().peekable();
 
-            for s in supported {
-                if first_supported.is_none() {
-                    first_supported = Some(s.clone());
-                }
+            // Checked it's not empty above.
+            let first_supported = *supported_iter.peek().unwrap();
 
+            for s in supported_iter {
                 for client_locale in client_locales {
-                    let client_locale: LanguageIdentifier = client_locale
-                        .parse()
-                        .expect("Client should provide a list of valid unicode locales");
-                    if client_locale.matches(&s, true, true) {
-                        return s;
+                    let client_locale = client_locale.parse::<LanguageIdentifier>();
+
+                    if let Ok(client_locale) = client_locale {
+                        if client_locale.matches(s, true, true) {
+                            return (*s).clone();
+                        }
+                    } else {
+                        warn!("Received an invalid LanguageIdentifier")
                     }
                 }
             }
 
-            unreachable!("{}", EMPTY_ERR_MSG);
+            (*first_supported).clone()
         })
     })
 }
