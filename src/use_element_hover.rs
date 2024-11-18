@@ -65,22 +65,25 @@ where
 
     let (is_hovered, set_hovered) = create_signal(false);
 
-    let mut timer: Option<TimeoutHandle> = None;
+    let timer: RwSignal<Option<TimeoutHandle>> = RwSignal::new(None);
 
-    let mut toggle = move |entering: bool| {
+    let toggle = move |entering: bool| {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
             let delay = if entering { delay_enter } else { delay_leave };
 
-            if let Some(handle) = timer.take() {
-                handle.clear();
-            }
+            timer.update_untracked(|timer|{
+                if let Some(handle) = timer.take() {
+                    handle.clear();
+                }
+            });
 
             if delay > 0 {
-                timer = set_timeout_with_handle(
+                let timer_handle = set_timeout_with_handle(
                     move || set_hovered.set(entering),
                     Duration::from_millis(delay),
                 )
                 .ok();
+                timer.set_untracked(timer_handle);
             } else {
                 set_hovered.set(entering);
             }
