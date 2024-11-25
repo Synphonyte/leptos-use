@@ -1,3 +1,21 @@
+/// Macro to wrap closures with `send_wrapper::SendWrapper`.
+/// 
+/// ## Usage
+///
+/// ```
+/// # use leptos_use::sendwrap_fn;
+/// 
+/// let wrapped = sendwrap_fn!(move |a: i32, b: i32| { /* do stuff */ });
+/// ```
+/// 
+/// For closures that implement only `FnOnce`:
+/// 
+/// ```
+/// # use leptos_use::sendwrap_fn;
+/// 
+/// let wrapped = sendwrap_fn!(once move || { /* do stuff */ });
+/// ```
+#[macro_export]
 macro_rules! sendwrap_fn {
     (move |$($param:ident : $ty:ty),*| $($content:tt)*) => {
         {
@@ -27,4 +45,3 @@ macro_rules! sendwrap_fn {
     };
 }
 
-pub(crate) use sendwrap_fn;

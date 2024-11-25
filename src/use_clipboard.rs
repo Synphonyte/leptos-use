@@ -1,4 +1,4 @@
-use crate::{js, js_fut, use_event_listener, use_supported, UseTimeoutFnReturn};
+use crate::{js, js_fut, sendwrap_fn, use_event_listener, use_supported, UseTimeoutFnReturn};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{copy, cut};
 use leptos::prelude::*;
@@ -47,14 +47,14 @@ use leptos::reactive::wrappers::read::Signal;
 /// ## Server-Side Rendering
 ///
 /// On the server the returnd `text` signal will always be `None` and `copy` is a no-op.
-pub fn use_clipboard() -> UseClipboardReturn<impl Fn(&str) + Clone> {
+pub fn use_clipboard() -> UseClipboardReturn<impl Fn(&str) + Clone + Send + Sync> {
     use_clipboard_with_options(UseClipboardOptions::default())
 }
 
 /// Version of [`use_clipboard`] that takes a `UseClipboardOptions`. See [`use_clipboard`] for how to use.
 pub fn use_clipboard_with_options(
     options: UseClipboardOptions,
-) -> UseClipboardReturn<impl Fn(&str) + Clone> {
+) -> UseClipboardReturn<impl Fn(&str) + Clone + Send + Sync> {
     let UseClipboardOptions {
         copied_reset_delay,
         read,
@@ -94,7 +94,7 @@ pub fn use_clipboard_with_options(
     let do_copy = {
         let start = start.clone();
 
-        move |value: &str| {
+        sendwrap_fn!(move |value: &str| {
             if is_supported.get() {
                 let start = start.clone();
                 let value = value.to_owned();
@@ -108,7 +108,7 @@ pub fn use_clipboard_with_options(
                     }
                 });
             }
-        }
+        })
     };
 
     UseClipboardReturn {

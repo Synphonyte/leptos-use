@@ -27,6 +27,5 @@ pub use is::*;
 #[allow(unused_imports)]
 pub(crate) use js_value_from_to_string::*;
 pub use pausable::*;
-pub(crate) use sendwrap_fn::*;
 #[allow(unused_imports)]
 pub(crate) use signal_filtered::*;

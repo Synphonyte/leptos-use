@@ -6,7 +6,7 @@ use leptos::ev::messageerror;
 use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
-use crate::utils::sendwrap_fn;
+use crate::sendwrap_fn;
 
 /// Reactive [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel).
 ///

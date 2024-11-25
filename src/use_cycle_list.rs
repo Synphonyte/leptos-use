@@ -35,9 +35,9 @@ pub fn use_cycle_list<T, L>(
 ) -> UseCycleListReturn<
     T,
     impl Fn(usize) -> T + Clone + Send + Sync,
-    impl Fn() + Clone,
-    impl Fn() + Clone,
-    impl Fn(i64) -> T + Clone,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn(i64) -> T + Clone + Send + Sync,
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,

@@ -1,5 +1,5 @@
 use crate::core::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
-use crate::utils::sendwrap_fn;
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 
