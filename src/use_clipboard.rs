@@ -44,6 +44,11 @@ use leptos::reactive::wrappers::read::Signal;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+/// 
+/// The returned closures `copy` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_clipboard`.
+/// 
 /// ## Server-Side Rendering
 ///
 /// On the server the returnd `text` signal will always be `None` and `copy` is a no-op.
