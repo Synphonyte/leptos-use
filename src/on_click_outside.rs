@@ -1,4 +1,5 @@
 use crate::core::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
+use crate::utils::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 
@@ -16,7 +17,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
     static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
 }}
 
-/// Listen for clicks outside of an element.
+/// Listen for clicks outside an element.
 /// Useful for modals or dropdowns.
 ///
 /// ## Demo
@@ -49,6 +50,11 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// > If you are targeting these browsers, we recommend you to include
 /// > [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
 ///
+/// ## SendWrapped Return
+/// 
+/// The return value of this function is a sendwrapped function to remove all event listeners. It can
+/// only be called from the same thread that called `on_click_outside`.
+/// 
 /// ## Excluding Elements
 ///
 /// Use this to ignore clicks on certain elements.
@@ -79,7 +85,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
-pub fn on_click_outside<El, M, F>(target: El, handler: F) -> impl FnOnce() + Clone
+pub fn on_click_outside<El, M, F>(target: El, handler: F) -> impl FnOnce() + Clone + Send + Sync
 where
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(web_sys::Event) + Clone + 'static,
@@ -93,7 +99,7 @@ pub fn on_click_outside_with_options<El, M, F>(
     target: El,
     handler: F,
     options: OnClickOutsideOptions,
-) -> impl FnOnce() + Clone
+) -> impl FnOnce() + Clone + Send + Sync
 where
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(web_sys::Event) + Clone + 'static,
@@ -236,13 +242,13 @@ where
             None
         };
 
-        move || {
+        sendwrap_fn!(once move || {
             remove_click_listener();
             remove_pointer_listener();
             if let Some(f) = remove_blur_listener {
                 f();
             }
-        }
+        })
     }
 }
 

@@ -6,6 +6,7 @@ use leptos::ev::messageerror;
 use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
+use crate::utils::sendwrap_fn;
 
 /// Reactive [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel).
 ///
@@ -70,12 +71,22 @@ use wasm_bindgen::JsValue;
 /// # view! { }
 /// # }
 /// ```
+/// 
+/// ## SendWrapped Return
+/// 
+/// The returned closures `post` and `close` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_broadcast_channel`.
 pub fn use_broadcast_channel<T, C>(
     name: &str,
-) -> UseBroadcastChannelReturn<T, impl Fn(&T) + Clone, impl Fn() + Clone, C>
+) -> UseBroadcastChannelReturn<
+    T,
+    impl Fn(&T) + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    C,
+>
 where
     T: Send + Sync,
-    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
+    C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str> + Send + Sync,
     <C as Encoder<T>>::Error: Send + Sync,
     <C as Decoder<T>>::Error: Send + Sync,
 {
@@ -89,7 +100,7 @@ where
     );
 
     let post = {
-        move |data: &T| {
+        sendwrap_fn!(move |data: &T| {
             if let Some(channel) = channel.get_untracked() {
                 match C::encode(data) {
                     Ok(msg) => {
@@ -107,16 +118,16 @@ where
                     }
                 }
             }
-        }
+        })
     };
 
     let close = {
-        move || {
+        sendwrap_fn!(move || {
             if let Some(channel) = channel.get_untracked() {
                 channel.close();
             }
             set_closed.set(true);
-        }
+        })
     };
 
     if is_supported.get_untracked() {
@@ -157,8 +168,12 @@ where
         }
     }
 
-    on_cleanup(move || {
-        close();
+    on_cleanup({
+        let close = close.clone();
+        
+        move || {
+            close();
+        }
     });
 
     UseBroadcastChannelReturn {
@@ -178,7 +193,7 @@ where
     T: Send + Sync + 'static,
     PFn: Fn(&T) + Clone,
     CFn: Fn() + Clone,
-    C: Encoder<T> + Decoder<T>,
+    C: Encoder<T> + Decoder<T> + Send + Sync,
 {
     /// `true` if this browser supports `BroadcastChannel`s.
     pub is_supported: Signal<bool>,
