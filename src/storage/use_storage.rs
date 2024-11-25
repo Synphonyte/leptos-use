@@ -322,7 +322,7 @@ where
                         }
                     }
                 },
-                WatchOptions::default().filter(filter),
+                WatchOptions::default().filter(filter).immediate(true),
             );
         }
 
