@@ -56,7 +56,7 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// The returned closure `reset` is a sendwrapped function. It can
 /// only be called from the same thread that called `use_idle`.
-/// 
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this will always return static signals

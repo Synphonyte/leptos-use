@@ -1,8 +1,8 @@
 use crate::core::IntoElementsMaybeSignal;
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive::wrappers::read::Signal;
-use crate::sendwrap_fn;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_supported;

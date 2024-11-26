@@ -32,7 +32,7 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// The returned closure `update` is a sendwrapped function. It can
 /// only be called from the same thread that called `use_element_bounding`.
-/// 
+///
 /// ## Server-Side Rendering
 ///
 /// On the server the returned signals always are `0.0` and `update` is a no-op.

@@ -1,5 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::sendwrap_fn;
 use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
@@ -8,7 +9,6 @@ use send_wrapper::SendWrapper;
 use std::cell::Cell;
 use std::sync::Arc;
 use std::time::Duration;
-use crate::sendwrap_fn;
 
 /// Wrapper for `set_interval` with controls.
 ///

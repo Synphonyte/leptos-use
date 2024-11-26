@@ -65,10 +65,10 @@ use std::sync::{Arc, Mutex};
 /// [`use_debounce_fn_with_arg`] and [`use_debounce_fn_with_arg_and_options`].
 ///
 /// ## SendWrapped Return
-/// 
+///
 /// The returned closure is a sendwrapped function. It can
 /// only be called from the same thread that called `use_debounce_...`.
-/// 
+///
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)

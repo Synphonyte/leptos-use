@@ -310,7 +310,7 @@ where
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_signal
                         .get_untracked()
-                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                        .is_some_and(|ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                     && reconnect_timer_ref.get_value().is_none()
                 {
                     reconnect_timer_ref.set_value(

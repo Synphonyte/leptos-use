@@ -51,10 +51,10 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// > [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
 ///
 /// ## SendWrapped Return
-/// 
+///
 /// The return value of this function is a sendwrapped function to remove all event listeners. It can
 /// only be called from the same thread that called `on_click_outside`.
-/// 
+///
 /// ## Excluding Elements
 ///
 /// Use this to ignore clicks on certain elements.

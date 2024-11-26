@@ -107,7 +107,7 @@ use thiserror::Error;
 ///
 /// The returned closures `open` and `close` are sendwrapped functions. They can
 /// only be called from the same thread that called `use_event_source`.
-/// 
+///
 /// To disable auto-reconnection, set `reconnect_limit` to `0`.
 ///
 /// ## Server-Side Rendering

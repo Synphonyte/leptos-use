@@ -61,10 +61,10 @@ pub use crate::utils::ThrottleOptions;
 /// [`use_throttle_fn_with_arg`] and [`use_throttle_fn_with_arg_and_options`].
 ///
 /// ## SendWrapped Return
-/// 
+///
 /// The returned closure is a sendwrapped function. It can
 /// only be called from the same thread that called `use_throttle_...`.
-/// 
+///
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)

@@ -1,3 +1,4 @@
+use crate::sendwrap_fn;
 use crate::{
     js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
 };
@@ -6,7 +7,6 @@ use leptos::ev::messageerror;
 use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
-use crate::sendwrap_fn;
 
 /// Reactive [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel).
 ///
@@ -71,9 +71,9 @@ use crate::sendwrap_fn;
 /// # view! { }
 /// # }
 /// ```
-/// 
+///
 /// ## SendWrapped Return
-/// 
+///
 /// The returned closures `post` and `close` are sendwrapped functions. They can
 /// only be called from the same thread that called `use_broadcast_channel`.
 pub fn use_broadcast_channel<T, C>(
@@ -170,7 +170,7 @@ where
 
     on_cleanup({
         let close = close.clone();
-        
+
         move || {
             close();
         }
