@@ -7,6 +7,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Reactive current timestamp.
 ///
@@ -46,6 +47,12 @@ use std::rc::Rc;
 /// # view! { }
 /// # }
 /// ```
+///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause` and `resume` of the `..._with_controls` versions are
+/// sendwrapped functions. They can only be called from the same thread that called
+/// `use_timestamp_with_controls`.
 ///
 /// ## Server-Side Rendering
 ///
@@ -107,8 +114,8 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
             UseTimestampReturn {
                 timestamp: ts.into(),
                 is_active,
-                pause: Rc::new(pause),
-                resume: Rc::new(resume),
+                pause: Arc::new(pause),
+                resume: Arc::new(resume),
             }
         }
 
@@ -126,8 +133,8 @@ pub fn use_timestamp_with_controls_and_options(options: UseTimestampOptions) -> 
             UseTimestampReturn {
                 timestamp: ts.into(),
                 is_active,
-                pause: Rc::new(pause),
-                resume: Rc::new(resume),
+                pause: Arc::new(pause),
+                resume: Arc::new(resume),
             }
         }
     }
@@ -186,8 +193,8 @@ pub struct UseTimestampReturn {
     pub is_active: Signal<bool>,
 
     /// Temporarily pause the timestamp from updating
-    pub pause: Rc<dyn Fn()>,
+    pub pause: Arc<dyn Fn()>,
 
     /// Resume the timestamp updating
-    pub resume: Rc<dyn Fn()>,
+    pub resume: Arc<dyn Fn()>,
 }

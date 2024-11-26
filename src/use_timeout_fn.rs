@@ -1,3 +1,4 @@
+use crate::sendwrap_fn;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 
@@ -28,6 +29,11 @@ use std::marker::PhantomData;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `start` and `stop` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_timeout_fn`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server the callback will never be run. The returned functions are all no-ops and
@@ -35,7 +41,7 @@ use std::marker::PhantomData;
 pub fn use_timeout_fn<CbFn, Arg, D>(
     callback: CbFn,
     delay: D,
-) -> UseTimeoutFnReturn<impl Fn(Arg) + Clone, Arg, impl Fn() + Clone>
+) -> UseTimeoutFnReturn<impl Fn(Arg) + Clone + Send + Sync, Arg, impl Fn() + Clone + Send + Sync>
 where
     CbFn: Fn(Arg) + Clone + 'static,
     Arg: 'static,
@@ -70,17 +76,17 @@ where
         stop = {
             let clear = clear.clone();
 
-            move || {
+            sendwrap_fn!(move || {
                 set_pending.set(false);
                 clear();
-            }
+            })
         };
 
         start = {
             let timer = Arc::clone(&timer);
             let callback = callback.clone();
 
-            move |arg: Arg| {
+            sendwrap_fn!(move |arg: Arg| {
                 set_pending.set(true);
 
                 let handle = set_timeout_with_handle(
@@ -103,7 +109,7 @@ where
                 .ok();
 
                 *timer.lock().unwrap() = handle;
-            }
+            })
         };
 
         on_cleanup(clear);
@@ -130,8 +136,8 @@ where
 /// Return type of [`use_timeout_fn`].
 pub struct UseTimeoutFnReturn<StartFn, StartArg, StopFn>
 where
-    StartFn: Fn(StartArg) + Clone,
-    StopFn: Fn() + Clone,
+    StartFn: Fn(StartArg) + Clone + Send + Sync,
+    StopFn: Fn() + Clone + Send + Sync,
 {
     /// Whether the timeout is pending. When the `callback` is called this is set to `false`.
     pub is_pending: Signal<bool>,

@@ -45,7 +45,7 @@ use crate::sendwrap_fn;
 /// On the server this does basically nothing. The provided closure will never be called.
 pub fn use_raf_fn(
     callback: impl Fn(UseRafFnCallbackArgs) + 'static,
-) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
+) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_raf_fn_with_options(callback, UseRafFnOptions::default())
 }
 
@@ -53,7 +53,7 @@ pub fn use_raf_fn(
 pub fn use_raf_fn_with_options(
     callback: impl Fn(UseRafFnCallbackArgs) + 'static,
     options: UseRafFnOptions,
-) -> Pausable<impl Fn() + Clone, impl Fn() + Clone> {
+) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     let UseRafFnOptions { immediate } = options;
 
     let raf_handle = Rc::new(Cell::new(None::<i32>));
@@ -161,7 +161,7 @@ pub fn use_raf_fn_with_options(
 #[derive(DefaultBuilder)]
 pub struct UseRafFnOptions {
     /// Start the requestAnimationFrame loop immediately on creation. Defaults to `true`.
-    /// If false the loop will only start when you call `resume()`.
+    /// If false, the loop will only start when you call `resume()`.
     immediate: bool,
 }
 

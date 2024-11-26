@@ -72,7 +72,11 @@ use leptos::prelude::*;
 ///
 /// * `leptos::watch`
 /// * [`fn@crate::watch_throttled`]
-pub fn watch_debounced<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone
+pub fn watch_debounced<W, T, DFn, CFn>(
+    deps: DFn,
+    callback: CFn,
+    ms: f64,
+) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
@@ -89,7 +93,7 @@ pub fn watch_debounced_with_options<W, T, DFn, CFn>(
     callback: CFn,
     ms: f64,
     options: WatchDebouncedOptions,
-) -> impl Fn() + Clone
+) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,

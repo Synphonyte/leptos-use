@@ -10,7 +10,7 @@ use std::sync::Arc;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::ServiceWorkerRegistration;
 
-use crate::{js_fut, use_window};
+use crate::{js_fut, sendwrap_fn, use_window};
 
 /// Reactive [ServiceWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API).
 ///
@@ -40,17 +40,23 @@ use crate::{js_fut, use_window};
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `check_for_update` and `skip_waiting` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_service_worker`.
+///
 /// ## Server-Side Rendering
 ///
 /// This function does **not** support SSR. Call it inside a `create_effect`.
-pub fn use_service_worker() -> UseServiceWorkerReturn<impl Fn() + Clone, impl Fn() + Clone> {
+pub fn use_service_worker(
+) -> UseServiceWorkerReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_service_worker_with_options(UseServiceWorkerOptions::default())
 }
 
 /// Version of [`use_service_worker`] that takes a `UseServiceWorkerOptions`. See [`use_service_worker`] for how to use.
 pub fn use_service_worker_with_options(
     options: UseServiceWorkerOptions,
-) -> UseServiceWorkerReturn<impl Fn() + Clone, impl Fn() + Clone> {
+) -> UseServiceWorkerReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     // Trigger the user-defined action (page-reload by default)
     // whenever a new ServiceWorker is installed.
     if let Some(navigator) = use_window().navigator() {
@@ -145,14 +151,14 @@ pub fn use_service_worker_with_options(
                     .unwrap_or_default()
             })
         }),
-        check_for_update: move || {
+        check_for_update: sendwrap_fn!(move || {
             registration.with(|reg| {
                 if let Ok(reg) = reg {
                     update_sw.dispatch(reg.clone());
                 }
             })
-        },
-        skip_waiting: move || {
+        }),
+        skip_waiting: sendwrap_fn!(move || {
             registration.with_untracked(|reg| if let Ok(reg) = reg {
                 match reg.waiting() {
                     Some(sw) => {
@@ -166,7 +172,7 @@ pub fn use_service_worker_with_options(
                     },
                 }
             });
-        },
+        }),
     }
 }
 
@@ -211,8 +217,8 @@ impl Default for UseServiceWorkerOptions {
 /// Return type of [`use_service_worker`].
 pub struct UseServiceWorkerReturn<CheckFn, SkipFn>
 where
-    CheckFn: Fn() + Clone,
-    SkipFn: Fn() + Clone,
+    CheckFn: Fn() + Clone + Send + Sync,
+    SkipFn: Fn() + Clone + Send + Sync,
 {
     /// The current registration state.
     pub registration:

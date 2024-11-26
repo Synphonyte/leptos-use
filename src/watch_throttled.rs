@@ -71,7 +71,7 @@ use default_struct_builder::DefaultBuilder;
 ///
 /// * `leptos::watch`
 /// * [`fn@crate::watch_debounced`]
-pub fn watch_throttled<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone
+pub fn watch_throttled<W, T, DFn, CFn>(deps: DFn, callback: CFn, ms: f64) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
@@ -87,7 +87,7 @@ pub fn watch_throttled_with_options<W, T, DFn, CFn>(
     callback: CFn,
     ms: f64,
     options: WatchThrottledOptions,
-) -> impl Fn() + Clone
+) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,

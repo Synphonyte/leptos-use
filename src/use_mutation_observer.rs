@@ -1,4 +1,5 @@
 use crate::core::IntoElementsMaybeSignal;
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive::wrappers::read::Signal;
@@ -47,13 +48,18 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure `stop` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_mouse_in_element`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
 pub fn use_mutation_observer<El, M, F>(
     target: El,
     callback: F,
-) -> UseMutationObserverReturn<impl Fn() + Clone>
+) -> UseMutationObserverReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
@@ -67,7 +73,7 @@ pub fn use_mutation_observer_with_options<El, M, F>(
     target: El,
     mut callback: F,
     options: UseMutationObserverOptions,
-) -> UseMutationObserverReturn<impl Fn() + Clone>
+) -> UseMutationObserverReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::MutationRecord>, web_sys::MutationObserver) + 'static,
@@ -147,10 +153,10 @@ where
             move || stop.stop()
         };
 
-        let stop = move || {
+        let stop = sendwrap_fn!(move || {
             cleanup();
             stop_watch();
-        };
+        });
 
         on_cleanup({
             let stop = SendWrapper::new(stop.clone());
@@ -238,7 +244,7 @@ impl From<UseMutationObserverOptions> for web_sys::MutationObserverInit {
 }
 
 /// The return value of [`use_mutation_observer`].
-pub struct UseMutationObserverReturn<F: Fn() + Clone> {
+pub struct UseMutationObserverReturn<F: Fn() + Clone + Send + Sync> {
     /// Whether the browser supports the MutationObserver API
     pub is_supported: Signal<bool>,
     /// A function to stop and detach the MutationObserver

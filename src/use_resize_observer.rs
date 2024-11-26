@@ -2,6 +2,7 @@ use crate::core::IntoElementsMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive::wrappers::read::Signal;
+use crate::sendwrap_fn;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::use_supported;
@@ -45,6 +46,11 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure `stop` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_resize_observer`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
@@ -55,7 +61,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 pub fn use_resize_observer<Els, M, F>(
     target: Els,
     callback: F,
-) -> UseResizeObserverReturn<impl Fn() + Clone>
+) -> UseResizeObserverReturn<impl Fn() + Clone + Send + Sync>
 where
     Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
@@ -69,7 +75,7 @@ pub fn use_resize_observer_with_options<Els, M, F>(
     target: Els,
     mut callback: F,
     options: UseResizeObserverOptions,
-) -> UseResizeObserverReturn<impl Fn() + Clone>
+) -> UseResizeObserverReturn<impl Fn() + Clone + Send + Sync>
 where
     Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::ResizeObserverEntry>, web_sys::ResizeObserver) + 'static,
@@ -148,13 +154,13 @@ where
             move || stop.stop()
         };
 
-        let stop = move || {
+        let stop = sendwrap_fn!(move || {
             cleanup();
             stop_watch();
-        };
+        });
 
         on_cleanup({
-            let stop = send_wrapper::SendWrapper::new(stop.clone());
+            let stop = stop.clone();
             #[allow(clippy::redundant_closure)]
             move || stop()
         });
@@ -183,7 +189,7 @@ impl From<UseResizeObserverOptions> for web_sys::ResizeObserverOptions {
 }
 
 /// The return value of [`use_resize_observer`].
-pub struct UseResizeObserverReturn<F: Fn() + Clone> {
+pub struct UseResizeObserverReturn<F: Fn() + Clone + Send + Sync> {
     /// Whether the browser supports the ResizeObserver API
     pub is_supported: Signal<bool>,
     /// A function to stop and detach the ResizeObserver

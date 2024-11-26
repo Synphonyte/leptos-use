@@ -1,7 +1,7 @@
 use crate::core::{IntoElementMaybeSignal, Position};
 use crate::{
-    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
-    UseMouseReturn, UseMouseSourceType, UseWindow,
+    sendwrap_fn, use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor,
+    UseMouseOptions, UseMouseReturn, UseMouseSourceType, UseWindow,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -34,11 +34,18 @@ use std::marker::PhantomData;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure `stop` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_mouse_in_element`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this returns simple Signals with the `initial_value` for `x` and `y`,
 /// no-op for `stop`, `is_outside = true` and `0.0` for the rest of the signals.
-pub fn use_mouse_in_element<El, M>(target: El) -> UseMouseInElementReturn<impl Fn() + Clone>
+pub fn use_mouse_in_element<El, M>(
+    target: El,
+) -> UseMouseInElementReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -49,7 +56,7 @@ where
 pub fn use_mouse_in_element_with_options<El, M, OptEl, OptM, OptEx>(
     target: El,
     options: UseMouseInElementOptions<OptEl, OptM, OptEx>,
-) -> UseMouseInElementReturn<impl Fn() + Clone>
+) -> UseMouseInElementReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
     OptEl: IntoElementMaybeSignal<web_sys::EventTarget, OptM>,
@@ -148,7 +155,7 @@ where
             false,
         );
 
-        stop = move || effect.stop();
+        stop = sendwrap_fn!(move || effect.stop());
 
         let _ = use_event_listener(document(), mouseleave, move |_| set_outside.set(true));
     }
@@ -219,7 +226,7 @@ where
 /// Return type of [`use_mouse_in_element`].
 pub struct UseMouseInElementReturn<F>
 where
-    F: Fn() + Clone,
+    F: Fn() + Clone + Send + Sync,
 {
     /// X coordinate of the mouse pointer / touch
     pub x: Signal<f64>,

@@ -93,7 +93,7 @@ pub fn watch_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
     options: WatchOptions,
-) -> impl Fn() + Clone
+) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,

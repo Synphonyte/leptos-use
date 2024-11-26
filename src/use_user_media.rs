@@ -43,14 +43,15 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
-pub fn use_user_media() -> UseUserMediaReturn<impl Fn() + Clone, impl Fn() + Clone> {
+pub fn use_user_media(
+) -> UseUserMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_user_media_with_options(UseUserMediaOptions::default())
 }
 
 /// Version of [`use_user_media`] that takes a `UseUserMediaOptions`. See [`use_user_media`] for how to use.
 pub fn use_user_media_with_options(
     options: UseUserMediaOptions,
-) -> UseUserMediaReturn<impl Fn() + Clone, impl Fn() + Clone> {
+) -> UseUserMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     let UseUserMediaOptions {
         enabled,
         video,
@@ -299,8 +300,8 @@ impl Default for UseUserMediaOptions {
 #[derive(Clone)]
 pub struct UseUserMediaReturn<StartFn, StopFn>
 where
-    StartFn: Fn() + Clone,
-    StopFn: Fn() + Clone,
+    StartFn: Fn() + Clone + Send + Sync,
+    StopFn: Fn() + Clone + Send + Sync,
 {
     /// The current [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) if it exists.
     /// Initially this is `None` until `start` resolved successfully.

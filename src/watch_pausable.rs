@@ -56,7 +56,7 @@ use leptos::prelude::*;
 pub fn watch_pausable<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
-) -> WatchPausableReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> WatchPausableReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
@@ -71,7 +71,7 @@ pub fn watch_pausable_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
     options: WatchOptions,
-) -> WatchPausableReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> WatchPausableReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
     DFn: Fn() -> W + 'static,
     CFn: Fn(&W, Option<&W>, Option<T>) -> T + Clone + 'static,
@@ -109,9 +109,9 @@ where
 /// Return type of [`watch_pausable`]
 pub struct WatchPausableReturn<StopFn, PauseFn, ResumeFn>
 where
-    StopFn: Fn() + Clone,
-    PauseFn: Fn() + Clone,
-    ResumeFn: Fn() + Clone,
+    StopFn: Fn() + Clone + Send + Sync,
+    PauseFn: Fn() + Clone + Send + Sync,
+    ResumeFn: Fn() + Clone + Send + Sync,
 {
     /// Stops the watcher
     pub stop: StopFn,

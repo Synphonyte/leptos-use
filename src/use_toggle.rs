@@ -27,7 +27,7 @@ use leptos::prelude::*;
 // #[doc(cfg(feature = "use_toggle"))]
 pub fn use_toggle(
     initial_value: impl Into<MaybeRwSignal<bool>>,
-) -> UseToggleReturn<impl Fn() + Clone + 'static> {
+) -> UseToggleReturn<impl Fn() + Clone + Send + Sync + 'static> {
     let initial_value = initial_value.into();
     let (value, set_value) = initial_value.into_signal();
 
@@ -46,7 +46,7 @@ pub fn use_toggle(
 // #[doc(cfg(feature = "use_toggle"))]
 pub struct UseToggleReturn<F>
 where
-    F: Fn() + Clone + 'static,
+    F: Fn() + Clone + Send + Sync + 'static,
 {
     /// Toggles the value between `true` and `false`.
     pub toggle: F,

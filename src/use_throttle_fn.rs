@@ -60,6 +60,11 @@ pub use crate::utils::ThrottleOptions;
 /// If you want to throttle a function that takes an argument there are also the versions
 /// [`use_throttle_fn_with_arg`] and [`use_throttle_fn_with_arg_and_options`].
 ///
+/// ## SendWrapped Return
+/// 
+/// The returned closure is a sendwrapped function. It can
+/// only be called from the same thread that called `use_throttle_...`.
+/// 
 /// ## Recommended Reading
 ///
 /// - [**Debounce vs Throttle**: Definitive Visual Guide](https://redd.one/blog/debounce-vs-throttle)
@@ -72,7 +77,7 @@ pub use crate::utils::ThrottleOptions;
 pub fn use_throttle_fn<F, R>(
     func: F,
     ms: impl Into<Signal<f64>> + 'static,
-) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
+) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone + Send + Sync
 where
     F: Fn() -> R + Clone + 'static,
     R: 'static,
@@ -85,7 +90,7 @@ pub fn use_throttle_fn_with_options<F, R>(
     func: F,
     ms: impl Into<Signal<f64>> + 'static,
     options: ThrottleOptions,
-) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone
+) -> impl Fn() -> Arc<Mutex<Option<R>>> + Clone + Send + Sync
 where
     F: Fn() -> R + Clone + 'static,
     R: 'static,
@@ -97,7 +102,7 @@ where
 pub fn use_throttle_fn_with_arg<F, Arg, R>(
     func: F,
     ms: impl Into<Signal<f64>> + 'static,
-) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
+) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone + Send + Sync
 where
     F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,
@@ -111,7 +116,7 @@ pub fn use_throttle_fn_with_arg_and_options<F, Arg, R>(
     func: F,
     ms: impl Into<Signal<f64>> + 'static,
     options: ThrottleOptions,
-) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone
+) -> impl Fn(Arg) -> Arc<Mutex<Option<R>>> + Clone + Send + Sync
 where
     F: Fn(Arg) -> R + Clone + 'static,
     Arg: Clone + 'static,

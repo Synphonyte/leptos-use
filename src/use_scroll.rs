@@ -1,5 +1,5 @@
 use crate::core::{Direction, Directions, IntoElementMaybeSignal};
-use crate::UseEventListenerOptions;
+use crate::{sendwrap_fn, UseEventListenerOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -173,12 +173,21 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `set_x`, `set_y` and `measure` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_scroll`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this returns signals that don't change and setters that are noops.
 pub fn use_scroll<El, M>(
     element: El,
-) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
+) -> UseScrollReturn<
+    impl Fn(f64) + Clone + Send + Sync,
+    impl Fn(f64) + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -190,7 +199,11 @@ where
 pub fn use_scroll_with_options<El, M>(
     element: El,
     options: UseScrollOptions,
-) -> UseScrollReturn<impl Fn(f64) + Clone, impl Fn(f64) + Clone, impl Fn() + Clone>
+) -> UseScrollReturn<
+    impl Fn(f64) + Clone + Send + Sync,
+    impl Fn(f64) + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -252,10 +265,10 @@ where
 
         set_x = {
             let scroll_to = scroll_to.clone();
-            move |x| scroll_to(Some(x), None)
+            sendwrap_fn!(move |x| scroll_to(Some(x), None))
         };
 
-        set_y = move |y| scroll_to(None, Some(y));
+        set_y = sendwrap_fn!(move |y| scroll_to(None, Some(y)));
 
         let on_scroll_end = {
             let on_stop = Rc::clone(&options.on_stop);
@@ -424,11 +437,11 @@ where
             options.event_listener_options,
         );
 
-        measure = move || {
+        measure = sendwrap_fn!(move || {
             if let Some(el) = signal.try_get_untracked().flatten() {
                 set_arrived_state(el);
             }
-        };
+        });
     }
 
     UseScrollReturn {
@@ -508,9 +521,9 @@ impl From<ScrollBehavior> for web_sys::ScrollBehavior {
 /// The return value of [`use_scroll`].
 pub struct UseScrollReturn<SetXFn, SetYFn, MFn>
 where
-    SetXFn: Fn(f64) + Clone,
-    SetYFn: Fn(f64) + Clone,
-    MFn: Fn() + Clone,
+    SetXFn: Fn(f64) + Clone + Send + Sync,
+    SetYFn: Fn(f64) + Clone + Send + Sync,
+    MFn: Fn() + Clone + Send + Sync,
 {
     /// X coordinate of scroll position
     pub x: Signal<f64>,

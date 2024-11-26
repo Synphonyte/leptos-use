@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
-use crate::js;
 use crate::utils::js_value_from_to_string;
+use crate::{js, sendwrap_fn};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -761,21 +761,19 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
     }
 }
 
-cfg_if! { if #[cfg(feature = "ssr")] {
-    /// Return type of [`use_intl_number_format`].
-    pub struct UseIntlNumberFormatReturn;
-} else {
-    /// Return type of [`use_intl_number_format`].
-    pub struct UseIntlNumberFormatReturn {
-        /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
-        pub js_intl_number_format: js_sys::Intl::NumberFormat,
-    }
-}}
+/// Return type of [`use_intl_number_format`].
+#[allow(dead_code)]
+pub struct UseIntlNumberFormatReturn {
+    /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
+    pub js_intl_number_format: js_sys::Intl::NumberFormat,
+}
 
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
     /// See [`use_intl_number_format`] for more information.
-    pub fn format<N>(&self, number: impl Into<Signal<N>>) -> Signal<String, LocalStorage>
+    /// In the browser this uses `SendWrapper` internally so the returned signal can only be used on
+    /// the same thread where this method was called.
+    pub fn format<N>(&self, number: impl Into<Signal<N>>) -> Signal<String>
     where
         N: Clone + Display + Send + Sync + 'static,
         js_sys::Number: From<N>,
@@ -783,13 +781,13 @@ impl UseIntlNumberFormatReturn {
         let number = number.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive_local(move || {
+            Signal::derive(move || {
                 format!("{}", number.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive_local(move || {
+            Signal::derive(sendwrap_fn!(move || {
                 if let Ok(result) = number_format
                     .format()
                     .call1(&number_format, &js_sys::Number::from(number.get()).into())
@@ -798,7 +796,7 @@ impl UseIntlNumberFormatReturn {
                 } else {
                     "".to_string()
                 }
-            })
+            }))
         }}
     }
 

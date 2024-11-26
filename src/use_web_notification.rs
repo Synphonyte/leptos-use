@@ -43,15 +43,20 @@ use wasm_bindgen::JsValue;
 /// ## Server-Side Rendering
 ///
 /// This function is basically ignored on the server. You can safely call `show` but it will do nothing.
-pub fn use_web_notification(
-) -> UseWebNotificationReturn<impl Fn(ShowOptions) + Clone, impl Fn() + Clone> {
+pub fn use_web_notification() -> UseWebNotificationReturn<
+    impl Fn(ShowOptions) + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+> {
     use_web_notification_with_options(UseWebNotificationOptions::default())
 }
 
 /// Version of [`use_web_notification`] which takes an [`UseWebNotificationOptions`].
 pub fn use_web_notification_with_options(
     options: UseWebNotificationOptions,
-) -> UseWebNotificationReturn<impl Fn(ShowOptions) + Clone, impl Fn() + Clone> {
+) -> UseWebNotificationReturn<
+    impl Fn(ShowOptions) + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+> {
     let is_supported = use_supported(browser_supports_notifications);
 
     let (notification, set_notification) = signal_local(None::<web_sys::Notification>);

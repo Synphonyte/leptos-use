@@ -1,4 +1,5 @@
 use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
+use crate::sendwrap_fn;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::sync::Arc;
@@ -92,11 +93,18 @@ use std::sync::Arc;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure `trigger_resize` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_textarea_autosize`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this will always return an empty string as ´content` and a no-op `trigger_resize`.
 // #[doc(cfg(feature = "use_textarea_autosize"))]
-pub fn use_textarea_autosize<El, M>(el: El) -> UseTextareaAutosizeReturn<impl Fn() + Clone>
+pub fn use_textarea_autosize<El, M>(
+    el: El,
+) -> UseTextareaAutosizeReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M> + Clone,
 {
@@ -108,7 +116,7 @@ where
 pub fn use_textarea_autosize_with_options<El, M>(
     el: El,
     options: UseTextareaAutosizeOptions,
-) -> UseTextareaAutosizeReturn<impl Fn() + Clone>
+) -> UseTextareaAutosizeReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M> + Clone,
 {
@@ -135,7 +143,7 @@ where
         let (textarea_scroll_height, set_textarea_scroll_height) = signal(1);
         let (textarea_old_width, set_textarea_old_width) = signal(0.0);
 
-        let trigger_resize = move || {
+        let trigger_resize = sendwrap_fn!(move || {
             textarea.with_untracked(|textarea| {
                 if let Some(textarea) = textarea {
                     let mut height = "".to_string();
@@ -180,7 +188,7 @@ where
                         .ok();
                 }
             })
-        };
+        });
 
         Effect::watch(
             move || {
@@ -310,7 +318,7 @@ impl UseTextareaAutosizeOptions {
 // #[doc(cfg(feature = "use_textarea_autosize"))]
 pub struct UseTextareaAutosizeReturn<F>
 where
-    F: Fn() + Clone,
+    F: Fn() + Clone + Send + Sync,
 {
     /// The textarea content
     pub content: Signal<String>,

@@ -36,6 +36,25 @@ macro_rules! sendwrap_fn {
         }
     };
     
+    (move |$($param:ident),*| $($content:tt)*) => {
+        {
+            let wrapped = send_wrapper::SendWrapper::new(move |$($param),*| $($content)*);
+
+            move |$($param),*| wrapped($($param),*)
+        }
+    };
+
+    (once move |$($param:ident),*| $($content:tt)*) => {
+        {
+            let wrapped = send_wrapper::SendWrapper::new(move |$($param),*| $($content)*);
+    
+            move |$($param),*| {
+                let inner = wrapped.take();
+                inner($($param),*)
+            }
+        }
+    };
+    
     (once move || $($content:tt)*) => {
         sendwrap_fn!(once move | | $($content)*)  
     };
