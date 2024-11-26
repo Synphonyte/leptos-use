@@ -1,7 +1,7 @@
 use crate::core::{IntoElementMaybeSignal, Position};
 use crate::{
-    sendwrap_fn, use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor,
-    UseMouseOptions, UseMouseReturn, UseMouseSourceType, UseWindow,
+    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
+    UseMouseReturn, UseMouseSourceType, UseWindow,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -111,7 +111,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::use_event_listener;
+        use crate::{sendwrap_fn, use_event_listener};
         use leptos::ev::mouseleave;
 
         let target = target.into_element_maybe_signal();

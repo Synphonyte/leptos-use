@@ -1,11 +1,10 @@
 use crate::core::IntoElementMaybeSignal;
-use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    use crate::{watch_with_options, WatchOptions};
+    use crate::{watch_with_options, WatchOptions, sendwrap_fn};
     use leptos::prelude::*;
     use std::cell::RefCell;
     use std::rc::Rc;

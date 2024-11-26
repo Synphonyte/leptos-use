@@ -1,8 +1,6 @@
 use crate::core::now;
 use crate::filter_builder_methods;
-use crate::sendwrap_fn;
 use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -87,18 +85,25 @@ pub fn use_idle_with_options(
     let (idle, set_idle) = signal(initial_state);
     let (last_active, set_last_active) = signal(now());
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
-        let reset = || ();
+    let reset;
+    
+    #[cfg(feature = "ssr")]
+    {
+        reset = || ();
         let _ = timeout;
         let _ = events;
         let _ = listen_for_visibility_change;
         let _ = filter;
         let _ = set_last_active;
         let _ = set_idle;
-    } else {
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         use crate::utils::create_filter_wrapper;
         use crate::{
-            use_document, use_event_listener, use_event_listener_with_options, UseEventListenerOptions,
+            sendwrap_fn, use_document, use_event_listener, use_event_listener_with_options,
+            UseEventListenerOptions,
         };
         use leptos::ev::{visibilitychange, Custom};
         use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -108,14 +113,17 @@ pub fn use_idle_with_options(
 
         let timer = Rc::new(Cell::new(None::<TimeoutHandle>));
 
-        let reset = {
+        reset = {
             let timer = Rc::clone(&timer);
 
             sendwrap_fn!(move || {
                 set_idle.set(false);
                 if let Some(timer) = timer.replace(
-                    set_timeout_with_handle(move || set_idle.set(true), Duration::from_millis(timeout))
-                        .ok(),
+                    set_timeout_with_handle(
+                        move || set_idle.set(true),
+                        Duration::from_millis(timeout),
+                    )
+                    .ok(),
                 ) {
                     timer.clear();
                 }
@@ -156,7 +164,7 @@ pub fn use_idle_with_options(
         }
 
         reset.clone()();
-    }}
+    }
 
     UseIdleReturn {
         idle: idle.into(),

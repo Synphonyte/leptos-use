@@ -761,12 +761,16 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
     }
 }
 
-/// Return type of [`use_intl_number_format`].
-#[allow(dead_code)]
-pub struct UseIntlNumberFormatReturn {
-    /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
-    pub js_intl_number_format: js_sys::Intl::NumberFormat,
-}
+cfg_if! { if #[cfg(feature = "ssr")] {
+    /// Return type of [`use_intl_number_format`].
+    pub struct UseIntlNumberFormatReturn;
+} else {
+    /// Return type of [`use_intl_number_format`].
+    pub struct UseIntlNumberFormatReturn {
+        /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
+        pub js_intl_number_format: js_sys::Intl::NumberFormat,
+    }
+}}  
 
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.

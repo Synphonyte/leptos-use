@@ -1,11 +1,10 @@
 use crate::core::IntoElementsMaybeSignal;
-use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::reactive::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    use crate::use_supported;
+    use crate::{sendwrap_fn, use_supported};
     use std::cell::RefCell;
     use std::rc::Rc;
     use wasm_bindgen::prelude::*;

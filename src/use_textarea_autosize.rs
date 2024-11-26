@@ -1,5 +1,4 @@
 use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
-use crate::sendwrap_fn;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::sync::Arc;
@@ -122,6 +121,7 @@ where
 {
     #[cfg(not(feature = "ssr"))]
     {
+        use crate::sendwrap_fn;
         use wasm_bindgen::JsCast;
 
         let el = el.into_element_maybe_signal();

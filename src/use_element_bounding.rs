@@ -1,5 +1,4 @@
 use crate::core::IntoElementMaybeSignal;
-use crate::sendwrap_fn;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -84,7 +83,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{
-            use_event_listener_with_options, use_resize_observer, use_window,
+            sendwrap_fn, use_event_listener_with_options, use_resize_observer, use_window,
             UseEventListenerOptions,
         };
         use leptos::ev::{resize, scroll};

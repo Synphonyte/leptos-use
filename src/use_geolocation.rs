@@ -1,5 +1,3 @@
-use crate::sendwrap_fn;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -55,18 +53,25 @@ pub fn use_geolocation_with_options(
     let (error, set_error) = signal_local(None::<web_sys::PositionError>);
     let (coords, set_coords) = signal_local(None::<web_sys::Coordinates>);
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
-        let resume = || ();
-        let pause = || ();
+    let resume;
+    let pause;
+
+    #[cfg(feature = "ssr")]
+    {
+        resume = || ();
+        pause = || ();
 
         let _ = options;
         let _ = set_located_at;
         let _ = set_error;
         let _ = set_coords;
-    } else {
-        use crate::use_window;
-        use wasm_bindgen::prelude::*;
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        use crate::{sendwrap_fn, use_window};
         use std::sync::{Arc, Mutex};
+        use wasm_bindgen::prelude::*;
 
         let update_position = move |position: web_sys::Position| {
             set_located_at.set(Some(position.timestamp()));
@@ -80,7 +85,7 @@ pub fn use_geolocation_with_options(
 
         let watch_handle = Arc::new(Mutex::new(None::<i32>));
 
-        let resume = {
+        resume = {
             let watch_handle = Arc::clone(&watch_handle);
             let position_options = options.as_position_options();
 
@@ -88,19 +93,20 @@ pub fn use_geolocation_with_options(
                 let navigator = use_window().navigator();
                 if let Some(navigator) = navigator {
                     if let Ok(geolocation) = navigator.geolocation() {
-                        let update_position =
-                            Closure::wrap(Box::new(update_position) as Box<dyn Fn(web_sys::Position)>);
-                        let on_error =
-                            Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
+                        let update_position = Closure::wrap(
+                            Box::new(update_position) as Box<dyn Fn(web_sys::Position)>
+                        );
+                        let on_error = Closure::wrap(
+                            Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>
+                        );
 
-                        *watch_handle.lock().unwrap() =
-                            geolocation
-                                .watch_position_with_error_callback_and_options(
-                                    update_position.as_ref().unchecked_ref(),
-                                    Some(on_error.as_ref().unchecked_ref()),
-                                    &position_options,
-                                )
-                                .ok();
+                        *watch_handle.lock().unwrap() = geolocation
+                            .watch_position_with_error_callback_and_options(
+                                update_position.as_ref().unchecked_ref(),
+                                Some(on_error.as_ref().unchecked_ref()),
+                                &position_options,
+                            )
+                            .ok();
 
                         update_position.forget();
                         on_error.forget();
@@ -113,7 +119,7 @@ pub fn use_geolocation_with_options(
             resume();
         }
 
-        let pause = {
+        pause = {
             let watch_handle = Arc::clone(&watch_handle);
 
             sendwrap_fn!(move || {
@@ -135,7 +141,7 @@ pub fn use_geolocation_with_options(
                 pause();
             }
         });
-    }}
+    }
 
     UseGeolocationReturn {
         coords: coords.into(),

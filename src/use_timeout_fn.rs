@@ -1,4 +1,3 @@
-use crate::sendwrap_fn;
 use leptos::prelude::*;
 use std::marker::PhantomData;
 
@@ -56,6 +55,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        use crate::sendwrap_fn;
         use leptos::leptos_dom::helpers::TimeoutHandle;
         use std::sync::{Arc, Mutex};
         use std::time::Duration;
