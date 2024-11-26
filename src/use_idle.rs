@@ -86,7 +86,7 @@ pub fn use_idle_with_options(
     let (last_active, set_last_active) = signal(now());
 
     let reset;
-    
+
     #[cfg(feature = "ssr")]
     {
         reset = || ();

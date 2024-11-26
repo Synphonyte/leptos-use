@@ -770,7 +770,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
         /// The instance of [`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
         pub js_intl_number_format: js_sys::Intl::NumberFormat,
     }
-}}  
+}}
 
 impl UseIntlNumberFormatReturn {
     /// Formats a number according to the [locale and formatting options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#parameters) of this `Intl.NumberFormat` object.
