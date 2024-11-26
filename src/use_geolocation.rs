@@ -1,3 +1,4 @@
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -32,17 +33,24 @@ use leptos::reactive::wrappers::read::Signal;
 /// # }
 /// ```
 ///
+///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause` and `resume` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_geolocation`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server all signals returns will always contain `None` and the functions do nothing.
-pub fn use_geolocation() -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
+pub fn use_geolocation(
+) -> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_geolocation_with_options(UseGeolocationOptions::default())
 }
 
 /// Version of [`use_geolocation`] that takes a `UseGeolocationOptions`. See [`use_geolocation`] for how to use.
 pub fn use_geolocation_with_options(
     options: UseGeolocationOptions,
-) -> UseGeolocationReturn<impl Fn() + Clone, impl Fn() + Clone> {
+) -> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     let (located_at, set_located_at) = signal(None::<f64>);
     let (error, set_error) = signal_local(None::<web_sys::PositionError>);
     let (coords, set_coords) = signal_local(None::<web_sys::Coordinates>);
@@ -76,7 +84,7 @@ pub fn use_geolocation_with_options(
             let watch_handle = Arc::clone(&watch_handle);
             let position_options = options.as_position_options();
 
-            move || {
+            sendwrap_fn!(move || {
                 let navigator = use_window().navigator();
                 if let Some(navigator) = navigator {
                     if let Ok(geolocation) = navigator.geolocation() {
@@ -98,7 +106,7 @@ pub fn use_geolocation_with_options(
                         on_error.forget();
                     }
                 }
-            }
+            })
         };
 
         if options.immediate {
@@ -108,7 +116,7 @@ pub fn use_geolocation_with_options(
         let pause = {
             let watch_handle = Arc::clone(&watch_handle);
 
-            move || {
+            sendwrap_fn!(move || {
                 let navigator = use_window().navigator();
                 if let Some(navigator) = navigator {
                     if let Some(handle) = *watch_handle.lock().unwrap() {
@@ -117,7 +125,7 @@ pub fn use_geolocation_with_options(
                         }
                     }
                 }
-            }
+            })
         };
 
         on_cleanup({
@@ -198,8 +206,8 @@ impl UseGeolocationOptions {
 /// Return type of [`use_geolocation`].
 pub struct UseGeolocationReturn<ResumeFn, PauseFn>
 where
-    ResumeFn: Fn() + Clone,
-    PauseFn: Fn() + Clone,
+    ResumeFn: Fn() + Clone + Send + Sync,
+    PauseFn: Fn() + Clone + Send + Sync,
 {
     /// The coordinates of the current device like latitude and longitude.
     /// See [`GeolocationCoordinates`](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates)..

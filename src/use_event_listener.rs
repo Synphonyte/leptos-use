@@ -1,4 +1,5 @@
 use crate::core::IntoElementMaybeSignal;
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;
@@ -85,10 +86,19 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure is a sendwrapped function. It can
+/// only be called from the same thread that called `use_event_listener`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a noop.
-pub fn use_event_listener<Ev, El, M, F>(target: El, event: Ev, handler: F) -> impl Fn() + Clone
+pub fn use_event_listener<Ev, El, M, F>(
+    target: El,
+    event: Ev,
+    handler: F,
+) -> impl Fn() + Clone + Send + Sync
 where
     Ev: EventDescriptor + 'static,
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
@@ -105,7 +115,7 @@ pub fn use_event_listener_with_options<Ev, El, M, F>(
     event: Ev,
     mut handler: F,
     options: UseEventListenerOptions,
-) -> impl Fn() + Clone
+) -> impl Fn() + Clone + Send + Sync
 where
     Ev: EventDescriptor + 'static,
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
@@ -181,10 +191,10 @@ where
             )
         };
 
-        let stop = move || {
+        let stop = sendwrap_fn!(move || {
             stop_watch();
             cleanup_prev_element();
-        };
+        });
 
         on_cleanup({
             let stop = SendWrapper::new(stop.clone());

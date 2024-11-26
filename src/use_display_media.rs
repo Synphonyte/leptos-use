@@ -1,4 +1,5 @@
 use crate::core::MaybeRwSignal;
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -40,18 +41,24 @@ use wasm_bindgen::{JsCast, JsValue};
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `start` and `stop` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_display_media`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
-pub fn use_display_media() -> UseDisplayMediaReturn<impl Fn() + Clone, impl Fn() + Clone> {
+pub fn use_display_media(
+) -> UseDisplayMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_display_media_with_options(UseDisplayMediaOptions::default())
 }
 
 /// Version of [`use_display_media`] that accepts a [`UseDisplayMediaOptions`].
 pub fn use_display_media_with_options(
     options: UseDisplayMediaOptions,
-) -> UseDisplayMediaReturn<impl Fn() + Clone, impl Fn() + Clone> {
+) -> UseDisplayMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     let UseDisplayMediaOptions { enabled, audio } = options;
 
     let (enabled, set_enabled) = enabled.into_signal();
@@ -82,7 +89,7 @@ pub fn use_display_media_with_options(
         set_stream.set(None);
     };
 
-    let start = move || {
+    let start = sendwrap_fn!(move || {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
             leptos::task::spawn_local(async move {
                 _start().await;
@@ -93,12 +100,12 @@ pub fn use_display_media_with_options(
                 });
             });
         }}
-    };
+    });
 
-    let stop = move || {
+    let stop = sendwrap_fn!(move || {
         _stop();
         set_enabled.set(false);
-    };
+    });
 
     Effect::watch(
         move || enabled.get(),
@@ -170,8 +177,8 @@ impl Default for UseDisplayMediaOptions {
 #[derive(Clone)]
 pub struct UseDisplayMediaReturn<StartFn, StopFn>
 where
-    StartFn: Fn() + Clone,
-    StopFn: Fn() + Clone,
+    StartFn: Fn() + Clone + Send + Sync,
+    StopFn: Fn() + Clone + Send + Sync,
 {
     /// The current [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) if it exists.
     /// Initially this is `None` until `start` resolved successfully.

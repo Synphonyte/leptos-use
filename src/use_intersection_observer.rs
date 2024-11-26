@@ -1,4 +1,5 @@
 use crate::core::{IntoElementMaybeSignal, IntoElementsMaybeSignal};
+use crate::sendwrap_fn;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -48,6 +49,11 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause`, `resume` and `stop` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_intersection_observer`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this amounts to a no-op.
@@ -58,7 +64,11 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 pub fn use_intersection_observer<Els, M, F, RootM>(
     target: Els,
     callback: F,
-) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> UseIntersectionObserverReturn<
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     F: FnMut(Vec<web_sys::IntersectionObserverEntry>, web_sys::IntersectionObserver) + 'static,
@@ -77,7 +87,11 @@ pub fn use_intersection_observer_with_options<Els, M, RootEl, RootM, F>(
     target: Els,
     mut callback: F,
     options: UseIntersectionObserverOptions<RootEl, RootM>,
-) -> UseIntersectionObserverReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> UseIntersectionObserverReturn<
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     Els: IntoElementsMaybeSignal<web_sys::Element, M>,
     RootEl: IntoElementMaybeSignal<web_sys::Element, RootM>,
@@ -188,10 +202,10 @@ where
         let stop = {
             let cleanup = cleanup.clone();
 
-            move || {
+            sendwrap_fn!(move || {
                 cleanup();
                 stop_watch();
-            }
+            })
         };
 
         on_cleanup(stop.clone());
@@ -199,20 +213,20 @@ where
         let pause = {
             let cleanup = cleanup.clone();
 
-            move || {
+            sendwrap_fn!(move || {
                 cleanup();
                 set_active.set(false);
-            }
+            })
         };
     }}
 
     UseIntersectionObserverReturn {
         is_active: is_active.into(),
         pause,
-        resume: move || {
+        resume: sendwrap_fn!(move || {
             cleanup();
             set_active.set(true);
-        },
+        }),
         stop,
     }
 }
@@ -275,9 +289,9 @@ where
 /// The return value of [`use_intersection_observer`].
 pub struct UseIntersectionObserverReturn<StopFn, PauseFn, ResumeFn>
 where
-    StopFn: Fn() + Clone,
-    PauseFn: Fn() + Clone,
-    ResumeFn: Fn() + Clone,
+    StopFn: Fn() + Clone + Send + Sync,
+    PauseFn: Fn() + Clone + Send + Sync,
+    ResumeFn: Fn() + Clone + Send + Sync,
 {
     /// Pauses the `IntersectionObserver` observations. Will cause `is_active = false`.
     pub pause: PauseFn,

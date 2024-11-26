@@ -1,12 +1,13 @@
 use crate::core::now;
 use crate::filter_builder_methods;
+use crate::sendwrap_fn;
 use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 
-///
+/// Tracks whether the user is being inactive.
 ///
 /// ## Demo
 ///
@@ -51,6 +52,11 @@ use leptos::reactive::wrappers::read::Signal;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closure `reset` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_idle`.
+/// 
 /// ## Server-Side Rendering
 ///
 /// On the server this will always return static signals
@@ -62,7 +68,7 @@ use leptos::reactive::wrappers::read::Signal;
 ///     reset: || {}
 /// }
 /// ```
-pub fn use_idle(timeout: u64) -> UseIdleReturn<impl Fn() + Clone> {
+pub fn use_idle(timeout: u64) -> UseIdleReturn<impl Fn() + Clone + Send + Sync> {
     use_idle_with_options(timeout, UseIdleOptions::default())
 }
 
@@ -70,7 +76,7 @@ pub fn use_idle(timeout: u64) -> UseIdleReturn<impl Fn() + Clone> {
 pub fn use_idle_with_options(
     timeout: u64,
     options: UseIdleOptions,
-) -> UseIdleReturn<impl Fn() + Clone> {
+) -> UseIdleReturn<impl Fn() + Clone + Send + Sync> {
     let UseIdleOptions {
         events,
         listen_for_visibility_change,
@@ -105,7 +111,7 @@ pub fn use_idle_with_options(
         let reset = {
             let timer = Rc::clone(&timer);
 
-            move || {
+            sendwrap_fn!(move || {
                 set_idle.set(false);
                 if let Some(timer) = timer.replace(
                     set_timeout_with_handle(move || set_idle.set(true), Duration::from_millis(timeout))
@@ -113,7 +119,7 @@ pub fn use_idle_with_options(
                 ) {
                     timer.clear();
                 }
-            }
+            })
         };
 
         let on_event = {
@@ -207,7 +213,7 @@ impl UseIdleOptions {
 /// Return type of [`use_idle`].
 pub struct UseIdleReturn<F>
 where
-    F: Fn() + Clone,
+    F: Fn() + Clone + Send + Sync,
 {
     /// Wether the use has been inactive for at least `timeout` milliseconds.
     pub idle: Signal<bool>,

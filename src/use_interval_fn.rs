@@ -8,6 +8,7 @@ use send_wrapper::SendWrapper;
 use std::cell::Cell;
 use std::sync::Arc;
 use std::time::Duration;
+use crate::sendwrap_fn;
 
 /// Wrapper for `set_interval` with controls.
 ///
@@ -34,6 +35,11 @@ use std::time::Duration;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause` and `resume` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_interval_fn`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this function will simply be ignored.
@@ -42,7 +48,7 @@ pub fn use_interval_fn<CbFn, N>(
     interval: N,
 ) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
-    CbFn: Fn() + Clone + 'static + Send + Sync,
+    CbFn: Fn() + Clone + 'static,
     N: Into<Signal<u64>>,
 {
     use_interval_fn_with_options(callback, interval, UseIntervalFnOptions::default())
@@ -53,7 +59,7 @@ pub fn use_interval_fn_with_options<CbFn, N>(
     callback: CbFn,
     interval: N,
     options: UseIntervalFnOptions,
-) -> Pausable<impl Fn() + Clone, impl Fn() + Clone>
+) -> Pausable<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync>
 where
     CbFn: Fn() + Clone + 'static,
     N: Into<Signal<u64>>,
@@ -89,7 +95,7 @@ where
 
     let interval = interval.into();
 
-    let resume = move || {
+    let resume = sendwrap_fn!(move || {
         #[cfg(not(feature = "ssr"))]
         {
             let interval_value = interval.get();
@@ -120,7 +126,7 @@ where
                     .ok(),
             );
         }
-    };
+    });
 
     if immediate {
         resume();

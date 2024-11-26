@@ -1,5 +1,5 @@
 use crate::core::ConnectionReadyState;
-use crate::{js, use_event_listener, ReconnectLimit};
+use crate::{js, sendwrap_fn, use_event_listener, ReconnectLimit};
 use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -102,6 +102,12 @@ use thiserror::Error;
 /// # }
 /// ```
 ///
+///
+/// ## SendWrapped Return
+///
+/// The returned closures `open` and `close` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_event_source`.
+/// 
 /// To disable auto-reconnection, set `reconnect_limit` to `0`.
 ///
 /// ## Server-Side Rendering
@@ -110,7 +116,12 @@ use thiserror::Error;
 /// `data`, `event` and `error` will always be `None`, and `open` and `close` will do nothing.
 pub fn use_event_source<T, C>(
     url: &str,
-) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
+) -> UseEventSourceReturn<
+    T,
+    C::Error,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+>
 where
     T: Clone + PartialEq + Send + Sync + 'static,
     C: Decoder<T, Encoded = str>,
@@ -123,7 +134,12 @@ where
 pub fn use_event_source_with_options<T, C>(
     url: &str,
     options: UseEventSourceOptions<T>,
-) -> UseEventSourceReturn<T, C::Error, impl Fn() + Clone + 'static, impl Fn() + Clone + 'static>
+) -> UseEventSourceReturn<
+    T,
+    C::Error,
+    impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn() + Clone + Send + Sync + 'static,
+>
 where
     T: Clone + PartialEq + Send + Sync + 'static,
     C: Decoder<T, Encoded = str>,
@@ -162,14 +178,14 @@ where
     let close = {
         let explicitly_closed = Arc::clone(&explicitly_closed);
 
-        move || {
+        sendwrap_fn!(move || {
             if let Some(event_source) = event_source.get_untracked() {
                 event_source.close();
                 set_event_source.set(None);
                 set_ready_state.set(ConnectionReadyState::Closed);
                 explicitly_closed.store(true, std::sync::atomic::Ordering::Relaxed);
             }
-        }
+        })
     };
 
     let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
@@ -273,14 +289,14 @@ where
             let explicitly_closed = Arc::clone(&explicitly_closed);
             let retried = Arc::clone(&retried);
 
-            move || {
+            sendwrap_fn!(move || {
                 close();
                 explicitly_closed.store(false, std::sync::atomic::Ordering::Relaxed);
                 retried.store(0, std::sync::atomic::Ordering::Relaxed);
                 if let Some(init) = init.get_value() {
                     init();
                 }
-            }
+            })
         };
     }
 
@@ -356,8 +372,8 @@ pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn>
 where
     Err: Send + Sync + 'static,
     T: Clone + Send + Sync + 'static,
-    OpenFn: Fn() + Clone + 'static,
-    CloseFn: Fn() + Clone + 'static,
+    OpenFn: Fn() + Clone + Send + Sync + 'static,
+    CloseFn: Fn() + Clone + Send + Sync + 'static,
 {
     /// Latest data received via the `EventSource`
     pub data: Signal<Option<T>>,

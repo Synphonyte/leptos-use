@@ -1,4 +1,5 @@
 use crate::core::IntoElementMaybeSignal;
+use crate::sendwrap_fn;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -26,10 +27,18 @@ use leptos::reactive::wrappers::read::Signal;
 /// view! { <div node_ref=el></div> }
 /// # }
 /// ```
+///
+/// ## SendWrapped Return
+///
+/// The returned closure `update` is a sendwrapped function. It can
+/// only be called from the same thread that called `use_element_bounding`.
+/// 
 /// ## Server-Side Rendering
 ///
 /// On the server the returned signals always are `0.0` and `update` is a no-op.
-pub fn use_element_bounding<El, M>(target: El) -> UseElementBoundingReturn<impl Fn() + Clone>
+pub fn use_element_bounding<El, M>(
+    target: El,
+) -> UseElementBoundingReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -40,7 +49,7 @@ where
 pub fn use_element_bounding_with_options<El, M>(
     target: El,
     options: UseElementBoundingOptions,
-) -> UseElementBoundingReturn<impl Fn() + Clone>
+) -> UseElementBoundingReturn<impl Fn() + Clone + Send + Sync>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -92,7 +101,7 @@ where
         update = {
             let target = target.clone();
 
-            move || {
+            sendwrap_fn!(move || {
                 let el = target.get_untracked();
 
                 if let Some(el) = el {
@@ -116,7 +125,7 @@ where
                     set_x.set(0.0);
                     set_y.set(0.0);
                 }
-            }
+            })
         };
 
         use_resize_observer(target.clone(), {
@@ -220,7 +229,7 @@ impl Default for UseElementBoundingOptions {
 /// Return type of [`use_element_bounding`].
 pub struct UseElementBoundingReturn<F>
 where
-    F: Fn() + Clone,
+    F: Fn() + Clone + Send + Sync,
 {
     /// Reactive version of [`BoudingClientRect.height`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/height)
     pub height: Signal<f64>,

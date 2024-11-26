@@ -4,6 +4,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use crate::sendwrap_fn;
 
 /// Call function on every requestAnimationFrame.
 /// With controls of pausing and resuming.
@@ -33,6 +34,11 @@ use std::rc::Rc;
 ///
 /// You can use `use_raf_fn_with_options` and set `immediate` to `false`. In that case
 /// you have to call `resume()` before the `callback` is executed.
+///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause` and `resume` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_interval_fn`.
 ///
 /// ## Server-Side Rendering
 ///
@@ -117,14 +123,14 @@ pub fn use_raf_fn_with_options(
 
     let _ = loop_ref.replace(Box::new(loop_fn));
 
-    let resume = move || {
+    let resume = sendwrap_fn!(move || {
         if !is_active.get_untracked() {
             set_active.set(true);
             request_next_frame();
         }
-    };
+    });
 
-    let pause = move || {
+    let pause = sendwrap_fn!(move || {
         set_active.set(false);
 
         let handle = raf_handle.get();
@@ -132,14 +138,14 @@ pub fn use_raf_fn_with_options(
             let _ = window().cancel_animation_frame(handle);
         }
         raf_handle.set(None);
-    };
+    });
 
     if immediate {
         resume();
     }
 
     on_cleanup({
-        let pause = send_wrapper::SendWrapper::new(pause.clone());
+        let pause = pause.clone();
         #[allow(clippy::redundant_closure)]
         move || pause()
     });

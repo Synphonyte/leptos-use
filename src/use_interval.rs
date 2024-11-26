@@ -1,5 +1,5 @@
 use crate::utils::Pausable;
-use crate::{use_interval_fn_with_options, UseIntervalFnOptions};
+use crate::{sendwrap_fn, use_interval_fn_with_options, UseIntervalFnOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -30,12 +30,21 @@ use std::rc::Rc;
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `pause`, `resume` and `reset` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_intersection_observer`.
+///
 /// ## Server-Side Rendering
 ///
 /// On the server this function will simply be ignored.
 pub fn use_interval<N>(
     interval: N,
-) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> UseIntervalReturn<
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     N: Into<Signal<u64>>,
 {
@@ -46,7 +55,11 @@ where
 pub fn use_interval_with_options<N>(
     interval: N,
     options: UseIntervalOptions,
-) -> UseIntervalReturn<impl Fn() + Clone, impl Fn() + Clone, impl Fn() + Clone>
+) -> UseIntervalReturn<
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+    impl Fn() + Clone + Send + Sync,
+>
 where
     N: Into<Signal<u64>>,
 {
@@ -58,7 +71,7 @@ where
     let (counter, set_counter) = signal(0u64);
 
     let update = move || set_counter.update(|count| *count += 1);
-    let reset = move || set_counter.set(0);
+    let reset = sendwrap_fn!(move || set_counter.set(0));
 
     let cb = move || {
         update();
@@ -110,9 +123,9 @@ impl Default for UseIntervalOptions {
 #[derive(DefaultBuilder)]
 pub struct UseIntervalReturn<PauseFn, ResumeFn, ResetFn>
 where
-    PauseFn: Fn() + Clone,
-    ResumeFn: Fn() + Clone,
-    ResetFn: Fn() + Clone,
+    PauseFn: Fn() + Clone + Send + Sync,
+    ResumeFn: Fn() + Clone + Send + Sync,
+    ResetFn: Fn() + Clone + Send + Sync,
 {
     /// Counter signal that increases by one every interval.
     pub counter: Signal<u64>,
