@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0-rc4] - 2024-11-26
+
+- Updated to Leptos 0.7.0-rc2
+- Fixed WASM on the serverside (thanks to @GuillaumeDelorme)
+- Fixed `use_storage`.
+- Made all returned closures `Send + Sync`.
+
+Special thanks to our sponsor:
+- @spencewenski
+
 ## [0.14.0-rc3] - 2024-11-14
 
 - Fixed potential SSR panic in use_locale(s) (thanks to @veigaribo)
