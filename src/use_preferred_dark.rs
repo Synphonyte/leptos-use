@@ -79,7 +79,7 @@ impl Default for UsePreferredDarkOptions {
             ssr_color_header_getter: Arc::new(move || {
                 get_header!(
                     HeaderName::from_static("sec-ch-prefers-color-scheme"),
-                    use_locale,
+                    use_preferred_dark,
                     ssr_color_header_getter
                 )
             }),

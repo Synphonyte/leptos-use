@@ -108,7 +108,7 @@ impl Default for UseLocalesOptions {
     fn default() -> Self {
         Self {
             ssr_lang_header_getter: Arc::new(move || {
-                get_header!(ACCEPT_LANGUAGE, use_locale, ssr_lang_header_getter)
+                get_header!(ACCEPT_LANGUAGE, use_locales, ssr_lang_header_getter)
             }),
         }
     }

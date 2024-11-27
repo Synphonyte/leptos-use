@@ -94,7 +94,7 @@ impl Default for UsePrefersReducedMotionOptions {
             ssr_motion_header_getter: Arc::new(move || {
                 get_header!(
                     HeaderName::from_static("sec-ch-prefers-reduced-motion"),
-                    use_locale,
+                    use_prefers_reduced_motion,
                     ssr_motion_header_getter
                 )
             }),
