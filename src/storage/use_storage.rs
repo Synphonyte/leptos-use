@@ -146,7 +146,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 pub fn use_storage<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Default + Clone + PartialEq + Send + Sync + 'static,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -159,7 +159,7 @@ pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl AsRef<str>,
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + PartialEq + Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -194,7 +194,9 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::{use_event_listener, use_window, watch_with_options, WatchOptions};
+        use crate::{
+            sendwrap_fn, use_event_listener, use_window, watch_with_options, WatchOptions,
+        };
         use send_wrapper::SendWrapper;
 
         // Get storage API
@@ -371,7 +373,7 @@ where
         // Remove from storage fn
         let remove = {
             let key = key.as_ref().to_owned();
-            move || {
+            sendwrap_fn!(move || {
                 let _ = storage.as_ref().map(|storage| {
                     // Delete directly from storage
                     let result = storage
@@ -381,7 +383,7 @@ where
                     notify.notify();
                     dispatch_storage_event();
                 });
-            }
+            })
         };
 
         (data, set_data, remove)

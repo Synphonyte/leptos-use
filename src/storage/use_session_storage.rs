@@ -12,7 +12,7 @@ use leptos::prelude::*;
 /// See [`use_storage`](https://leptos-use.rs/storage/use_storage.html) for more details on how to use.
 pub fn use_session_storage<T, C>(
     key: impl AsRef<str>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + Default + PartialEq + Send + Sync + 'static,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
@@ -28,7 +28,7 @@ where
 pub fn use_session_storage_with_options<T, C>(
     key: impl AsRef<str>,
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
-) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone)
+) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + PartialEq + Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
