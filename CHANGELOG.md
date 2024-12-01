@@ -3,11 +3,23 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.14.0]
+
+### Highlights since 0.13
+
+- Updated to Leptos 0.7
+- Refactored `ElementMaybeSignal` and `ElementsMaybeSignal` to have a simpler implementation. For the vast majority
+  of cases this should continue to work as before.
+- Almost everything returned from functions is now `Send + Sync`.
+
+### Changes since 0.14.0-rc5
 
 - Updated Leptos to use stable 0.7 version
 - Updated wasm-bindgen to 0.2.96
 - Updated web-sys 0.3.73
+
+Special thanks to our sponsor:
+- @spencewenski
 
 ## [0.14.0-rc5] - 2024-11-27
 
