@@ -267,8 +267,8 @@ where
                         }
                     }
 
-                    // Revert to default
-                    None => set_data.set(default.clone()),
+                    // Do nothing
+                    None => {},
                 };
             })
         };
