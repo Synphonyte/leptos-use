@@ -116,6 +116,6 @@ signal_filtered_local!(
     /// Internally this uses `setTimeout` which is not supported on the server. So usually
     /// a throttled signal on the server will simply be ignored.
     debounce
-    /// [`signal_debounced`]
+    /// [`signal_debounced_local`]
     /// [`DebounceOptions`]
 );
