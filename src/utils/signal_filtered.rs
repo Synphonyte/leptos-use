@@ -126,5 +126,4 @@ macro_rules! signal_filtered_local {
     };
 }
 
-pub(crate) use signal_filtered;
-pub(crate) use signal_filtered_local;
+pub(crate) use {signal_filtered, signal_filtered_local};
