@@ -23,32 +23,12 @@ fn Demo() -> impl IntoView {
     }
 }
 
-#[component]
-fn DemoLocal() -> impl IntoView {
-    let (input, set_input) = signal_local(RefCell::new(0));
-    let debounced: Signal<RefCell<i32>, _> = signal_debounced_local(input, 1000.0);
-
-    view! {
-        <div>
-            <input
-                type="text"
-                value=input
-                on:input=move |event| set_input(event_target_value(&event))
-                placeholder="Try to type quickly, then stop..."
-            />
-            <Note>Delay is set to 1000ms for this demo.</Note>
-            <p>Input signal: {input}</p>
-            <p>Debounced signal: {debounced}</p>
-        </div>
-    }
-}
-
 fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
     let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
-        view! { <Demo/> <DemoLocal/> }
+        view! { <Demo/> }
     });
 
     unmount_handle.forget();
