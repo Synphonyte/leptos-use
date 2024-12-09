@@ -107,11 +107,19 @@ where
 
     let (is_active, set_active) = signal(immediate);
 
-    cfg_if! { if #[cfg(feature = "ssr")] {
-        let pause = || {};
-        let cleanup = || {};
-        let stop = || {};
-    } else {
+    let pause;
+    let cleanup;
+    let stop;
+    
+    #[cfg(feature = "ssr")]
+    {
+        pause = || {};
+        cleanup = || {};
+        stop = || {};
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
         use send_wrapper::SendWrapper;
 
         let closure_js = Closure::<dyn FnMut(js_sys::Array, web_sys::IntersectionObserver)>::new(
@@ -134,7 +142,7 @@ where
         let observer: Arc<Mutex<Option<SendWrapper<web_sys::IntersectionObserver>>>> =
             Arc::new(Mutex::new(None));
 
-        let cleanup = {
+        cleanup = {
             let observer = Arc::clone(&observer);
 
             move || {
@@ -199,7 +207,7 @@ where
             )
         };
 
-        let stop = {
+        stop = {
             let cleanup = cleanup.clone();
 
             sendwrap_fn!(move || {
@@ -210,7 +218,7 @@ where
 
         on_cleanup(stop.clone());
 
-        let pause = {
+        pause = {
             let cleanup = cleanup.clone();
 
             sendwrap_fn!(move || {
@@ -218,7 +226,7 @@ where
                 set_active.set(false);
             })
         };
-    }}
+    }
 
     UseIntersectionObserverReturn {
         is_active: is_active.into(),
