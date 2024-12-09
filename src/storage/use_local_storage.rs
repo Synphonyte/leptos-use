@@ -17,7 +17,7 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// See [`use_storage`](https://leptos-use.rs/storage/use_storage.html) for more details on how to use.
 pub fn use_local_storage<T, C>(
-    key: impl AsRef<str>,
+    key: impl Into<Signal<String>>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + Default + PartialEq + Send + Sync + 'static,
@@ -32,7 +32,7 @@ where
 
 /// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
 pub fn use_local_storage_with_options<T, C>(
-    key: impl AsRef<str>,
+    key: impl Into<Signal<String>>,
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where

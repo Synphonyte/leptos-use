@@ -145,7 +145,7 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 #[inline(always)]
 pub fn use_storage<T, C>(
     storage_type: StorageType,
-    key: impl AsRef<str>,
+    key: impl Into<Signal<String>>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Default + Clone + PartialEq + Send + Sync + 'static,
@@ -157,7 +157,7 @@ where
 /// Version of [`use_storage`] that accepts [`UseStorageOptions`].
 pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
-    key: impl AsRef<str>,
+    key: impl Into<Signal<String>>,
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
@@ -199,6 +199,8 @@ where
         };
         use send_wrapper::SendWrapper;
 
+        let key = key.into();
+
         // Get storage API
         let storage = storage_type
             .into_storage()
@@ -208,16 +210,16 @@ where
 
         // Schedules a storage event microtask. Uses a queue to avoid re-entering the runtime
         let dispatch_storage_event = {
-            let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
+
             move || {
-                let key = key.to_owned();
                 let on_error = on_error.to_owned();
+
                 queue_microtask(move || {
                     // TODO : better to use a BroadcastChannel (use_broadcast_channel)?
                     // Note: we cannot construct a full StorageEvent so we _must_ rely on a custom event
                     let custom = web_sys::CustomEventInit::new();
-                    custom.set_detail(&JsValue::from_str(&key));
+                    custom.set_detail(&JsValue::from_str(&key.get_untracked()));
                     let result = window()
                         .dispatch_event(
                             &web_sys::CustomEvent::new_with_event_init_dict(
@@ -235,7 +237,6 @@ where
         // Fetches direct from browser storage and fills set_data if changed (memo)
         let fetch_from_storage = {
             let storage = storage.to_owned();
-            let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
             let default = default.clone();
 
@@ -245,7 +246,7 @@ where
                     .and_then(|storage| {
                         // Get directly from storage
                         let result = storage
-                            .get_item(&key)
+                            .get_item(&key.get_untracked())
                             .map_err(UseStorageError::GetItemFailed);
                         handle_error(&on_error, result)
                     })
@@ -297,9 +298,9 @@ where
         // Set item on internal (non-event) page changes to the data signal
         {
             let storage = storage.to_owned();
-            let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
             let dispatch_storage_event = dispatch_storage_event.to_owned();
+
             let _ = watch_with_options(
                 move || (notify_id.get(), data.get()),
                 move |(id, value), prev, _| {
@@ -317,7 +318,7 @@ where
                             .and_then(|enc_value| {
                                 // Set storage -- sends a global event
                                 storage
-                                    .set_item(&key, &enc_value)
+                                    .set_item(&key.get_untracked(), &enc_value)
                                     .map_err(UseStorageError::SetItemFailed)
                             });
                         let result = handle_error(&on_error, result);
@@ -346,41 +347,50 @@ where
         }
 
         if listen_to_storage_changes {
-            let check_key = key.as_ref().to_owned();
-            let storage_notify = notify.clone();
-            let custom_notify = notify.clone();
-
             // Listen to global storage events
-            let _ = use_event_listener(use_window(), leptos::ev::storage, move |ev| {
-                let ev_key = ev.key();
-                // Key matches or all keys deleted (None)
-                if ev_key == Some(check_key.clone()) || ev_key.is_none() {
-                    storage_notify.notify()
+            let _ = use_event_listener(use_window(), leptos::ev::storage, {
+                let notify = notify.clone();
+
+                move |ev| {
+                    let ev_key = ev.key();
+                    // Key matches or all keys deleted (None)
+                    if ev_key == Some(key.get_untracked()) || ev_key.is_none() {
+                        notify.notify()
+                    }
                 }
             });
             // Listen to internal storage events
-            let check_key = key.as_ref().to_owned();
             let _ = use_event_listener(
                 use_window(),
                 leptos::ev::Custom::new(INTERNAL_STORAGE_EVENT),
                 {
+                    let notify = notify.clone();
+
                     move |ev: web_sys::CustomEvent| {
-                        if Some(check_key.clone()) == ev.detail().as_string() {
-                            custom_notify.notify()
+                        if Some(key.get_untracked()) == ev.detail().as_string() {
+                            notify.notify()
                         }
                     }
                 },
             );
         };
 
+        Effect::watch(
+            move || key.get(),
+            {
+                let notify = notify.clone();
+                move |_, _, _| notify.notify()
+            },
+            false,
+        );
+
         // Remove from storage fn
         let remove = {
-            let key = key.as_ref().to_owned();
             sendwrap_fn!(move || {
                 let _ = storage.as_ref().map(|storage| {
                     // Delete directly from storage
                     let result = storage
-                        .remove_item(&key)
+                        .remove_item(&key.get_untracked())
                         .map_err(UseStorageError::RemoveItemFailed);
                     let _ = handle_error(&on_error, result);
                     notify.notify();
