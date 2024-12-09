@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::signal_debounced;
+use leptos_use::{signal_debounced, signal_debounced_local};
+use std::cell::RefCell;
 
 #[component]
 fn Demo() -> impl IntoView {

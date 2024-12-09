@@ -1,11 +1,12 @@
-use crate::utils::signal_filtered;
+use crate::utils::{signal_filtered, signal_filtered_local};
 use crate::{use_debounce_fn_with_options, DebounceOptions};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use paste::paste;
 
 signal_filtered!(
     /// Debounce changing of a `Signal` value.
+    ///
+    /// Use `*_local` variants for values that are not `Send + Sync`.
     ///
     /// ## Demo
     ///
@@ -15,12 +16,16 @@ signal_filtered!(
     ///
     /// ```
     /// # use leptos::prelude::*;
-    /// # use leptos_use::signal_debounced;
+    /// # use leptos_use::{signal_debounced, signal_debounced_local};
+    /// # use std::cell::RefCell;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = signal("");
     /// let debounced: Signal<&'static str> = signal_debounced(input, 1000.0);
+    ///
+    /// let (input_local, set_input_local) = signal_local(RefCell::new(0));
+    /// let debounced_local: Signal<RefCell<i32>, _> = signal_debounced_local(input_local, 1000.0);
     /// #
     /// # view! { }
     /// # }
@@ -32,13 +37,21 @@ signal_filtered!(
     ///
     /// ```
     /// # use leptos::prelude::*;
-    /// # use leptos_use::{signal_debounced_with_options, DebounceOptions};
+    /// # use leptos_use::{signal_debounced_with_options, signal_debounced_local_with_options, DebounceOptions};
+    /// # use std::cell::RefCell;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = signal("");
     /// let debounced: Signal<&'static str> = signal_debounced_with_options(
     ///     input,
+    ///     1000.0,
+    ///     DebounceOptions::default().max_wait(Some(500.0))
+    /// );
+    ///
+    /// let (input_local, set_input_local) = signal_local(RefCell::new(0));
+    /// let debounced_local: Signal<RefCell<i32>, _> = signal_debounced_local_with_options(
+    ///     input_local,
     ///     1000.0,
     ///     DebounceOptions::default().max_wait(Some(500.0))
     /// );
@@ -58,5 +71,14 @@ signal_filtered!(
     /// a throttled signal on the server will simply be ignored.
     debounce
     /// [`signal_debounced`]
+    /// [`DebounceOptions`]
+);
+
+signal_filtered_local!(
+    /// Debounce changing of a `Signal` value that is not `Send + Sync`.
+    ///
+    /// See ['signal_debounced`] for docs.
+    debounce
+    /// [`signal_debounced_local`]
     /// [`DebounceOptions`]
 );
