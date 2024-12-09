@@ -36,7 +36,7 @@ pub fn use_local_storage_with_options<T, C>(
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
-    T: Default + Clone + PartialEq + Send + Sync,
+    T: Clone + PartialEq + Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     use_storage_with_options::<T, C>(StorageType::Local, key, options)

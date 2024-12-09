@@ -161,7 +161,7 @@ pub fn use_storage_with_options<T, C>(
     options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
-    T: Default + Clone + PartialEq + Send + Sync,
+    T: Clone + PartialEq + Send + Sync,
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
 {
     let UseStorageOptions {
@@ -174,6 +174,7 @@ where
 
     let (data, set_data) = initial_value.into_signal();
     let default = data.get_untracked();
+    let default_clone = default.clone();
 
     #[cfg(feature = "ssr")]
     {
@@ -286,7 +287,6 @@ where
                 match prev {
                     None => 1, // Avoid async fetch of initial value
                     Some(prev) => {
-
                         fetch_from_storage();
                         prev + 1
                     }
@@ -305,7 +305,7 @@ where
                 move |(id, value), prev, _| {
                     // Skip setting storage on changes from external events. The ID will change on external events.
                     let change_from_external_event = prev.map(|(prev_id, _)| *prev_id != *id).unwrap_or_default();
-                    let record_was_deleted_from_storage = prev.is_some() && *value == T::default();
+                    let record_was_deleted_from_storage = prev.is_some() && *value == default_clone;
                     if change_from_external_event || record_was_deleted_from_storage {
                         return;
                     }
