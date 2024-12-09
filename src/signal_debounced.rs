@@ -2,7 +2,6 @@ use crate::utils::{signal_filtered, signal_filtered_local};
 use crate::{use_debounce_fn_with_options, DebounceOptions};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use paste::paste;
 
 signal_filtered!(
     /// Debounce changing of a `Signal` value.
