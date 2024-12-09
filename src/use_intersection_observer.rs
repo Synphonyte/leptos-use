@@ -110,7 +110,7 @@ where
     let pause;
     let cleanup;
     let stop;
-    
+
     #[cfg(feature = "ssr")]
     {
         pause = || {};
