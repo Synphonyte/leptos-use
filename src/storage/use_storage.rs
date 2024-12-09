@@ -174,7 +174,6 @@ where
 
     let (data, set_data) = initial_value.into_signal();
     let default = data.get_untracked();
-    let default_clone = default.clone();
 
     #[cfg(feature = "ssr")]
     {
@@ -238,6 +237,7 @@ where
             let storage = storage.to_owned();
             let key = key.as_ref().to_owned();
             let on_error = on_error.to_owned();
+            let default = default.clone();
 
             SendWrapper::new(move || {
                 let fetched = storage
@@ -305,7 +305,7 @@ where
                 move |(id, value), prev, _| {
                     // Skip setting storage on changes from external events. The ID will change on external events.
                     let change_from_external_event = prev.map(|(prev_id, _)| *prev_id != *id).unwrap_or_default();
-                    let record_was_deleted_from_storage = prev.is_some() && *value == default_clone;
+                    let record_was_deleted_from_storage = prev.is_some() && *value == default;
                     if change_from_external_event || record_was_deleted_from_storage {
                         return;
                     }
