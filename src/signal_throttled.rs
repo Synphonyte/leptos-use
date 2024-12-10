@@ -1,10 +1,12 @@
-use crate::utils::signal_filtered;
+use crate::utils::{signal_filtered, signal_filtered_local};
 use crate::{use_throttle_fn_with_options, ThrottleOptions};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 
 signal_filtered!(
     /// Throttle changing of a `Signal` value.
+    ///
+    /// Use `*_local` variants for values that are not `Send + Sync`.
     ///
     /// ## Demo
     ///
@@ -14,12 +16,16 @@ signal_filtered!(
     ///
     /// ```
     /// # use leptos::prelude::*;
-    /// # use leptos_use::signal_throttled;
+    /// # use leptos_use::{signal_throttled, signal_throttled_local};
+    /// # use std::cell::RefCell;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = signal("");
     /// let throttled: Signal<&'static str> = signal_throttled(input, 1000.0);
+    ///
+    /// let (input_local, set_input_local) = signal_local(RefCell::new(0));
+    /// let throttled_local: Signal<RefCell<i32>, _> = signal_throttled_local(input_local, 1000.0);
     /// #
     /// # view! { }
     /// # }
@@ -31,13 +37,21 @@ signal_filtered!(
     ///
     /// ```
     /// # use leptos::prelude::*;
-    /// # use leptos_use::{signal_throttled_with_options, ThrottleOptions};
+    /// # use leptos_use::{signal_throttled_with_options, signal_throttled_local_with_options, ThrottleOptions};
+    /// # use std::cell::RefCell;
     /// #
     /// # #[component]
     /// # fn Demo() -> impl IntoView {
     /// let (input, set_input) = signal("");
     /// let throttled: Signal<&'static str> = signal_throttled_with_options(
     ///     input,
+    ///     1000.0,
+    ///     ThrottleOptions::default().leading(false).trailing(true)
+    /// );
+    ///
+    /// let (input_local, set_input_local) = signal_local(RefCell::new(0));
+    /// let throttled_local: Signal<RefCell<i32>, _> = signal_throttled_local_with_options(
+    ///     input_local,
     ///     1000.0,
     ///     ThrottleOptions::default().leading(false).trailing(true)
     /// );
@@ -58,4 +72,13 @@ signal_filtered!(
     throttle
     /// [`signal_throttled`]
     /// [`ThrottleOptions`]
+);
+
+signal_filtered_local!(
+    /// Throttle changing of a `Signal` value that is not `Send + Sync`.
+    ///
+    /// See ['signal_throttled`] for docs.
+    throttle
+    /// [`signal_throttled_local`]
+    /// [`ThrottledOptions`]
 );
