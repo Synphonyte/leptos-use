@@ -1,6 +1,7 @@
 use leptos::reactive::wrappers::read::Signal;
 
 /// Pausable effect
+#[derive(Clone)]
 pub struct Pausable<PauseFn, ResumeFn>
 where
     PauseFn: Fn() + Clone + Send + Sync,

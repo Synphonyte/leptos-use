@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
-use crate::{core::ConnectionReadyState, ReconnectLimit};
+use crate::{core::ConnectionReadyState, use_interval_fn, ReconnectLimit};
 use cfg_if::cfg_if;
 use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
@@ -242,17 +242,19 @@ where
     C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
     C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
-    use_websocket_with_options::<Tx, Rx, C>(url, UseWebSocketOptions::default())
+    use_websocket_with_options::<Tx, Rx, C, (), DummyEncoder>(url, UseWebSocketOptions::default())
 }
 
 /// Version of [`use_websocket`] that takes `UseWebSocketOptions`. See [`use_websocket`] for how to use.
 #[allow(clippy::type_complexity)]
-pub fn use_websocket_with_options<Tx, Rx, C>(
+pub fn use_websocket_with_options<Tx, Rx, C, Hb, HbCodec>(
     url: &str,
     options: UseWebSocketOptions<
         Rx,
         HybridCoderError<<C as Encoder<Tx>>::Error>,
         HybridCoderError<<C as Decoder<Rx>>::Error>,
+        Hb,
+        HbCodec,
     >,
 ) -> UseWebSocketReturn<
     Tx,
@@ -267,6 +269,14 @@ where
     C: Encoder<Tx> + Decoder<Rx>,
     C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
     C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb> + Send + Sync,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
+    <HbCodec as Encoder<Hb>>::Error: std::fmt::Debug,
 {
     let url = normalize_url(url);
 
@@ -281,6 +291,7 @@ where
         reconnect_interval,
         immediate,
         protocols,
+        heartbeat,
     } = options;
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
@@ -296,8 +307,83 @@ where
 
     let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
 
+    let send_str = move |data: &str| {
+        if ready_state.get_untracked() == ConnectionReadyState::Open {
+            if let Some(web_socket) = ws_signal.get_untracked() {
+                let _ = web_socket.send_with_str(data);
+            }
+        }
+    };
+
+    let send_bytes = move |data: &[u8]| {
+        if ready_state.get_untracked() == ConnectionReadyState::Open {
+            if let Some(web_socket) = ws_signal.get_untracked() {
+                let _ = web_socket.send_with_u8_array(data);
+            }
+        }
+    };
+
+    let send = {
+        let on_error = Arc::clone(&on_error);
+
+        move |value: &Tx| {
+            let on_error = Arc::clone(&on_error);
+
+            send_with_codec::<Tx, C>(value, send_str, send_bytes, move |err| {
+                on_error(UseWebSocketError::Codec(CodecError::Encode(err)));
+            });
+        }
+    };
+
+    let heartbeat_interval_ref = StoredValue::new_local(None::<(Arc<dyn Fn()>, Arc<dyn Fn()>)>);
+
+    let stop_heartbeat = move || {
+        if let Some((pause, _)) = heartbeat_interval_ref.get_value() {
+            pause();
+        }
+    };
+
     #[cfg(not(feature = "ssr"))]
     {
+        use crate::utils::Pausable;
+
+        let start_heartbeat = {
+            let on_error = Arc::clone(&on_error);
+
+            move || {
+                if let Some(heartbeat) = &heartbeat {
+                    if let Some((pause, resume)) = heartbeat_interval_ref.get_value() {
+                        pause();
+                        resume();
+                    } else {
+                        let on_error = Arc::clone(&on_error);
+
+                        let Pausable { pause, resume, .. } = use_interval_fn(
+                            move || {
+                                send_with_codec::<Hb, HbCodec>(
+                                    &Hb::default(),
+                                    send_str,
+                                    send_bytes,
+                                    {
+                                        let on_error = Arc::clone(&on_error);
+
+                                        move |err| {
+                                            on_error(UseWebSocketError::HeartbeatCodec(format!(
+                                                "Failed to encode heartbeat data: {err:?}"
+                                            )))
+                                        }
+                                    },
+                                )
+                            },
+                            heartbeat.interval,
+                        );
+
+                        heartbeat_interval_ref.set_value(Some((Arc::new(pause), Arc::new(resume))));
+                    }
+                }
+            }
+        };
+
         let reconnect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> =
             StoredValue::new(None);
         reconnect_ref.set_value({
@@ -369,20 +455,26 @@ where
                     let unmounted = Arc::clone(&unmounted);
                     let on_open = Arc::clone(&on_open);
 
-                    let onopen_closure = Closure::wrap(Box::new(move |e: Event| {
-                        if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
-                            return;
+                    let onopen_closure = Closure::wrap(Box::new({
+                        let start_heartbeat = start_heartbeat.clone();
+
+                        move |e: Event| {
+                            if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
+                                return;
+                            }
+
+                            #[cfg(debug_assertions)]
+                            let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                            on_open(e);
+
+                            #[cfg(debug_assertions)]
+                            drop(zone);
+
+                            set_ready_state.set(ConnectionReadyState::Open);
+
+                            start_heartbeat();
                         }
-
-                        #[cfg(debug_assertions)]
-                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
-
-                        on_open(e);
-
-                        #[cfg(debug_assertions)]
-                        drop(zone);
-
-                        set_ready_state.set(ConnectionReadyState::Open);
                     })
                         as Box<dyn FnMut(Event)>);
                     web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
@@ -488,6 +580,8 @@ where
                             return;
                         }
 
+                        stop_heartbeat();
+
                         if let Some(reconnect) = &reconnect_ref.get_value() {
                             reconnect();
                         }
@@ -517,6 +611,8 @@ where
                             return;
                         }
 
+                        stop_heartbeat();
+
                         if let Some(reconnect) = &reconnect_ref.get_value() {
                             reconnect();
                         }
@@ -541,44 +637,6 @@ where
         });
     }
 
-    // Send text (String)
-    let send_str = {
-        Box::new(move |data: &str| {
-            if ready_state.get_untracked() == ConnectionReadyState::Open {
-                if let Some(web_socket) = ws_signal.get_untracked() {
-                    let _ = web_socket.send_with_str(data);
-                }
-            }
-        })
-    };
-
-    // Send bytes
-    let send_bytes = move |data: &[u8]| {
-        if ready_state.get_untracked() == ConnectionReadyState::Open {
-            if let Some(web_socket) = ws_signal.get_untracked() {
-                let _ = web_socket.send_with_u8_array(data);
-            }
-        }
-    };
-
-    let send = {
-        let on_error = Arc::clone(&on_error);
-
-        move |value: &Tx| {
-            if C::is_binary_encoder() {
-                match C::encode_bin(value) {
-                    Ok(val) => send_bytes(&val),
-                    Err(err) => on_error(CodecError::Encode(err).into()),
-                }
-            } else {
-                match C::encode_str(value) {
-                    Ok(val) => send_str(&val),
-                    Err(err) => on_error(CodecError::Encode(err).into()),
-                }
-            }
-        }
-    };
-
     // Open connection
     let open = move || {
         reconnect_times_ref.set_value(0);
@@ -592,6 +650,7 @@ where
         reconnect_timer_ref.set_value(None);
 
         move || {
+            stop_heartbeat();
             manually_closed_ref.set_value(true);
             if let Some(web_socket) = ws_signal.get_untracked() {
                 let _ = web_socket.close();
@@ -623,14 +682,46 @@ where
     }
 }
 
+fn send_with_codec<T, Codec>(
+    value: &T,
+    send_str: impl Fn(&str),
+    send_bytes: impl Fn(&[u8]),
+    on_error: impl Fn(HybridCoderError<<Codec as Encoder<T>>::Error>),
+) where
+    Codec: Encoder<T>,
+    Codec: HybridEncoder<T, <Codec as Encoder<T>>::Encoded, Error = <Codec as Encoder<T>>::Error>,
+{
+    if Codec::is_binary_encoder() {
+        match Codec::encode_bin(value) {
+            Ok(val) => send_bytes(&val),
+            Err(err) => on_error(err),
+        }
+    } else {
+        match Codec::encode_str(value) {
+            Ok(val) => send_str(&val),
+            Err(err) => on_error(err),
+        }
+    }
+}
+
 type ArcFnBytes = Arc<dyn Fn(&[u8]) + Send + Sync>;
 
 /// Options for [`use_websocket_with_options`].
 #[derive(DefaultBuilder)]
-pub struct UseWebSocketOptions<Rx, E, D>
+pub struct UseWebSocketOptions<Rx, E, D, Hb, HbCodec>
 where
     Rx: ?Sized,
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb>,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
 {
+    /// Heartbeat options
+    #[builder(skip)]
+    heartbeat: Option<HeartbeatOptions<Hb, HbCodec>>,
     /// `WebSocket` connect callback.
     on_open: Arc<dyn Fn(Event) + Send + Sync>,
     /// `WebSocket` message callback for typed message decoded by codec.
@@ -664,7 +755,16 @@ where
     protocols: Signal<Option<Vec<String>>>,
 }
 
-impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {
+impl<Rx: ?Sized, E, D, Hb, HbCodec> UseWebSocketOptions<Rx, E, D, Hb, HbCodec>
+where
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb>,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
+{
     /// `WebSocket` error callback.
     pub fn on_error<F>(self, handler: F) -> Self
     where
@@ -686,11 +786,46 @@ impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {
             ..self
         }
     }
+
+    /// Set the data, codec and interval at which the heartbeat is sent. The heartbeat
+    /// is the default value of the `NewHb` type.
+    pub fn heartbeat<NewHb, NewHbCodec>(
+        self,
+        interval: u64,
+    ) -> UseWebSocketOptions<Rx, E, D, NewHb, NewHbCodec>
+    where
+        NewHb: Default + Send + Sync + 'static,
+        NewHbCodec: Encoder<NewHb>,
+        NewHbCodec: HybridEncoder<
+            NewHb,
+            <NewHbCodec as Encoder<NewHb>>::Encoded,
+            Error = <NewHbCodec as Encoder<NewHb>>::Error,
+        >,
+    {
+        UseWebSocketOptions {
+            heartbeat: Some(HeartbeatOptions {
+                data: PhantomData::<NewHb>,
+                interval,
+                codec: PhantomData::<NewHbCodec>,
+            }),
+            on_open: self.on_open,
+            on_message: self.on_message,
+            on_message_raw: self.on_message_raw,
+            on_message_raw_bytes: self.on_message_raw_bytes,
+            on_close: self.on_close,
+            on_error: self.on_error,
+            reconnect_limit: self.reconnect_limit,
+            reconnect_interval: self.reconnect_interval,
+            immediate: self.immediate,
+            protocols: self.protocols,
+        }
+    }
 }
 
-impl<Rx: ?Sized, E, D> Default for UseWebSocketOptions<Rx, E, D> {
+impl<Rx: ?Sized, E, D> Default for UseWebSocketOptions<Rx, E, D, (), DummyEncoder> {
     fn default() -> Self {
         Self {
+            heartbeat: None,
             on_open: Arc::new(|_| {}),
             on_message: Arc::new(|_| {}),
             on_message_raw: Arc::new(|_| {}),
@@ -703,6 +838,67 @@ impl<Rx: ?Sized, E, D> Default for UseWebSocketOptions<Rx, E, D> {
             protocols: Default::default(),
         }
     }
+}
+
+pub struct DummyEncoder;
+
+impl Encoder<()> for DummyEncoder {
+    type Encoded = String;
+    type Error = ();
+
+    fn encode(_: &()) -> Result<Self::Encoded, Self::Error> {
+        Ok("".to_string())
+    }
+}
+
+/// Options for heartbeats
+pub struct HeartbeatOptions<Hb, HbCodec>
+where
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb>,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
+{
+    /// Heartbeat data that will be sent to the server
+    data: PhantomData<Hb>,
+    /// Heartbeat interval in ms. A heartbeat will be sent every `interval` ms.
+    interval: u64,
+    /// Codec used to encode the heartbeat data
+    codec: PhantomData<HbCodec>,
+}
+
+impl<Hb, HbCodec> Clone for HeartbeatOptions<Hb, HbCodec>
+where
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb>,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
+{
+    fn clone(&self) -> Self {
+        Self {
+            data: PhantomData::<Hb>,
+            interval: self.interval,
+            codec: PhantomData::<HbCodec>,
+        }
+    }
+}
+
+impl<Hb, HbCodec> Copy for HeartbeatOptions<Hb, HbCodec>
+where
+    Hb: Default + Send + Sync + 'static,
+    HbCodec: Encoder<Hb>,
+    HbCodec: HybridEncoder<
+        Hb,
+        <HbCodec as Encoder<Hb>>::Encoded,
+        Error = <HbCodec as Encoder<Hb>>::Error,
+    >,
+{
 }
 
 /// Return type of [`use_websocket`].
@@ -737,6 +933,8 @@ pub enum UseWebSocketError<E, D> {
     Event(Event),
     #[error("WebSocket codec error: {0}")]
     Codec(#[from] CodecError<E, D>),
+    #[error("WebSocket heartbeat codec error: {0}")]
+    HeartbeatCodec(String),
 }
 
 fn normalize_url(url: &str) -> String {

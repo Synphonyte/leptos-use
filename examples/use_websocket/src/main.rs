@@ -1,7 +1,11 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{core::ConnectionReadyState, use_websocket, use_websocket_with_options, ReconnectLimit, UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn};
+use leptos_use::{
+    core::ConnectionReadyState, use_websocket, use_websocket_with_options, ReconnectLimit,
+    UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn,
+};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 use codee::{binary::MsgpackSerdeCodec, string::FromToStringCodec};
 use web_sys::{CloseEvent, Event};
@@ -10,6 +14,15 @@ use web_sys::{CloseEvent, Event};
 struct Apple {
     name: String,
     worm_count: u32,
+}
+
+#[derive(Default)]
+struct Heartbeat;
+
+impl Display for Heartbeat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<Heartbeat>")
+    }
 }
 
 #[component]
@@ -98,7 +111,7 @@ fn Demo() -> impl IntoView {
         close: close2,
         message: message2,
         ..
-    } = use_websocket_with_options::<String, String, FromToStringCodec>(
+    } = use_websocket_with_options::<String, String, FromToStringCodec, _, _>(
         "wss://echo.websocket.events/",
         UseWebSocketOptions::default()
             .immediate(false)
@@ -106,7 +119,8 @@ fn Demo() -> impl IntoView {
             .on_open(on_open_callback)
             .on_close(on_close_callback)
             .on_error(on_error_callback)
-            .on_message(on_message_callback),
+            .on_message(on_message_callback)
+            .heartbeat::<Heartbeat, FromToStringCodec>(1000),
     );
 
     let open_connection2 = move |_| {
