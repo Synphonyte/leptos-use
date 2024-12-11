@@ -108,6 +108,46 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// }
 /// ```
 ///
+/// ### Heartbeats
+///
+/// Heartbeats can be configured by the `heartbeat` option. You have to provide a heartbeat
+/// type, that implements the `Default` trait and an `Encoder` for it. This encoder doesn't have
+/// to be the same as the one used for the other websocket messages.
+///
+/// ```
+/// # use leptos::*;
+/// # use codee::string::FromToStringCodec;
+/// # use leptos_use::{use_websocket_with_options, UseWebSocketOptions, UseWebSocketReturn};
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// #[derive(Default)]
+/// struct Heartbeat;
+///
+/// // Simple example for usage with `FromToStringCodec`
+/// impl std::fmt::Display for Heartbeat {
+///     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+///         write!(f, "<Heartbeat>")
+///     }
+/// }
+///
+/// let UseWebSocketReturn {
+///     send,
+///     message,
+///     ..
+/// } = use_websocket_with_options::<String, String, FromToStringCodec, _, _>(
+///     "wss://echo.websocket.events/",
+///     UseWebSocketOptions::default()
+///         // Enable heartbeats every 10 seconds. In this case we use the same codec as for the
+///         // other messages. But this is not necessary.
+///         .heartbeat::<Heartbeat, FromToStringCodec>(10_000),
+/// );
+/// #
+/// # view! {}
+/// }
+/// ```
+///
 /// ## Relative Paths
 ///
 /// If the provided `url` is relative, it will be resolved relative to the current page.
@@ -881,11 +921,7 @@ where
     >,
 {
     fn clone(&self) -> Self {
-        Self {
-            data: PhantomData::<Hb>,
-            interval: self.interval,
-            codec: PhantomData::<HbCodec>,
-        }
+        *self
     }
 }
 
