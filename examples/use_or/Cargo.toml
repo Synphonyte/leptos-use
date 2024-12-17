@@ -11,7 +11,7 @@ leptos = { workspace = true, features = [
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["docs", "math"] }
+leptos-use = { path = "../..", default-features = false, features = ["docs", "math"] }
 web-sys = "0.3"
 
 [dev-dependencies]

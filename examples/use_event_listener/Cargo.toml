@@ -11,7 +11,7 @@ leptos = { workspace = true, features = [
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["use_event_listener"] }
+leptos-use = { path = "../..", default-features = false, features = ["use_event_listener"] }
 web-sys = "0.3"
 
 [dev-dependencies]

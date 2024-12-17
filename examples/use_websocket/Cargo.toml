@@ -12,7 +12,7 @@ codee = { workspace = true, features = ["msgpack_serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["use_websocket", "docs"] }
+leptos-use = { path = "../..", default-features = false, features = ["use_websocket", "docs"] }
 serde = { version = "1", features = ["derive"] }
 web-sys = "0.3"
 

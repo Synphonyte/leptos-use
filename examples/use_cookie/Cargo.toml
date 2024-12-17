@@ -12,7 +12,7 @@ codee.workspace = true
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", features = ["use_cookie", "docs"] }
+leptos-use = { path = "../..", default-features = false, features = ["use_cookie", "docs"] }
 rand = "0.8"
 getrandom = { version = "0.2", features = ["js"] }
 web-sys = "0.3"
