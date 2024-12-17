@@ -3,7 +3,26 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.14.0]
+## [0.15.0] - 2024-12-17
+
+### New Functions 🚀
+
+- `signal_throttled` and `signal_debounced` now have `..._local` variants (thanks to @bicarlsen)
+
+### Breaking Changes 🛠
+
+- `use_storage` now accepts a Signal as it's `key` parameter (thanks to [LeftClick](https://www.leftclick.cloud/))
+- `use_websocket` now supports sending heartbeats (thanks to [LeftClick](https://www.leftclick.cloud/))
+
+### Fix 🍕
+
+- Fixed `use_storage` to actually remove the key when `remove` is called (thanks to @flaviopezzini)
+
+### Special thanks to our sponsors
+- @spencewenski
+- [LeftClick](https://www.leftclick.cloud/)
+
+## [0.14.0] - 2024-12-01
 
 ### Highlights since 0.13
 
