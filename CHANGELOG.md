@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `use_storage` not writing default values.
 - Fixed unidirectional `sync_signal` not syncing properly.
 
+### Special thanks to our sponsors
+- @spencewenski
+- [LeftClick](https://www.leftclick.cloud/)
+
+
 ## [0.15.0] - 2024-12-17
 
 ### New Functions 🚀
