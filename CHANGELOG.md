@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed `use_element_hover` not properly cancelling it's timeout (thanks to @jcold).
 - Fixed `use_storage` not writing default values.
-- Fixed unidirectional `sync_signalö not syncing properly.
+- Fixed unidirectional `sync_signal` not syncing properly.
 
 ## [0.15.0] - 2024-12-17
 
