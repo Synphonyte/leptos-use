@@ -1,15 +1,10 @@
 use crate::core::IntoElementMaybeSignal;
 use crate::{use_event_listener_with_options, UseEventListenerOptions};
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-
-cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    use std::time::Duration;
-}}
 
 /// Reactive element's hover state.
 ///
@@ -62,26 +57,31 @@ where
 
     let (is_hovered, set_hovered) = signal(false);
 
-    let mut timer: Option<TimeoutHandle> = None;
+    let timer = StoredValue::new(None::<TimeoutHandle>);
 
-    let mut toggle = move |entering: bool| {
-        cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    let toggle = move |entering: bool| {
+        #[cfg(not(feature = "ssr"))]
+        {
             let delay = if entering { delay_enter } else { delay_leave };
 
-            if let Some(handle) = timer.take() {
-                handle.clear();
-            }
+            timer.update_value(|timer| {
+                if let Some(handle) = timer.take() {
+                    handle.clear();
+                }
+            });
 
             if delay > 0 {
-                timer = set_timeout_with_handle(
-                    move || set_hovered.set(entering),
-                    Duration::from_millis(delay),
-                )
-                .ok();
+                timer.set_value(
+                    set_timeout_with_handle(
+                        move || set_hovered.set(entering),
+                        std::time::Duration::from_millis(delay),
+                    )
+                    .ok(),
+                );
             } else {
                 set_hovered.set(entering);
             }
-        }}
+        }
     };
 
     let listener_options = UseEventListenerOptions::default().passive(true);
