@@ -227,7 +227,7 @@ where
         stop_watch_left = Some(Effect::watch(
             move || left.get(),
             move |new_value, _, _| {
-                if !is_sync_update.get_value() {
+                if !is_sync_update.get_value() || !matches!(direction, SyncDirection::Both) {
                     is_sync_update.set_value(true);
                     right.try_update(|right| {
                         assign_ltr(right, new_value);
@@ -244,7 +244,7 @@ where
         stop_watch_right = Some(Effect::watch(
             move || right.get(),
             move |new_value, _, _| {
-                if !is_sync_update.get_value() {
+                if !is_sync_update.get_value() || !matches!(direction, SyncDirection::Both) {
                     is_sync_update.set_value(true);
                     left.try_update(|left| assign_rtl(left, new_value));
                 } else {
