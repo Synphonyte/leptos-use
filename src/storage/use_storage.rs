@@ -234,14 +234,12 @@ where
             }
         };
 
-        // Fetches direct from browser storage and fills set_data if changed (memo)
-        let fetch_from_storage = {
+        let read_from_storage = {
             let storage = storage.to_owned();
             let on_error = on_error.to_owned();
-            let default = default.clone();
 
-            SendWrapper::new(move || {
-                let fetched = storage
+            move || {
+                storage
                     .to_owned()
                     .and_then(|storage| {
                         // Get directly from storage
@@ -259,7 +257,17 @@ where
                         handle_error(&on_error, result)
                     })
                     .transpose()
-                    .unwrap_or_default(); // Drop handled Err(())
+                    .unwrap_or_default() // Drop handled Err(())
+            }
+        };
+
+        // Fetches direct from browser storage and fills set_data if changed (memo)
+        let fetch_from_storage = {
+            let default = default.clone();
+            let read_from_storage = read_from_storage.clone();
+
+            SendWrapper::new(move || {
+                let fetched = read_from_storage();
 
                 match fetched {
                     Some(value) => {
@@ -307,8 +315,13 @@ where
                     // Skip setting storage on changes from external events. The ID will change on external events.
                     let change_from_external_event =
                         prev.map(|(prev_id, _)| *prev_id != *id).unwrap_or_default();
-                    let record_was_deleted_from_storage = prev.is_some() && *value == default;
-                    if change_from_external_event || record_was_deleted_from_storage {
+
+                    if change_from_external_event {
+                        return;
+                    }
+
+                    // Dons't write default value if store is empty
+                    if value == &default && read_from_storage().is_none() {
                         return;
                     }
 
