@@ -102,6 +102,15 @@ where
 
         let target = target.into_element_maybe_signal();
 
+        let use_drop_zone_event = move |event| UseDropZoneEvent {
+            files: files
+                .read_untracked()
+                .iter()
+                .map(|f| f.deref().clone())
+                .collect(),
+            event,
+        };
+
         let _ = use_event_listener(target.clone(), dragenter, move |event| {
             event.prevent_default();
             counter.update_value(|counter| *counter += 1);
@@ -112,11 +121,7 @@ where
             #[cfg(debug_assertions)]
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            on_enter(UseDropZoneEvent {
-                files: files
-                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
-                event,
-            });
+            on_enter(use_drop_zone_event(event));
         });
 
         let _ = use_event_listener(target.clone(), dragover, move |event| {
@@ -126,11 +131,7 @@ where
             #[cfg(debug_assertions)]
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            on_over(UseDropZoneEvent {
-                files: files
-                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
-                event,
-            });
+            on_over(use_drop_zone_event(event));
         });
 
         let _ = use_event_listener(target.clone(), dragleave, move |event| {
@@ -145,11 +146,7 @@ where
             #[cfg(debug_assertions)]
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            on_leave(UseDropZoneEvent {
-                files: files
-                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
-                event,
-            });
+            on_leave(use_drop_zone_event(event));
         });
 
         let _ = use_event_listener(target, drop, move |event| {
@@ -162,11 +159,7 @@ where
             #[cfg(debug_assertions)]
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            on_drop(UseDropZoneEvent {
-                files: files
-                    .with_untracked(|files| files.iter().map(|f| f.deref().clone()).collect()),
-                event,
-            });
+            on_drop(use_drop_zone_event(event));
         });
     }
 
@@ -217,7 +210,7 @@ pub struct UseDropZoneEvent {
 }
 
 /// Return type of [`use_drop_zone`].
-#[derive(Debug,Clone,Copy)]
+#[derive(Clone, Copy)]
 pub struct UseDropZoneReturn {
     /// Files being handled
     pub files: Signal<Vec<SendWrapper<web_sys::File>>>,
