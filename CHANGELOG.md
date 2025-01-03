@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.12] - 2025-01-03
+
+- Fixed path of use_color_mode cookie
+
+Thanks to our generous sponsor:
+- @spencewenski
+
 ## [0.13.11] - 2024-11-22
 
 - Updated web-sys version to 0.3.72
