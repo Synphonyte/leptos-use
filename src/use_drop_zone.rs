@@ -217,6 +217,7 @@ pub struct UseDropZoneEvent {
 }
 
 /// Return type of [`use_drop_zone`].
+#[derive(Debug,Clone,Copy)]
 pub struct UseDropZoneReturn {
     /// Files being handled
     pub files: Signal<Vec<SendWrapper<web_sys::File>>>,
