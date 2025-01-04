@@ -102,7 +102,6 @@ where
 
         let target = target.into_element_maybe_signal();
 
-
         let use_drop_zone_event = move |event| UseDropZoneEvent {
             files: files
                 .read_untracked()
@@ -112,8 +111,7 @@ where
             event,
         };
 
-        let _ = use_event_listener(target.clone(), dragenter, move |event| {
-
+        let _ = use_event_listener(target, dragenter, move |event| {
             event.prevent_default();
             counter.update_value(|counter| *counter += 1);
             set_over_drop_zone.set(true);
