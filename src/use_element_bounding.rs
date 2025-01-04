@@ -97,37 +97,33 @@ where
 
         let target = target.into_element_maybe_signal();
 
-        update = {
-            let target = target.clone();
+        update = sendwrap_fn!(move || {
+            let el = target.get_untracked();
 
-            sendwrap_fn!(move || {
-                let el = target.get_untracked();
+            if let Some(el) = el {
+                let rect = el.get_bounding_client_rect();
 
-                if let Some(el) = el {
-                    let rect = el.get_bounding_client_rect();
+                set_height.set(rect.height());
+                set_width.set(rect.width());
+                set_left.set(rect.x());
+                set_right.set(rect.x() + rect.width());
+                set_top.set(rect.y());
+                set_bottom.set(rect.y() + rect.height());
+                set_x.set(rect.x());
+                set_y.set(rect.y());
+            } else if reset {
+                set_height.set(0.0);
+                set_width.set(0.0);
+                set_left.set(0.0);
+                set_right.set(0.0);
+                set_top.set(0.0);
+                set_bottom.set(0.0);
+                set_x.set(0.0);
+                set_y.set(0.0);
+            }
+        });
 
-                    set_height.set(rect.height());
-                    set_width.set(rect.width());
-                    set_left.set(rect.x());
-                    set_right.set(rect.x() + rect.width());
-                    set_top.set(rect.y());
-                    set_bottom.set(rect.y() + rect.height());
-                    set_x.set(rect.x());
-                    set_y.set(rect.y());
-                } else if reset {
-                    set_height.set(0.0);
-                    set_width.set(0.0);
-                    set_left.set(0.0);
-                    set_right.set(0.0);
-                    set_top.set(0.0);
-                    set_bottom.set(0.0);
-                    set_x.set(0.0);
-                    set_y.set(0.0);
-                }
-            })
-        };
-
-        use_resize_observer(target.clone(), {
+        use_resize_observer(target, {
             let update = update.clone();
 
             move |_, _| {

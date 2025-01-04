@@ -88,12 +88,8 @@ where
 
     let el = el.into_element_maybe_signal();
 
-    let _ = use_event_listener_with_options(
-        el.clone(),
-        mouseenter,
-        move |_| toggle(true),
-        listener_options,
-    );
+    let _ =
+        use_event_listener_with_options(el, mouseenter, move |_| toggle(true), listener_options);
 
     let _ =
         use_event_listener_with_options(el, mouseleave, move |_| toggle(false), listener_options);

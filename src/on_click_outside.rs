@@ -154,8 +154,6 @@ where
         let listener = {
             let should_listen = Rc::clone(&should_listen);
             let mut handler = handler.clone();
-            let should_ignore = should_ignore.clone();
-            let target = target.clone();
 
             move |event: web_sys::UiEvent| {
                 if let Some(el) = target.get_untracked() {
@@ -195,7 +193,6 @@ where
         };
 
         let remove_pointer_listener = {
-            let target = target.clone();
             let should_listen = Rc::clone(&should_listen);
 
             use_event_listener_with_options::<_, web_sys::Window, _, _>(
@@ -216,7 +213,6 @@ where
                 window(),
                 blur,
                 move |event| {
-                    let target = target.clone();
                     let mut handler = handler.clone();
 
                     let _ = set_timeout_with_handle(

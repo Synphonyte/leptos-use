@@ -91,7 +91,7 @@ where
         measure,
         ..
     } = use_scroll_with_options(
-        el.clone(),
+        el,
         UseScrollOptions::default()
             .on_scroll(move |evt| on_scroll(evt))
             .event_listener_options(event_listener_options)

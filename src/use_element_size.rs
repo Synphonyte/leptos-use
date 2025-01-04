@@ -75,84 +75,73 @@ where
 
         let target = target.into_element_maybe_signal();
 
-        let is_svg = {
-            let target = target.clone();
-
-            move || {
-                if let Some(target) = target.get_untracked() {
-                    target
-                        .namespace_uri()
-                        .map(|ns| ns.contains("svg"))
-                        .unwrap_or(false)
-                } else {
-                    false
-                }
+        let is_svg = move || {
+            if let Some(target) = target.get_untracked() {
+                target
+                    .namespace_uri()
+                    .map(|ns| ns.contains("svg"))
+                    .unwrap_or(false)
+            } else {
+                false
             }
         };
 
         let _ = use_resize_observer_with_options(
-            target.clone(),
-            {
-                let target = target.clone();
+            target,
+            move |entries, _| {
+                let entry = &entries[0];
 
-                move |entries, _| {
-                    let entry = &entries[0];
+                let box_size = match box_ {
+                    web_sys::ResizeObserverBoxOptions::ContentBox => entry.content_box_size(),
+                    web_sys::ResizeObserverBoxOptions::BorderBox => entry.border_box_size(),
+                    web_sys::ResizeObserverBoxOptions::DevicePixelContentBox => {
+                        entry.device_pixel_content_box_size()
+                    }
+                    _ => unreachable!(),
+                };
 
-                    let box_size = match box_ {
-                        web_sys::ResizeObserverBoxOptions::ContentBox => entry.content_box_size(),
-                        web_sys::ResizeObserverBoxOptions::BorderBox => entry.border_box_size(),
-                        web_sys::ResizeObserverBoxOptions::DevicePixelContentBox => {
-                            entry.device_pixel_content_box_size()
+                if is_svg() {
+                    if let Some(target) = target.get() {
+                        if let Ok(Some(styles)) = window().get_computed_style(&target) {
+                            set_height.set(
+                                styles
+                                    .get_property_value("height")
+                                    .map(|v| v.parse().unwrap_or_default())
+                                    .unwrap_or_default(),
+                            );
+                            set_width.set(
+                                styles
+                                    .get_property_value("width")
+                                    .map(|v| v.parse().unwrap_or_default())
+                                    .unwrap_or_default(),
+                            );
                         }
-                        _ => unreachable!(),
+                    }
+                } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
+                    let format_box_size = if box_size.is_array() {
+                        box_size.to_vec()
+                    } else {
+                        vec![box_size.into()]
                     };
 
-                    if is_svg() {
-                        if let Some(target) = target.get() {
-                            if let Ok(Some(styles)) = window().get_computed_style(&target) {
-                                set_height.set(
-                                    styles
-                                        .get_property_value("height")
-                                        .map(|v| v.parse().unwrap_or_default())
-                                        .unwrap_or_default(),
-                                );
-                                set_width.set(
-                                    styles
-                                        .get_property_value("width")
-                                        .map(|v| v.parse().unwrap_or_default())
-                                        .unwrap_or_default(),
-                                );
-                            }
-                        }
-                    } else if !box_size.is_null()
-                        && !box_size.is_undefined()
-                        && box_size.length() > 0
-                    {
-                        let format_box_size = if box_size.is_array() {
-                            box_size.to_vec()
-                        } else {
-                            vec![box_size.into()]
-                        };
-
-                        set_width.set(format_box_size.iter().fold(0.0, |acc, v| {
-                            acc + v
-                                .as_ref()
-                                .clone()
-                                .unchecked_into::<web_sys::ResizeObserverSize>()
-                                .inline_size()
-                        }));
-                        set_height.set(format_box_size.iter().fold(0.0, |acc, v| {
-                            acc + v
-                                .as_ref()
-                                .clone()
-                                .unchecked_into::<web_sys::ResizeObserverSize>()
-                                .block_size()
-                        }))
-                    } else {
-                        // fallback
-                        set_width.set(entry.content_rect().width());
-                        set_height.set(entry.content_rect().height())
-                    }
+                    set_width.set(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v
+                            .as_ref()
+                            .clone()
+                            .unchecked_into::<web_sys::ResizeObserverSize>()
+                            .inline_size()
+                    }));
+                    set_height.set(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v
+                            .as_ref()
+                            .clone()
+                            .unchecked_into::<web_sys::ResizeObserverSize>()
+                            .block_size()
+                    }))
+                } else {
+                    // fallback
+                    set_width.set(entry.content_rect().width());
+                    set_height.set(entry.content_rect().height())
                 }
             },
             UseResizeObserverOptions::default().box_(box_),

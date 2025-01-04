@@ -159,27 +159,23 @@ where
         let event_listener_options = UseEventListenerOptions::default().passive(true);
 
         let _ = use_event_listener_with_options(
-            target.clone(),
+            target,
             mousemove,
             mouse_handler,
             event_listener_options,
         );
-        let _ = use_event_listener_with_options(
-            target.clone(),
-            dragover,
-            drag_handler,
-            event_listener_options,
-        );
+        let _ =
+            use_event_listener_with_options(target, dragover, drag_handler, event_listener_options);
 
         if options.touch && !matches!(options.coord_type, UseMouseCoordType::Movement) {
             let _ = use_event_listener_with_options(
-                target.clone(),
+                target,
                 touchstart,
                 touch_handler.clone(),
                 event_listener_options,
             );
             let _ = use_event_listener_with_options(
-                target.clone(),
+                target,
                 touchmove,
                 touch_handler,
                 event_listener_options,

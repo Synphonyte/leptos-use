@@ -3,8 +3,8 @@ use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, StorageType, UseStorageOptions};
 use crate::utils::get_header;
 use crate::{
-    sync_signal_with_options, use_cookie, use_preferred_dark_with_options, SyncSignalOptions,
-    UsePreferredDarkOptions,
+    sync_signal_with_options, use_cookie_with_options, use_preferred_dark_with_options,
+    SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions,
 };
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
@@ -295,7 +295,7 @@ where
     };
 
     let default_on_changed = move |mode: ColorMode| {
-        update_html_attrs(target.clone(), attribute.clone(), mode);
+        update_html_attrs(target, attribute.clone(), mode);
     };
 
     let on_changed = move |mode: ColorMode| {
@@ -341,7 +341,10 @@ fn get_cookie_signal(
     cookie_enabled: bool,
 ) -> (Signal<Option<ColorMode>>, WriteSignal<Option<ColorMode>>) {
     if cookie_enabled {
-        use_cookie::<ColorMode, FromToStringCodec>(cookie_name)
+        use_cookie_with_options::<ColorMode, FromToStringCodec>(
+            cookie_name,
+            UseCookieOptions::default().path("/"),
+        )
     } else {
         let (value, set_value) = signal(None);
         (value.into(), set_value)

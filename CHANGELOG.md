@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.2] - 2025-01-03
+
+### Fixes 🍕
+
+- Fixed path of `use_color_mode` cookie
+- `ElementMaybeSignal` and `ElementsMaybeSignal` are now properly `Clone` and `Copy`
+
+### Special thanks to our sponsor
+- @spencewenski
+
 ## [0.15.1] - 2024-12-31
 
 ### Fixes 🍕
@@ -129,6 +139,33 @@ Special thanks to our sponsor:
 
 Ported everything to Leptos 0.7
 Some example don't run yet.
+
+## [0.13.12] - 2025-01-03
+
+- Fixed path of `use_color_mode` cookie
+
+Thanks to our generous sponsor:
+- @spencewenski
+
+## [0.13.11] - 2024-11-22
+
+- Updated web-sys version to 0.3.72
+
+Thanks to our generous sponsor:
+- @spencewenski
+
+## [0.13.10] - 2024-11-14
+
+- Fixed potential SSR crash in `use_locale(s)` (thanks to @veigaribo)
+
+## [0.13.9] - 2024-11-10
+
+- Reverted use_user_media to have video enabled by default
+- Fixed exponential increase on websocket reconnects
+
+## [0.13.8] - 2024-11-06
+
+- Backported fixes from 0.14.0-rc1
 
 ## [0.13.7] - 2024-10-20
 

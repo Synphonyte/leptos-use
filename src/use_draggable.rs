@@ -81,7 +81,7 @@ where
     let dragging_handle = if let Some(handle) = handle {
         handle.into_element_maybe_signal()
     } else {
-        target.clone()
+        target
     };
 
     let (position, set_position) = initial_value.into_signal();
@@ -207,7 +207,7 @@ where
         listener_options,
     );
     let _ = use_event_listener_with_options(
-        dragging_element.clone(),
+        dragging_element,
         pointermove,
         on_pointer_move,
         listener_options,

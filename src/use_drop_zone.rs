@@ -102,6 +102,7 @@ where
 
         let target = target.into_element_maybe_signal();
 
+
         let use_drop_zone_event = move |event| UseDropZoneEvent {
             files: files
                 .read_untracked()
@@ -112,6 +113,7 @@ where
         };
 
         let _ = use_event_listener(target.clone(), dragenter, move |event| {
+
             event.prevent_default();
             counter.update_value(|counter| *counter += 1);
             set_over_drop_zone.set(true);
@@ -124,7 +126,7 @@ where
             on_enter(use_drop_zone_event(event));
         });
 
-        let _ = use_event_listener(target.clone(), dragover, move |event| {
+        let _ = use_event_listener(target, dragover, move |event| {
             event.prevent_default();
             update_files(&event);
 
@@ -134,7 +136,7 @@ where
             on_over(use_drop_zone_event(event));
         });
 
-        let _ = use_event_listener(target.clone(), dragleave, move |event| {
+        let _ = use_event_listener(target, dragleave, move |event| {
             event.prevent_default();
             counter.update_value(|counter| *counter -= 1);
             if counter.get_value() == 0 {
