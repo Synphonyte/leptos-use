@@ -154,7 +154,6 @@ where
         let listener = {
             let should_listen = Rc::clone(&should_listen);
             let mut handler = handler.clone();
-            let should_ignore = should_ignore.clone();
 
             move |event: web_sys::UiEvent| {
                 if let Some(el) = target.get_untracked() {
