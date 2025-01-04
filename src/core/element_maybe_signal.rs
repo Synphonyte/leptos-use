@@ -11,7 +11,6 @@ use std::ops::Deref;
 /// * a `NodeRef`
 ///
 /// into a function. Used for example in [`fn@crate::use_event_listener`].
-#[derive(Copy, Clone)]
 #[cfg_attr(not(debug_assertions), repr(transparent))]
 pub struct ElementMaybeSignal<T: 'static> {
     #[cfg(debug_assertions)]
@@ -19,11 +18,26 @@ pub struct ElementMaybeSignal<T: 'static> {
     inner: ElementMaybeSignalType<T>,
 }
 
-#[derive(Clone, Copy)]
+impl<T> Clone for ElementMaybeSignal<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> Copy for ElementMaybeSignal<T> {}
+
 pub enum ElementMaybeSignalType<T: 'static> {
     Static(StoredValue<Option<T>, LocalStorage>),
     Dynamic(Signal<Option<T>, LocalStorage>),
 }
+
+impl<T> Clone for ElementMaybeSignalType<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> Copy for ElementMaybeSignalType<T> {}
 
 impl<T: 'static> Default for ElementMaybeSignalType<T> {
     fn default() -> Self {
