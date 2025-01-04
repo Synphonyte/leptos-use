@@ -102,7 +102,7 @@ where
 
         let target = target.into_element_maybe_signal();
 
-        let _ = use_event_listener(target.clone(), dragenter, move |event| {
+        let _ = use_event_listener(target, dragenter, move |event| {
             event.prevent_default();
             counter.update_value(|counter| *counter += 1);
             set_over_drop_zone.set(true);
@@ -119,7 +119,7 @@ where
             });
         });
 
-        let _ = use_event_listener(target.clone(), dragover, move |event| {
+        let _ = use_event_listener(target, dragover, move |event| {
             event.prevent_default();
             update_files(&event);
 
@@ -133,7 +133,7 @@ where
             });
         });
 
-        let _ = use_event_listener(target.clone(), dragleave, move |event| {
+        let _ = use_event_listener(target, dragleave, move |event| {
             event.prevent_default();
             counter.update_value(|counter| *counter -= 1);
             if counter.get_value() == 0 {

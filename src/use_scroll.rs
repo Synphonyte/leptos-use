@@ -241,32 +241,25 @@ where
         let signal = element.into_element_maybe_signal();
         let behavior = options.behavior;
 
-        let scroll_to = {
-            let signal = signal.clone();
+        let scroll_to = move |x: Option<f64>, y: Option<f64>| {
+            let element = signal.get_untracked();
 
-            move |x: Option<f64>, y: Option<f64>| {
-                let element = signal.get_untracked();
+            if let Some(element) = element {
+                let scroll_options = web_sys::ScrollToOptions::new();
+                scroll_options.set_behavior(behavior.get_untracked().into());
 
-                if let Some(element) = element {
-                    let scroll_options = web_sys::ScrollToOptions::new();
-                    scroll_options.set_behavior(behavior.get_untracked().into());
-
-                    if let Some(x) = x {
-                        scroll_options.set_left(x);
-                    }
-                    if let Some(y) = y {
-                        scroll_options.set_top(y);
-                    }
-
-                    element.scroll_to_with_scroll_to_options(&scroll_options);
+                if let Some(x) = x {
+                    scroll_options.set_left(x);
                 }
+                if let Some(y) = y {
+                    scroll_options.set_top(y);
+                }
+
+                element.scroll_to_with_scroll_to_options(&scroll_options);
             }
         };
 
-        set_x = {
-            let scroll_to = scroll_to.clone();
-            sendwrap_fn!(move |x| scroll_to(Some(x), None))
-        };
+        set_x = sendwrap_fn!(move |x| scroll_to(Some(x), None));
 
         set_y = sendwrap_fn!(move |y| scroll_to(None, Some(y)));
 
@@ -382,13 +375,9 @@ where
             }
         };
 
-        let target = Signal::derive_local({
-            let signal = signal.clone();
-
-            move || {
-                let element = signal.get();
-                element.map(|element| element.unchecked_into::<web_sys::EventTarget>())
-            }
+        let target = Signal::derive_local(move || {
+            let element = signal.get();
+            element.map(|element| element.unchecked_into::<web_sys::EventTarget>())
         });
 
         if throttle >= 0.0 {

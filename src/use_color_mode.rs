@@ -295,7 +295,7 @@ where
     };
 
     let default_on_changed = move |mode: ColorMode| {
-        update_html_attrs(target.clone(), attribute.clone(), mode);
+        update_html_attrs(target, attribute.clone(), mode);
     };
 
     let on_changed = move |mode: ColorMode| {

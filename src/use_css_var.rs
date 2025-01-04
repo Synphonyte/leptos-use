@@ -105,27 +105,22 @@ where
         let el_signal = target.into_element_maybe_signal();
         let prop = prop.into();
 
-        let update_css_var = {
-            let el_signal = el_signal.clone();
-
-            move || {
-                if let Some(el) = el_signal.get_untracked() {
-                    if let Ok(Some(style)) = window().get_computed_style(&el) {
-                        if let Ok(value) = style.get_property_value(&prop.read_untracked()) {
-                            set_variable.update(|var| *var = value.trim().to_string());
-                            return;
-                        }
+        let update_css_var = move || {
+            if let Some(el) = el_signal.get_untracked() {
+                if let Ok(Some(style)) = window().get_computed_style(&el) {
+                    if let Ok(value) = style.get_property_value(&prop.read_untracked()) {
+                        set_variable.update(|var| *var = value.trim().to_string());
+                        return;
                     }
-
-                    let initial_value = initial_value.clone();
-                    set_variable.update(|var| *var = initial_value);
                 }
+
+                let initial_value = initial_value.clone();
+                set_variable.update(|var| *var = initial_value);
             }
         };
 
         if observe {
             let update_css_var = update_css_var.clone();
-            let el_signal = el_signal.clone();
 
             use_mutation_observer_with_options(
                 el_signal,
@@ -137,15 +132,11 @@ where
         // To get around style attributes on node_refs that are not applied after the first render
         set_timeout(update_css_var.clone(), Duration::ZERO);
 
-        {
-            let el_signal = el_signal.clone();
-
-            let _ = watch_with_options(
-                move || (el_signal.get(), prop.get()),
-                move |_, _, _| update_css_var(),
-                WatchOptions::default().immediate(true),
-            );
-        }
+        let _ = watch_with_options(
+            move || (el_signal.get(), prop.get()),
+            move |_, _, _| update_css_var(),
+            WatchOptions::default().immediate(true),
+        );
 
         Effect::watch(
             move || variable.get(),
