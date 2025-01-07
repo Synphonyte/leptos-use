@@ -82,7 +82,6 @@ pub fn use_calendar_with_options(
         first_day_of_the_week,
     } = options;
     let (date, _set_date) = date.into_signal();
-    let first_day_of_the_week = first_day_of_the_week.into_signal();
 
     let show_date = RwSignal::new(date.get_untracked().unwrap_or(Local::now().date_naive()));
     Effect::new(move |_| {
