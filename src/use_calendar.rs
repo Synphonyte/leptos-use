@@ -226,7 +226,6 @@ where
     pub dates: Signal<Vec<CalendarDate>>,
 }
 
-
 /// Utility enum to represent a calendar date. Implements [`Deref`] to [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/struct.NaiveDate.html).
 #[derive(Clone, Copy, PartialEq)]
 pub enum CalendarDate {
