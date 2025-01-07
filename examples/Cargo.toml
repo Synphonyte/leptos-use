@@ -11,6 +11,7 @@ members = [
     "use_and",
     "use_breakpoints",
     "use_broadcast_channel",
+    "use_calendar",
     "use_ceil",
     "use_clipboard",
     "use_color_mode",
