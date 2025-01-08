@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `use_calendar`
 
+### Fix 🍕
+
+- added `Debug` to `Size` (@Ahlman)
+
 ### Special thanks to our sponsor
 - @spencewenski
 
