@@ -83,6 +83,10 @@
 - [use_timeout_fn](animation/use_timeout_fn.md)
 - [use_timestamp](animation/use_timestamp.md)
 
+# Component
+
+- [use_calendar](component/use_calendar.md)
+
 # Watch
 
 - [watch_debounced](watch/watch_debounced.md)

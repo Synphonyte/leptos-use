@@ -1,0 +1,17 @@
+[package]
+name = "use_calendar"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+leptos = { workspace = true, features = ["nightly", "csr"] }
+console_error_panic_hook = { workspace = true }
+console_log = { workspace = true }
+log = { workspace = true }
+leptos-use = { path = "../..", features = ["use_calendar", "docs"] }
+web-sys = { workspace = true }
+chrono = "0.4"
+
+[dev-dependencies]
+wasm-bindgen = { workspace = true }
+wasm-bindgen-test = { workspace = true }
