@@ -5,13 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.15.3] - 2025-01-08 
 
-### New Functions 🚀
+### New Function 🚀
 
 - `use_calendar`
 
 ### Fix 🍕
 
-- added `Debug` to `Size` (@Ahlman)
+- added `Debug` to `Size` (thanks to @Ahlman)
 
 ### Special thanks to our sponsor
 - @spencewenski
