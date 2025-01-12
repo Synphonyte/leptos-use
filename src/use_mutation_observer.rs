@@ -146,7 +146,7 @@ where
                         observer.replace(Some(obs));
                     }
                 },
-                false,
+                true,
             );
 
             move || stop.stop()
