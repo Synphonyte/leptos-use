@@ -72,7 +72,7 @@ where
     T: Into<web_sys::EventTarget> + Clone + 'static,
 {
     let (is_over_drop_zone, set_over_drop_zone) = create_signal(false);
-    let (files, set_files) = create_signal(Vec::<web_sys::File>::new());
+    let files= create_rw_signal(Vec::<web_sys::File>::new());
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -81,13 +81,14 @@ where
             on_enter,
             on_leave,
             on_over,
+            extend_files
         } = options;
 
         let counter = store_value(0_usize);
 
         let update_files = move |event: &web_sys::DragEvent| {
             if let Some(data_transfer) = event.data_transfer() {
-                let files: Vec<web_sys::File> = data_transfer
+                let new_files: Vec<web_sys::File> = data_transfer
                     .files()
                     .map(|f| js_sys::Array::from(&f).to_vec())
                     .unwrap_or_default()
@@ -95,7 +96,11 @@ where
                     .map(web_sys::File::from)
                     .collect();
 
-                set_files.update(move |f| *f = files);
+                if extend_files {
+                    files.update(|files| files.extend(new_files));
+                } else {
+                    files.update(move |f| *f = new_files);
+                }
             }
         };
 
@@ -193,6 +198,8 @@ pub struct UseDropZoneOptions {
     on_leave: Rc<dyn Fn(UseDropZoneEvent)>,
     /// Event handler for the [`dragover`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragover_event) event
     on_over: Rc<dyn Fn(UseDropZoneEvent)>,
+    /// Whether to allow the files to be extended or replaced
+    extend_files: bool,
 }
 
 impl Default for UseDropZoneOptions {
@@ -202,6 +209,7 @@ impl Default for UseDropZoneOptions {
             on_enter: Rc::new(|_| {}),
             on_leave: Rc::new(|_| {}),
             on_over: Rc::new(|_| {}),
+            extend_files: false,
         }
     }
 }
@@ -224,7 +232,7 @@ pub struct UseDropZoneEvent {
 /// Return type of [`use_drop_zone`].
 pub struct UseDropZoneReturn {
     /// Files being handled
-    pub files: Signal<Vec<web_sys::File>>,
+    pub files: RwSignal<Vec<web_sys::File>>,
     /// Whether the files (dragged by the pointer) are over the drop zone
     pub is_over_drop_zone: Signal<bool>,
 }
