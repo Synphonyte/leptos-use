@@ -41,7 +41,7 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3.77", optional = true }
 
 [dev-dependencies]
-codee = { version = "0.3", features = [
+codee = { version = "0.2", features = [
     "json_serde",
     "msgpack_serde",
     "base64",
