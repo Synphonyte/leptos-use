@@ -3,7 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.3] - 2025-01-08 
+## [0.15.4] - 2025-01-15
+
+### Fixes 🍕
+
+- downgraded codee to 0.2.0 to be compatible with Leptos 0.7
+- fixed `use_mutation_observer` (thanks to @bpwarner)
+
+### Changes 🔥
+
+- improxed DX: implemented `Clone + Copy` for `UseDropZoneReturn` (thanks to @mahmoud-eltahawy)
+
+### Special thanks to our sponsor
+- @spencewenski
+
+
+## ~~[0.15.3] - 2025-01-08~~ (yanked)
 
 ### New Function 🚀
 
