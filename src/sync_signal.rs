@@ -187,6 +187,12 @@ use std::rc::Rc;
 /// # view! { }
 /// # }
 /// ```
+/// 
+/// ## Server-Side Rendering
+/// 
+/// On the server the signals are not continuously synced. If the option `immediate` is `true`, the
+/// signals are synced once initially. If the option `immediate` is `false`, then this function 
+/// does nothing.
 pub fn sync_signal<T>(
     left: impl Into<UseRwSignal<T>>,
     right: impl Into<UseRwSignal<T>>,
@@ -224,6 +230,14 @@ where
     let is_sync_update = StoredValue::new(false);
 
     if matches!(direction, SyncDirection::Both | SyncDirection::LeftToRight) {
+        #[cfg(feature = "ssr")]
+        {
+            if immediate {
+                let assign_ltr = Rc::clone(&assign_ltr);
+                right.try_update(move |right| assign_ltr(right, &left.get_untracked()));
+            }
+        }
+
         stop_watch_left = Some(Effect::watch(
             move || left.get(),
             move |new_value, _, _| {
@@ -241,6 +255,14 @@ where
     }
 
     if matches!(direction, SyncDirection::Both | SyncDirection::RightToLeft) {
+        #[cfg(feature = "ssr")]
+        {
+            if immediate && matches!(direction, SyncDirection::RightToLeft) {
+                let assign_rtl = Rc::clone(&assign_rtl);
+                left.try_update(move |left| assign_rtl(left, &right.get_untracked()));
+            }
+        }
+
         stop_watch_right = Some(Effect::watch(
             move || right.get(),
             move |new_value, _, _| {
