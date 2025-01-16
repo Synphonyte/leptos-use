@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sync_signal` with `immediate = true` now syncs the signals on the server once initially. This fixes `use_color_mode`
   with cookies enabled to give wrong results during SSR.
 
+### Special thanks to our sponsor
+- @spencewenski
+
+
 ## [0.15.4] - 2025-01-15
 
 ### Fixes 🍕
