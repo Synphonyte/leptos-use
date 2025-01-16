@@ -187,11 +187,11 @@ use std::rc::Rc;
 /// # view! { }
 /// # }
 /// ```
-/// 
+///
 /// ## Server-Side Rendering
-/// 
+///
 /// On the server the signals are not continuously synced. If the option `immediate` is `true`, the
-/// signals are synced once initially. If the option `immediate` is `false`, then this function 
+/// signals are synced once initially. If the option `immediate` is `false`, then this function
 /// does nothing.
 pub fn sync_signal<T>(
     left: impl Into<UseRwSignal<T>>,
