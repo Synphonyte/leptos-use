@@ -49,7 +49,7 @@ codee = { version = "0.2", features = [
 ] }
 getrandom = { version = "0.2", features = ["js"] }
 leptos_meta = "0.7"
-rand = "0.8"
+rand = "0.9"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
