@@ -199,7 +199,7 @@ where
         };
         use send_wrapper::SendWrapper;
 
-        let (delaying, set_delaying) = signal(
+        let delaying = StoredValue::new(
             delay_during_hydration
                 && Owner::current_shared_context()
                     .map(|sc| sc.during_hydration())
@@ -328,8 +328,7 @@ where
                     }
 
                     // Dons't write default value if store is empty or still hydrating
-                    if value == &default
-                        && (read_from_storage().is_none() || delaying.get_untracked())
+                    if value == &default && (read_from_storage().is_none() || delaying.get_value())
                     {
                         return;
                     }
@@ -355,11 +354,11 @@ where
             );
         }
 
-        if delaying.get_untracked() {
+        if delaying.get_value() {
             request_animation_frame({
                 let fetch_from_storage = fetch_from_storage.clone();
                 move || {
-                    set_delaying.set(false);
+                    delaying.set_value(false);
                     fetch_from_storage()
                 }
             });
