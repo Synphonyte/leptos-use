@@ -199,6 +199,13 @@ where
         };
         use send_wrapper::SendWrapper;
 
+        let (delaying, set_delaying) = signal(
+            delay_during_hydration
+                && Owner::current_shared_context()
+                    .map(|sc| sc.during_hydration())
+                    .unwrap_or_default(),
+        );
+
         let key = key.into();
 
         // Get storage API
@@ -321,7 +328,9 @@ where
                     }
 
                     // Dons't write default value if store is empty
-                    if value == &default && read_from_storage().is_none() {
+                    if value == &default
+                        && (read_from_storage().is_none() || delaying.get_untracked())
+                    {
                         return;
                     }
 
@@ -346,15 +355,13 @@ where
             );
         }
 
-        if delay_during_hydration
-            && Owner::current_shared_context()
-                .map(|sc| sc.during_hydration())
-                .unwrap_or_default()
-        {
+        if delaying.get_untracked() {
             request_animation_frame({
                 let fetch_from_storage = fetch_from_storage.clone();
-                #[allow(clippy::redundant_closure)]
-                move || fetch_from_storage()
+                move || {
+                    set_delaying.set(false);
+                    fetch_from_storage()
+                }
             });
         } else {
             fetch_from_storage();
