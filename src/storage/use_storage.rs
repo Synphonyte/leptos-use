@@ -327,7 +327,7 @@ where
                         return;
                     }
 
-                    // Dons't write default value if store is empty or still hydrating
+                    // Don't write default value if store is empty or still hydrating
                     if value == &default && (read_from_storage().is_none() || delaying.get_value())
                     {
                         return;
