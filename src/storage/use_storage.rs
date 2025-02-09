@@ -199,6 +199,13 @@ where
         };
         use send_wrapper::SendWrapper;
 
+        let delaying = StoredValue::new(
+            delay_during_hydration
+                && Owner::current_shared_context()
+                    .map(|sc| sc.during_hydration())
+                    .unwrap_or_default(),
+        );
+
         let key = key.into();
 
         // Get storage API
@@ -320,8 +327,9 @@ where
                         return;
                     }
 
-                    // Dons't write default value if store is empty
-                    if value == &default && read_from_storage().is_none() {
+                    // Dons't write default value if store is empty or still hydrating
+                    if value == &default && (read_from_storage().is_none() || delaying.get_value())
+                    {
                         return;
                     }
 
@@ -346,15 +354,13 @@ where
             );
         }
 
-        if delay_during_hydration
-            && Owner::current_shared_context()
-                .map(|sc| sc.during_hydration())
-                .unwrap_or_default()
-        {
+        if delaying.get_value() {
             request_animation_frame({
                 let fetch_from_storage = fetch_from_storage.clone();
-                #[allow(clippy::redundant_closure)]
-                move || fetch_from_storage()
+                move || {
+                    delaying.set_value(false);
+                    fetch_from_storage()
+                }
             });
         } else {
             fetch_from_storage();
