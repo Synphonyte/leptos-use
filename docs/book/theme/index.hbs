@@ -1,0 +1,352 @@
+<!DOCTYPE HTML>
+<html lang="{{ language }}" class="{{ default_theme }} sidebar-visible" dir="{{ text_direction }}">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+        {{#if is_print }}
+        <meta name="robots" content="noindex">
+        {{/if}}
+        {{#if base_url}}
+        <base href="{{ base_url }}">
+        {{/if}}
+
+
+        <!-- Custom HTML head -->
+        {{> head}}
+
+        <meta name="description" content="{{ description }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        {{#if favicon_svg}}
+        <link rel="icon" href="{{ path_to_root }}favicon.svg">
+        {{/if}}
+        {{#if favicon_png}}
+        <link rel="shortcut icon" href="{{ path_to_root }}favicon.png">
+        {{/if}}
+        <link rel="stylesheet" href="{{ path_to_root }}css/variables.css">
+        <link rel="stylesheet" href="{{ path_to_root }}css/general.css">
+        <link rel="stylesheet" href="{{ path_to_root }}css/chrome.css">
+        {{#if print_enable}}
+        <link rel="stylesheet" href="{{ path_to_root }}css/print.css" media="print">
+        {{/if}}
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="{{ path_to_root }}FontAwesome/css/font-awesome.css">
+        {{#if copy_fonts}}
+        <link rel="stylesheet" href="{{ path_to_root }}fonts/fonts.css">
+        {{/if}}
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="{{ path_to_root }}highlight.css">
+        <link rel="stylesheet" href="{{ path_to_root }}tomorrow-night.css">
+        <link rel="stylesheet" href="{{ path_to_root }}ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        {{#each additional_css}}
+        <link rel="stylesheet" href="{{ ../path_to_root }}{{ this }}">
+        {{/each}}
+
+        {{#if mathjax_support}}
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        {{/if}}
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "{{ path_to_root }}";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "{{ preferred_dark_theme }}" : "{{ default_theme }}";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="{{ path_to_root }}toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('{{ default_theme }}')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <div class="banner">
+            <div class="bg-blur first-bg-blur" aria-hidden="true">
+                <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"></div>
+            </div>
+
+            <div class="bg-blur second-bg-blur" aria-hidden="true">
+                <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"></div>
+            </div>
+            <div class="banner-content">
+                Like Leptos-Use? Support us and check out
+                <a href="https://oxyde.cloud" target="_blank">
+                    <span>
+                        <svg viewBox="0 0 6428 706" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"><path style="fill:none" d="M0 0h6428v706H0z"/><clipPath id="a"><path d="M0 0h6428v706H0z"/></clipPath><g clip-path="url(#a)"><path d="M3484.75 97.34c19.5 15.17-8.63 55.18-34.5 34.5C3370 61.86 3227 74.3 3156.5 182.91c-51.29 79.02-44.44 181.6 11.73 252.6 67.54 85.35 189.88 105.85 285.28 32.13 21-17.5 52.4 13.07 31.24 37.75-84.66 78.02-257.86 82.87-355.2-39.25-86.92-109.06-74.23-274.25 33.9-366.23 83.72-71.22 219.41-87.8 321.3-2.58Zm182.23 457.52c-48.45 0-89.82-42.93-89.82-112.6V71.32c0-32.38 49.47-32.38 49.47 0v370.96c0 43.69 22.84 63.13 40.35 63.13h16.27c27.7 0 30.97 49.46-7.81 49.46h-8.46Zm420.42-177.67c0 155.98-164.62 219.63-273.99 157.5-117.22-66.6-117.1-249.12 0-315.65 106.5-60.51 272-3.01 274 158.15Zm-180.92 135.37c174.48 0 174.13-271.4 0-271.4-75.55 0-132.12 58.14-132.12 136.03 0 78.57 57.77 135.37 132.12 135.37Zm522.6-5.26c-79.4 90.82-279.85 66.8-279.85-114.5V223.6c0-31.93 50.11-31.85 50.11 0v169.2c0 167.15 229.74 142.17 229.74 23.44V223.6c0-32.84 50.11-31.8 50.11 0v305.88c0 32.8-50.11 33.85-50.11 0V507.3Zm300.8 50.78c-155.54 2.89-225-161.1-161.85-273.96 62.9-112.46 221.53-115.46 287.98-20.82V71.96c0-33.26 50.76-33.26 50.76 0v457.52c0 32.8-50.1 33.85-50.1 0l-.04-38.87c-18.28 26.03-61.71 64.44-126.74 67.47Zm-4.03-45.52c111.04 0 160.52-121.85 114.22-205.33-49.02-88.39-179.29-87.64-228.76 0-47.9 84.83 5.4 205.33 114.54 205.33Zm-4466.3 48.8c-286.52 0-346.12-375.28-127.08-491.03 142.62-75.37 347.7-8.45 381.96 176.2 30.2 162.71-78.23 314.84-254.87 314.84Zm0-48.15c228.6 0 280.82-304.5 101.88-400.25C245.3 50.8 81.21 107.36 53.25 257.03c-23.94 128.19 60.71 256.18 206.3 256.18ZM716.8 407.06 606.44 547.05c-15.77 21.03-56.9-4.65-33.84-31.89L685.05 374.6l-106.6-135.38c-21.6-25.54 13.4-54.3 35.15-32.54l105.1 134.5 103.16-130.6c19.58-27.97 59.94-.41 37.1 29.29L750.66 373.9l110.9 141.91c22.58 27.8-15.98 54.54-37.75 27.34L716.8 407.04Zm494.92 121.77v-21.5c-79.4 90.82-279.85 66.8-279.85-114.5v-169.2c0-31.92 50.12-31.84 50.12 0v169.2c0 167.16 229.73 142.17 229.73 23.44V223.63c0-32.84 50.12-31.8 50.12 0V529.5c0 14.37 0 108.07-86.89 157.14-74.97 42.34-167.95 18.04-211.84-19.2-17.84-14.87-.61-30.77 1.3-32.54 7.54-6.03 22.53-6.36 31.9 1.3 55.06 47.56 215.41 47.39 215.41-107.38Zm298.46 29.25c-155.54 2.89-225-161.1-161.86-273.96 62.91-112.46 221.54-115.46 287.99-20.82V71.96c0-33.26 50.76-33.26 50.76 0v457.52c0 32.8-50.11 33.85-50.11 0l-.04-38.87c-18.28 26.03-61.7 64.44-126.74 67.47Zm-4.04-45.52c111.05 0 160.52-121.85 114.22-205.33-49.02-88.39-179.28-87.64-228.76 0-47.9 84.83 5.41 205.33 114.54 205.33Zm290.1-119.1c1.03 10.78 7.72 80.62 79.2 109.86 51.43 21.04 112.92 3.52 138.71-18.75 9.36-7.66 24.35-7.33 31.89-1.3 1.91 1.77 19.14 17.67 1.3 32.54-43.88 37.24-136.87 61.54-211.84 19.2-143.98-81.32-104.56-339.16 83.63-339.4 107.3-.13 164.32 85.37 163.35 175.07-.24 22.78-20.81 22.78-23.42 22.78h-262.82Zm.92-41.65h238.34c-14.5-148.97-217.85-148.49-238.34 0Z" style="fill:url(#b)"/><path d="M2446.84 562.06a184.14 184.14 0 0 1-71.1 14.18c-102.03 0-184.87-82.84-184.87-184.88 0-76.76 46.89-142.66 113.56-170.6 33.1-71.79 99.05-125.36 178.54-141.39 32.3-41.87 82.96-68.86 139.88-68.86 35.6 0 68.76 10.56 96.5 28.72 107.54 17.69 189.68 111.16 189.68 223.67 0 2.45-.04 4.9-.12 7.33l.12-.04c40.1 30.37 66.02 78.49 66.02 132.61 0 91.76-74.5 166.25-166.25 166.25-42.41 0-86.27-18.36-117.37-48.25a250.28 250.28 0 0 1-158.58 56.38c-30.2 0-59.17-5.34-86.01-15.12Z" style="fill:url(#c)"/><path d="M2441.79 572a190.96 190.96 0 0 1-73.73 14.72c-105.82 0-191.74-85.92-191.74-191.74 0-79.61 48.63-147.96 117.77-176.93 34.33-74.45 102.73-130.01 185.17-146.63C2512.76 27.99 2565.3 0 2624.33 0c36.93 0 71.31 10.95 100.09 29.79 111.52 18.34 196.7 115.28 196.7 231.96 0 2.55-.04 5.08-.12 7.6l.12-.03c41.59 31.49 68.47 81.4 68.47 137.53 0 95.16-77.26 172.41-172.42 172.41-43.98 0-89.47-19.04-121.72-50.04A259.57 259.57 0 0 1 2531 587.69a259.9 259.9 0 0 1-89.2-15.68Zm-169.7-275.89a137.41 137.41 0 0 0-41.84 98.87c0 76.06 61.75 137.81 137.81 137.81.98 0 1.95 0 2.91-.03-61.26-47.72-100.69-122.18-100.69-205.78 0-10.44.62-20.74 1.81-30.87Zm174.15-155.73a205.91 205.91 0 0 0-78.56 62.86 204.52 204.52 0 0 0-30.63 57.44 204.4 204.4 0 0 0-10.99 66.3c0 81.1 47.22 151.27 115.65 184.48a203.4 203.4 0 0 0 62.3 18.68 206.6 206.6 0 0 0 26.98 1.77 203.92 203.92 0 0 0 131.72-48 206.38 206.38 0 0 0 34.87-37.63 204.35 204.35 0 0 0 28.18-55.5 204.46 204.46 0 0 0 10.15-63.8c0-21.51-3.32-42.25-9.48-61.74-23.18-73.33-86.51-128.88-164.15-140.8a206.1 206.1 0 0 0-67.64.84 203.4 203.4 0 0 0-48.4 15.1Zm422.44 150.2c1.47-9.4 2.24-19.02 2.24-28.83 0-62.4-30.99-117.64-78.4-151.12a182.33 182.33 0 0 1 14.92 72.48c0 31.49-7.96 61.12-21.98 87.01a261.23 261.23 0 0 1 6.1 65.37 542.52 542.52 0 0 1 77.12-44.9Zm-138.92 205.03c23.12 22.02 55.94 35.3 87.41 35.3 68.48 0 124.07-55.59 124.07-124.07a123.55 123.55 0 0 0-30.98-81.97 481.64 481.64 0 0 0-66.98 34.12 446.74 446.74 0 0 0-63.8 47.01 260.73 260.73 0 0 1-49.73 89.61Zm-27.8-418.07a130.42 130.42 0 0 0-77.63-25.48c-22.72 0-44.1 5.8-62.75 16a258.83 258.83 0 0 1 68.09 17.57 261.95 261.95 0 0 1 125.3 107.94 130.9 130.9 0 0 0-53.02-116.02Z" style="fill:url(#d)"/><path d="M6427.98 163.35v326.7c0 90.16-73.2 163.35-163.35 163.35h-981.08c-90.15 0-163.35-73.2-163.35-163.35v-326.7C5120.2 73.2 5193.4 0 5283.55 0h981.08c90.15 0 163.35 73.2 163.35 163.35Zm-37.23 0c0-69.6-56.51-126.12-126.12-126.12h-981.08c-69.6 0-126.12 56.51-126.12 126.12v326.7c0 69.61 56.51 126.13 126.12 126.13h981.08c69.6 0 126.12-56.52 126.12-126.13v-326.7Z" style="fill:url(#e)"/><path d="M5328.36 364.54V213.87c0-21.8 33.7-22.3 33.7 0v89.2c52.42-62.9 159.14-20.62 147.6 74.19-13.2 108.61-179.82 104.25-181.3-12.72Zm90.86 62.11c61.83 0 78.56-86.67 30.07-115.8-31.1-18.7-77.2-2.58-86.65 36.83-9.15 38.2 16.19 78.97 56.58 78.97Zm212.37-50.22c7.93 49.01 67.95 64.42 101.86 38.99 1.34-.99 11.36-8.33 20.82-.33 1.27 1.12 13.14 11.6.66 21.15-51.76 41.1-153.83 18.34-153.98-71.38-.16-105.2 137.24-123.36 166-38.69 1.33 3.88 17.08 50.26-9.7 50.26h-125.66Zm.37-26.43h110.06c-8.83-66.9-98.85-62.41-110.06 0Zm240.6-40.65h-15.2c-20.34 0-20.25-28.41 0-28.41h15.2v-47.58c0-21.52 33.04-21.52 33.04 0v47.58h28.08c20.25 0 20.34 28.41 0 28.41h-28.08v81.62c0 18.74 14.12 31.06 25.11 31.06h11.23c17.85 0 20.65 33.04-5.28 33.04h-5.95c-30.71 0-58.15-27.33-58.15-64.1v-81.62Zm313.56 116.81c-51.77 63.58-159.09 21.02-147.6-74.02 5.12-42.38 40.72-79.13 90.44-79.13 51.89 0 90.87 40.7 90.87 91.85v73.69c0 21.93-33.7 21.76-33.7 0v-12.39Zm-57.16.5c48.75 0 71.01-55.98 50.89-93.68-21.26-39.8-80.57-39.23-101.94-.04-20.84 38.2 3.02 93.71 51.05 93.71Z" style="fill:url(#f)"/></g><defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="translate(-.12 374.91) scale(4906.89)"><stop offset="0" style="stop-color:#3d2006;stop-opacity:1"/><stop offset="1" style="stop-color:#2f2a47;stop-opacity:1"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="rotate(32.32 964.48 4143.4) scale(704.737)"><stop offset="0" style="stop-color:#ffe5d1;stop-opacity:1"/><stop offset="1" style="stop-color:#e6e2fa;stop-opacity:1"/></linearGradient><linearGradient id="d" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="rotate(33.12 970 4038.89) scale(704.245)"><stop offset="0" style="stop-color:#ff994a;stop-opacity:1"/><stop offset=".44" style="stop-color:#895bda;stop-opacity:1"/><stop offset="1" style="stop-color:#6b4bff;stop-opacity:1"/></linearGradient><linearGradient id="e" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1191.36 576.333 -287.953 595.241 5173.54 42.64)"><stop offset="0" style="stop-color:#ff994a;stop-opacity:1"/><stop offset="1" style="stop-color:#6b4bff;stop-opacity:1"/></linearGradient><linearGradient id="f" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(891.466 0 0 259.378 5328.36 326.7)"><stop offset="0" style="stop-color:#3d2006;stop-opacity:1"/><stop offset="1" style="stop-color:#2a2444;stop-opacity:1"/></linearGradient></defs></svg>
+                    </span>
+                </a>
+            </div>
+
+            <div class="banner-close-button">
+                {{!<button type="button">
+                    <span class="sr-only">"Dismiss"</span>
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                    </svg>
+                </button>}}
+            </div>
+        </div>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="{{ path_to_root }}toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                {{> header}}
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        {{#if search_enabled}}
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        {{/if}}
+                    </div>
+
+                    <h1 class="menu-title">{{ book_title }}</h1>
+
+                    <div class="right-buttons">
+                        {{#if print_enable}}
+                        <a href="{{ path_to_root }}print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        {{/if}}
+                        {{#if git_repository_url}}
+                        <a href="{{git_repository_url}}" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa {{git_repository_icon}}"></i>
+                        </a>
+                        {{/if}}
+                        {{#if git_repository_edit_url}}
+                        <a href="{{git_repository_edit_url}}" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                        {{/if}}
+
+                    </div>
+                </div>
+
+                {{#if search_enabled}}
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                {{/if}}
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        {{{ content }}}
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        {{#previous}}
+                            <a rel="prev" href="{{ path_to_root }}{{link}}" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        {{/previous}}
+
+                        {{#next}}
+                            <a rel="next prefetch" href="{{ path_to_root }}{{link}}" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        {{/next}}
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                {{#previous}}
+                    <a rel="prev" href="{{ path_to_root }}{{link}}" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                {{/previous}}
+
+                {{#next}}
+                    <a rel="next prefetch" href="{{ path_to_root }}{{link}}" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                {{/next}}
+            </nav>
+
+        </div>
+
+        {{#if live_reload_endpoint}}
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "{{{live_reload_endpoint}}}";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+        {{/if}}
+
+        {{#if google_analytics}}
+        <!-- Google Analytics Tag -->
+        <script>
+            var localAddrs = ["localhost", "127.0.0.1", ""];
+
+            // make sure we don't activate google analytics if the developer is
+            // inspecting the book locally...
+            if (localAddrs.indexOf(document.location.hostname) === -1) {
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                ga('create', '{{google_analytics}}', 'auto');
+                ga('send', 'pageview');
+            }
+        </script>
+        {{/if}}
+
+        {{#if playground_line_numbers}}
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+        {{/if}}
+
+        {{#if playground_copyable}}
+        <script>
+            window.playground_copyable = true;
+        </script>
+        {{/if}}
+
+        {{#if playground_js}}
+        <script src="{{ path_to_root }}ace.js"></script>
+        <script src="{{ path_to_root }}editor.js"></script>
+        <script src="{{ path_to_root }}mode-rust.js"></script>
+        <script src="{{ path_to_root }}theme-dawn.js"></script>
+        <script src="{{ path_to_root }}theme-tomorrow_night.js"></script>
+        {{/if}}
+
+        {{#if search_js}}
+        <script src="{{ path_to_root }}elasticlunr.min.js"></script>
+        <script src="{{ path_to_root }}mark.min.js"></script>
+        <script src="{{ path_to_root }}searcher.js"></script>
+        {{/if}}
+
+        <script src="{{ path_to_root }}clipboard.min.js"></script>
+        <script src="{{ path_to_root }}highlight.js"></script>
+        <script src="{{ path_to_root }}book.js"></script>
+
+        <!-- Custom JS scripts -->
+        {{#each additional_js}}
+        <script src="{{ ../path_to_root }}{{this}}"></script>
+        {{/each}}
+
+        {{#if is_print}}
+        {{#if mathjax_support}}
+        <script>
+        window.addEventListener('load', function() {
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
+        });
+        </script>
+        {{else}}
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        {{/if}}
+        {{/if}}
+
+    </div>
+    </body>
+</html>

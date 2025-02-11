@@ -38,6 +38,10 @@ pre > code {
     opacity: 0.5;
 }
 
+.sidebar {
+    top: 3.8rem;
+}
+
 .sidebar .sidebar-scrollbox {
     padding: 10px 10px 10px 20px;
 }
@@ -103,4 +107,118 @@ h2, h3, h4 {
 
 #searchbar {
     font-size: 1.6rem;
+}
+
+.banner > *,::after,::before,::backdrop,::file-selector-button {
+  box-sizing: border-box;
+  border: 0 solid;
+  margin: 0;
+  padding: 0;
+}
+
+.banner {
+    display: none;
+    isolation: isolate;
+    overflow: hidden;
+    position: relative;
+    padding: 1rem 1.25rem;
+    column-gap: 1.5rem;
+    align-items: center;
+    background-color: rgb(249 250 251);
+    z-index: 999999;
+}
+
+.banner:before {
+  content: "";
+  flex: 1
+}
+
+.bg-blur {
+  position: absolute;
+  top: 50%;
+  filter: blur(40px);
+  z-index: -10;
+  transform: translateY(-50%);
+  transform: translate3d(0, -50%, 0) rotate(0) skewX(0) skewY(0) scaleX(1.6) scaleY(1.6);
+}
+
+.bg-blur > div {
+  background: linear-gradient(to right, mediumvioletred 0%, cornflowerblue 100%);
+  opacity: 0.3;
+  aspect-ratio: 577/310;
+  width: 36.0625rem;
+}
+
+.first-bg-blur {
+  left: max(-9rem, 50% - 72rem);
+}
+
+.second-bg-blur {
+  left: max(65rem, 50% + 25rem);
+}
+
+.banner-content {
+    font-size: 1.4rem;
+    line-height: 2rem;
+    font-weight: 500;
+    color: #222;
+}
+
+.banner-content > a:hover {
+  transition: 0.5s;
+  filter: drop-shadow(0 0 23px #6b4bff)
+}
+
+.banner-content > a > span > svg {
+  vertical-align: middle;
+  height: 2rem;
+  width: 15rem;
+  margin-left: 0.25rem
+}
+
+.banner-close-button {
+    display: flex;
+    flex: 1 1 0;
+    justify-content: flex-end;
+}
+
+.banner-close-button > button {
+    -webkit-appearance: button;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    text-transform: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 0 solid;
+    font-size: 100%;
+    padding: 0.875rem;
+    margin: -0.875rem;
+}
+
+.banner-close-button > button > svg {
+    width: 2rem;
+    height: 2rem;
+    color: #111827;
+}
+
+.banner-close-button > button:focus-visible {
+  outline-offset: -4px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+@media (min-width: 640px) {
+    .banner {
+        display: flex;
+    }
 }
