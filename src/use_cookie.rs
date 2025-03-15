@@ -35,7 +35,7 @@ use std::sync::Arc;
 /// # use leptos::prelude::*;
 /// # use leptos_use::use_cookie;
 /// # use codee::string::FromToStringCodec;
-/// # use rand::prelude::*;
+/// # use rand::random;
 ///
 /// #
 /// # #[component]
