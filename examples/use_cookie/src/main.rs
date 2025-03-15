@@ -2,7 +2,7 @@ use codee::string::FromToStringCodec;
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::use_cookie;
-use rand::prelude::*;
+use rand::random;
 
 #[component]
 fn Demo() -> impl IntoView {
