@@ -34,11 +34,11 @@ use std::sync::Arc;
 /// On the server this returns the parsed value of the `accept-language` header.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
-/// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
+/// > In case it's `actix-web` enable the feature `"actix"`.
 ///
 /// ### Bring your own header
 ///
-/// In case you're neither using Axum, Actix nor Spin, or the default implementation is not to your liking,
+/// In case you're neither using Axum, Actix or the default implementation is not to your liking,
 /// you can provide your own way of reading the language header value using the option
 /// [`crate::UseLocalesOptions::ssr_lang_header_getter`].
 pub fn use_locales() -> Signal<Vec<String>> {
@@ -99,7 +99,7 @@ pub fn use_locales_with_options(options: UseLocalesOptions) -> Signal<Vec<String
 #[derive(DefaultBuilder)]
 pub struct UseLocalesOptions {
     /// Getter function to return the string value of the accept languange header.
-    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
+    /// When you use one of the features `"axum"` or `"actix"` there's a valid default implementation provided.
     #[allow(dead_code)]
     ssr_lang_header_getter: Arc<dyn Fn() -> Option<String>>,
 }

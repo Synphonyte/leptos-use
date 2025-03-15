@@ -30,7 +30,6 @@ lazy_static = "1"
 leptos = "0.8.0-alpha"
 leptos_axum = { version = "0.8.0-alpha", default-features = false, optional = true }
 leptos_actix = { version = "0.8.0-alpha", default-features = false, optional = true }
-leptos-spin = { version = "0.2", default-features = false, optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 send_wrapper = "0.6.0"
@@ -161,7 +160,6 @@ math = ["num"]
 on_click_outside = ["use_event_listener", "is"]
 signal_debounced = ["use_debounce_fn"]
 signal_throttled = ["use_throttle_fn"]
-spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
 storage = [
     "use_event_listener",
