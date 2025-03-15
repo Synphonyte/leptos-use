@@ -33,7 +33,7 @@ use std::sync::Arc;
 ///
 /// ### Bring your own header
 ///
-/// In case you're neither using Axum, Actix or the default implementation is not to your liking,
+/// In case you're neither using Axum nor Actix or the default implementation is not to your liking,
 /// you can provide your own way of reading the color scheme header value using the option
 /// [`crate::UsePreferredDarkOptions::ssr_color_header_getter`].
 ///
