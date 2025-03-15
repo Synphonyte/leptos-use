@@ -46,7 +46,7 @@ codee = { version = "0.3", features = [
     "base64",
     "prost",
 ] }
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { version = "0.3", features = ["wasm_js"] }
 leptos_meta = "0.8.0-alpha"
 rand = "0.9"
 serde = { version = "1", features = ["derive"] }
