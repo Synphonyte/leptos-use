@@ -1,8 +1,5 @@
 mod filters;
-#[cfg(all(
-    feature = "ssr",
-    any(feature = "axum", feature = "actix", feature = "spin")
-))]
+#[cfg(all(feature = "ssr", any(feature = "axum", feature = "actix")))]
 mod header;
 mod header_macro;
 #[cfg(feature = "is")]
@@ -15,10 +12,7 @@ mod signal_filtered;
 mod use_derive_signal;
 
 pub use filters::*;
-#[cfg(all(
-    feature = "ssr",
-    any(feature = "axum", feature = "actix", feature = "spin")
-))]
+#[cfg(all(feature = "ssr", any(feature = "axum", feature = "actix")))]
 pub use header::*;
 #[allow(unused_imports)]
 pub(crate) use header_macro::*;

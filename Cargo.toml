@@ -27,10 +27,9 @@ http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
 lazy_static = "1"
-leptos = "0.7"
-leptos_axum = { version = "0.7", default-features = false, optional = true }
-leptos_actix = { version = "0.7", default-features = false, optional = true }
-leptos-spin = { version = "0.2", default-features = false, optional = true }
+leptos = "0.8.0-alpha"
+leptos_axum = { version = "0.8.0-alpha", default-features = false, optional = true }
+leptos_actix = { version = "0.8.0-alpha", default-features = false, optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
 send_wrapper = "0.6.0"
@@ -48,8 +47,8 @@ codee = { version = "0.3", features = [
     "prost",
 ] }
 getrandom = { version = "0.2", features = ["js"] }
-leptos_meta = "0.7"
-rand = "0.8"
+leptos_meta = "0.8.0-alpha"
+rand = "0.9"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
@@ -161,7 +160,6 @@ math = ["num"]
 on_click_outside = ["use_event_listener", "is"]
 signal_debounced = ["use_debounce_fn"]
 signal_throttled = ["use_throttle_fn"]
-spin = ["dep:leptos-spin", "dep:http1"]
 ssr = []
 storage = [
     "use_event_listener",
