@@ -54,7 +54,7 @@ fn Demo() -> impl IntoView {
         set_history.update(|history: &mut Vec<_>| history.push(format!("[send]: {:?}", m)));
     };
 
-    let status = move || ready_state().to_string();
+    let status = move || ready_state.get().to_string();
 
     let connected = move || ready_state.get() == ConnectionReadyState::Open;
 
@@ -165,7 +165,7 @@ fn Demo() -> impl IntoView {
                     <div class="flex items-center">
                         <h3 class="text-2xl mr-2">"History"</h3>
                         <button
-                            on:click=move |_| set_history(vec![])
+                            on:click=move |_| set_history.set(vec![])
                             disabled=move || history2.with(Vec::is_empty)
                         >
                             "Clear"
@@ -196,7 +196,7 @@ fn Demo() -> impl IntoView {
                     <div class="flex items-center">
                         <h3 class="text-2xl mr-2">"History"</h3>
                         <button
-                            on:click=move |_| set_history2(vec![])
+                            on:click=move |_| set_history2.set(vec![])
                             disabled=move || history2.with(Vec::is_empty)
                         >
                             "Clear"

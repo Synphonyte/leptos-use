@@ -78,15 +78,15 @@ members = [
 exclude = ["ssr", "use_webtransport_with_server"]
 
 [workspace.dependencies]
-leptos = "0.7"
-codee = "0.2"
+leptos = "0.8.0-alpha"
+codee = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
 leptos-use = { path = "..", features = ["docs"] }
 web-sys = "0.3"
 wasm-bindgen = "0.2"
-wasm-bindgen-test = "0.3.0"
+wasm-bindgen-test = "0.3"
 
 [package]
 name = "leptos-use-examples"

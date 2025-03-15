@@ -35,7 +35,7 @@ use std::sync::Arc;
 /// # use leptos::prelude::*;
 /// # use leptos_use::use_cookie;
 /// # use codee::string::FromToStringCodec;
-/// # use rand::prelude::*;
+/// # use rand::random;
 ///
 /// #
 /// # #[component]
@@ -99,11 +99,11 @@ use std::sync::Arc;
 /// this will have no effect.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
-/// > In case it's `actix-web` enable the feature `"actix"`, for `spin` enable `"spin"`.
+/// > In case it's `actix-web` enable the feature `"actix"`..
 ///
 /// ### Bring your own header
 ///
-/// In case you're neither using Axum, Actix nor Spin, or the default implementation is not to your liking,
+/// In case you're neither using Axum nor Actix or the default implementation is not to your liking,
 /// you can provide your own way of reading and writing the cookie header value.
 ///
 /// ```
@@ -484,11 +484,11 @@ pub struct UseCookieOptions<T, E, D> {
     readonly: bool,
 
     /// Getter function to return the string value of the cookie header.
-    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
+    /// When you use one of the features `"axum"` or `"actix"` there's a valid default implementation provided.
     ssr_cookies_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 
     /// Function to add a set cookie header to the response on the server.
-    /// When you use one of the features `"axum"`, `"actix"` or `"spin"` there's a valid default implementation provided.
+    /// When you use one of the features `"axum"` or `"actix"` there's a valid default implementation provided.
     ssr_set_cookie: Arc<dyn Fn(&Cookie) + Send + Sync>,
 
     /// Callback for encoding/decoding errors. Defaults to logging the error to the console.
@@ -518,28 +518,22 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                     use leptos_actix::ResponseOptions;
                     #[cfg(feature = "axum")]
                     use leptos_axum::ResponseOptions;
-                    #[cfg(feature = "spin")]
-                    use leptos_spin::ResponseOptions;
 
                     #[cfg(feature = "actix")]
                     const SET_COOKIE: http0_2::HeaderName = http0_2::header::SET_COOKIE;
-                    #[cfg(any(feature = "axum", feature = "spin"))]
+                    #[cfg(feature = "axum")]
                     const SET_COOKIE: http1::HeaderName = http1::header::SET_COOKIE;
 
                     #[cfg(feature = "actix")]
                     type HeaderValue = http0_2::HeaderValue;
-                    #[cfg(any(feature = "axum", feature = "spin"))]
+                    #[cfg(feature = "axum")]
                     type HeaderValue = http1::HeaderValue;
 
-                    #[cfg(all(
-                        not(feature = "axum"),
-                        not(feature = "actix"),
-                        not(feature = "spin")
-                    ))]
+                    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
                     {
                         use leptos::logging::warn;
                         let _ = cookie;
-                        warn!("If you're using use_cookie without the feature `axum`, `actix` or `spin` enabled, you should provide the option `ssr_set_cookie`");
+                        warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`");
                     }
 
                     #[cfg(any(feature = "axum", feature = "actix"))]
@@ -550,13 +544,6 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
                             {
                                 response_options.append_header(SET_COOKIE, header_value);
                             }
-                        }
-                    }
-                    #[cfg(feature = "spin")]
-                    {
-                        if let Some(response_options) = use_context::<ResponseOptions>() {
-                            let header_value = cookie.encoded().to_string().as_bytes().to_vec();
-                            response_options.append_header(SET_COOKIE.as_str(), &header_value);
                         }
                     }
                 }
