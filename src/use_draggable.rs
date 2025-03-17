@@ -70,6 +70,7 @@ where
         handle,
         pointer_types,
         initial_value,
+        target_offset,
         on_start,
         on_move,
         on_end,
@@ -110,16 +111,16 @@ where
             }
 
             if let Some(target) = target.get_untracked() {
+                let (x, y) = target_offset(target.clone().unchecked_into());
                 let target: web_sys::Element = target.unchecked_into();
 
                 if exact.get_untracked() && event_target::<web_sys::Element>(&event) != target {
                     return;
                 }
 
-                let rect = target.get_bounding_client_rect();
                 let position = Position {
-                    x: event.client_x() as f64 - rect.left(),
-                    y: event.client_y() as f64 - rect.top(),
+                    x: event.client_x() as f64 - x,
+                    y: event.client_y() as f64 - y,
                 };
 
                 #[cfg(debug_assertions)]
@@ -264,6 +265,10 @@ where
     #[builder(into)]
     initial_value: MaybeRwSignal<Position>,
 
+    /// Computes the initial offset of the target element for drag positioning.
+    /// Defaults to using its bounding client rectangle's left and top values.
+    target_offset: Arc<dyn Fn(web_sys::EventTarget) -> (f64, f64)>,
+
     /// Callback when the dragging starts. Return `false` to prevent dragging.
     on_start: Arc<dyn Fn(UseDraggableCallbackArgs) -> bool + Send + Sync>,
 
@@ -294,6 +299,11 @@ where
             handle: None,
             pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],
             initial_value: MaybeRwSignal::default(),
+            target_offset: Arc::new(|target: web_sys::EventTarget| {
+                let target: web_sys::Element = target.unchecked_into();
+                let rect = target.get_bounding_client_rect();
+                (rect.left(), rect.top())
+            }),
             on_start: Arc::new(|_| true),
             on_move: Arc::new(|_| {}),
             on_end: Arc::new(|_| {}),
