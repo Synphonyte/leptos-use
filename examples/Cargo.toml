@@ -79,7 +79,7 @@ exclude = ["ssr", "use_webtransport_with_server"]
 
 [workspace.dependencies]
 leptos = "0.7"
-codee = "0.2"
+codee = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
