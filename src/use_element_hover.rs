@@ -41,7 +41,6 @@ where
 }
 
 /// Version of [`use_element_hover`] that takes a `UseElementHoverOptions`. See [`use_element_hover`] for how to use.
-
 #[cfg_attr(feature = "ssr", allow(unused_variables, unused_mut))]
 pub fn use_element_hover_with_options<El, M>(
     el: El,
