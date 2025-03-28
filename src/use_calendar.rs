@@ -185,7 +185,7 @@ pub fn use_calendar_with_options(
             show_date.set(Local::now().date_naive());
         },
         month_by_date: move |new_date: &NaiveDate| {
-            show_date.set(new_date.clone());
+            show_date.set(*new_date);
         },
 
         next_month: move || {
