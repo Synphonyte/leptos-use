@@ -24,6 +24,7 @@ use std::ops::Deref;
 ///     weekdays,
 ///     previous_month,
 ///     today,
+///     month_by_date,
 ///     next_month
 /// } = use_calendar();
 /// #
@@ -54,6 +55,7 @@ use std::ops::Deref;
 ///     weekdays,
 ///     previous_month,
 ///     today,
+///     month_by_date,
 ///     next_month
 /// } = use_calendar_with_options(options);
 /// #
@@ -70,6 +72,7 @@ use std::ops::Deref;
 pub fn use_calendar() -> UseCalendarReturn<
     impl Fn() + Clone + Send + Sync,
     impl Fn() + Clone + Send + Sync,
+    impl Fn(&NaiveDate) + Clone + Send + Sync,
     impl Fn() + Clone + Send + Sync,
 > {
     use_calendar_with_options(UseCalendarOptions::default())
@@ -82,6 +85,7 @@ pub fn use_calendar_with_options(
 ) -> UseCalendarReturn<
     impl Fn() + Clone + Send + Sync,
     impl Fn() + Clone + Send + Sync,
+    impl Fn(&NaiveDate) + Clone + Send + Sync,
     impl Fn() + Clone + Send + Sync,
 > {
     let UseCalendarOptions {
@@ -180,6 +184,10 @@ pub fn use_calendar_with_options(
         today: move || {
             show_date.set(Local::now().date_naive());
         },
+        month_by_date: move |new_date: &NaiveDate| {
+            show_date.set(new_date.clone());
+        },
+
         next_month: move || {
             show_date.update(|date| {
                 *date = *date + Months::new(1);
@@ -214,16 +222,19 @@ impl Default for UseCalendarOptions {
 
 /// Return type of [`use_calendar`].
 // #[doc(cfg(feature = "use_calendar"))]
-pub struct UseCalendarReturn<PreviousMonthFn, TodayFn, NextMonthFn>
+pub struct UseCalendarReturn<PreviousMonthFn, TodayFn, MonthByDateFn, NextMonthFn>
 where
     PreviousMonthFn: Fn() + Clone + Send + Sync,
     TodayFn: Fn() + Clone + Send + Sync,
+    MonthByDateFn: Fn(&NaiveDate) + Clone + Send + Sync,
     NextMonthFn: Fn() + Clone + Send + Sync,
 {
     /// A function to go to the previous month.
     pub previous_month: PreviousMonthFn,
     /// A function to go to the current month.
     pub today: TodayFn,
+    /// A function to go to the month by date.
+    pub month_by_date: MonthByDateFn,
     /// A function to go to the next month.
     pub next_month: NextMonthFn,
     /// The first day of the week as a number from 0 to 6.
