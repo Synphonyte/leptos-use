@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use chrono::*;
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
@@ -15,6 +16,7 @@ fn Demo() -> impl IntoView {
         dates,
         previous_month,
         today,
+        month_by_date,
         next_month,
     } = use_calendar_with_options(options);
 
@@ -38,6 +40,7 @@ fn Demo() -> impl IntoView {
     });
 
     view! {
+        <button on:click=move |_| month_by_date(&NaiveDate::from_ymd_opt(2006,2,7).unwrap())> go to month by date (2006.02)</button>
         <div class="w-[50%]">
             <div class="flex center-items justify-between">
                 <button on:click=move |_| previous_month()>{"<<"}</button>
