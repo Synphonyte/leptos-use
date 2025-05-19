@@ -98,6 +98,7 @@ pub fn use_user_media_with_options(
     };
 
     let start = {
+        #[cfg(not(feature = "ssr"))]
         let _start = _start.clone();
         move || {
             #[cfg(not(feature = "ssr"))]
@@ -128,6 +129,7 @@ pub fn use_user_media_with_options(
         move |enabled, _, _| {
             if *enabled {
                 leptos::task::spawn_local({
+                    #[cfg(not(feature = "ssr"))]
                     let _start = _start.clone();
 
                     async move {
