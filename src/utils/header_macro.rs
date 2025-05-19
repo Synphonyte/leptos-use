@@ -10,12 +10,11 @@ macro_rules! get_header {
         if cfg!(feature = "ssr") {
             #[cfg(all(
                 not(feature = "axum"),
-                not(feature = "actix"),
-                not(feature = "spin")
+                not(feature = "actix")
             ))]
             {
                 leptos::logging::warn!(
-                    "If you're using `{}` with SSR but without any of the features `axum`, `actix` or `spin` enabled, you have to provide the option `{}`",
+                    "If you're using `{}` with SSR but without any of the features `axum`, `actix` enabled, you have to provide the option `{}`",
                     stringify!($function_name),
                     stringify!($option_name)
                 );
@@ -25,11 +24,11 @@ macro_rules! get_header {
             #[cfg(feature = "actix")]
             #[allow(unused_imports)]
             use http0_2::{HeaderName, header::*};
-            #[cfg(any(feature = "axum", feature = "spin"))]
+            #[cfg(feature = "axum")]
             #[allow(unused_imports)]
             use http1::{HeaderName, header::*};
 
-            #[cfg(any(feature = "axum", feature = "actix", feature = "spin"))]
+            #[cfg(any(feature = "axum", feature = "actix"))]
             {
                 let header_name = $header_name;
                 crate::utils::header(header_name)

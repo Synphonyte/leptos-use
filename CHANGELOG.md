@@ -3,6 +3,27 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0-beta] - 2025-03-20
+
+### Breaking Change 🛠
+
+- Updated dependency Leptos to version `0.8.0-beta` (thanks to @ifiokjr)
+
+### Special thanks to our sponsor
+- @spencewenski
+
+## [0.16.0-alpha] - 2025-03-17
+
+### Breaking Changes 🛠
+
+- Removed the feature `spin` and it's backend integration dependency `leptos-spin` (thanks to @ifiokjr)
+- Updated dependency Leptos to version `0.8.0-alpha` (thanks to @ifiokjr)
+- Updated dependency getrandom to version `0.3`
+- Updated dependency rand to version `0.9`
+
+### Special thanks to our sponsor
+- @spencewenski
+
 ## [0.15.7] - 2025-03-17
 
 ### Change
