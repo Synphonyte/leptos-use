@@ -384,7 +384,7 @@ impl Display for ColorMode {
             Auto => write!(f, "auto"),
             Light => write!(f, "light"),
             Dark => write!(f, "dark"),
-            Custom(v) => write!(f, "{}", v),
+            Custom(v) => write!(f, "{v}"),
         }
     }
 }
