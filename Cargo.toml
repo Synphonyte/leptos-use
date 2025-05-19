@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.16.0"
+version = "0.16.0-beta2"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming", "wasm"]
@@ -127,7 +127,7 @@ default = [
     "watch_pausable",
     "watch_throttled",
     "watch_with_options",
-    "whenever"
+    "whenever",
 ]
 use_calendar = []
 use_textarea_autosize = [
@@ -166,7 +166,7 @@ storage = [
     "dep:web-sys",
     "dep:codee",
     "web-sys/CustomEventInit",
-    "web-sys/Storage"
+    "web-sys/Storage",
 ]
 sync_signal = []
 use_active_element = ["use_event_listener"]
@@ -189,7 +189,7 @@ use_color_mode = [
     "use_cycle_list",
     "use_preferred_dark",
     "storage",
-    "sync_signal"
+    "sync_signal",
 ]
 use_cookie = [
     "use_broadcast_channel",
@@ -197,10 +197,7 @@ use_cookie = [
     "dep:cookie",
     "web-sys/HtmlDocument",
 ]
-use_css_var = [
-    "use_mutation_observer",
-    "watch_with_options",
-]
+use_css_var = ["use_mutation_observer", "watch_with_options"]
 use_cycle_list = []
 use_debounce_fn = []
 use_device_orientation = ["use_event_listener", "use_supported"]
@@ -212,18 +209,14 @@ use_display_media = [
     "web-sys/MediaStream",
     "web-sys/MediaStreamTrack",
 ]
-use_document = [
-    "dep:web-sys",
-    "web-sys/NodeList",
-    "web-sys/VisibilityState",
-]
+use_document = ["dep:web-sys", "web-sys/NodeList", "web-sys/VisibilityState"]
 use_document_visibility = ["use_event_listener", "web-sys/VisibilityState"]
 use_draggable = ["use_event_listener", "web-sys/DomRect"]
 use_drop_zone = [
     "use_event_listener",
     "web-sys/DataTransfer",
     "web-sys/File",
-    "web-sys/FileList"
+    "web-sys/FileList",
 ]
 use_element_bounding = [
     "use_event_listener",
@@ -236,16 +229,13 @@ use_element_size = [
     "watch_with_options",
     "web-sys/ResizeObserverSize",
 ]
-use_element_visibility = [
-    "use_intersection_observer",
-    "web-sys/DomRect",
-]
+use_element_visibility = ["use_intersection_observer", "web-sys/DomRect"]
 use_event_listener = [
     "element",
     "watch_with_options",
     "dep:web-sys",
     "web-sys/EventTarget",
-    "web-sys/EventListenerOptions"
+    "web-sys/EventListenerOptions",
 ]
 use_event_source = [
     "use_event_listener",
@@ -262,11 +252,7 @@ use_geolocation = [
     "web-sys/PositionError",
     "web-sys/PositionOptions",
 ]
-use_idle = [
-    "use_event_listener",
-    "use_document",
-    "use_timestamp",
-]
+use_idle = ["use_event_listener", "use_document", "use_timestamp"]
 use_infinite_scroll = [
     "use_element_visibility",
     "use_scroll",
@@ -293,10 +279,7 @@ use_mouse = [
     "web-sys/Touch",
     "web-sys/TouchList",
 ]
-use_mouse_in_element = [
-    "use_mouse",
-    "web-sys/DomRect",
-]
+use_mouse_in_element = ["use_mouse", "web-sys/DomRect"]
 use_mutation_observer = [
     "element",
     "use_supported",
@@ -335,7 +318,7 @@ use_service_worker = [
     "use_window",
     "web-sys/ServiceWorker",
     "web-sys/ServiceWorkerContainer",
-    "web-sys/ServiceWorkerRegistration"
+    "web-sys/ServiceWorkerRegistration",
 ]
 use_sorted = []
 use_supported = []
@@ -361,14 +344,15 @@ use_web_notification = [
     "web-sys/NotificationOptions",
     "web-sys/NotificationPermission",
     "web-sys/NotificationDirection",
-    "web-sys/VisibilityState"
+    "web-sys/VisibilityState",
 ]
-use_websocket = [
+use_websocket = ["dep:web-sys", "dep:codee", "use_interval_fn"]
+use_window = [
+    "use_document",
     "dep:web-sys",
-    "dep:codee",
-    "use_interval_fn"
+    "web-sys/Navigator",
+    "web-sys/MediaQueryList",
 ]
-use_window = ["use_document", "dep:web-sys", "web-sys/Navigator", "web-sys/MediaQueryList"]
 use_window_focus = ["use_event_listener"]
 use_window_scroll = ["use_event_listener", "use_window"]
 wasm_ssr = []

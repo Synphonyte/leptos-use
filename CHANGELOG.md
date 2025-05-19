@@ -3,13 +3,32 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0-beta2] - 2025-03-20
+
+### Breaking Change 🛠
+
+- Updated dependency Leptos to version `0.8.0` (thanks to @DerKnerd, @jaystile)
+
+### New Feature 🚀
+
+- Added `target_offset` to `use_draggable` options for more flexible positioning (thanks to @theredfish)
+
+### Special thanks to our sponsors
+- @benwis
+- @spencewenski
+
 ## [0.16.0-beta] - 2025-03-20
 
 ### Breaking Change 🛠
 
 - Updated dependency Leptos to version `0.8.0-beta` (thanks to @ifiokjr)
 
-### Special thanks to our sponsor
+### New Feature 🚀
+
+- Added `month_by_date` to `use_calendar` (thanks to @tomaszkubacki)
+
+### Special thanks to our sponsors
+- @benwis
 - @spencewenski
 
 ## [0.16.0-alpha] - 2025-03-17
@@ -194,7 +213,7 @@ Special thanks to our sponsor:
 - Adapted to the latest changes in Leptos (thanks to @BakerNet and @nikessel)
 - Fixed all the examples
 - `use_active_element` ported
-- `use_drop_zone` now returns `Signal<Vec<SendSignal<web_sys::File>>>` instead of `Signal<Vec<web_sys::File>, LocalStorage>` 
+- `use_drop_zone` now returns `Signal<Vec<SendSignal<web_sys::File>>>` instead of `Signal<Vec<web_sys::File>, LocalStorage>`
   to make it easier to use with `<For>`
 
 ## [0.14.0-beta4] - 2024-09-15
@@ -281,7 +300,7 @@ Thanks to our generous sponsor:
 
 - Fixed web-sys `unstable_apis` flag for `use_web_lock`
 
-## [0.13.1] - 2024-09-01 
+## [0.13.1] - 2024-09-01
 
 ### New Functions 🚀
 
@@ -290,7 +309,7 @@ Thanks to our generous sponsor:
 
 ### Change 🔥
 
-- `UseWebsocket::protocols` now supports a signal. It is read right before `open` is called. (thanks to @zakstucke) 
+- `UseWebsocket::protocols` now supports a signal. It is read right before `open` is called. (thanks to @zakstucke)
 
 ## [0.13.0] - 2024-08-28
 
@@ -351,7 +370,7 @@ Thanks to our generous sponsor:
 
 - `use_locale` has now a supported locale list.
 
-## (yanked) [0.11.1] - 2024-07-28 
+## (yanked) [0.11.1] - 2024-07-28
 
 ### New Functions 🚀
 
