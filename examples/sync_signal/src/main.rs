@@ -30,7 +30,7 @@ fn Demo() -> impl IntoView {
     );
 
     view! {
-        <div class="flex items-center gap-2">
+        <div class="flex gap-2 items-center">
             <input class="block" bind:value=(a1, set_a1) placeholder="A" type="text" />
 
             <svg
@@ -51,7 +51,7 @@ fn Demo() -> impl IntoView {
             <input class="block" bind:value=(b1, set_b1) placeholder="B" type="text" />
         </div>
 
-        <div class="flex items-center gap-2 my-5">
+        <div class="flex gap-2 items-center my-5">
             <input class="block" bind:value=a2 placeholder="A" type="text" />
 
             <svg
@@ -72,7 +72,7 @@ fn Demo() -> impl IntoView {
             <input class="block" bind:value=b2 placeholder="B" type="text" />
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex gap-2 items-center">
             <input class="block" bind:value=a3 placeholder="A" type="text" />
 
             <svg
