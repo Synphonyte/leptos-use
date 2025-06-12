@@ -59,8 +59,11 @@ def add_to_compat_table(leptos_version: str, crate_version: str, original_text: 
 
     table_row = None
 
-    if re.search(rf"^\|[^|]+\| {leptos_version}", lines[-1]) is not None:
-        table_row = lines[-1]
+    i = 1
+    for i in range(1, 5):
+        if re.search(rf"^\|[^|]+\| {leptos_version}", lines[-i]) is not None:
+            table_row = lines[-1]
+            break
 
     if table_row is None:
         lines.append(f"| {crate_version} | {leptos_version} |")
@@ -70,7 +73,7 @@ def add_to_compat_table(leptos_version: str, crate_version: str, original_text: 
         index = table_row.index("|", 1)
         while index > 2 and table_row[index - 1] == " ":
             index -= 1
-        lines[-1] = f"{table_row[:index]}, {crate_version}{table_row[index:]}"
+        lines[-i] = f"{table_row[:index]}, {crate_version}{table_row[index:]}"
 
     return "\n".join(lines) + '\n'
 
