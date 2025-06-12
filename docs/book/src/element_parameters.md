@@ -35,17 +35,17 @@ pub fn some_directive(el: HtmlElement<AnyElement>) {
 Signal of Strings: `Signal<String>`, `ReadSignal<String>`, `RwSignal<String>`, `Memo<String>`; also works with `&str`:
 
 ```rust
-let (str_signal, set_str_signal) = signal("div > p.some-class".to_string());
+let (str_signal, set_str_signal) = signal("div > p.some-class");
 use_element_size(str_signal);
 ```
 
 Signals of
 Elements: `Signal<web_sys::Element>`, `ReadSignal<web_sys::Element>`, `RwSignal<web_sys::Element>`, `Memo<web_sys::Element>`;
-also works with `Option<web_sys::Element>`:
+also works with `Option<web_sys::Element>` and `SendWrapper<web_sys::Element>`:
 
 ```rust
 let (el_signal, set_el_signal) = signal(document().query_selector("div > p.some-class").unwrap());
-use_element_size(el_signal); 
+use_element_size(el_signal);
 ```
 
 ## How it works

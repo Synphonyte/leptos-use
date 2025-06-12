@@ -24,6 +24,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Special thanks to our sponsor
 - @spencewenski
 
+## [0.15.8] - 2025-06-12
+
+### New Features 🚀
+
+- Added `month_by_date` to `use_calendar` (thanks to @tomaszkubacki)
+- Added `target_offset` to `use_draggable` (thanks to @theredfish)
+- `UseRwSignal` can now be converted from anything that implements the respective reactive Leptos traits.
+  This includes Signals, Memos, Store fields, ... meaning the `sync_signal` now works with everything.
+- `ElementMaybeSignal` can be converted from `Signal<SendWrapper<web_sys::Element>>` improving interop
+  with other crates.
+
+### Fixes 🍕
+
+- `use_cookie` with SSR has been fixed. This fixes the `use_color_mode` SSR issues as well.
+- `use_event_source` with infinity reconnect limit has been fixed.
+- Conversion of `ElementMaybeSignal` from `&str` has been fixed.
+
+### Special thanks to our sponsor
+- @benwis
+
+
 ## [0.15.7] - 2025-03-17
 
 ### Change
@@ -194,7 +215,7 @@ Special thanks to our sponsor:
 - Adapted to the latest changes in Leptos (thanks to @BakerNet and @nikessel)
 - Fixed all the examples
 - `use_active_element` ported
-- `use_drop_zone` now returns `Signal<Vec<SendSignal<web_sys::File>>>` instead of `Signal<Vec<web_sys::File>, LocalStorage>` 
+- `use_drop_zone` now returns `Signal<Vec<SendSignal<web_sys::File>>>` instead of `Signal<Vec<web_sys::File>, LocalStorage>`
   to make it easier to use with `<For>`
 
 ## [0.14.0-beta4] - 2024-09-15
@@ -281,7 +302,7 @@ Thanks to our generous sponsor:
 
 - Fixed web-sys `unstable_apis` flag for `use_web_lock`
 
-## [0.13.1] - 2024-09-01 
+## [0.13.1] - 2024-09-01
 
 ### New Functions 🚀
 
@@ -290,7 +311,7 @@ Thanks to our generous sponsor:
 
 ### Change 🔥
 
-- `UseWebsocket::protocols` now supports a signal. It is read right before `open` is called. (thanks to @zakstucke) 
+- `UseWebsocket::protocols` now supports a signal. It is read right before `open` is called. (thanks to @zakstucke)
 
 ## [0.13.0] - 2024-08-28
 
@@ -351,7 +372,7 @@ Thanks to our generous sponsor:
 
 - `use_locale` has now a supported locale list.
 
-## (yanked) [0.11.1] - 2024-07-28 
+## (yanked) [0.11.1] - 2024-07-28
 
 ### New Functions 🚀
 
