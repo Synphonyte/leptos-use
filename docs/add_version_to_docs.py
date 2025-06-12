@@ -62,7 +62,7 @@ def add_to_compat_table(leptos_version: str, crate_version: str, original_text: 
     i = 1
     for i in range(1, 5):
         if re.search(rf"^\|[^|]+\| {leptos_version}", lines[-i]) is not None:
-            table_row = lines[-1]
+            table_row = lines[-i]
             break
 
     if table_row is None:
