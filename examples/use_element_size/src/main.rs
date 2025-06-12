@@ -16,7 +16,7 @@ fn Demo() -> impl IntoView {
         <textarea
             node_ref=el
             readonly
-            class="resize rounded-md p-4 w-[200px] h-[100px] text-2xl leading-10"
+            class="p-4 text-2xl leading-10 rounded-md resize w-[200px] h-[100px]"
             prop:value=text
         ></textarea>
     }
@@ -27,7 +27,7 @@ fn main() {
     console_error_panic_hook::set_once();
 
     let unmount_handle = leptos::mount::mount_to(demo_or_body(), || {
-        view! { <Demo/> }
+        view! { <Demo /> }
     });
 
     unmount_handle.forget();

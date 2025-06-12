@@ -1,7 +1,7 @@
 use crate::core::UseRwSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use std::rc::Rc;
+use std::{ops::Deref, rc::Rc};
 
 /// Two-way Signals synchronization.
 ///
@@ -193,25 +193,44 @@ use std::rc::Rc;
 /// On the server the signals are not continuously synced. If the option `immediate` is `true`, the
 /// signals are synced once initially. If the option `immediate` is `false`, then this function
 /// does nothing.
-pub fn sync_signal<T>(
-    left: impl Into<UseRwSignal<T>>,
-    right: impl Into<UseRwSignal<T>>,
+pub fn sync_signal<LeftRead, RightRead, LeftWrite, RightWrite, T>(
+    left: impl Into<UseRwSignal<LeftRead, LeftWrite, T>>,
+    right: impl Into<UseRwSignal<RightRead, RightWrite, T>>,
 ) -> impl Fn() + Clone
 where
     T: Clone + Send + Sync + 'static,
+
+    LeftRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
+    <LeftRead as Read>::Value: Deref<Target = T>,
+    <LeftRead as ReadUntracked>::Value: Deref<Target = T>,
+    LeftWrite: Write<Value = T> + Copy + 'static,
+
+    RightRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
+    <RightRead as Read>::Value: Deref<Target = T>,
+    <RightRead as ReadUntracked>::Value: Deref<Target = T>,
+    RightWrite: Write<Value = T> + Copy + 'static,
 {
     sync_signal_with_options(left, right, SyncSignalOptions::<T, T>::default())
 }
 
 /// Version of [`sync_signal`] that takes a `SyncSignalOptions`. See [`sync_signal`] for how to use.
-pub fn sync_signal_with_options<L, R>(
-    left: impl Into<UseRwSignal<L>>,
-    right: impl Into<UseRwSignal<R>>,
-    options: SyncSignalOptions<L, R>,
+pub fn sync_signal_with_options<LeftRead, RightRead, LeftWrite, RightWrite, Left, Right>(
+    left: impl Into<UseRwSignal<LeftRead, LeftWrite, Left>>,
+    right: impl Into<UseRwSignal<RightRead, RightWrite, Right>>,
+    options: SyncSignalOptions<Left, Right>,
 ) -> impl Fn() + Clone
 where
-    L: Clone + Send + Sync + 'static,
-    R: Clone + Send + Sync + 'static,
+    Left: Clone + Send + Sync + 'static,
+    LeftRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
+    <LeftRead as Read>::Value: Deref<Target = Left>,
+    <LeftRead as ReadUntracked>::Value: Deref<Target = Left>,
+    LeftWrite: Write<Value = Left> + Copy + 'static,
+
+    Right: Clone + Send + Sync + 'static,
+    RightRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
+    <RightRead as Read>::Value: Deref<Target = Right>,
+    <RightRead as ReadUntracked>::Value: Deref<Target = Right>,
+    RightWrite: Write<Value = Right> + Copy + 'static,
 {
     let SyncSignalOptions {
         immediate,

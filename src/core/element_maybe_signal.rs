@@ -1,16 +1,55 @@
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 use std::ops::Deref;
 
 /// Used as an argument type to make it easily possible to pass either
 ///
+/// * a `&str` for example "div > p.some-class",
 /// * a `web_sys` element that implements `E` (for example `EventTarget`, `Element` or `HtmlElement`),
 /// * an `Option<T>` where `T` is the web_sys element,
-/// * a `Signal<T>` where `T` is the web_sys element,
+/// * a `Signal<T>`, `RwSignal<T>`, `ReadSignal<T>` or `Memo<T>` where `T` is the web_sys element or a String,
 /// * a `Signal<Option<T>>` where `T` is the web_sys element,
+/// * a `Signal<SendWrapper<T>>` where `T` is the web_sys element,
 /// * a `NodeRef`
 ///
 /// into a function. Used for example in [`fn@crate::use_event_listener`].
+///
+/// ```
+/// # use leptos::{html::Div, prelude::*};
+/// # use leptos_use::{use_element_size};
+/// # use send_wrapper::SendWrapper;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let test = "div > p.some-class";
+/// use_element_size(&test); // &str
+/// use_element_size(document().body()); // Option<web_sys::Element>
+/// use_element_size(document().body().unwrap()); // web_sys::Element
+///
+/// let (string_signal, _set_string_signal) = signal("div > p.some-class".to_string());
+/// use_element_size(string_signal); // Signal<String>
+///
+/// let (el_signal, _set_el_signal) = signal_local(
+///     document().query_selector("div > p.some-class").unwrap().unwrap()
+/// );
+/// use_element_size(el_signal); // Signal<web_sys::Element>
+///
+/// let (el_signal_send_wrapper, _set_el_signal_send_wrapper) = signal(
+///     SendWrapper::new(
+///         document().query_selector("div > p.some-class").unwrap().unwrap()
+///     )
+/// );
+/// use_element_size(el_signal_send_wrapper); // Signal<SendWrapper<web_sys::Element>>
+///
+/// let el = NodeRef::<Div>::new();
+/// use_element_size(el); // NodeRef
+///
+///
+/// # view! {
+/// # }
+/// # }
+/// ```
 #[cfg_attr(not(debug_assertions), repr(transparent))]
 pub struct ElementMaybeSignal<T: 'static> {
     #[cfg(debug_assertions)]
@@ -204,6 +243,22 @@ where
 {
     fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T> {
         ElementMaybeSignalType::Dynamic(Signal::derive_local(move || Some(T::from(self.get()))))
+    }
+}
+
+pub struct SendWrapperSignalMarker;
+
+/// Handles `Signal<SendWrapper<web_sys::*>>`
+impl<T, V, E> IntoElementMaybeSignalType<T, SendWrapperSignalMarker> for V
+where
+    E: Clone,
+    V: Get<Value = SendWrapper<E>> + 'static,
+    T: From<E> + Clone,
+{
+    fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T> {
+        ElementMaybeSignalType::Dynamic(Signal::derive_local(move || {
+            Some(T::from((*self.get()).clone()))
+        }))
     }
 }
 

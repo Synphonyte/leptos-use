@@ -232,14 +232,13 @@ where
                     // this is the case when the connection is closed (readyState is 2)
                     if es.ready_state() == 2
                         && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
-                        && matches!(reconnect_limit, ReconnectLimit::Limited(_))
                     {
                         es.close();
 
                         let retried_value =
                             retried.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
 
-                        if reconnect_limit.is_exceeded_by(retried_value as u64) {
+                        if !reconnect_limit.is_exceeded_by(retried_value as u64) {
                             set_timeout(
                                 move || {
                                     if let Some(init) = init.get_value() {

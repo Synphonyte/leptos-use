@@ -38,7 +38,7 @@ features = [
     "use_intl_number_format",
     "use_locales",
     "use_timestamp",
-    "storage"
+    "storage",
 ]
 
 [features]

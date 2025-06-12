@@ -43,6 +43,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Special thanks to our sponsor
 - @spencewenski
 
+## [0.15.8] - 2025-06-12
+
+### New Features 🚀
+
+- Added `month_by_date` to `use_calendar` (thanks to @tomaszkubacki)
+- Added `target_offset` to `use_draggable` (thanks to @theredfish)
+- `UseRwSignal` can now be converted from anything that implements the respective reactive Leptos traits.
+  This includes Signals, Memos, Store fields, ... meaning the `sync_signal` now works with everything.
+- `ElementMaybeSignal` can be converted from `Signal<SendWrapper<web_sys::Element>>` improving interop
+  with other crates.
+
+### Fixes 🍕
+
+- `use_cookie` with SSR has been fixed. This fixes the `use_color_mode` SSR issues as well.
+- `use_event_source` with infinity reconnect limit has been fixed.
+- Conversion of `ElementMaybeSignal` from `&str` has been fixed.
+
+### Special thanks to our sponsor
+- @benwis
+
+
 ## [0.15.7] - 2025-03-17
 
 ### Change

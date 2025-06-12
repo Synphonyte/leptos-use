@@ -57,7 +57,8 @@ pub fn use_preferred_dark_with_options(options: UsePreferredDarkOptions) -> Sign
 
     #[cfg(feature = "ssr")]
     {
-        Signal::derive(move || (options.ssr_color_header_getter)() == Some("dark".to_string()))
+        let color_header = (options.ssr_color_header_getter)();
+        Signal::derive(move || color_header == Some("dark".to_string()))
     }
 }
 
