@@ -15,7 +15,7 @@ homepage = "https://leptos-use.rs"
 [dependencies]
 actix-web = { version = "4", optional = true, default-features = false }
 cfg-if = "1"
-chrono = "=0.4.40"
+chrono = "0.4.41"
 codee = { version = "0.3", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
