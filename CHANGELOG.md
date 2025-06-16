@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed version pin for `chrono`
 
+### Special thanks to our sponsor
+- @benwis
+
 ## [0.16.0] - 2025-06-12
 
 ### Breaking Change 🛠
@@ -67,6 +70,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Special thanks to our sponsor
 - @spencewenski
+
+## [0.15.9] - 2025-06-16
+
+### Dependency Fix 🐛
+
+- Removed version pin for `chrono`
+
+### Special thanks to our sponsor
+- @benwis
 
 ## [0.15.8] - 2025-06-12
 
