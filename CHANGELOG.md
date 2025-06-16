@@ -3,6 +3,50 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.1] - 2025-06-16
+
+### Dependency Fix 🐛
+
+- Removed version pin for `chrono`
+
+## [0.16.0] - 2025-06-12
+
+### Breaking Change 🛠
+
+- Updated dependency Leptos to version `0.8.0` (thanks to @DerKnerd, @jaystile, @ifiokjr)
+
+### New Features 🚀
+
+- Added `month_by_date` to `use_calendar` (thanks to @tomaszkubacki)
+- Added `target_offset` to `use_draggable` (thanks to @theredfish)
+- `UseRwSignal` can now be converted from anything that implements the respective reactive Leptos traits.
+  This includes Signals, Memos, Store fields, ... meaning the `sync_signal` now works with everything.
+- `ElementMaybeSignal` can be converted from `Signal<SendWrapper<web_sys::Element>>` improving interop
+  with other crates.
+
+### Fixes 🍕
+
+- `use_cookie` with SSR has been fixed. This fixes the `use_color_mode` SSR issues as well.
+- `use_event_source` with infinity reconnect limit has been fixed.
+- Conversion of `ElementMaybeSignal` from `&str` has been fixed.
+
+### Special thanks to our sponsor
+- @benwis
+
+## [0.16.0-beta2] - 2025-03-20
+
+### Breaking Change 🛠
+
+- Updated dependency Leptos to version `0.8.0` (thanks to @DerKnerd, @jaystile)
+
+### New Feature 🚀
+
+- Added `target_offset` to `use_draggable` options for more flexible positioning (thanks to @theredfish)
+
+### Special thanks to our sponsors
+- @benwis
+- @spencewenski
+
 ## [0.16.0-beta] - 2025-03-20
 
 ### Breaking Change 🛠
