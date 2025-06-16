@@ -15,7 +15,7 @@ homepage = "https://leptos-use.rs"
 [dependencies]
 actix-web = { version = "4", optional = true, default-features = false }
 cfg-if = "1"
-chrono = "0.4.38"
+chrono = { version = "0.4.38", optional = true }
 codee = { version = "0.3", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
@@ -129,7 +129,9 @@ default = [
     "watch_with_options",
     "whenever",
 ]
-use_calendar = []
+use_calendar = [
+    "dep:chrono"
+]
 use_textarea_autosize = [
     "use_resize_observer",
     "web-sys/CssStyleDeclaration",
