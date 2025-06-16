@@ -129,9 +129,7 @@ default = [
     "watch_with_options",
     "whenever",
 ]
-use_calendar = [
-    "dep:chrono"
-]
+use_calendar = ["dep:chrono"]
 use_textarea_autosize = [
     "use_resize_observer",
     "web-sys/CssStyleDeclaration",
