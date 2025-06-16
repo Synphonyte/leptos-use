@@ -5,9 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.16.1] - 2025-06-16
 
-### Dependency Fix 🐛
+### Dependency Fixes 🐛
 
 - Removed version pin for `chrono`
+- Made `chrono` optional in `Cargo.toml` (thanks to @emilbonnek)
 
 ### Special thanks to our sponsor
 - @benwis
@@ -73,9 +74,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.15.9] - 2025-06-16
 
-### Dependency Fix 🐛
+### Dependency Fixes 🐛
 
 - Removed version pin for `chrono`
+- Made `chrono` optional in `Cargo.toml` (thanks to @emilbonnek)
 
 ### Special thanks to our sponsor
 - @benwis
