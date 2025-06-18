@@ -6,6 +6,7 @@ use crate::{
     sync_signal_with_options, use_cookie_with_options, use_preferred_dark_with_options,
     SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions,
 };
+use cfg_if::cfg_if;
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -15,10 +16,10 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 use std::sync::Arc;
 
-#[cfg(not(feature = "ssr"))]
-use crate::core::ElementMaybeSignal;
-#[cfg(not(feature = "ssr"))]
-use wasm_bindgen::JsCast;
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use crate::core::ElementMaybeSignal;
+    use wasm_bindgen::JsCast;
+}}
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
 ///
@@ -156,6 +157,7 @@ where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
     M: ?Sized,
 {
+    #[allow(unused_variables)]
     let UseColorModeOptions {
         target,
         attribute,
@@ -176,14 +178,6 @@ where
         ssr_color_header_getter,
         _marker,
     } = options;
-
-    let modes: Vec<String> = custom_modes
-        .into_iter()
-        .chain(vec![
-            ColorMode::Dark.to_string(),
-            ColorMode::Light.to_string(),
-        ])
-        .collect();
 
     let preferred_dark = use_preferred_dark_with_options(UsePreferredDarkOptions {
         ssr_color_header_getter,
@@ -252,6 +246,14 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
+        let modes: Vec<String> = custom_modes
+            .into_iter()
+            .chain(vec![
+                ColorMode::Dark.to_string(),
+                ColorMode::Light.to_string(),
+            ])
+            .collect();
+
         let target = target.into_element_maybe_signal();
 
         let update_html_attrs = {
