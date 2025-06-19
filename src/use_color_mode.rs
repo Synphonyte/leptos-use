@@ -1,11 +1,12 @@
 use crate::core::url;
-use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
+use crate::core::{IntoElementMaybeSignal, MaybeRwSignal};
 use crate::storage::{use_storage_with_options, StorageType, UseStorageOptions};
 use crate::utils::get_header;
 use crate::{
     sync_signal_with_options, use_cookie_with_options, use_preferred_dark_with_options,
     SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions,
 };
+use cfg_if::cfg_if;
 use codee::string::FromToStringCodec;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -14,7 +15,11 @@ use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::str::FromStr;
 use std::sync::Arc;
-use wasm_bindgen::JsCast;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use crate::core::ElementMaybeSignal;
+    use wasm_bindgen::JsCast;
+}}
 
 /// Reactive color mode (dark / light / customs) with auto data persistence.
 ///
@@ -152,6 +157,7 @@ where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
     M: ?Sized,
 {
+    #[allow(unused_variables)]
     let UseColorModeOptions {
         target,
         attribute,
@@ -172,14 +178,6 @@ where
         ssr_color_header_getter,
         _marker,
     } = options;
-
-    let modes: Vec<String> = custom_modes
-        .into_iter()
-        .chain(vec![
-            ColorMode::Dark.to_string(),
-            ColorMode::Light.to_string(),
-        ])
-        .collect();
 
     let preferred_dark = use_preferred_dark_with_options(UsePreferredDarkOptions {
         ssr_color_header_getter,
@@ -246,73 +244,86 @@ where
         }
     });
 
-    let target = target.into_element_maybe_signal();
+    #[cfg(not(feature = "ssr"))]
+    {
+        let modes: Vec<String> = custom_modes
+            .into_iter()
+            .chain(vec![
+                ColorMode::Dark.to_string(),
+                ColorMode::Light.to_string(),
+            ])
+            .collect();
 
-    let update_html_attrs = {
-        move |target: ElementMaybeSignal<web_sys::Element>, attribute: String, value: ColorMode| {
-            let el = target.get_untracked();
+        let target = target.into_element_maybe_signal();
 
-            if let Some(el) = el {
-                let mut style: Option<web_sys::HtmlStyleElement> = None;
-                if !transition_enabled {
-                    if let Ok(styl) = document().create_element("style") {
-                        if let Some(head) = document().head() {
-                            let styl: web_sys::HtmlStyleElement = styl.unchecked_into();
-                            let style_string = "*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
-                            styl.set_text_content(Some(style_string));
-                            let _ = head.append_child(&styl);
-                            style = Some(styl);
-                        }
-                    }
-                }
+        let update_html_attrs = {
+            move |target: ElementMaybeSignal<web_sys::Element>,
+                  attribute: String,
+                  value: ColorMode| {
+                let el = target.get_untracked();
 
-                if attribute == "class" {
-                    for mode in &modes {
-                        if &value.to_string() == mode {
-                            let _ = el.class_list().add_1(mode);
-                        } else {
-                            let _ = el.class_list().remove_1(mode);
-                        }
-                    }
-                } else {
-                    let _ = el.set_attribute(&attribute, &value.to_string());
-                }
-
-                if !transition_enabled {
-                    if let Some(style) = style {
-                        if let Some(head) = document().head() {
-                            // Calling getComputedStyle forces the browser to redraw
-                            if let Ok(Some(style)) = window().get_computed_style(&style) {
-                                let _ = style.get_property_value("opacity");
+                if let Some(el) = el {
+                    let mut style: Option<web_sys::HtmlStyleElement> = None;
+                    if !transition_enabled {
+                        if let Ok(styl) = document().create_element("style") {
+                            if let Some(head) = document().head() {
+                                let styl: web_sys::HtmlStyleElement = styl.unchecked_into();
+                                let style_string = "*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
+                                styl.set_text_content(Some(style_string));
+                                let _ = head.append_child(&styl);
+                                style = Some(styl);
                             }
+                        }
+                    }
 
-                            let _ = head.remove_child(&style);
+                    if attribute == "class" {
+                        for mode in &modes {
+                            if &value.to_string() == mode {
+                                let _ = el.class_list().add_1(mode);
+                            } else {
+                                let _ = el.class_list().remove_1(mode);
+                            }
+                        }
+                    } else {
+                        let _ = el.set_attribute(&attribute, &value.to_string());
+                    }
+
+                    if !transition_enabled {
+                        if let Some(style) = style {
+                            if let Some(head) = document().head() {
+                                // Calling getComputedStyle forces the browser to redraw
+                                if let Ok(Some(style)) = window().get_computed_style(&style) {
+                                    let _ = style.get_property_value("opacity");
+                                }
+
+                                let _ = head.remove_child(&style);
+                            }
                         }
                     }
                 }
             }
-        }
-    };
+        };
 
-    let default_on_changed = move |mode: ColorMode| {
-        update_html_attrs(target, attribute.clone(), mode);
-    };
+        let default_on_changed = move |mode: ColorMode| {
+            update_html_attrs(target, attribute.clone(), mode);
+        };
 
-    let on_changed = move |mode: ColorMode| {
-        on_changed(mode, Arc::new(default_on_changed.clone()));
-    };
+        let on_changed = move |mode: ColorMode| {
+            on_changed(mode, Arc::new(default_on_changed.clone()));
+        };
 
-    Effect::new({
-        let on_changed = on_changed.clone();
+        Effect::new({
+            let on_changed = on_changed.clone();
 
-        move |_| {
-            on_changed.clone()(state.get());
-        }
-    });
+            move |_| {
+                on_changed.clone()(state.get());
+            }
+        });
 
-    on_cleanup(move || {
-        on_changed(state.get());
-    });
+        on_cleanup(move || {
+            on_changed(state.get());
+        });
+    }
 
     let mode = Signal::derive(move || if emit_auto { store.get() } else { state.get() });
 
