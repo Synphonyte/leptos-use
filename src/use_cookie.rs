@@ -488,7 +488,7 @@ pub struct UseCookieOptions<T, E, D> {
 
     /// Function to add a set cookie header to the response on the server.
     /// When you use one of the features `"axum"` or `"actix"` there's a valid default implementation provided.
-    pub ssr_set_cookie: Arc<dyn Fn(&Cookie) + Send + Sync>,
+    ssr_set_cookie: Arc<dyn Fn(&Cookie) + Send + Sync>,
 
     /// Callback for encoding/decoding errors. Defaults to logging the error to the console.
     on_error: Arc<dyn Fn(CodecError<E, D>) + Send + Sync>,
