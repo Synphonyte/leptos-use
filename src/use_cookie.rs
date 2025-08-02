@@ -11,7 +11,7 @@ use leptos::{
     logging::{debug_warn, error},
     prelude::*,
 };
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 /// SSR-friendly and reactive cookie access.
 ///
@@ -186,11 +186,9 @@ where
         false
     };
 
-    let (cookie, set_cookie) = signal(None::<T>);
-
     let jar = StoredValue::new(CookieJar::new());
-
-    if !has_expired {
+    
+    let (cookie, set_cookie) = if !has_expired {
         let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
         let new_cookie = jar.try_update_value(|jar| {
@@ -204,15 +202,17 @@ where
                 .or(default_value)
         });
 
-        set_cookie.set(new_cookie.flatten());
-
-        handle_expiration(delay, set_cookie);
+        let out = signal(new_cookie.flatten());
+        handle_expiration(delay, out.1);
+        out
     } else {
         debug_warn!(
             "not setting cookie '{}' because it has already expired",
             cookie_name
         );
-    }
+
+        signal(None::<T>)
+    };
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -368,7 +368,10 @@ where
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
+                let lock = Arc::new(Mutex::new(()));
+
                 move |previous_effect_value: Option<()>| {
+                    lock.clone().lock();
                     let domain = domain.clone();
                     let path = path.clone();
 
@@ -379,29 +382,27 @@ where
                                 .ok()
                         })
                     }) {
-                        if previous_effect_value.is_some() {
-                            jar.update_value({
-                                let domain = domain.clone();
-                                let path = path.clone();
-                                let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
+                        jar.update_value({
+                            let domain = domain.clone();
+                            let path = path.clone();
+                            let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-                                |jar| {
-                                    write_server_cookie(
-                                        &cookie_name,
-                                        value.flatten(),
-                                        jar,
-                                        max_age,
-                                        expires,
-                                        domain,
-                                        path,
-                                        same_site,
-                                        secure,
-                                        http_only,
-                                        ssr_set_cookie,
-                                    )
-                                }
-                            });
-                        }
+                            |jar| {
+                                write_server_cookie(
+                                    &cookie_name,
+                                    value.flatten(),
+                                    jar,
+                                    max_age,
+                                    expires,
+                                    domain,
+                                    path,
+                                    same_site,
+                                    secure,
+                                    http_only,
+                                    ssr_set_cookie,
+                                )
+                            }
+                        });
                     }
                 }
             });
