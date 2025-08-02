@@ -95,7 +95,7 @@ use std::sync::Arc;
 /// On the server this function reads the cookie from the HTTP request header and writes it back into
 /// the HTTP response header according to options (if provided).
 /// The returned `WriteSignal` may not affect the cookie headers on the server! It will try and write
-/// the headers buy if this happens after the headers have already been streamed to the client then
+/// the headers but if this happens after the headers have already been streamed to the client then
 /// this will have no effect.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.
@@ -370,39 +370,40 @@ where
 
                 let lock = Arc::new(std::sync::Mutex::new(()));
 
-                move |previous_effect_value: Option<()>| {
-                    lock.clone().lock();
-                    let domain = domain.clone();
-                    let path = path.clone();
+                move || {
+                    if let Ok(_lock_guard) = lock.clone().lock() {
+                        let domain = domain.clone();
+                        let path = path.clone();
 
-                    if let Some(value) = cookie.try_with(|cookie| {
-                        cookie.as_ref().map(|cookie| {
-                            C::encode(cookie)
-                                .map_err(|err| on_error(CodecError::Encode(err)))
-                                .ok()
-                        })
-                    }) {
-                        jar.update_value({
-                            let domain = domain.clone();
-                            let path = path.clone();
-                            let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
+                        if let Some(value) = cookie.try_with(|cookie| {
+                            cookie.as_ref().map(|cookie| {
+                                C::encode(cookie)
+                                    .map_err(|err| on_error(CodecError::Encode(err)))
+                                    .ok()
+                            })
+                        }) {
+                            jar.update_value({
+                                let domain = domain.clone();
+                                let path = path.clone();
+                                let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-                            |jar| {
-                                write_server_cookie(
-                                    &cookie_name,
-                                    value.flatten(),
-                                    jar,
-                                    max_age,
-                                    expires,
-                                    domain,
-                                    path,
-                                    same_site,
-                                    secure,
-                                    http_only,
-                                    ssr_set_cookie,
-                                )
-                            }
-                        });
+                                |jar| {
+                                    write_server_cookie(
+                                        &cookie_name,
+                                        value.flatten(),
+                                        jar,
+                                        max_age,
+                                        expires,
+                                        domain,
+                                        path,
+                                        same_site,
+                                        secure,
+                                        http_only,
+                                        ssr_set_cookie,
+                                    )
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -513,38 +514,7 @@ impl<T, E, D> Default for UseCookieOptions<T, E, D> {
             ssr_set_cookie: Arc::new(|cookie: &Cookie| {
                 #[cfg(feature = "ssr")]
                 {
-                    #[cfg(feature = "actix")]
-                    use leptos_actix::ResponseOptions;
-                    #[cfg(feature = "axum")]
-                    use leptos_axum::ResponseOptions;
-
-                    #[cfg(feature = "actix")]
-                    const SET_COOKIE: http0_2::HeaderName = http0_2::header::SET_COOKIE;
-                    #[cfg(feature = "axum")]
-                    const SET_COOKIE: http1::HeaderName = http1::header::SET_COOKIE;
-
-                    #[cfg(feature = "actix")]
-                    type HeaderValue = http0_2::HeaderValue;
-                    #[cfg(feature = "axum")]
-                    type HeaderValue = http1::HeaderValue;
-
-                    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
-                    {
-                        use leptos::logging::warn;
-                        let _ = cookie;
-                        warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`");
-                    }
-
-                    #[cfg(any(feature = "axum", feature = "actix"))]
-                    {
-                        if let Some(response_options) = use_context::<ResponseOptions>() {
-                            if let Ok(header_value) =
-                                HeaderValue::from_str(&cookie.encoded().to_string())
-                            {
-                                response_options.append_header(SET_COOKIE, header_value);
-                            }
-                        }
-                    }
+                    server_set_cookie(cookie);
                 }
 
                 let _ = cookie;
@@ -830,4 +800,38 @@ fn load_and_parse_cookie_jar(
 
         jar
     })
+}
+
+#[cfg(feature = "ssr")]
+fn server_set_cookie(cookie: &Cookie) {
+    #[cfg(feature = "actix")]
+    use leptos_actix::ResponseOptions;
+    #[cfg(feature = "axum")]
+    use leptos_axum::ResponseOptions;
+
+    #[cfg(feature = "actix")]
+    const SET_COOKIE: http0_2::HeaderName = http0_2::header::SET_COOKIE;
+    #[cfg(feature = "axum")]
+    const SET_COOKIE: http1::HeaderName = http1::header::SET_COOKIE;
+
+    #[cfg(feature = "actix")]
+    type HeaderValue = http0_2::HeaderValue;
+    #[cfg(feature = "axum")]
+    type HeaderValue = http1::HeaderValue;
+
+    #[cfg(all(not(feature = "axum"), not(feature = "actix")))]
+    {
+        use leptos::logging::warn;
+        let _ = cookie;
+        warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`");
+    }
+
+    #[cfg(any(feature = "axum", feature = "actix"))]
+    {
+        if let Some(response_options) = use_context::<ResponseOptions>() {
+            if let Ok(header_value) = HeaderValue::from_str(&cookie.encoded().to_string()) {
+                response_options.append_header(SET_COOKIE, header_value);
+            }
+        }
+    }
 }
