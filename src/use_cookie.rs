@@ -11,7 +11,7 @@ use leptos::{
     logging::{debug_warn, error},
     prelude::*,
 };
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 /// SSR-friendly and reactive cookie access.
 ///
@@ -187,7 +187,7 @@ where
     };
 
     let jar = StoredValue::new(CookieJar::new());
-    
+
     let (cookie, set_cookie) = if !has_expired {
         let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
@@ -368,7 +368,7 @@ where
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
-                let lock = Arc::new(Mutex::new(()));
+                let lock = Arc::new(std::sync::Mutex::new(()));
 
                 move |previous_effect_value: Option<()>| {
                     lock.clone().lock();
