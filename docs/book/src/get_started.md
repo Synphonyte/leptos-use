@@ -33,5 +33,5 @@ Please refer to the [functions list](functions.md) for more details.
 ## Stable Rust
 
 Just like `leptos` this library can be safely run on stable rust.
-In the [Getting Started section](https://leptos-rs.github.io/leptos/02_getting_started.html)
+In the [Getting Started section](https://book.leptos.dev/getting_started/index.html)
 of the `leptos` docs you can read more about what this means.
