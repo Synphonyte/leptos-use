@@ -43,6 +43,8 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned signals always contain the value of the `initial_size` option.
 ///
 /// ## See also

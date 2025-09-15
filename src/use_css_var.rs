@@ -76,6 +76,8 @@ use wasm_bindgen::JsCast;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this simply returns `signal(options.initial_value)`.
 pub fn use_css_var(prop: impl Into<Signal<String>>) -> (ReadSignal<String>, WriteSignal<String>) {
     use_css_var_with_options(prop, UseCssVarOptions::default())

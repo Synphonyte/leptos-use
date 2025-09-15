@@ -12,10 +12,10 @@ codee = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "1"
 cfg-if = "1"
-leptos = { version = "0.8", features = ["nightly"] }
+leptos = { version = "0.8" }
 leptos_axum = { version = "0.8", optional = true }
 leptos_meta = "0.8"
-leptos_router = { version = "0.8", features = ["nightly"] }
+leptos_router = { version = "0.8" }
 log = "0.4"
 simple_logger = "4"
 tokio = { version = "1", features = ["full"], optional = true }
@@ -49,10 +49,10 @@ ssr = [
     "dep:tower",
     "dep:tower-http",
     "dep:leptos_axum",
+    "dep:tracing",
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "dep:tracing",
     "leptos-use/ssr",
     "leptos-use/axum",
 ]

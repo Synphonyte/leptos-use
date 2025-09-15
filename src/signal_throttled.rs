@@ -67,6 +67,8 @@ signal_filtered!(
     ///
     /// ## Server-Side Rendering
     ///
+    /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+    ///
     /// Internally this uses `setTimeout` which is not supported on the server. So usually
     /// a throttled signal on the server will simply be ignored.
     throttle

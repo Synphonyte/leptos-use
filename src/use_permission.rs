@@ -24,6 +24,8 @@ use std::fmt::Display;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned signal will always be `PermissionState::Unknown`.
 pub fn use_permission(permission_name: &str) -> Signal<PermissionState> {
     let (state, set_state) = signal(PermissionState::Unknown);

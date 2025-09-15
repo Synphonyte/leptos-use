@@ -33,6 +33,8 @@ use unic_langid::LanguageIdentifier;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// See [`fn@crate::use_locales`]
 pub fn use_locale<S>(supported: S) -> Signal<LanguageIdentifier>
 where

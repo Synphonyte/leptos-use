@@ -86,6 +86,8 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns simple `Signal`s with the `initial_value`s.
 pub fn use_mouse() -> UseMouseReturn {
     use_mouse_with_options(Default::default())

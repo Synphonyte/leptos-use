@@ -37,6 +37,8 @@ use std::rc::Rc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this function will simply be ignored.
 pub fn use_interval<N>(
     interval: N,

@@ -121,6 +121,8 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this will try to read the
 /// [`Sec-CH-Prefers-Color-Scheme` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
 /// to determine the color mode. If the header is not present it will return `ColorMode::Light`.

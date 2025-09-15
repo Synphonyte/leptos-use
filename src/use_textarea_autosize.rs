@@ -99,6 +99,8 @@ use std::sync::Arc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this will always return an empty string as ´content` and a no-op `trigger_resize`.
 // #[doc(cfg(feature = "use_textarea_autosize"))]
 pub fn use_textarea_autosize<El, M>(

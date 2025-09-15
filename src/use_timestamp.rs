@@ -56,6 +56,8 @@ use std::sync::Arc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this function will return a signal with the milliseconds since the Unix epoch.
 /// But the signal will never update (as there's no `request_animation_frame` on the server).
 pub fn use_timestamp() -> Signal<f64> {

@@ -41,6 +41,8 @@ use std::marker::PhantomData;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns simple Signals with the `initial_value` for `x` and `y`,
 /// no-op for `stop`, `is_outside = true` and `0.0` for the rest of the signals.
 pub fn use_mouse_in_element<El, M>(

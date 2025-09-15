@@ -37,6 +37,8 @@ use std::sync::Arc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this will try to read the
 /// [`Sec-CH-Prefers-Reduced-Motion` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Reduced-Motion)
 /// to indicate the preference for animations to be displayed with reduced motion.

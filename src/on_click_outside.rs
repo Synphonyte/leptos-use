@@ -83,6 +83,8 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this amounts to a no-op.
 pub fn on_click_outside<El, M, F>(target: El, handler: F) -> impl FnOnce() + Clone + Send + Sync
 where

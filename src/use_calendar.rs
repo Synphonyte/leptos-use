@@ -67,6 +67,8 @@ use std::ops::Deref;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// Not tested yet.
 // #[doc(cfg(feature = "use_calendar"))]
 pub fn use_calendar() -> UseCalendarReturn<

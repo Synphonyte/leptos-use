@@ -51,6 +51,8 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned `file` signal always contains an empty `Vec` and
 /// `is_over_drop_zone` contains always `false`
 pub fn use_drop_zone<El, M>(target: El) -> UseDropZoneReturn

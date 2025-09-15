@@ -27,6 +27,8 @@ use leptos::prelude::*;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns `Signal`s that are always `0.0`.
 pub fn use_window_scroll() -> (Signal<f64>, Signal<f64>) {
     cfg_if! { if #[cfg(feature = "ssr")] {

@@ -81,6 +81,8 @@ use std::rc::Rc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this works just fine except if you throttle or debounce in which case the callback
 /// will never be called except if you set `immediate` to `true` in which case the callback will be
 /// called exactly once when `watch()` is executed.

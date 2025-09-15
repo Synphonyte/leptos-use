@@ -35,6 +35,8 @@ use std::marker::PhantomData;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the callback will never be run. The returned functions are all no-ops and
 /// `is_pending` will always be `false`.
 pub fn use_timeout_fn<CbFn, Arg, D>(

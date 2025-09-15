@@ -58,6 +58,8 @@ use wasm_bindgen::JsCast;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server only the signals work but no favicon will be changed obviously.
 pub fn use_favicon() -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     use_favicon_with_options(UseFaviconOptions::default())

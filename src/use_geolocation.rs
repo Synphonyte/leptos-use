@@ -39,6 +39,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server all signals returns will always contain `None` and the functions do nothing.
 pub fn use_geolocation(
 ) -> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {

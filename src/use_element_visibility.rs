@@ -37,6 +37,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns a `Signal` that always contains the value `false`.
 ///
 /// ## See also

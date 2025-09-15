@@ -42,6 +42,8 @@ use std::time::Duration;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this function will simply be ignored.
 pub fn use_interval_fn<CbFn, N>(
     callback: CbFn,

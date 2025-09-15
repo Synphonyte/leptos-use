@@ -112,6 +112,8 @@ use thiserror::Error;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server-side, `use_event_source` will always return `ready_state` as `ConnectionReadyState::Closed`,
 /// `data`, `event` and `error` will always be `None`, and `open` and `close` will do nothing.
 pub fn use_event_source<T, C>(

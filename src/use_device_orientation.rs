@@ -32,6 +32,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this function returns values as if the orientation
 /// capabilties were not supported by the device.
 pub fn use_device_orientation() -> UseDeviceOrientationReturn {

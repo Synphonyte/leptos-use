@@ -57,6 +57,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this will always return static signals
 ///
 /// ```ignore

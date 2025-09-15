@@ -76,6 +76,8 @@ use std::sync::{Arc, Mutex};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// Internally this uses `setTimeout` which is not supported on the server. So usually calling
 /// a debounced function on the server will simply be ignored.
 pub fn use_debounce_fn<F, R>(

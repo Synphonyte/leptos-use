@@ -27,6 +27,8 @@ use leptos::prelude::*;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this function returns a Signal that is always `1.0`.
 pub fn use_device_pixel_ratio() -> Signal<f64> {
     cfg_if! { if #[cfg(feature = "ssr")] {

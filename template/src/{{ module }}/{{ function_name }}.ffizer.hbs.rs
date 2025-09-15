@@ -26,6 +26,8 @@ use leptos::prelude::*;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 // #[doc(cfg(feature = "{{feature}}"))]
 pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
     {{ function_name }}_with_options({{ to_pascal_case function_name }}Options::default())

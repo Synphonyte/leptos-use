@@ -265,6 +265,8 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned functions amount to no-ops.
 pub fn use_websocket<Tx, Rx, C>(
     url: &str,

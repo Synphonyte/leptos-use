@@ -91,6 +91,8 @@ use std::sync::Arc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// This works equally well on the server or the client.
 /// On the server this function reads the cookie from the HTTP request header and writes it back into
 /// the HTTP response header according to options (if provided).
@@ -146,6 +148,8 @@ pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Op
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone + Send + Sync + 'static,
+    T: std::fmt::Debug,
+    <C as Encoder<T>>::Error: std::fmt::Debug,
 {
     use_cookie_with_options::<T, C>(cookie_name, UseCookieOptions::default())
 }
@@ -158,6 +162,8 @@ pub fn use_cookie_with_options<T, C>(
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
     T: Clone + Send + Sync + 'static,
+    T: std::fmt::Debug,
+    <C as Encoder<T>>::Error: std::fmt::Debug,
 {
     let UseCookieOptions {
         max_age,
@@ -364,7 +370,7 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            Effect::new_isomorphic({
+            ImmediateEffect::new_isomorphic({
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 

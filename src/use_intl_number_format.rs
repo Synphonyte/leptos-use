@@ -155,6 +155,8 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// Since `Intl.NumberFormat` is a JavaScript API it is not available on the server. That's why
 /// it falls back to a simple call to `format!()` on the server.
 pub fn use_intl_number_format(options: UseIntlNumberFormatOptions) -> UseIntlNumberFormatReturn {

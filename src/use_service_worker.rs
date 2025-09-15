@@ -47,6 +47,8 @@ use crate::{js_fut, sendwrap_fn, use_window};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// This function does **not** support SSR. Call it inside a `create_effect`.
 pub fn use_service_worker(
 ) -> UseServiceWorkerReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {

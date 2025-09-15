@@ -63,6 +63,8 @@ use default_struct_builder::DefaultBuilder;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the callback
 /// will never be called except if you set `immediate` to `true` in which case the callback will be
 /// called exactly once.

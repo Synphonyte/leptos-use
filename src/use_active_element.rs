@@ -32,6 +32,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns a `Signal` that always contains the value `None`.
 pub fn use_active_element() -> Signal<Option<web_sys::Element>, LocalStorage> {
     let get_active_element = move || use_document().active_element();

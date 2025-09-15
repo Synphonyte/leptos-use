@@ -42,6 +42,8 @@ use wasm_bindgen::JsValue;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// This function is basically ignored on the server. You can safely call `show` but it will do nothing.
 pub fn use_web_notification() -> UseWebNotificationReturn<
     impl Fn(ShowOptions) + Clone + Send + Sync,

@@ -48,6 +48,8 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
 pub fn use_display_media(

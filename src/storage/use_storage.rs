@@ -83,6 +83,8 @@ const INTERNAL_STORAGE_EVENT: &str = "leptos-use-storage";
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned signals will just read/manipulate the `initial_value` without persistence.
 ///
 /// ### Hydration bugs and `use_cookie`

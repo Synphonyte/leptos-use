@@ -180,6 +180,8 @@ const ARRIVED_STATE_THRESHOLD_PIXELS: f64 = 1.0;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns signals that don't change and setters that are noops.
 pub fn use_scroll<El, M>(
     element: El,

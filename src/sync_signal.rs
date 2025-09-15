@@ -190,6 +190,8 @@ use std::{ops::Deref, rc::Rc};
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the signals are not continuously synced. If the option `immediate` is `true`, the
 /// signals are synced once initially. If the option `immediate` is `false`, then this function
 /// does nothing.

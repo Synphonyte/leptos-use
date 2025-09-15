@@ -42,6 +42,8 @@ use std::rc::Rc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this does basically nothing. The provided closure will never be called.
 pub fn use_raf_fn(
     callback: impl Fn(UseRafFnCallbackArgs) + 'static,

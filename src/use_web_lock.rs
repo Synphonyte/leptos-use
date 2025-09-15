@@ -4,7 +4,7 @@ use thiserror::Error;
 use wasm_bindgen::JsValue;
 pub use web_sys::LockMode;
 
-/// Rustified [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API).   
+/// Rustified [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API).
 ///
 /// The **Web Locks API** allows scripts running in one tab or worker to asynchronously acquire a
 /// lock, hold it while work is performed, then release it. While held, no other script executing
@@ -41,6 +41,8 @@ pub use web_sys::LockMode;
 /// ```
 ///
 /// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// On the server this returns `Err(UseWebLockError::Server)` and the task is not executed.
 // #[doc(cfg(feature = "use_web_lock"))]

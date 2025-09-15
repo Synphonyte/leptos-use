@@ -17,15 +17,15 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <!DOCTYPE html>
         <html lang="en">
             <head>
-                <meta charset="utf-8"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                <MetaTags/>
-                <AutoReload options=options.clone()/>
-                <HydrationScripts options/>
-                <link rel="stylesheet" id="leptos" href="/pkg/leptos_use_ssr.css"/>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <MetaTags />
+                <AutoReload options=options.clone() />
+                <HydrationScripts options />
+                <link rel="stylesheet" id="leptos" href="/pkg/leptos_use_ssr.css" />
             </head>
             <body>
-                <App/>
+                <App />
             </body>
         </html>
     }
@@ -37,14 +37,14 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/start-axum.css"/>
+        <Stylesheet id="leptos" href="/pkg/start-axum.css" />
 
-        <Title text="Leptos-Use SSR Example"/>
+        <Title text="Leptos-Use SSR Example" />
 
         <Router>
             <main>
                 <Routes fallback=|| "This page could not be found.">
-                    <Route path=path!("") view=|| view! { <HomePage/> }/>
+                    <Route path=path!("") view=|| view! { <HomePage /> } />
                 </Routes>
             </main>
         </Router>
@@ -71,14 +71,14 @@ fn HomePage() -> impl IntoView {
 
     // window() doesn't work on the server so we provide use_window()
     let _ = use_event_listener(use_window(), keypress, move |evt: KeyboardEvent| {
-        set_key(evt.key())
+        set_key.set(evt.key())
     });
 
     let (debounce_value, set_debounce_value) = signal("not called");
 
     let debounced_fn = use_debounce_fn(
         move || {
-            set_debounce_value("called");
+            set_debounce_value.set("called");
         },
         2000.0,
     );
@@ -101,7 +101,7 @@ fn HomePage() -> impl IntoView {
     let locales = use_locales();
 
     view! {
-        <Html {..} class=move || mode.get().to_string()/>
+        <Html {..} class=move || mode.get().to_string() />
 
         <h1>Leptos-Use SSR Example</h1>
         <button on:click=on_click>Click Me: {count}</button>
@@ -113,15 +113,20 @@ fn HomePage() -> impl IntoView {
         <button on:click=move |_| set_mode.set(ColorMode::Auto)>Change to Auto</button>
         <p>{timestamp}</p>
         <p>Dark preferred: {is_dark_preferred}</p>
-        <LocalStorageTest/>
-        <p>Test cookie: {move || test_cookie().unwrap_or("<Expired>".to_string())}</p>
-        <pre>{move || format!("Locales:\n    {}", locales().join("\n    "))}</pre>
+        <LocalStorageTest />
+        <p>Test cookie: {move || test_cookie.get().unwrap_or("<Expired>".to_string())}</p>
+        <pre>{move || format!("Locales:\n    {}", locales.get().join("\n    "))}</pre>
 
         <p>Locale zh-Hans-CN-u-nu-hanidec: {zh_count}</p>
 
-        <Show when={move || count() > 0 }>
-            <div>Greater than 0 </div>
+        <Show when=move || { count.get() > 0 }>
+            <div>Greater than 0</div>
         </Show>
+
+        <button on:click=move |_| leptos::task::spawn_local(async move {
+            let r = set_a_cookie().await;
+            leptos::logging::log!("Serverfn cookie set: {:?}", r);
+        })>Set serverfn cookie</button>
     }
 }
 
@@ -139,4 +144,18 @@ pub fn LocalStorageTest() -> impl IntoView {
             type="text"
         />
     }
+}
+
+#[server]
+pub async fn set_a_cookie() -> Result<(), ServerFnError> {
+    let cookie_name = "test_cookie";
+    let cookie_value = "test_value";
+
+    let (cookie, set_cookie) = leptos_use::use_cookie::<String, FromToStringCodec>(
+        "bla-cookie",
+    );
+
+    set_cookie.set(Some("something not so important".to_string()));
+
+    Ok(())
 }

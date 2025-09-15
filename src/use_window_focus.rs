@@ -28,6 +28,8 @@ use leptos::prelude::*;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns a `Signal` that is always `true`.
 pub fn use_window_focus() -> Signal<bool> {
     cfg_if! { if #[cfg(feature = "ssr")] {

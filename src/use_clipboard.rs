@@ -51,6 +51,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returnd `text` signal will always be `None` and `copy` is a no-op.
 pub fn use_clipboard() -> UseClipboardReturn<impl Fn(&str) + Clone + Send + Sync> {
     use_clipboard_with_options(UseClipboardOptions::default())

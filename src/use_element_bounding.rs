@@ -34,6 +34,8 @@ use leptos::reactive::wrappers::read::Signal;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the returned signals always are `0.0` and `update` is a no-op.
 pub fn use_element_bounding<El, M>(
     target: El,

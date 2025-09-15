@@ -31,6 +31,8 @@ use std::sync::Arc;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server this returns the parsed value of the `accept-language` header.
 ///
 /// > If you're using `axum` you have to enable the `"axum"` feature in your Cargo.toml.

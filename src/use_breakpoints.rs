@@ -109,6 +109,8 @@ use std::hash::Hash;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// Since internally this uses [`fn@crate::use_media_query`], which returns always `false` on the server,
 /// the returned methods also will return `false`.
 pub fn use_breakpoints<K: Eq + Hash + Debug + Clone + Send + Sync>(

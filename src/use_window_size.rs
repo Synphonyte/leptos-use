@@ -28,6 +28,8 @@ use leptos::prelude::*;
 ///
 /// ## Server-Side Rendering
 ///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
 /// On the server the width and height are always `initial_size` which defaults to
 /// `Size { width: INFINITY, height: INFINITY }`.
 // #[doc(cfg(feature = "use_window_size"))]
