@@ -3,11 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] -
+## [0.16.3] - 2025-09-30
 
 ### Change
 
 - Implemented `PartialEq` for `core::Position`
+
+### Fixes 🍕
+
+- Fixed effects running simultaneously in `use_cookie` (thanks to @ cbishopvelti)
+- Fixed link to Leptos Getting Started in the book (thanks to @mbergkvist)
+- Fixed SSR in `use_interval_fn` (thanks to @johansmitsnl)
+
+### Special thanks to our sponsor
+- @benwis
 
 ## [0.16.2] - 2025-06-18
 

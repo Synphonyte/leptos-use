@@ -245,19 +245,14 @@ where
 }
 
 /// Defines how to get the coordinates from the event.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub enum UseMouseCoordType<E: UseMouseEventExtractor + Clone> {
+    #[default]
     Page,
     Client,
     Screen,
     Movement,
     Custom(E),
-}
-
-impl Default for UseMouseCoordType<Infallible> {
-    fn default() -> Self {
-        Self::Page
-    }
 }
 
 /// Trait to implement if you want to specify a custom extractor
