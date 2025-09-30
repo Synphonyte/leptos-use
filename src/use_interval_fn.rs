@@ -71,90 +71,107 @@ where
         immediate_callback,
     } = options;
 
-    let timer: Arc<SendWrapper<Cell<Option<IntervalHandle>>>> =
-        Arc::new(SendWrapper::new(Cell::new(None)));
-
     let (is_active, set_active) = signal(false);
 
-    let clean = {
-        let timer = Arc::clone(&timer);
+    let resume;
+    let pause;
 
-        move || {
-            if let Some(handle) = Cell::take(&timer) {
-                handle.clear();
-            }
-        }
-    };
-
-    let pause = {
-        let clean = clean.clone();
-
-        move || {
-            set_active.set(false);
-            clean();
-        }
-    };
-
-    let interval = interval.into();
-
-    let resume = sendwrap_fn!(move || {
-        #[cfg(not(feature = "ssr"))]
-        {
-            let interval_value = interval.get();
-            if interval_value == 0 {
-                return;
-            }
-
-            set_active.set(true);
-
-            let callback = {
-                let callback = callback.clone();
-
-                move || {
-                    #[cfg(debug_assertions)]
-                    let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
-
-                    callback();
-                }
-            };
-
-            if immediate_callback {
-                callback.clone()();
-            }
-            clean();
-
-            timer.set(
-                set_interval_with_handle(callback.clone(), Duration::from_millis(interval_value))
-                    .ok(),
-            );
-        }
-    });
-
-    if immediate {
-        resume();
-    }
-
+    #[cfg(feature = "ssr")]
     {
-        #[allow(clippy::clone_on_copy)]
-        let resume = resume.clone();
+        resume = || ();
+        pause = || ();
 
-        let effect = Effect::watch(
-            move || interval.get(),
-            move |_, _, _| {
-                if is_active.get() {
-                    resume();
-                }
-            },
-            false,
-        );
-        on_cleanup(move || effect.stop());
+        let _ = options;
     }
 
-    on_cleanup({
-        let pause = SendWrapper::new(pause.clone());
-        #[allow(clippy::redundant_closure)]
-        move || pause()
-    });
+    #[cfg(not(feature = "ssr"))]
+    {
+        let timer: Arc<SendWrapper<Cell<Option<IntervalHandle>>>> =
+            Arc::new(SendWrapper::new(Cell::new(None)));
+
+        let clean = {
+            let timer = Arc::clone(&timer);
+
+            move || {
+                if let Some(handle) = Cell::take(&timer) {
+                    handle.clear();
+                }
+            }
+        };
+
+        pause = {
+            let clean = clean.clone();
+
+            move || {
+                set_active.set(false);
+                clean();
+            }
+        };
+
+        let interval = interval.into();
+
+        resume = sendwrap_fn!(move || {
+            #[cfg(not(feature = "ssr"))]
+            {
+                let interval_value = interval.get();
+                if interval_value == 0 {
+                    return;
+                }
+
+                set_active.set(true);
+
+                let callback = {
+                    let callback = callback.clone();
+
+                    move || {
+                        #[cfg(debug_assertions)]
+                        let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                        callback();
+                    }
+                };
+
+                if immediate_callback {
+                    callback.clone()();
+                }
+                clean();
+
+                timer.set(
+                    set_interval_with_handle(
+                        callback.clone(),
+                        Duration::from_millis(interval_value),
+                    )
+                    .ok(),
+                );
+            }
+        });
+
+        if immediate {
+            resume();
+        }
+
+        {
+            #[allow(clippy::clone_on_copy)]
+            let resume = resume.clone();
+
+            let effect = Effect::watch(
+                move || interval.get(),
+                move |_, _, _| {
+                    if is_active.get() {
+                        resume();
+                    }
+                },
+                false,
+            );
+            on_cleanup(move || effect.stop());
+        }
+
+        on_cleanup({
+            let pause = SendWrapper::new(pause.clone());
+            #[allow(clippy::redundant_closure)]
+            move || pause()
+        });
+    }
 
     Pausable {
         is_active: is_active.into(),
