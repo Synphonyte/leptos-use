@@ -53,6 +53,7 @@ members = [
     "use_raf_fn",
     "use_resize_observer",
     "use_round",
+    "use_screen_orientation",
     "use_scroll",
     "use_service_worker",
     "use_sorted",

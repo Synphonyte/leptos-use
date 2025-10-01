@@ -108,6 +108,7 @@ default = [
     "use_prefers_reduced_motion",
     "use_raf_fn",
     "use_resize_observer",
+    "use_screen_orientation",
     "use_scroll",
     "use_service_worker",
     "use_sorted",
@@ -128,6 +129,13 @@ default = [
     "watch_throttled",
     "watch_with_options",
     "whenever",
+]
+use_screen_orientation = [
+    "use_event_listener",
+    "web-sys/Screen",
+    "web-sys/ScreenOrientation",
+    "web-sys/OrientationType",
+    "web-sys/OrientationLockType",
 ]
 use_calendar = ["dep:chrono"]
 use_textarea_autosize = [

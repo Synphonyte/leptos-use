@@ -120,6 +120,8 @@ mod use_prefers_reduced_motion;
 mod use_raf_fn;
 #[cfg(feature = "use_resize_observer")]
 mod use_resize_observer;
+#[cfg(feature = "use_screen_orientation")]
+mod use_screen_orientation;
 #[cfg(feature = "use_scroll")]
 mod use_scroll;
 #[cfg(feature = "use_service_worker")]
@@ -270,6 +272,8 @@ pub use use_prefers_reduced_motion::*;
 pub use use_raf_fn::*;
 #[cfg(feature = "use_resize_observer")]
 pub use use_resize_observer::*;
+#[cfg(feature = "use_screen_orientation")]
+pub use use_screen_orientation::*;
 #[cfg(feature = "use_scroll")]
 pub use use_scroll::*;
 #[cfg(feature = "use_service_worker")]
