@@ -1,4 +1,3 @@
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 
 /// Reactive [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Orientation_API).
@@ -63,7 +62,7 @@ pub fn use_screen_orientation() -> UseScreenOrientationReturn<
                 .expect("cannot read screen orientation")
                 .into(),
         );
-        let (angle, set_angle) = signal(screen_orientation.angle().unwrap_or_default().into());
+        let (angle, set_angle) = signal(screen_orientation.angle().unwrap_or_default());
 
         let _ = use_event_listener_with_options(
             window(),
@@ -78,7 +77,7 @@ pub fn use_screen_orientation() -> UseScreenOrientationReturn<
                             .expect("cannot read screen orientation")
                             .into(),
                     );
-                    set_angle.set(screen_orientation.angle().unwrap_or_default().into());
+                    set_angle.set(screen_orientation.angle().unwrap_or_default());
                 }
             },
             UseEventListenerOptions::default().passive(true),

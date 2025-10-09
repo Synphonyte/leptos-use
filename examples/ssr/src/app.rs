@@ -151,9 +151,7 @@ pub async fn set_a_cookie() -> Result<(), ServerFnError> {
     let cookie_name = "test_cookie";
     let cookie_value = "test_value";
 
-    let (cookie, set_cookie) = leptos_use::use_cookie::<String, FromToStringCodec>(
-        "bla-cookie",
-    );
+    let (cookie, set_cookie) = leptos_use::use_cookie::<String, FromToStringCodec>("bla-cookie");
 
     set_cookie.set(Some("something not so important".to_string()));
 
