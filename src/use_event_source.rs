@@ -121,6 +121,7 @@ pub fn use_event_source<T, C>(
     C::Error,
     impl Fn() + Clone + Send + Sync + 'static,
     impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn(String) + Clone + Send + Sync + 'static,
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
@@ -139,6 +140,7 @@ pub fn use_event_source_with_options<T, C>(
     C::Error,
     impl Fn() + Clone + Send + Sync + 'static,
     impl Fn() + Clone + Send + Sync + 'static,
+    impl Fn(String) + Clone + Send + Sync + 'static,
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
@@ -163,6 +165,7 @@ where
 
     let open;
     let close;
+    let change_url;
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -170,8 +173,7 @@ where
         use std::sync::atomic::{AtomicBool, AtomicU32};
         use std::time::Duration;
 
-        let url = url.to_owned();
-
+        let stored_url = StoredValue::new(String::new());
         let explicitly_closed = Arc::new(AtomicBool::new(false));
         let retried = Arc::new(AtomicU32::new(0));
 
@@ -199,97 +201,111 @@ where
 
         let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
-        init.set_value(Some(Arc::new({
+        let set_init = {
             let explicitly_closed = Arc::clone(&explicitly_closed);
             let retried = Arc::clone(&retried);
-
             move || {
-                use wasm_bindgen::prelude::*;
-
-                if explicitly_closed.load(std::sync::atomic::Ordering::Relaxed) {
-                    return;
-                }
-
-                let event_src_opts = web_sys::EventSourceInit::new();
-                event_src_opts.set_with_credentials(with_credentials);
-
-                let es =
-                    web_sys::EventSource::new_with_event_source_init_dict(&url, &event_src_opts)
-                        .unwrap_throw();
-
-                set_ready_state.set(ConnectionReadyState::Connecting);
-
-                set_event_source.set(Some(es.clone()));
-
-                let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
-                    set_ready_state.set(ConnectionReadyState::Open);
-                    set_error.set(None);
-                }) as Box<dyn FnMut(web_sys::Event)>);
-                es.set_onopen(Some(on_open.as_ref().unchecked_ref()));
-                on_open.forget();
-
-                let on_error = Closure::wrap(Box::new({
+                init.set_value(Some(Arc::new({
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
+                    let named_events = named_events.clone();
                     let on_failed = Arc::clone(&on_failed);
-                    let es = es.clone();
 
-                    move |e: web_sys::Event| {
-                        set_ready_state.set(ConnectionReadyState::Closed);
-                        set_error.set(Some(UseEventSourceError::Event(e)));
+                    move || {
+                        use wasm_bindgen::prelude::*;
 
-                        // only reconnect if EventSource isn't reconnecting by itself
-                        // this is the case when the connection is closed (readyState is 2)
-                        if es.ready_state() == 2
-                            && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
-                        {
-                            es.close();
+                        if explicitly_closed.load(std::sync::atomic::Ordering::Relaxed) {
+                            return;
+                        }
 
-                            let retried_value =
-                                retried.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                        let event_src_opts = web_sys::EventSourceInit::new();
+                        event_src_opts.set_with_credentials(with_credentials);
 
-                            if !reconnect_limit.is_exceeded_by(retried_value as u64) {
-                                set_timeout(
-                                    move || {
-                                        if let Some(init) = init.get_value() {
-                                            init();
-                                        }
-                                    },
-                                    Duration::from_millis(reconnect_interval),
-                                );
-                            } else {
-                                #[cfg(debug_assertions)]
+                        let es = web_sys::EventSource::new_with_event_source_init_dict(
+                            &stored_url.get_value(),
+                            &event_src_opts,
+                        )
+                        .unwrap_throw();
+
+                        set_ready_state.set(ConnectionReadyState::Connecting);
+
+                        set_event_source.set(Some(es.clone()));
+
+                        let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
+                            set_ready_state.set(ConnectionReadyState::Open);
+                            set_error.set(None);
+                        })
+                            as Box<dyn FnMut(web_sys::Event)>);
+                        es.set_onopen(Some(on_open.as_ref().unchecked_ref()));
+                        on_open.forget();
+
+                        let on_error = Closure::wrap(Box::new({
+                            let explicitly_closed = Arc::clone(&explicitly_closed);
+                            let retried = Arc::clone(&retried);
+                            let on_failed = Arc::clone(&on_failed);
+                            let es = es.clone();
+
+                            move |e: web_sys::Event| {
+                                set_ready_state.set(ConnectionReadyState::Closed);
+                                set_error.set(Some(UseEventSourceError::Event(e)));
+
+                                // only reconnect if EventSource isn't reconnecting by itself
+                                // this is the case when the connection is closed (readyState is 2)
+                                if es.ready_state() == 2
+                                    && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
+                                {
+                                    es.close();
+
+                                    let retried_value = retried
+                                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+                                        + 1;
+
+                                    if !reconnect_limit.is_exceeded_by(retried_value as u64) {
+                                        set_timeout(
+                                            move || {
+                                                if let Some(init) = init.get_value() {
+                                                    init();
+                                                }
+                                            },
+                                            Duration::from_millis(reconnect_interval),
+                                        );
+                                    } else {
+                                        #[cfg(debug_assertions)]
                                 let _z =
                                     leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-                                on_failed();
+                                        on_failed();
+                                    }
+                                }
                             }
+                        })
+                            as Box<dyn FnMut(web_sys::Event)>);
+                        es.set_onerror(Some(on_error.as_ref().unchecked_ref()));
+                        on_error.forget();
+
+                        let on_message = Closure::wrap(Box::new(move |e: web_sys::MessageEvent| {
+                            set_data_from_string(e.data().as_string());
+                        })
+                            as Box<dyn FnMut(web_sys::MessageEvent)>);
+                        es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
+                        on_message.forget();
+
+                        for event_name in named_events.clone() {
+                            let _ = use_event_listener(
+                                es.clone(),
+                                leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
+                                move |e| {
+                                    set_event.set(Some(e.clone()));
+                                    let data_string =
+                                        js!(e["data"]).ok().and_then(|d| d.as_string());
+                                    set_data_from_string(data_string);
+                                },
+                            );
                         }
                     }
-                }) as Box<dyn FnMut(web_sys::Event)>);
-                es.set_onerror(Some(on_error.as_ref().unchecked_ref()));
-                on_error.forget();
-
-                let on_message = Closure::wrap(Box::new(move |e: web_sys::MessageEvent| {
-                    set_data_from_string(e.data().as_string());
-                })
-                    as Box<dyn FnMut(web_sys::MessageEvent)>);
-                es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
-                on_message.forget();
-
-                for event_name in named_events.clone() {
-                    let _ = use_event_listener(
-                        es.clone(),
-                        leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
-                        move |e| {
-                            set_event.set(Some(e.clone()));
-                            let data_string = js!(e["data"]).ok().and_then(|d| d.as_string());
-                            set_data_from_string(data_string);
-                        },
-                    );
-                }
+                })))
             }
-        })));
+        };
 
         open = {
             let close = close.clone();
@@ -306,6 +322,24 @@ where
             })
         };
 
+        change_url = {
+            let set_init = set_init.clone();
+            let open = open.clone();
+            let close = close.clone();
+
+            sendwrap_fn!(move |new_url: String| {
+                close();
+                stored_url.set_value(new_url);
+                set_init();
+                open();
+            })
+        };
+
+        if url != stored_url.get_value() {
+            stored_url.set_value(url.to_owned());
+            set_init();
+        }
+
         if immediate {
             open();
         }
@@ -317,6 +351,7 @@ where
     {
         open = move || {};
         close = move || {};
+        change_url = move |_new_url: String| {};
 
         let _ = reconnect_limit;
         let _ = reconnect_interval;
@@ -340,6 +375,7 @@ where
         error: error.into(),
         open,
         close,
+        change_url,
     }
 }
 
@@ -389,12 +425,13 @@ impl<T> Default for UseEventSourceOptions<T> {
 }
 
 /// Return type of [`use_event_source`].
-pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn>
+pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn, ChangeUrlFn>
 where
     Err: Send + Sync + 'static,
     T: Clone + Send + Sync + 'static,
     OpenFn: Fn() + Clone + Send + Sync + 'static,
     CloseFn: Fn() + Clone + Send + Sync + 'static,
+    ChangeUrlFn: Fn(String) + Clone + Send + Sync + 'static,
 {
     /// Latest data received via the `EventSource`
     pub data: Signal<Option<T>>,
@@ -414,6 +451,11 @@ where
 
     /// Closes the `EventSource` connection
     pub close: CloseFn,
+
+    /// Changes the url of the `EventSource` instance
+    /// If the current one is active, will close it before changing the url
+    /// and reopen it afterwards.
+    pub change_url: ChangeUrlFn,
 
     /// The `EventSource` instance
     pub event_source: Signal<Option<web_sys::EventSource>, LocalStorage>,
