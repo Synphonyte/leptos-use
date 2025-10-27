@@ -115,13 +115,12 @@ use thiserror::Error;
 /// On the server-side, `use_event_source` will always return `ready_state` as `ConnectionReadyState::Closed`,
 /// `data`, `event` and `error` will always be `None`, and `open` and `close` will do nothing.
 pub fn use_event_source<T, C>(
-    url: &str,
+    url: impl Into<Signal<String>>,
 ) -> UseEventSourceReturn<
     T,
     C::Error,
     impl Fn() + Clone + Send + Sync + 'static,
     impl Fn() + Clone + Send + Sync + 'static,
-    impl Fn(String) + Clone + Send + Sync + 'static,
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
@@ -133,14 +132,13 @@ where
 
 /// Version of [`use_event_source`] that takes a `UseEventSourceOptions`. See [`use_event_source`] for how to use.
 pub fn use_event_source_with_options<T, C>(
-    url: &str,
+    url: impl Into<Signal<String>>,
     options: UseEventSourceOptions<T>,
 ) -> UseEventSourceReturn<
     T,
     C::Error,
     impl Fn() + Clone + Send + Sync + 'static,
     impl Fn() + Clone + Send + Sync + 'static,
-    impl Fn(String) + Clone + Send + Sync + 'static,
 >
 where
     T: Clone + PartialEq + Send + Sync + 'static,
@@ -165,7 +163,6 @@ where
 
     let open;
     let close;
-    let change_url;
 
     #[cfg(not(feature = "ssr"))]
     {
@@ -173,7 +170,6 @@ where
         use std::sync::atomic::{AtomicBool, AtomicU32};
         use std::time::Duration;
 
-        let stored_url = StoredValue::new(String::new());
         let explicitly_closed = Arc::new(AtomicBool::new(false));
         let retried = Arc::new(AtomicU32::new(0));
 
@@ -204,7 +200,7 @@ where
         let set_init = {
             let explicitly_closed = Arc::clone(&explicitly_closed);
             let retried = Arc::clone(&retried);
-            move || {
+            move |url: String| {
                 init.set_value(Some(Arc::new({
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
@@ -222,7 +218,7 @@ where
                         event_src_opts.set_with_credentials(with_credentials);
 
                         let es = web_sys::EventSource::new_with_event_source_init_dict(
-                            &stored_url.get_value(),
+                            &url,
                             &event_src_opts,
                         )
                         .unwrap_throw();
@@ -322,27 +318,23 @@ where
             })
         };
 
-        change_url = {
-            let set_init = set_init.clone();
-            let open = open.clone();
+        let url: Signal<String> = url.into();
+
+        let _change_url = {
             let close = close.clone();
-
-            sendwrap_fn!(move |new_url: String| {
-                close();
-                stored_url.set_value(new_url);
-                set_init();
-                open();
-            })
+            let open = open.clone();
+            Effect::watch(
+                move || url.get(),
+                move |url, prev_url, _| {
+                    if Some(url) != prev_url {
+                        close();
+                        set_init(url.to_owned());
+                        open();
+                    }
+                },
+                immediate,
+            )
         };
-
-        if url != stored_url.get_value() {
-            stored_url.set_value(url.to_owned());
-            set_init();
-        }
-
-        if immediate {
-            open();
-        }
 
         on_cleanup(close.clone());
     }
@@ -351,7 +343,6 @@ where
     {
         open = move || {};
         close = move || {};
-        change_url = move |_new_url: String| {};
 
         let _ = reconnect_limit;
         let _ = reconnect_interval;
@@ -375,7 +366,6 @@ where
         error: error.into(),
         open,
         close,
-        change_url,
     }
 }
 
@@ -425,13 +415,12 @@ impl<T> Default for UseEventSourceOptions<T> {
 }
 
 /// Return type of [`use_event_source`].
-pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn, ChangeUrlFn>
+pub struct UseEventSourceReturn<T, Err, OpenFn, CloseFn>
 where
     Err: Send + Sync + 'static,
     T: Clone + Send + Sync + 'static,
     OpenFn: Fn() + Clone + Send + Sync + 'static,
     CloseFn: Fn() + Clone + Send + Sync + 'static,
-    ChangeUrlFn: Fn(String) + Clone + Send + Sync + 'static,
 {
     /// Latest data received via the `EventSource`
     pub data: Signal<Option<T>>,
@@ -451,11 +440,6 @@ where
 
     /// Closes the `EventSource` connection
     pub close: CloseFn,
-
-    /// Changes the url of the `EventSource` instance
-    /// If the current one is active, will close it before changing the url
-    /// and reopen it afterwards.
-    pub change_url: ChangeUrlFn,
 
     /// The `EventSource` instance
     pub event_source: Signal<Option<web_sys::EventSource>, LocalStorage>,
