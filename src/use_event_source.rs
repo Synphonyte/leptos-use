@@ -356,6 +356,7 @@ where
         let _ = set_ready_state;
         let _ = set_event_source;
         let _ = set_error;
+        let _ = url;
     }
 
     UseEventSourceReturn {
