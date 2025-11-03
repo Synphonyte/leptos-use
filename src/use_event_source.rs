@@ -51,7 +51,7 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceNamedEventOptions};
 /// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
@@ -61,7 +61,61 @@ use thiserror::Error;
 /// } = use_event_source_with_options::<String, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
-///         .named_events(["notice".to_string(), "update".to_string()])
+///         .named_events([
+///             UseEventSourceNamedEventOptions::default().name("notice"),
+///             UseEventSourceNamedEventOptions::default().name("update"),
+///         ])
+/// );
+/// #
+/// # view! { }
+/// # }
+/// ```
+///
+/// You can also provide custom handlers for named events:
+///
+/// ```
+/// # use leptos::{prelude::*, web_sys::MessageEvent};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceNamedEventOptions};
+/// # use codee::string::FromToStringCodec;
+/// # use std::sync::Arc;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let custom_handler = Arc::new(|event: MessageEvent| {
+///     // Handle the event, e.g., log data
+///    leptos::logging::log!("Custom event received: {}\ndata: {:?}", event.type_(), event.data().as_string());
+/// });
+/// let UseEventSourceReturn {
+///     ready_state, data, error, close, ..
+/// } = use_event_source_with_options::<String, FromToStringCodec>(
+///     "https://event-source-url",
+///     UseEventSourceOptions::default()
+///         .named_events([
+///             UseEventSourceNamedEventOptions::default().name("notice").handler(Some(custom_handler)),
+///         ])
+/// );
+/// #
+/// # view! { }
+/// # }
+/// ```
+/// ['use_event_source_with_options'] expects custom events to provide data of the same type as the main event source data (T).
+/// If your custom event has no data or data of a different type, set `no_or_custom_data` to true:
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceNamedEventOptions};
+/// # use codee::string::FromToStringCodec;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let UseEventSourceReturn {
+///     ready_state, data, error, close, ..
+/// } = use_event_source_with_options::<String, FromToStringCodec>(
+///     "https://event-source-url",
+///     UseEventSourceOptions::default()
+///         .named_events([
+///             UseEventSourceNamedEventOptions::default().name("ping").no_or_custom_data(true),
+///         ])
 /// );
 /// #
 /// # view! { }
@@ -445,7 +499,7 @@ where
     }
 }
 
-/// Options to configure Named Events
+/// Options to configure Named Events for [`use_event_source_with_options`].
 #[cfg_attr(feature = "ssr", allow(dead_code))]
 #[derive(DefaultBuilder, Clone, Default)]
 pub struct UseEventSourceNamedEventOptions {
