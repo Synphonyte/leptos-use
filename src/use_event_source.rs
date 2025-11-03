@@ -3,6 +3,7 @@ use crate::ReconnectLimit;
 use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use thiserror::Error;
@@ -155,29 +156,33 @@ where
         _marker,
     } = options;
 
-    let (event, set_event) = signal_local(None::<web_sys::Event>);
+    let (event, set_event) = signal(None::<UseEventSourceMessage<T>>);
+    // ToDo: should we keep data? event contains data already. This would only be useful for backwards compatibility.
     let (data, set_data) = signal(None::<T>);
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
-    let (event_source, set_event_source) = signal_local(None::<web_sys::EventSource>);
-    let (error, set_error) = signal_local(None::<UseEventSourceError<C::Error>>);
+    let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
 
     let open;
     let close;
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::{js, sendwrap_fn, use_event_listener};
+        use crate::{sendwrap_fn, use_event_listener};
         use std::sync::atomic::{AtomicBool, AtomicU32};
         use std::time::Duration;
 
+        let (event_source, set_event_source) = signal_local(None::<web_sys::EventSource>);
         let explicitly_closed = Arc::new(AtomicBool::new(false));
         let retried = Arc::new(AtomicU32::new(0));
 
-        let set_data_from_string = move |data_string: Option<String>| {
-            if let Some(data_string) = data_string {
-                match C::decode(&data_string) {
-                    Ok(data) => set_data.set(Some(data)),
-                    Err(err) => set_error.set(Some(UseEventSourceError::Deserialize(err))),
+        let set_event_from_message_event = move |message_event: &web_sys::MessageEvent| {
+            match UseEventSourceMessage::<T>::decode::<C>(message_event) {
+                Ok(event_msg) => {
+                    set_data.set(Some(event_msg.data.clone()));
+                    set_event.set(Some(event_msg));
+                }
+                Err(err) => {
+                    set_error.set(Some(UseEventSourceError::Deserialize(err)));
                 }
             }
         };
@@ -243,7 +248,20 @@ where
 
                             move |e: web_sys::Event| {
                                 set_ready_state.set(ConnectionReadyState::Closed);
-                                set_error.set(Some(UseEventSourceError::Event(e)));
+                                if let Ok(message_event) = e.dyn_into::<web_sys::MessageEvent>() {
+                                    // ToDo: should we close and reconnect, if user defined error is received?
+                                    let error_msg = UseEventSourceMessage {
+                                        data: message_event
+                                            .data()
+                                            .as_string()
+                                            .unwrap_or_default(),
+                                        event_type: message_event.type_(),
+                                        last_event_id: message_event.last_event_id(),
+                                    };
+                                    set_error.set(Some(UseEventSourceError::CustomErrorEvent(error_msg)))
+                                } else {
+                                    set_error.set(Some(UseEventSourceError::GenericErrorEvent));
+                                };
 
                                 // only reconnect if EventSource isn't reconnecting by itself
                                 // this is the case when the connection is closed (readyState is 2)
@@ -267,8 +285,8 @@ where
                                         );
                                     } else {
                                         #[cfg(debug_assertions)]
-                                let _z =
-                                    leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+                                        let _z =
+                                            leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_failed();
                                     }
@@ -280,22 +298,39 @@ where
                         on_error.forget();
 
                         let on_message = Closure::wrap(Box::new(move |e: web_sys::MessageEvent| {
-                            set_data_from_string(e.data().as_string());
+                            set_event_from_message_event(&e);
                         })
                             as Box<dyn FnMut(web_sys::MessageEvent)>);
                         es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
                         on_message.forget();
 
-                        for event_name in named_events.clone() {
+                        for UseEventSourceNamedEventOptions { name, handler, no_or_custom_data } in named_events.clone() {
+                            let event_handler = {
+                                let handler = handler.clone();
+                                let name = name.clone();
+
+                                move |e: web_sys::Event| {
+                                let e = if let Ok(message_event) = e.dyn_into::<web_sys::MessageEvent>() {
+                                    message_event
+                                } else {
+                                    set_error.set(Some(UseEventSourceError::CastToMessageEvent(name.clone())));
+                                    return;
+                                };
+
+                                if let Some(custom_handler) = handler.as_ref() {
+                                    custom_handler(e.clone());
+                                }
+
+                                if !no_or_custom_data {
+                                    set_event_from_message_event(&e);
+                                }
+
+                            }};
+
                             let _ = use_event_listener(
                                 es.clone(),
-                                leptos::ev::Custom::<leptos::ev::Event>::new(event_name),
-                                move |e| {
-                                    set_event.set(Some(e.clone()));
-                                    let data_string =
-                                        js!(e["data"]).ok().and_then(|d| d.as_string());
-                                    set_data_from_string(data_string);
-                                },
+                                leptos::ev::Custom::<leptos::ev::Event>::new(name),
+                                event_handler,
                             );
                         }
                     }
@@ -320,21 +355,21 @@ where
 
         let url: Signal<String> = url.into();
 
-        let _change_url = {
+        {
             let close = close.clone();
             let open = open.clone();
             Effect::watch(
                 move || url.get(),
                 move |url, prev_url, _| {
-                    if Some(url) != prev_url {
+                    if Some(url) != prev_url && !url.is_empty() {
                         close();
                         set_init(url.to_owned());
                         open();
                     }
                 },
                 immediate,
-            )
-        };
+            );
+        }
 
         on_cleanup(close.clone());
     }
@@ -354,13 +389,11 @@ where
         let _ = set_event;
         let _ = set_data;
         let _ = set_ready_state;
-        let _ = set_event_source;
         let _ = set_error;
         let _ = url;
     }
 
     UseEventSourceReturn {
-        event_source: event_source.into(),
         event: event.into(),
         data: data.into(),
         ready_state: ready_state.into(),
@@ -368,6 +401,66 @@ where
         open,
         close,
     }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct UseEventSourceMessage<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    pub data: T,
+    pub event_type: String,
+    pub last_event_id: String,
+}
+
+impl Debug for UseEventSourceMessage<String> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UseEventSourceMessage")
+            .field("data", &self.data)
+            .field("event_type", &self.event_type)
+            .field("last_event_id", &self.last_event_id)
+            .finish()
+    }
+}
+
+impl<T> UseEventSourceMessage<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    /// decodes a web_sys::MessageEvent into a UseEventSourceMessage
+    pub fn decode<C>(message_event: &web_sys::MessageEvent) -> Result<Self, C::Error>
+    where
+        C: Decoder<T, Encoded = str>,
+        C::Error: Send + Sync,
+    {
+        let data_string = message_event.data().as_string().unwrap_or_default();
+
+        let data = C::decode(&data_string)?;
+
+        Ok(Self {
+            data,
+            event_type: message_event.type_(),
+            last_event_id: message_event.last_event_id(),
+        })
+    }
+}
+
+/// Options to configure Named Events
+#[cfg_attr(feature = "ssr", allow(dead_code))]
+#[derive(DefaultBuilder, Clone, Default)]
+pub struct UseEventSourceNamedEventOptions {
+    /// Name of the event
+    #[builder(into)]
+    name: String,
+
+    /// Optional event handler
+    /// Defaults to `None`.
+    handler: Option<Arc<dyn Fn(web_sys::MessageEvent) + Send + Sync>>,
+
+    /// If true, event has no or custom data. Custom data has to be handled by provided handler, if any.
+    /// If false, event data is expected to be of the same type as message event data (T) and will be handled normally.
+    /// Defaults to `false`.
+    no_or_custom_data: bool,
 }
 
 /// Options for [`use_event_source_with_options`].
@@ -393,7 +486,7 @@ where
 
     /// List of named events to listen for on the `EventSource`.
     #[builder(into)]
-    named_events: Vec<String>,
+    named_events: Vec<UseEventSourceNamedEventOptions>,
 
     /// If CORS should be set to `include` credentials. Defaults to `false`.
     with_credentials: bool,
@@ -430,10 +523,10 @@ where
     pub ready_state: Signal<ConnectionReadyState>,
 
     /// The latest named event
-    pub event: Signal<Option<web_sys::Event>, LocalStorage>,
+    pub event: Signal<Option<UseEventSourceMessage<T>>>,
 
     /// The current error
-    pub error: Signal<Option<UseEventSourceError<Err>>, LocalStorage>,
+    pub error: Signal<Option<UseEventSourceError<Err>>>,
 
     /// (Re-)Opens the `EventSource` connection
     /// If the current one is active, will close it before opening a new one.
@@ -441,16 +534,19 @@ where
 
     /// Closes the `EventSource` connection
     pub close: CloseFn,
-
-    /// The `EventSource` instance
-    pub event_source: Signal<Option<web_sys::EventSource>, LocalStorage>,
 }
 
 #[derive(Error, Debug)]
 pub enum UseEventSourceError<Err> {
-    #[error("Error event: {0:?}")]
-    Event(web_sys::Event),
+    #[error("Error event")]
+    GenericErrorEvent,
+
+    #[error("Custom error event: {0:?}")]
+    CustomErrorEvent(UseEventSourceMessage<String>),
 
     #[error("Error decoding value")]
     Deserialize(Err),
+
+    #[error("Error casting event '{0}' to MessageEvent")]
+    CastToMessageEvent(String),
 }
