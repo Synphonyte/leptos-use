@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leptos = { workspace = true, features = ["csr"] }
+leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
