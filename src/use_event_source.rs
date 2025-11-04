@@ -67,12 +67,12 @@ use thiserror::Error;
 /// # view! { }
 /// # }
 /// ```
-/// 
+///
 /// You can also provide a custom handler for named events via `named_event_handler`. This handler
 /// receives the `MessageEvent` and should return `true` if the event data is custom or has no data,
 /// and `false` if the data is expected to be of the same type as the message event data.
 /// By default, the handler returns `false`.
-/// 
+///
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions};
