@@ -1,10 +1,10 @@
 use crate::core::url;
 use crate::core::{IntoElementMaybeSignal, MaybeRwSignal};
-use crate::storage::{use_storage_with_options, StorageType, UseStorageOptions};
+use crate::storage::{StorageType, UseStorageOptions, use_storage_with_options};
 use crate::utils::get_header;
 use crate::{
-    sync_signal_with_options, use_cookie_with_options, use_preferred_dark_with_options,
-    SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions,
+    SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions, sync_signal_with_options,
+    use_cookie_with_options, use_preferred_dark_with_options,
 };
 use cfg_if::cfg_if;
 use codee::string::FromToStringCodec;
@@ -194,10 +194,10 @@ where
     });
 
     let mut initial_value_from_url = None;
-    if let Some(param) = initial_value_from_url_param.as_ref() {
-        if let Some(value) = url::params::get(param) {
-            initial_value_from_url = ColorMode::from_str(&value).map(MaybeRwSignal::Static).ok()
-        }
+    if let Some(param) = initial_value_from_url_param.as_ref()
+        && let Some(value) = url::params::get(param)
+    {
+        initial_value_from_url = ColorMode::from_str(&value).map(MaybeRwSignal::Static).ok()
     }
 
     let (store, set_store) = get_store_signal(
@@ -266,16 +266,16 @@ where
 
                 if let Some(el) = el {
                     let mut style: Option<web_sys::HtmlStyleElement> = None;
-                    if !transition_enabled {
-                        if let Ok(styl) = document().create_element("style") {
-                            if let Some(head) = document().head() {
-                                let styl: web_sys::HtmlStyleElement = styl.unchecked_into();
-                                let style_string = "*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
-                                styl.set_text_content(Some(style_string));
-                                let _ = head.append_child(&styl);
-                                style = Some(styl);
-                            }
-                        }
+
+                    if !transition_enabled
+                        && let Ok(styl) = document().create_element("style")
+                        && let Some(head) = document().head()
+                    {
+                        let styl: web_sys::HtmlStyleElement = styl.unchecked_into();
+                        let style_string = "*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
+                        styl.set_text_content(Some(style_string));
+                        let _ = head.append_child(&styl);
+                        style = Some(styl);
                     }
 
                     if attribute == "class" {
@@ -290,17 +290,16 @@ where
                         let _ = el.set_attribute(&attribute, &value.to_string());
                     }
 
-                    if !transition_enabled {
-                        if let Some(style) = style {
-                            if let Some(head) = document().head() {
-                                // Calling getComputedStyle forces the browser to redraw
-                                if let Ok(Some(style)) = window().get_computed_style(&style) {
-                                    let _ = style.get_property_value("opacity");
-                                }
-
-                                let _ = head.remove_child(&style);
-                            }
+                    if !transition_enabled
+                        && let Some(style) = style
+                        && let Some(head) = document().head()
+                    {
+                        // Calling getComputedStyle forces the browser to redraw
+                        if let Ok(Some(style)) = window().get_computed_style(&style) {
+                            let _ = style.get_property_value("opacity");
                         }
+
+                        let _ = head.remove_child(&style);
                     }
                 }
             }

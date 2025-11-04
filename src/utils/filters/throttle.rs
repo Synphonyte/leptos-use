@@ -6,7 +6,7 @@ use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
 use std::cmp::max;
-use std::sync::{atomic::AtomicBool, Arc, Mutex};
+use std::sync::{Arc, Mutex, atomic::AtomicBool};
 use std::time::Duration;
 
 #[derive(Copy, Clone, DefaultBuilder)]

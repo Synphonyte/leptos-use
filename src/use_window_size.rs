@@ -1,6 +1,6 @@
 use crate::core::Size;
 use crate::{
-    use_event_listener_with_options, use_media_query, use_window, UseEventListenerOptions,
+    UseEventListenerOptions, use_event_listener_with_options, use_media_query, use_window,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::resize;

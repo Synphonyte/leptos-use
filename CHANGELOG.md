@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### Breaking Changes 🛠
+
+- Updated Rust Edition to 2024
+- `use_cookie` now requires its value type to be `PartialEq` to be able to compare values to avoid infinite update loops.
+
 ### New Functions 🚀
 
 - `use_screen_orientation`

@@ -1,5 +1,5 @@
-use crate::core::ConnectionReadyState;
 use crate::ReconnectLimit;
+use crate::core::ConnectionReadyState;
 use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

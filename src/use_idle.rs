@@ -104,10 +104,10 @@ pub fn use_idle_with_options(
     {
         use crate::utils::create_filter_wrapper;
         use crate::{
-            sendwrap_fn, use_document, use_event_listener, use_event_listener_with_options,
-            UseEventListenerOptions,
+            UseEventListenerOptions, sendwrap_fn, use_document, use_event_listener,
+            use_event_listener_with_options,
         };
-        use leptos::ev::{visibilitychange, Custom};
+        use leptos::ev::{Custom, visibilitychange};
         use leptos::leptos_dom::helpers::TimeoutHandle;
         use std::cell::Cell;
         use std::rc::Rc;

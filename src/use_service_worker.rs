@@ -7,7 +7,7 @@ use leptos::{
 };
 use send_wrapper::SendWrapper;
 use std::sync::Arc;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use web_sys::ServiceWorkerRegistration;
 
 use crate::{js_fut, sendwrap_fn, use_window};
@@ -50,8 +50,8 @@ use crate::{js_fut, sendwrap_fn, use_window};
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// This function does **not** support SSR. Call it inside a `create_effect`.
-pub fn use_service_worker(
-) -> UseServiceWorkerReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
+pub fn use_service_worker()
+-> UseServiceWorkerReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_service_worker_with_options(UseServiceWorkerOptions::default())
 }
 
@@ -204,12 +204,12 @@ impl Default for UseServiceWorkerOptions {
             skip_waiting_message: "skipWaiting".into(),
             on_controller_change: Arc::new(move || {
                 use std::ops::Deref;
-                if let Some(window) = use_window().deref() {
-                    if let Err(err) = window.location().reload() {
-                        warn!(
-                            "Detected a ServiceWorkerController change but the page reload failed! Error: {err:?}"
-                        );
-                    }
+                if let Some(window) = use_window().deref()
+                    && let Err(err) = window.location().reload()
+                {
+                    warn!(
+                        "Detected a ServiceWorkerController change but the page reload failed! Error: {err:?}"
+                    );
                 }
             }),
         }
@@ -295,8 +295,8 @@ fn create_action_create_or_update_registration() -> Action<
 }
 
 /// A leptos action which asynchronously fetches the current ServiceWorkerRegistration.
-fn create_action_get_registration(
-) -> Action<(), Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>> {
+fn create_action_get_registration()
+-> Action<(), Result<SendWrapper<ServiceWorkerRegistration>, SendWrapper<JsValue>>> {
     Action::new_unsync(move |(): &()| async move {
         if let Some(navigator) = use_window().navigator() {
             js_fut!(navigator.service_worker().get_registration())

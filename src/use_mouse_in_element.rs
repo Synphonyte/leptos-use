@@ -1,7 +1,7 @@
 use crate::core::{IntoElementMaybeSignal, Position};
 use crate::{
-    use_mouse_with_options, use_window, UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions,
-    UseMouseReturn, UseMouseSourceType, UseWindow,
+    UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions, UseMouseReturn, UseMouseSourceType,
+    UseWindow, use_mouse_with_options, use_window,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

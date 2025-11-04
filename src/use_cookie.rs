@@ -3,8 +3,8 @@
 use crate::core::now;
 use crate::utils::get_header;
 use codee::{CodecError, Decoder, Encoder};
-use cookie::time::{Duration, OffsetDateTime};
 pub use cookie::SameSite;
+use cookie::time::{Duration, OffsetDateTime};
 use cookie::{Cookie, CookieJar};
 use default_struct_builder::DefaultBuilder;
 use leptos::{
@@ -147,7 +147,7 @@ use std::sync::Arc;
 pub fn use_cookie<T, C>(cookie_name: &str) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone + Send + Sync + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     T: std::fmt::Debug,
     <C as Encoder<T>>::Error: std::fmt::Debug,
 {
@@ -161,7 +161,7 @@ pub fn use_cookie_with_options<T, C>(
 ) -> (Signal<Option<T>>, WriteSignal<Option<T>>)
 where
     C: Encoder<T, Encoded = String> + Decoder<T, Encoded = str>,
-    T: Clone + Send + Sync + 'static,
+    T: Clone + PartialEq + Send + Sync + 'static,
     T: std::fmt::Debug,
     <C as Encoder<T>>::Error: std::fmt::Debug,
 {
@@ -223,7 +223,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{
-            use_broadcast_channel, watch_pausable, UseBroadcastChannelReturn, WatchPausableReturn,
+            UseBroadcastChannelReturn, WatchPausableReturn, use_broadcast_channel, watch_pausable,
         };
         use codee::string::{FromToStringCodec, OptionCodec};
 
@@ -253,8 +253,19 @@ where
                 });
 
                 if let Some(value) = value {
-                    if value
-                        == jar.with_value(|jar| jar.get(&cookie_name).map(|c| c.value().to_owned()))
+                    let prev_value = jar
+                        .read_value()
+                        .get(&cookie_name)
+                        .map(|c| c.value().to_string());
+
+                    if prev_value == value {
+                        return;
+                    }
+
+                    if let Some(prev_value) = prev_value
+                        && let Ok(prev_parsed_value) = C::decode(&prev_value)
+                        && let Some(cookie) = cookie.try_read_untracked()
+                        && Some(prev_parsed_value) == *cookie
                     {
                         return;
                     }
@@ -564,7 +575,7 @@ where
         #[cfg(not(feature = "ssr"))]
         {
             use leptos::leptos_dom::helpers::TimeoutHandle;
-            use std::sync::{atomic::AtomicI32, Mutex};
+            use std::sync::{Mutex, atomic::AtomicI32};
 
             // The maximum value allowed on a timeout delay.
             // Reference: https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value
@@ -829,7 +840,9 @@ fn server_set_cookie(cookie: &Cookie) {
     {
         use leptos::logging::warn;
         let _ = cookie;
-        warn!("If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`");
+        warn!(
+            "If you're using use_cookie without the feature `axum` or `actix` enabled, you should provide the option `ssr_set_cookie`"
+        );
     }
 
     #[cfg(any(feature = "axum", feature = "actix"))]

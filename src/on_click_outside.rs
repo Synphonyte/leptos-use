@@ -120,22 +120,18 @@ where
 
         // Fixes: https://github.com/vueuse/vueuse/issues/1520
         // How it works: https://stackoverflow.com/a/39712411
-        if *IS_IOS {
-            if let Ok(mut ios_workaround) = IOS_WORKAROUND.write() {
-                if !*ios_workaround {
-                    *ios_workaround = true;
-                    if let Some(body) = document().body() {
-                        let children = body.children();
-                        for i in 0..children.length() {
-                            let _ = children
-                                .get_with_index(i)
-                                .expect("checked index")
-                                .add_event_listener_with_callback(
-                                    "click",
-                                    &js_sys::Function::default(),
-                                );
-                        }
-                    }
+        if *IS_IOS
+            && let Ok(mut ios_workaround) = IOS_WORKAROUND.write()
+            && !*ios_workaround
+        {
+            *ios_workaround = true;
+            if let Some(body) = document().body() {
+                let children = body.children();
+                for i in 0..children.length() {
+                    let _ = children
+                        .get_with_index(i)
+                        .expect("checked index")
+                        .add_event_listener_with_callback("click", &js_sys::Function::default());
                 }
             }
         }
@@ -219,16 +215,14 @@ where
 
                     let _ = set_timeout_with_handle(
                         move || {
-                            if let Some(el) = target.get_untracked() {
-                                if let Some(active_element) = document().active_element() {
-                                    if active_element.tag_name() == "IFRAME"
-                                        && !el
-                                            .unchecked_into::<web_sys::Node>()
-                                            .contains(Some(&active_element.into()))
-                                    {
-                                        handler(event.into());
-                                    }
-                                }
+                            if let Some(el) = target.get_untracked()
+                                && let Some(active_element) = document().active_element()
+                                && active_element.tag_name() == "IFRAME"
+                                && !el
+                                    .unchecked_into::<web_sys::Node>()
+                                    .contains(Some(&active_element.into()))
+                            {
+                                handler(event.into());
                             }
                         },
                         Duration::ZERO,

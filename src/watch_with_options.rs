@@ -1,5 +1,5 @@
 use crate::filter_builder_methods;
-use crate::utils::{create_filter_wrapper, DebounceOptions, FilterOptions, ThrottleOptions};
+use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions, create_filter_wrapper};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::cell::RefCell;
@@ -115,16 +115,14 @@ where
             #[cfg(debug_assertions)]
             let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            let ret = callback(
+            callback(
                 cur_deps_value
                     .borrow()
                     .as_ref()
                     .expect("this will not be called before there is deps value"),
                 prev_deps_value.borrow().as_ref(),
                 prev_callback_val.take(),
-            );
-
-            ret
+            )
         }
     };
 

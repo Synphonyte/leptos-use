@@ -201,12 +201,10 @@ pub fn sync_signal<LeftRead, RightRead, LeftWrite, RightWrite, T>(
 ) -> impl Fn() + Clone
 where
     T: Clone + Send + Sync + 'static,
-
     LeftRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
     <LeftRead as Read>::Value: Deref<Target = T>,
     <LeftRead as ReadUntracked>::Value: Deref<Target = T>,
     LeftWrite: Write<Value = T> + Copy + 'static,
-
     RightRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
     <RightRead as Read>::Value: Deref<Target = T>,
     <RightRead as ReadUntracked>::Value: Deref<Target = T>,
@@ -227,7 +225,6 @@ where
     <LeftRead as Read>::Value: Deref<Target = Left>,
     <LeftRead as ReadUntracked>::Value: Deref<Target = Left>,
     LeftWrite: Write<Value = Left> + Copy + 'static,
-
     Right: Clone + Send + Sync + 'static,
     RightRead: Read + ReadUntracked + Track + Copy + Send + Sync + 'static,
     <RightRead as Read>::Value: Deref<Target = Right>,

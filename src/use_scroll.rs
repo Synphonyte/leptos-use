@@ -1,5 +1,5 @@
-use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use crate::UseEventListenerOptions;
+use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

@@ -2,8 +2,8 @@
 
 use crate::core::IntoElementMaybeSignal;
 use crate::{
-    use_mutation_observer_with_options, watch_with_options, UseMutationObserverOptions,
-    WatchOptions,
+    UseMutationObserverOptions, WatchOptions, use_mutation_observer_with_options,
+    watch_with_options,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -109,11 +109,11 @@ where
 
         let update_css_var = move || {
             if let Some(el) = el_signal.get_untracked() {
-                if let Ok(Some(style)) = window().get_computed_style(&el) {
-                    if let Ok(value) = style.get_property_value(&prop.read_untracked()) {
-                        set_variable.update(|var| *var = value.trim().to_string());
-                        return;
-                    }
+                if let Ok(Some(style)) = window().get_computed_style(&el)
+                    && let Ok(value) = style.get_property_value(&prop.read_untracked())
+                {
+                    set_variable.update(|var| *var = value.trim().to_string());
+                    return;
                 }
 
                 let initial_value = initial_value.clone();

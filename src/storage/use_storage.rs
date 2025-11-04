@@ -197,7 +197,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{
-            sendwrap_fn, use_event_listener, use_window, watch_with_options, WatchOptions,
+            WatchOptions, sendwrap_fn, use_event_listener, use_window, watch_with_options,
         };
         use send_wrapper::SendWrapper;
 

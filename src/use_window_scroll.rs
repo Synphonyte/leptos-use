@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions};
+use crate::{UseEventListenerOptions, use_event_listener_with_options, use_window};
 use cfg_if::cfg_if;
 use leptos::ev::scroll;
 use leptos::prelude::*;

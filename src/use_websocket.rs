@@ -1,13 +1,13 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
-use crate::{core::ConnectionReadyState, use_interval_fn, ReconnectLimit};
+use crate::{ReconnectLimit, core::ConnectionReadyState, use_interval_fn};
 use cfg_if::cfg_if;
 use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
 use js_sys::Array;
 use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
 use std::marker::PhantomData;
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::{Arc, atomic::AtomicBool};
 use std::time::Duration;
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
@@ -314,10 +314,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb> + Send + Sync,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
     <HbCodec as Encoder<Hb>>::Error: std::fmt::Debug,
 {
     let url = normalize_url(url);
@@ -350,18 +350,18 @@ where
     let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
 
     let send_str = move |data: &str| {
-        if ready_state.get_untracked() == ConnectionReadyState::Open {
-            if let Some(web_socket) = ws_signal.get_untracked() {
-                let _ = web_socket.send_with_str(data);
-            }
+        if ready_state.get_untracked() == ConnectionReadyState::Open
+            && let Some(web_socket) = ws_signal.get_untracked()
+        {
+            let _ = web_socket.send_with_str(data);
         }
     };
 
     let send_bytes = move |data: &[u8]| {
-        if ready_state.get_untracked() == ConnectionReadyState::Open {
-            if let Some(web_socket) = ws_signal.get_untracked() {
-                let _ = web_socket.send_with_u8_array(data);
-            }
+        if ready_state.get_untracked() == ConnectionReadyState::Open
+            && let Some(web_socket) = ws_signal.get_untracked()
+        {
+            let _ = web_socket.send_with_u8_array(data);
         }
     };
 
@@ -756,10 +756,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// Heartbeat options
     #[builder(skip)]
@@ -802,10 +802,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// `WebSocket` error callback.
     pub fn on_error<F>(self, handler: F) -> Self
@@ -839,10 +839,10 @@ where
         NewHb: Default + Send + Sync + 'static,
         NewHbCodec: Encoder<NewHb>,
         NewHbCodec: HybridEncoder<
-            NewHb,
-            <NewHbCodec as Encoder<NewHb>>::Encoded,
-            Error = <NewHbCodec as Encoder<NewHb>>::Error,
-        >,
+                NewHb,
+                <NewHbCodec as Encoder<NewHb>>::Encoded,
+                Error = <NewHbCodec as Encoder<NewHb>>::Error,
+            >,
     {
         UseWebSocketOptions {
             heartbeat: Some(HeartbeatOptions {
@@ -899,10 +899,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// Heartbeat data that will be sent to the server
     data: PhantomData<Hb>,
@@ -917,10 +917,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     fn clone(&self) -> Self {
         *self
@@ -932,10 +932,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
 }
 

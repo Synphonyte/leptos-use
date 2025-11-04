@@ -1,5 +1,5 @@
 use crate::utils::Pausable;
-use crate::{sendwrap_fn, use_interval_fn_with_options, UseIntervalFnOptions};
+use crate::{UseIntervalFnOptions, sendwrap_fn, use_interval_fn_with_options};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;

@@ -1,7 +1,7 @@
 use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use crate::{
-    use_element_visibility, use_scroll_with_options, ScrollOffset, UseEventListenerOptions,
-    UseScrollOptions, UseScrollReturn,
+    ScrollOffset, UseEventListenerOptions, UseScrollOptions, UseScrollReturn,
+    use_element_visibility, use_scroll_with_options,
 };
 use default_struct_builder::DefaultBuilder;
 use futures_util::join;
@@ -191,10 +191,10 @@ where
     Effect::watch(
         move || state.arrived_state.get().get_direction(direction),
         move |arrived, prev_arrived, _| {
-            if let Some(prev_arrived) = prev_arrived {
-                if prev_arrived == arrived {
-                    return;
-                }
+            if let Some(prev_arrived) = prev_arrived
+                && prev_arrived == arrived
+            {
+                return;
             }
 
             check_and_load

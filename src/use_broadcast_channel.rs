@@ -1,6 +1,6 @@
 use crate::sendwrap_fn;
 use crate::{
-    js, use_event_listener, use_event_listener_with_options, use_supported, UseEventListenerOptions,
+    UseEventListenerOptions, js, use_event_listener, use_event_listener_with_options, use_supported,
 };
 use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;
@@ -80,7 +80,7 @@ pub fn use_broadcast_channel<T, C>(
     name: &str,
 ) -> UseBroadcastChannelReturn<
     T,
-    impl Fn(&T) + Clone + Send + Sync,
+    impl Fn(&T) + Clone + Send + Sync + use<T, C>,
     impl Fn() + Clone + Send + Sync,
     C,
 >

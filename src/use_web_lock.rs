@@ -81,8 +81,8 @@ where
         use crate::js_fut;
         use leptos::prelude::window;
         use std::sync::{Arc, Mutex};
-        use wasm_bindgen::closure::Closure;
         use wasm_bindgen::JsCast;
+        use wasm_bindgen::closure::Closure;
         use wasm_bindgen_futures::future_to_promise;
 
         let ret_value = Arc::new(Mutex::new(None));
