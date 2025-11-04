@@ -7,6 +7,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use thiserror::Error;
+use wasm_bindgen::JsCast;
 
 /// Reactive [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)
 ///
@@ -75,24 +76,30 @@ use thiserror::Error;
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceMessage};
 /// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let named_event_handler = |e: &web_sys::MessageEvent| {
+/// let pre_event_handler = |e: &web_sys::Event| {
 ///     // Custom logic to determine if the event data is custom or has no data
-///     leptos::logging::log!("Received named event: {}", e.type_());
-///     // Example: return true if data is null
-///     e.data().is_null()
+///     leptos::logging::log!("Received event: {}", e.type_());
+///     // Example: log data and skip processing
+///     if let Ok(message) = UseEventSourceMessage::<String, FromToStringCodec>::try_from(e.clone()) {
+///         leptos::logging::log!("Message data: {}", message.data);
+///         // skip processing
+///         true
+///     } else {
+///         false
+///     }
 /// };
 /// let UseEventSourceReturn {
 ///     ready_state, data, error, close, ..
-/// } = use_event_source_with_options::<bool, FromToStringCodec>(
+/// } = use_event_source_with_options::<String, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
 ///         .named_events(["custom_event".to_string()])
-///         .named_event_handler(named_event_handler)
+///         .pre_event_handler(pre_event_handler)
 /// );
 /// #
 /// # view! { }
@@ -185,7 +192,7 @@ where
         on_failed,
         immediate,
         named_events,
-        named_event_handler,
+        pre_event_handler,
         with_credentials,
         _marker,
     } = options;
@@ -210,18 +217,6 @@ where
         let explicitly_closed = Arc::new(AtomicBool::new(false));
         let retried = Arc::new(AtomicU32::new(0));
 
-        let set_event_from_message_event = move |message_event: &web_sys::MessageEvent| {
-            match UseEventSourceMessage::<T, C>::try_from(message_event) {
-                Ok(event_msg) => {
-                    set_data.set(Some(event_msg.data.clone()));
-                    set_event.set(Some(event_msg));
-                }
-                Err(err) => {
-                    set_error.set(Some(UseEventSourceError::Deserialize(err)));
-                }
-            }
-        };
-
         let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
         let set_init = {
@@ -232,7 +227,7 @@ where
                 init.set_value(Some(Arc::new({
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
-                    let named_event_handler = Arc::clone(&named_event_handler);
+                    let pre_event_handler = Arc::clone(&pre_event_handler);
                     let named_events = named_events.clone();
                     let on_failed = Arc::clone(&on_failed);
 
@@ -254,27 +249,34 @@ where
 
                         set_event_source.set(Some(es.clone()));
 
-                        let on_open = Closure::wrap(Box::new(move |_: web_sys::Event| {
-                            set_ready_state.set(ConnectionReadyState::Open);
-                            set_error.set(None);
-                        })
-                            as Box<dyn FnMut(web_sys::Event)>);
+                        let on_open = Closure::wrap(Box::new({
+                            let pre_event_handler = pre_event_handler.clone();
+                            move |e: web_sys::Event| {
+                                if pre_event_handler.as_ref()(&e) {
+                                    // skip processing open event!
+                                    return;
+                                }
+                                set_ready_state.set(ConnectionReadyState::Open);
+                                set_error.set(None);
+                            }})
+                                as Box<dyn FnMut(web_sys::Event)>);
                         es.set_onopen(Some(on_open.as_ref().unchecked_ref()));
                         on_open.forget();
 
                         let on_error = Closure::wrap(Box::new({
+                            let pre_event_handler = pre_event_handler.clone();
                             let explicitly_closed = Arc::clone(&explicitly_closed);
                             let retried = Arc::clone(&retried);
                             let on_failed = Arc::clone(&on_failed);
                             let es = es.clone();
 
                             move |e: web_sys::Event| {
+                                if pre_event_handler.as_ref()(&e) {
+                                    // skip processing error event!
+                                    return;
+                                }
                                 set_ready_state.set(ConnectionReadyState::Closed);
-                                if let Ok(message_event) = e.dyn_into::<web_sys::MessageEvent>() {
-                                    let Ok(error_msg) = UseEventSourceMessage::<String, codee::string::FromToStringCodec>::try_from(&message_event);
-                                    // ToDo: should we close and reconnect, if user defined error is received?
-                                    // Perhaps make this configurable with a provided error handler?
-                                    // we could also reuse the named_events_handler for this.
+                                if let Ok(error_msg) = UseEventSourceMessage::try_from(e) {
                                     set_error.set(Some(UseEventSourceError::ServerErrorEvent(error_msg)));
                                 } else {
                                     set_error.set(Some(UseEventSourceError::SseErrorEvent));
@@ -314,30 +316,45 @@ where
                         es.set_onerror(Some(on_error.as_ref().unchecked_ref()));
                         on_error.forget();
 
-                        let on_message = Closure::wrap(Box::new(move |e: web_sys::MessageEvent| {
-                            set_event_from_message_event(&e);
-                        })
-                            as Box<dyn FnMut(web_sys::MessageEvent)>);
+                        let on_message = Closure::wrap(Box::new({
+                            let pre_event_handler = pre_event_handler.clone();
+                            move |e: web_sys::MessageEvent| {
+                                let event: &web_sys::Event = e.as_ref();
+                                    if pre_event_handler.as_ref()(event) {
+                                        // skip processing message event!
+                                        return;
+                                    }
+                                    match UseEventSourceMessage::<T, C>::try_from(&e) {
+                                        Ok(event_msg) => {
+                                            set_data.set(Some(event_msg.data.clone()));
+                                            set_event.set(Some(event_msg));
+                                        }
+                                        Err(err) => {
+                                            set_error.set(Some(err));
+                                        }
+                                    }
+                            }})
+                                as Box<dyn FnMut(web_sys::MessageEvent)>);
                         es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
                         on_message.forget();
 
                         for event_name in named_events.clone() {
                             let event_handler = {
-                                let handler = named_event_handler.clone();
-                                let name = event_name.clone();
-
+                                let pre_event_handler = pre_event_handler.clone();
                                 move |e: web_sys::Event| {
-                                let e = if let Ok(message_event) = e.dyn_into::<web_sys::MessageEvent>() {
-                                    message_event
-                                } else {
-                                    set_error.set(Some(UseEventSourceError::CastToMessageEvent(name.clone())));
-                                    return;
-                                };
-
-                                if !handler.as_ref()(&e) {
-                                    set_event_from_message_event(&e);
-                                }
-
+                                    if pre_event_handler.as_ref()(&e) {
+                                        // skip processing named event!
+                                        return;
+                                    }
+                                    match UseEventSourceMessage::<T, C>::try_from(e) {
+                                        Ok(event_msg) => {
+                                            set_data.set(Some(event_msg.data.clone()));
+                                            set_event.set(Some(event_msg));
+                                        }
+                                        Err(err) => {
+                                            set_error.set(Some(err));
+                                        }
+                                    }
                             }};
 
                             let _ = use_event_listener(
@@ -417,7 +434,7 @@ where
         let _ = on_failed;
         let _ = immediate;
         let _ = named_events;
-        let _ = named_event_handler;
+        let _ = pre_event_handler;
         let _ = with_credentials;
 
         let _ = set_event;
@@ -437,6 +454,7 @@ where
     }
 }
 
+/// Message received from the `EventSource` with transcoded data.
 #[derive(Clone, PartialEq)]
 pub struct UseEventSourceMessage<T, C>
 where
@@ -471,12 +489,12 @@ where
     C: Decoder<T, Encoded = str> + Send + Sync,
     C::Error: Send + Sync,
 {
-    type Error = C::Error;
+    type Error = UseEventSourceError<C::Error>;
 
     fn try_from(message_event: &web_sys::MessageEvent) -> Result<Self, Self::Error> {
         let data_string = message_event.data().as_string().unwrap_or_default();
 
-        let data = C::decode(&data_string)?;
+        let data = C::decode(&data_string).map_err(UseEventSourceError::Deserialize)?;
 
         Ok(Self {
             data,
@@ -484,6 +502,23 @@ where
             last_event_id: message_event.last_event_id(),
             _marker: PhantomData,
         })
+    }
+}
+
+impl<T, C> TryFrom<web_sys::Event> for UseEventSourceMessage<T, C>
+where
+    T: Clone + Send + Sync + 'static,
+    C: Decoder<T, Encoded = str> + Send + Sync,
+    C::Error: Send + Sync,
+{
+    type Error = UseEventSourceError<C::Error>;
+
+    fn try_from(event: web_sys::Event) -> Result<Self, Self::Error> {
+        let message_event = event
+            .dyn_into::<web_sys::MessageEvent>()
+            .map_err(|e| UseEventSourceError::CastToMessageEvent(e.type_()))?;
+
+        UseEventSourceMessage::try_from(&message_event)
     }
 }
 
@@ -512,9 +547,16 @@ where
     #[builder(into)]
     named_events: Vec<String>,
 
-    /// Handling named events. Returns true, if data of named event is custom or has no data.
-    /// Default handler returns false (data is expected to be of same type as message event data).
-    named_event_handler: Arc<dyn Fn(&web_sys::MessageEvent) -> bool + Send + Sync>,
+    /// The `pre_event_handler` is called before processing any event inside of [`use_event_source`].
+    /// Return `true` to skip processing of the respective event (e.g. for custom event data or
+    /// events without data), or `false` to process the event as usual.
+    ///
+    /// Beware that skipping handling the `open` and `error` events may yield unexpected results.
+    ///
+    /// You may want to use [`UseEventSourceMessage::try_from()`] to access the event data.
+    ///
+    /// Default handler returns false.
+    pre_event_handler: Arc<dyn Fn(&web_sys::Event) -> bool + Send + Sync>,
 
     /// If CORS should be set to `include` credentials. Defaults to `false`.
     with_credentials: bool,
@@ -530,7 +572,7 @@ impl<T> Default for UseEventSourceOptions<T> {
             on_failed: Arc::new(|| {}),
             immediate: true,
             named_events: vec![],
-            named_event_handler: Arc::new(|_| false),
+            pre_event_handler: Arc::new(|_| false),
             with_credentials: false,
             _marker: PhantomData,
         }
@@ -553,7 +595,7 @@ where
     /// The current state of the connection,
     pub ready_state: Signal<ConnectionReadyState>,
 
-    /// The latest named event
+    /// The latest message event
     pub event: Signal<Option<UseEventSourceMessage<T, C>>>,
 
     /// The current error
