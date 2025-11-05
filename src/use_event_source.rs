@@ -85,25 +85,27 @@ use wasm_bindgen::JsCast;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let on_event = |e: &web_sys::Event| {
-///     // Custom example handler: log event name and skip processing if data can be decoded as String
+/// // Custom example handler: log event name and check for custom_error event
+/// let custom_event_handler = |e: &web_sys::Event| {
 ///     leptos::logging::log!("Received event: {}", e.type_());
-///     if let Ok(message) = UseEventSourceMessage::<String, FromToStringCodec>::try_from(e.clone()) {
-///         // Decoded successfully, log the data
-///         leptos::logging::log!("Message data: {}", message.data);
-///         // skip processing
-///         UseEventSourceOnEventReturn::Ignore
-///     } else {
-///         UseEventSourceOnEventReturn::Use
+///     if e.type_() == "custom_error" {
+///         if let Ok(error_message) = UseEventSourceMessage::<String, FromToStringCodec>::try_from(e.clone()) {
+///             // Decoded successfully, log the error message
+///             leptos::logging::log!("Error message: {}", error_message.data);
+///             // skip processing this event further
+///             return UseEventSourceOnEventReturn::Ignore
+///         }
 ///     }
+///     // Process other events normally
+///     UseEventSourceOnEventReturn::Use
 /// };
 /// let UseEventSourceReturn {
 ///     ready_state, message, error, close, ..
 /// } = use_event_source_with_options::<String, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
-///         .named_events(["custom_event".to_string()])
-///         .on_event(on_event)
+///         .named_events(["custom_error".to_string()])
+///         .on_event(custom_event_handler)
 /// );
 /// #
 /// # view! { }
@@ -224,7 +226,7 @@ where
             #[cfg(debug_assertions)]
             let _ = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-            on_event.as_ref()(e)
+            on_event(e)
         };
 
         let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
@@ -290,11 +292,7 @@ where
                                     }
                                     UseEventSourceOnEventReturn::Use => {
                                         set_ready_state.set(ConnectionReadyState::Closed);
-                                        if let Ok(error_msg) = UseEventSourceMessage::try_from(e) {
-                                            set_error.set(Some(UseEventSourceError::ServerErrorEvent(error_msg)));
-                                        } else {
-                                            set_error.set(Some(UseEventSourceError::SseErrorEvent));
-                                        };
+                                        set_error.set(Some(UseEventSourceError::ErrorEvent));
 
                                         // only reconnect if EventSource isn't reconnecting by itself
                                         // this is the case when the connection is closed (readyState is 2)
@@ -650,11 +648,8 @@ where
 
 #[derive(Error, Debug)]
 pub enum UseEventSourceError<Err> {
-    #[error("SSE error event received")]
-    SseErrorEvent,
-
-    #[error("An error occurred on server: {0:?}")]
-    ServerErrorEvent(UseEventSourceMessage<String, codee::string::FromToStringCodec>),
+    #[error("Error event received")]
+    ErrorEvent,
 
     #[error("Error decoding value")]
     Deserialize(Err),
