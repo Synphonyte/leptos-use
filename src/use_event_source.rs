@@ -219,6 +219,14 @@ where
         let explicitly_closed = Arc::new(AtomicBool::new(false));
         let retried = Arc::new(AtomicU32::new(0));
 
+        let on_event_return = move |e: &web_sys::Event| {
+            // make sure handler doesn't create reactive dependencies
+            #[cfg(debug_assertions)]
+            let _ = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+            on_event.as_ref()(e)
+        };
+
         let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
         let set_init = {
@@ -229,7 +237,7 @@ where
                 init.set_value(Some(Arc::new({
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
-                    let on_event = Arc::clone(&on_event);
+                    let on_event_return = on_event_return.clone();
                     let named_events = named_events.clone();
                     let on_failed = Arc::clone(&on_failed);
 
@@ -252,9 +260,9 @@ where
                         set_event_source.set(Some(es.clone()));
 
                         let on_open = Closure::wrap(Box::new({
-                            let on_event = on_event.clone();
+                            let on_event_return = on_event_return.clone();
                             move |e: web_sys::Event| {
-                                match on_event.as_ref()(&e) {
+                                match on_event_return(&e) {
                                     UseEventSourceOnEventReturn::Ignore => {
                                         // skip processing open event!
                                     }
@@ -269,14 +277,14 @@ where
                         on_open.forget();
 
                         let on_error = Closure::wrap(Box::new({
-                            let on_event = on_event.clone();
+                            let on_event_return = on_event_return.clone();
                             let explicitly_closed = Arc::clone(&explicitly_closed);
                             let retried = Arc::clone(&retried);
                             let on_failed = Arc::clone(&on_failed);
                             let es = es.clone();
 
                             move |e: web_sys::Event| {
-                                match on_event.as_ref()(&e) {
+                                match on_event_return(&e) {
                                     UseEventSourceOnEventReturn::Ignore => {
                                         // skip processing error event!
                                     }
@@ -325,10 +333,10 @@ where
                         on_error.forget();
 
                         let on_message = Closure::wrap(Box::new({
-                            let on_event = on_event.clone();
+                            let on_event_return = on_event_return.clone();
                             move |e: web_sys::MessageEvent| {
                                 let event: &web_sys::Event = e.as_ref();
-                                match on_event.as_ref()(event) {
+                                match on_event_return(event) {
                                     UseEventSourceOnEventReturn::Ignore => {
                                     // skip processing message event!
                                     }
@@ -350,9 +358,9 @@ where
 
                         for event_name in named_events.clone() {
                             let event_handler = {
-                                let on_event = on_event.clone();
+                                let on_event_return = on_event_return.clone();
                                 move |e: web_sys::Event| {
-                                    match on_event.as_ref()(&e) {
+                                    match on_event_return(&e) {
                                         UseEventSourceOnEventReturn::Ignore => {
                                         // skip processing named event!
                                         }
@@ -465,7 +473,7 @@ where
 }
 
 /// Message received from the `EventSource` with transcoded data.
-#[derive(Clone, PartialEq)]
+#[derive(PartialEq)]
 pub struct UseEventSourceMessage<T, C>
 where
     T: Clone + Send + Sync + 'static,
@@ -476,6 +484,22 @@ where
     pub data: T,
     pub last_event_id: String,
     _marker: PhantomData<C>,
+}
+
+impl<T, C> Clone for UseEventSourceMessage<T, C>
+where
+    T: Clone + Send + Sync + 'static,
+    C: Decoder<T, Encoded = str> + Send + Sync,
+    C::Error: Send + Sync,
+{
+    fn clone(&self) -> Self {
+        Self {
+            event_type: self.event_type.clone(),
+            data: self.data.clone(),
+            last_event_id: self.last_event_id.clone(),
+            _marker: PhantomData,
+        }
+    }
 }
 
 impl<T, C> Debug for UseEventSourceMessage<T, C>
