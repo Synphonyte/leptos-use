@@ -39,7 +39,7 @@ use wasm_bindgen::JsCast;
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let UseEventSourceReturn {
-///     ready_state, data, error, close, ..
+///     ready_state, message, error, close, ..
 /// } = use_event_source::<EventSourceData, JsonSerdeCodec>("https://event-source-url");
 /// #
 /// # view! { }
@@ -58,7 +58,7 @@ use wasm_bindgen::JsCast;
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let UseEventSourceReturn {
-///     ready_state, data, error, close, ..
+///     ready_state, message, error, close, ..
 /// } = use_event_source_with_options::<String, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
@@ -69,37 +69,41 @@ use wasm_bindgen::JsCast;
 /// # }
 /// ```
 ///
-/// You can also provide a custom handler for named events via `named_event_handler`. This handler
-/// receives the `MessageEvent` and should return `true` if the event data is custom or has no data,
-/// and `false` if the data is expected to be of the same type as the message event data.
-/// By default, the handler returns `false`.
+/// ### Custom Event Handler
+///
+/// You can provide a custom `on_event` handler using `use_event_source_with_options`.
+/// `on_event` wil be run for every received event, including the built-in `open`, `error`, and `message` events,
+/// as well as any named events you have specified.
+/// With the return value of `on_event` you can control, whether the event should be further processed by
+/// `use_event_source` (`UseEventSourceOnEventReturn::Use`) or ignored (`UseEventSourceOnEventReturn::Ignore`).
+/// By default, the handler returns `UseEventSourceOnEventReturn::Use`.
 ///
 /// ```
 /// # use leptos::prelude::*;
-/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceMessage};
+/// # use leptos_use::{use_event_source_with_options, UseEventSourceReturn, UseEventSourceOptions, UseEventSourceMessage, UseEventSourceOnEventReturn};
 /// # use codee::string::FromToStringCodec;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// let pre_event_handler = |e: &web_sys::Event| {
-///     // Custom logic to determine if the event data is custom or has no data
+/// let on_event = |e: &web_sys::Event| {
+///     // Custom example handler: log event name and skip processing if data can be decoded as String
 ///     leptos::logging::log!("Received event: {}", e.type_());
-///     // Example: log data and skip processing
 ///     if let Ok(message) = UseEventSourceMessage::<String, FromToStringCodec>::try_from(e.clone()) {
+///         // Decoded successfully, log the data
 ///         leptos::logging::log!("Message data: {}", message.data);
 ///         // skip processing
-///         true
+///         UseEventSourceOnEventReturn::Ignore
 ///     } else {
-///         false
+///         UseEventSourceOnEventReturn::Use
 ///     }
 /// };
 /// let UseEventSourceReturn {
-///     ready_state, data, error, close, ..
+///     ready_state, message, error, close, ..
 /// } = use_event_source_with_options::<String, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
 ///         .named_events(["custom_event".to_string()])
-///         .pre_event_handler(pre_event_handler)
+///         .on_event(on_event)
 /// );
 /// #
 /// # view! { }
@@ -127,7 +131,7 @@ use wasm_bindgen::JsCast;
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
 /// let UseEventSourceReturn {
-///     ready_state, data, error, close, ..
+///     ready_state, message, error, close, ..
 /// } = use_event_source_with_options::<bool, FromToStringCodec>(
 ///     "https://event-source-url",
 ///     UseEventSourceOptions::default()
@@ -192,14 +196,12 @@ where
         on_failed,
         immediate,
         named_events,
-        pre_event_handler,
+        on_event,
         with_credentials,
         _marker,
     } = options;
 
-    let (event, set_event) = signal(None::<UseEventSourceMessage<T, C>>);
-    // ToDo: should we keep data? event contains data already. This would only be useful for backwards compatibility.
-    let (data, set_data) = signal(None::<T>);
+    let (message, set_message) = signal(None::<UseEventSourceMessage<T, C>>);
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (error, set_error) = signal(None::<UseEventSourceError<C::Error>>);
 
@@ -227,7 +229,7 @@ where
                 init.set_value(Some(Arc::new({
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
-                    let pre_event_handler = Arc::clone(&pre_event_handler);
+                    let on_event = Arc::clone(&on_event);
                     let named_events = named_events.clone();
                     let on_failed = Arc::clone(&on_failed);
 
@@ -250,64 +252,70 @@ where
                         set_event_source.set(Some(es.clone()));
 
                         let on_open = Closure::wrap(Box::new({
-                            let pre_event_handler = pre_event_handler.clone();
+                            let on_event = on_event.clone();
                             move |e: web_sys::Event| {
-                                if pre_event_handler.as_ref()(&e) {
-                                    // skip processing open event!
-                                    return;
+                                match on_event.as_ref()(&e) {
+                                    UseEventSourceOnEventReturn::Ignore => {
+                                        // skip processing open event!
+                                    }
+                                    UseEventSourceOnEventReturn::Use => {
+                                        set_ready_state.set(ConnectionReadyState::Open);
+                                        set_error.set(None);
+                                    }
                                 }
-                                set_ready_state.set(ConnectionReadyState::Open);
-                                set_error.set(None);
                             }})
                                 as Box<dyn FnMut(web_sys::Event)>);
                         es.set_onopen(Some(on_open.as_ref().unchecked_ref()));
                         on_open.forget();
 
                         let on_error = Closure::wrap(Box::new({
-                            let pre_event_handler = pre_event_handler.clone();
+                            let on_event = on_event.clone();
                             let explicitly_closed = Arc::clone(&explicitly_closed);
                             let retried = Arc::clone(&retried);
                             let on_failed = Arc::clone(&on_failed);
                             let es = es.clone();
 
                             move |e: web_sys::Event| {
-                                if pre_event_handler.as_ref()(&e) {
-                                    // skip processing error event!
-                                    return;
-                                }
-                                set_ready_state.set(ConnectionReadyState::Closed);
-                                if let Ok(error_msg) = UseEventSourceMessage::try_from(e) {
-                                    set_error.set(Some(UseEventSourceError::ServerErrorEvent(error_msg)));
-                                } else {
-                                    set_error.set(Some(UseEventSourceError::SseErrorEvent));
-                                };
+                                match on_event.as_ref()(&e) {
+                                    UseEventSourceOnEventReturn::Ignore => {
+                                        // skip processing error event!
+                                    }
+                                    UseEventSourceOnEventReturn::Use => {
+                                        set_ready_state.set(ConnectionReadyState::Closed);
+                                        if let Ok(error_msg) = UseEventSourceMessage::try_from(e) {
+                                            set_error.set(Some(UseEventSourceError::ServerErrorEvent(error_msg)));
+                                        } else {
+                                            set_error.set(Some(UseEventSourceError::SseErrorEvent));
+                                        };
 
-                                // only reconnect if EventSource isn't reconnecting by itself
-                                // this is the case when the connection is closed (readyState is 2)
-                                if es.ready_state() == 2
-                                    && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
-                                {
-                                    es.close();
+                                        // only reconnect if EventSource isn't reconnecting by itself
+                                        // this is the case when the connection is closed (readyState is 2)
+                                        if es.ready_state() == 2
+                                            && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
+                                        {
+                                            es.close();
 
-                                    let retried_value = retried
-                                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-                                        + 1;
+                                            let retried_value = retried
+                                                .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+                                                + 1;
 
-                                    if !reconnect_limit.is_exceeded_by(retried_value as u64) {
-                                        set_timeout(
-                                            move || {
-                                                if let Some(init) = init.get_value() {
-                                                    init();
-                                                }
-                                            },
-                                            Duration::from_millis(reconnect_interval),
-                                        );
-                                    } else {
-                                        #[cfg(debug_assertions)]
-                                        let _z =
-                                            leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+                                            if !reconnect_limit.is_exceeded_by(retried_value as u64) {
+                                                set_timeout(
+                                                    move || {
+                                                        if let Some(init) = init.get_value() {
+                                                            init();
+                                                        }
+                                                    },
+                                                    Duration::from_millis(reconnect_interval),
+                                                );
+                                            } else {
+                                                #[cfg(debug_assertions)]
+                                                let _z =
+                                                    leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-                                        on_failed();
+                                                on_failed();
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -317,22 +325,24 @@ where
                         on_error.forget();
 
                         let on_message = Closure::wrap(Box::new({
-                            let pre_event_handler = pre_event_handler.clone();
+                            let on_event = on_event.clone();
                             move |e: web_sys::MessageEvent| {
                                 let event: &web_sys::Event = e.as_ref();
-                                    if pre_event_handler.as_ref()(event) {
-                                        // skip processing message event!
-                                        return;
+                                match on_event.as_ref()(event) {
+                                    UseEventSourceOnEventReturn::Ignore => {
+                                    // skip processing message event!
                                     }
-                                    match UseEventSourceMessage::<T, C>::try_from(&e) {
-                                        Ok(event_msg) => {
-                                            set_data.set(Some(event_msg.data.clone()));
-                                            set_event.set(Some(event_msg));
-                                        }
-                                        Err(err) => {
-                                            set_error.set(Some(err));
+                                    UseEventSourceOnEventReturn::Use => {
+                                        match UseEventSourceMessage::<T, C>::try_from(&e) {
+                                            Ok(event_msg) => {
+                                                set_message.set(Some(event_msg));
+                                            }
+                                            Err(err) => {
+                                                set_error.set(Some(err));
+                                            }
                                         }
                                     }
+                                }
                             }})
                                 as Box<dyn FnMut(web_sys::MessageEvent)>);
                         es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
@@ -340,19 +350,21 @@ where
 
                         for event_name in named_events.clone() {
                             let event_handler = {
-                                let pre_event_handler = pre_event_handler.clone();
+                                let on_event = on_event.clone();
                                 move |e: web_sys::Event| {
-                                    if pre_event_handler.as_ref()(&e) {
+                                    match on_event.as_ref()(&e) {
+                                        UseEventSourceOnEventReturn::Ignore => {
                                         // skip processing named event!
-                                        return;
-                                    }
-                                    match UseEventSourceMessage::<T, C>::try_from(e) {
-                                        Ok(event_msg) => {
-                                            set_data.set(Some(event_msg.data.clone()));
-                                            set_event.set(Some(event_msg));
                                         }
-                                        Err(err) => {
-                                            set_error.set(Some(err));
+                                        UseEventSourceOnEventReturn::Use => {
+                                            match UseEventSourceMessage::<T, C>::try_from(e) {
+                                                Ok(event_msg) => {
+                                                    set_message.set(Some(event_msg));
+                                                }
+                                                Err(err) => {
+                                                    set_error.set(Some(err));
+                                                }
+                                            }
                                         }
                                     }
                             }};
@@ -434,19 +446,17 @@ where
         let _ = on_failed;
         let _ = immediate;
         let _ = named_events;
-        let _ = pre_event_handler;
+        let _ = on_event;
         let _ = with_credentials;
 
-        let _ = set_event;
-        let _ = set_data;
+        let _ = set_message;
         let _ = set_ready_state;
         let _ = set_error;
         let _ = url;
     }
 
     UseEventSourceReturn {
-        event: event.into(),
-        data: data.into(),
+        message: message.into(),
         ready_state: ready_state.into(),
         error: error.into(),
         open,
@@ -462,8 +472,8 @@ where
     C: Decoder<T, Encoded = str> + Send + Sync,
     C::Error: Send + Sync,
 {
-    pub data: T,
     pub event_type: String,
+    pub data: T,
     pub last_event_id: String,
     _marker: PhantomData<C>,
 }
@@ -497,8 +507,8 @@ where
         let data = C::decode(&data_string).map_err(UseEventSourceError::Deserialize)?;
 
         Ok(Self {
-            data,
             event_type: message_event.type_(),
+            data,
             last_event_id: message_event.last_event_id(),
             _marker: PhantomData,
         })
@@ -547,16 +557,16 @@ where
     #[builder(into)]
     named_events: Vec<String>,
 
-    /// The `pre_event_handler` is called before processing any event inside of [`use_event_source`].
-    /// Return `true` to skip processing of the respective event (e.g. for custom event data or
-    /// events without data), or `false` to process the event as usual.
+    /// The `on_event` is called before processing any event inside of [`use_event_source`].
+    /// Return `UseEventSourceOnEventReturn::Ignore` to ignore further processing of the respective event
+    /// in [`use_event_source`], or `UseEventSourceOnEventReturn::Use` to process the event as usual.
     ///
-    /// Beware that skipping handling the `open` and `error` events may yield unexpected results.
+    /// Beware that ignoring processing the `open` and `error` events may yield unexpected results.
     ///
     /// You may want to use [`UseEventSourceMessage::try_from()`] to access the event data.
     ///
-    /// Default handler returns false.
-    pre_event_handler: Arc<dyn Fn(&web_sys::Event) -> bool + Send + Sync>,
+    /// Default handler returns `UseEventSourceOnEventReturn::Use`.
+    on_event: Arc<dyn Fn(&web_sys::Event) -> UseEventSourceOnEventReturn + Send + Sync>,
 
     /// If CORS should be set to `include` credentials. Defaults to `false`.
     with_credentials: bool,
@@ -572,11 +582,19 @@ impl<T> Default for UseEventSourceOptions<T> {
             on_failed: Arc::new(|| {}),
             immediate: true,
             named_events: vec![],
-            pre_event_handler: Arc::new(|_| false),
+            on_event: Arc::new(|_| UseEventSourceOnEventReturn::Use),
             with_credentials: false,
             _marker: PhantomData,
         }
     }
+}
+
+/// Return type of the `on_event` handler in [`UseEventSourceOptions`].
+pub enum UseEventSourceOnEventReturn {
+    /// Ignore further processing of the event in [`use_event_source`].
+    Ignore,
+    /// Use the default processing of the event in [`use_event_source`].
+    Use,
 }
 
 /// Return type of [`use_event_source`].
@@ -589,14 +607,11 @@ where
     OpenFn: Fn() + Clone + Send + Sync + 'static,
     CloseFn: Fn() + Clone + Send + Sync + 'static,
 {
-    /// Latest data received via the `EventSource`
-    pub data: Signal<Option<T>>,
+    /// The latest message
+    pub message: Signal<Option<UseEventSourceMessage<T, C>>>,
 
     /// The current state of the connection,
     pub ready_state: Signal<ConnectionReadyState>,
-
-    /// The latest message event
-    pub event: Signal<Option<UseEventSourceMessage<T, C>>>,
 
     /// The current error
     pub error: Signal<Option<UseEventSourceError<Err>>>,
