@@ -85,8 +85,8 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{
-            sendwrap_fn, use_event_listener_with_options, use_resize_observer, use_window,
-            UseEventListenerOptions,
+            UseEventListenerOptions, sendwrap_fn, use_event_listener_with_options,
+            use_resize_observer, use_window,
         };
         use leptos::ev::{resize, scroll};
 

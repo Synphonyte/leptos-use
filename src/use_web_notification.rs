@@ -470,10 +470,10 @@ impl ShowOptions {
 
 /// Helper function to determine if browser supports notifications
 fn browser_supports_notifications() -> bool {
-    if let Some(window) = use_window().as_ref() {
-        if window.has_own_property(&wasm_bindgen::JsValue::from_str("Notification")) {
-            return true;
-        }
+    if let Some(window) = use_window().as_ref()
+        && window.has_own_property(&wasm_bindgen::JsValue::from_str("Notification"))
+    {
+        return true;
     }
 
     false

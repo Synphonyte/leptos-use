@@ -131,7 +131,7 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.map(|el| T::from(el).clone())
+            self.map(|el| T::from(el).clone()),
         ]))
     }
 }
@@ -144,9 +144,9 @@ where
     T: From<E> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![self
-            .as_ref()
-            .map(|e| T::from(e.clone()))]))
+        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
+            self.as_ref().map(|e| T::from(e.clone())),
+        ]))
     }
 }
 
@@ -162,10 +162,12 @@ where
         if cfg!(feature = "ssr") {
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![document()
-                .query_selector(self.as_ref())
-                .unwrap_or_default()
-                .map(|el| T::from(el).clone())]))
+            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
+                document()
+                    .query_selector(self.as_ref())
+                    .unwrap_or_default()
+                    .map(|el| T::from(el).clone()),
+            ]))
         }
     }
 }
@@ -182,10 +184,12 @@ where
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
             ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-                vec![document()
-                    .query_selector(self.get().as_ref())
-                    .unwrap_or_default()
-                    .map(|el| T::from(el).clone())]
+                vec![
+                    document()
+                        .query_selector(self.get().as_ref())
+                        .unwrap_or_default()
+                        .map(|el| T::from(el).clone()),
+                ]
             }))
         }
     }

@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::MaybeRwSignal;
-use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -77,35 +76,36 @@ pub fn use_favicon_with_options(
 
     let (favicon, set_favicon) = new_icon.into_signal();
 
-    cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    #[cfg(not(feature = "ssr"))]
+    {
         let link_selector = format!("link[rel*=\"{rel}\"]");
 
         let apply_icon = move |icon: &String| {
-            if let Some(head) = document().head() {
-                if let Ok(links) = head.query_selector_all(&link_selector) {
-                    let href = format!("{base_url}{icon}");
+            if let Some(head) = document().head()
+                && let Ok(links) = head.query_selector_all(&link_selector)
+            {
+                let href = format!("{base_url}{icon}");
 
-                    for i in 0..links.length() {
-                        let node = links.get(i).expect("checked length");
-                        let link: web_sys::HtmlLinkElement = node.unchecked_into();
-                        link.set_href(&href);
-                    }
+                for i in 0..links.length() {
+                    let node = links.get(i).expect("checked length");
+                    let link: web_sys::HtmlLinkElement = node.unchecked_into();
+                    link.set_href(&href);
                 }
             }
         };
 
         Effect::watch(
-                        move || favicon.get(),
+            move || favicon.get(),
             move |new_icon, prev_icon, _| {
-                if Some(new_icon) != prev_icon {
-                    if let Some(new_icon) = new_icon {
-                        apply_icon(new_icon);
-                    }
+                if Some(new_icon) != prev_icon
+                    && let Some(new_icon) = new_icon
+                {
+                    apply_icon(new_icon);
                 }
             },
             false,
         );
-    }}
+    }
 
     (favicon, set_favicon)
 }

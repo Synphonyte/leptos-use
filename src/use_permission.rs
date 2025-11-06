@@ -124,10 +124,12 @@ async fn query_permission(
     let permission_object = js_sys::Object::new();
     js!(permission_object["name"] = permission);
 
-    let permission_state: web_sys::PermissionStatus = js_fut!(window()
-        .navigator()
-        .permissions()?
-        .query(&permission_object)?)
+    let permission_state: web_sys::PermissionStatus = js_fut!(
+        window()
+            .navigator()
+            .permissions()?
+            .query(&permission_object)?
+    )
     .await?
     .unchecked_into();
 

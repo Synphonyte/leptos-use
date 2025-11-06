@@ -314,10 +314,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb> + Send + Sync,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
     <HbCodec as Encoder<Hb>>::Error: std::fmt::Debug,
 {
     let url = normalize_url(url);
@@ -798,10 +798,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// Heartbeat options
     #[builder(skip)]
@@ -844,10 +844,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// `WebSocket` error callback.
     pub fn on_error<F>(self, handler: F) -> Self
@@ -881,10 +881,10 @@ where
         NewHb: Default + Send + Sync + 'static,
         NewHbCodec: Encoder<NewHb>,
         NewHbCodec: HybridEncoder<
-            NewHb,
-            <NewHbCodec as Encoder<NewHb>>::Encoded,
-            Error = <NewHbCodec as Encoder<NewHb>>::Error,
-        >,
+                NewHb,
+                <NewHbCodec as Encoder<NewHb>>::Encoded,
+                Error = <NewHbCodec as Encoder<NewHb>>::Error,
+            >,
     {
         UseWebSocketOptions {
             heartbeat: Some(HeartbeatOptions {
@@ -942,10 +942,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     /// Heartbeat data that will be sent to the server
     data: PhantomData<Hb>,
@@ -960,10 +960,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
     fn clone(&self) -> Self {
         *self
@@ -975,10 +975,10 @@ where
     Hb: Default + Send + Sync + 'static,
     HbCodec: Encoder<Hb>,
     HbCodec: HybridEncoder<
-        Hb,
-        <HbCodec as Encoder<Hb>>::Encoded,
-        Error = <HbCodec as Encoder<Hb>>::Error,
-    >,
+            Hb,
+            <HbCodec as Encoder<Hb>>::Encoded,
+            Error = <HbCodec as Encoder<Hb>>::Error,
+        >,
 {
 }
 

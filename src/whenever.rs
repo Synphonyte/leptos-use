@@ -1,4 +1,4 @@
-use crate::{watch_with_options, WatchOptions};
+use crate::{WatchOptions, watch_with_options};
 
 /// Shorthand for watching a signal to be `true`.
 ///

@@ -1,4 +1,4 @@
-use crate::{watch_with_options, WatchOptions};
+use crate::{WatchOptions, watch_with_options};
 use leptos::prelude::*;
 
 /// Pausable [`watch`].

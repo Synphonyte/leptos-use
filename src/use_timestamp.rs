@@ -1,7 +1,7 @@
 use crate::core::now;
 use crate::utils::Pausable;
 use crate::{
-    use_interval_fn_with_options, use_raf_fn_with_options, UseIntervalFnOptions, UseRafFnOptions,
+    UseIntervalFnOptions, UseRafFnOptions, use_interval_fn_with_options, use_raf_fn_with_options,
 };
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

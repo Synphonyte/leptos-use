@@ -46,7 +46,7 @@ pub fn use_screen_orientation() -> UseScreenOrientationReturn<
     {
         use std::rc::Rc;
 
-        use crate::{sendwrap_fn, use_event_listener_with_options, UseEventListenerOptions};
+        use crate::{UseEventListenerOptions, sendwrap_fn, use_event_listener_with_options};
         use leptos::ev::orientationchange;
 
         let screen_orientation = Rc::new(

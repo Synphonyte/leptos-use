@@ -1,4 +1,4 @@
-use super::{use_storage_with_options, StorageType, UseStorageOptions};
+use super::{StorageType, UseStorageOptions, use_storage_with_options};
 use codee::{Decoder, Encoder};
 use leptos::prelude::*;
 

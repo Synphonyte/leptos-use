@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use std::marker::PhantomData;
 
 #[cfg(not(feature = "ssr"))]
-use crate::{use_intersection_observer_with_options, UseIntersectionObserverOptions};
+use crate::{UseIntersectionObserverOptions, use_intersection_observer_with_options};
 use leptos::reactive::wrappers::read::Signal;
 
 /// Tracks the visibility of an element within the viewport.

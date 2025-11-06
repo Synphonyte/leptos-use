@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
 use crate::core::{IntoElementMaybeSignal, Position};
-use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
+use crate::{UseEventListenerOptions, UseWindow, use_event_listener_with_options, use_window};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::prelude::*;
@@ -278,7 +278,7 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
             UseMouseCoordType::Movement => {
                 Some((event.movement_x() as f64, event.movement_y() as f64))
             }
-            UseMouseCoordType::Custom(ref extractor) => extractor.extract_mouse_coords(event),
+            UseMouseCoordType::Custom(extractor) => extractor.extract_mouse_coords(event),
         }
     }
 
@@ -288,7 +288,7 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
             UseMouseCoordType::Client => Some((touch.client_x() as f64, touch.client_y() as f64)),
             UseMouseCoordType::Screen => Some((touch.screen_x() as f64, touch.client_y() as f64)),
             UseMouseCoordType::Movement => None,
-            UseMouseCoordType::Custom(ref extractor) => extractor.extract_touch_coords(touch),
+            UseMouseCoordType::Custom(extractor) => extractor.extract_touch_coords(touch),
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::utils::{signal_filtered, signal_filtered_local};
-use crate::{use_debounce_fn_with_options, DebounceOptions};
+use crate::{DebounceOptions, use_debounce_fn_with_options};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 

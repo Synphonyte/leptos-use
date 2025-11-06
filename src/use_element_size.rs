@@ -103,21 +103,21 @@ where
                 };
 
                 if is_svg() {
-                    if let Some(target) = target.get() {
-                        if let Ok(Some(styles)) = window().get_computed_style(&target) {
-                            set_height.set(
-                                styles
-                                    .get_property_value("height")
-                                    .map(|v| v.parse().unwrap_or_default())
-                                    .unwrap_or_default(),
-                            );
-                            set_width.set(
-                                styles
-                                    .get_property_value("width")
-                                    .map(|v| v.parse().unwrap_or_default())
-                                    .unwrap_or_default(),
-                            );
-                        }
+                    if let Some(target) = target.get()
+                        && let Ok(Some(styles)) = window().get_computed_style(&target)
+                    {
+                        set_height.set(
+                            styles
+                                .get_property_value("height")
+                                .map(|v| v.parse().unwrap_or_default())
+                                .unwrap_or_default(),
+                        );
+                        set_width.set(
+                            styles
+                                .get_property_value("width")
+                                .map(|v| v.parse().unwrap_or_default())
+                                .unwrap_or_default(),
+                        );
                     }
                 } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
                     let format_box_size = if box_size.is_array() {

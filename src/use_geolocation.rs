@@ -42,8 +42,8 @@ use leptos::reactive::wrappers::read::Signal;
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// On the server all signals returns will always contain `None` and the functions do nothing.
-pub fn use_geolocation(
-) -> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
+pub fn use_geolocation()
+-> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_geolocation_with_options(UseGeolocationOptions::default())
 }
 
@@ -93,26 +93,24 @@ pub fn use_geolocation_with_options(
 
             sendwrap_fn!(move || {
                 let navigator = use_window().navigator();
-                if let Some(navigator) = navigator {
-                    if let Ok(geolocation) = navigator.geolocation() {
-                        let update_position = Closure::wrap(
-                            Box::new(update_position) as Box<dyn Fn(web_sys::Position)>
-                        );
-                        let on_error = Closure::wrap(
-                            Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>
-                        );
+                if let Some(navigator) = navigator
+                    && let Ok(geolocation) = navigator.geolocation()
+                {
+                    let update_position =
+                        Closure::wrap(Box::new(update_position) as Box<dyn Fn(web_sys::Position)>);
+                    let on_error =
+                        Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
 
-                        *watch_handle.lock().unwrap() = geolocation
-                            .watch_position_with_error_callback_and_options(
-                                update_position.as_ref().unchecked_ref(),
-                                Some(on_error.as_ref().unchecked_ref()),
-                                &position_options,
-                            )
-                            .ok();
+                    *watch_handle.lock().unwrap() = geolocation
+                        .watch_position_with_error_callback_and_options(
+                            update_position.as_ref().unchecked_ref(),
+                            Some(on_error.as_ref().unchecked_ref()),
+                            &position_options,
+                        )
+                        .ok();
 
-                        update_position.forget();
-                        on_error.forget();
-                    }
+                    update_position.forget();
+                    on_error.forget();
                 }
             })
         };
@@ -126,12 +124,11 @@ pub fn use_geolocation_with_options(
 
             sendwrap_fn!(move || {
                 let navigator = use_window().navigator();
-                if let Some(navigator) = navigator {
-                    if let Some(handle) = *watch_handle.lock().unwrap() {
-                        if let Ok(geolocation) = navigator.geolocation() {
-                            geolocation.clear_watch(handle);
-                        }
-                    }
+                if let Some(navigator) = navigator
+                    && let Some(handle) = *watch_handle.lock().unwrap()
+                    && let Ok(geolocation) = navigator.geolocation()
+                {
+                    geolocation.clear_watch(handle);
                 }
             })
         };

@@ -52,8 +52,8 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
-pub fn use_display_media(
-) -> UseDisplayMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
+pub fn use_display_media()
+-> UseDisplayMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_display_media_with_options(UseDisplayMediaOptions::default())
 }
 

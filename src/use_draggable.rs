@@ -1,5 +1,5 @@
 use crate::core::{IntoElementMaybeSignal, MaybeRwSignal, PointerType, Position};
-use crate::{use_event_listener_with_options, use_window, UseEventListenerOptions, UseWindow};
+use crate::{UseEventListenerOptions, UseWindow, use_event_listener_with_options, use_window};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::prelude::*;

@@ -1,4 +1,4 @@
-use crate::{use_locales_with_options, UseLocalesOptions};
+use crate::{UseLocalesOptions, use_locales_with_options};
 use leptos::{logging::warn, prelude::*};
 use unic_langid::LanguageIdentifier;
 

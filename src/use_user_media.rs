@@ -45,8 +45,8 @@ use wasm_bindgen::{JsCast, JsValue};
 ///
 /// On the server calls to `start` or any other way to enable the stream will be ignored
 /// and the stream will always be `None`.
-pub fn use_user_media(
-) -> UseUserMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
+pub fn use_user_media()
+-> UseUserMediaReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     use_user_media_with_options(UseUserMediaOptions::default())
 }
 
@@ -344,10 +344,7 @@ where
 
 impl<T> ConstraintExactIdeal<T> {
     pub fn exact(mut self, value: T) -> Self {
-        if let ConstraintExactIdeal::ExactIdeal {
-            exact: ref mut e, ..
-        } = &mut self
-        {
+        if let ConstraintExactIdeal::ExactIdeal { exact: e, .. } = &mut self {
             *e = Some(value);
         }
 
@@ -355,10 +352,7 @@ impl<T> ConstraintExactIdeal<T> {
     }
 
     pub fn ideal(mut self, value: T) -> Self {
-        if let ConstraintExactIdeal::ExactIdeal {
-            ideal: ref mut i, ..
-        } = &mut self
-        {
+        if let ConstraintExactIdeal::ExactIdeal { ideal: i, .. } = &mut self {
             *i = Some(value);
         }
 
@@ -438,7 +432,7 @@ where
     }
 
     pub fn exact(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { ref mut exact, .. } = &mut self {
+        if let ConstraintRange::Range { exact, .. } = &mut self {
             *exact = Some(value);
         }
 
@@ -446,7 +440,7 @@ where
     }
 
     pub fn ideal(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { ref mut ideal, .. } = &mut self {
+        if let ConstraintRange::Range { ideal, .. } = &mut self {
             *ideal = Some(value);
         }
 
