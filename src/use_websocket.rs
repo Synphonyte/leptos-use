@@ -1,4 +1,4 @@
-use crate::{core::ConnectionReadyState, ReconnectLimit};
+use crate::{ReconnectLimit, core::ConnectionReadyState};
 use cfg_if::cfg_if;
 use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
@@ -353,7 +353,7 @@ where
         use wasm_bindgen::prelude::*;
         use web_sys::{BinaryType, MessageEvent, WebSocket};
 
-        let ws_signal = StoredValue::new_local(None::<WebSocket>);
+        let ws = StoredValue::new_local(None::<WebSocket>);
 
         let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
 
@@ -365,18 +365,18 @@ where
         let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
 
         let send_str = move |data: &str| {
-            if ready_state.get_untracked() == ConnectionReadyState::Open {
-                if let Some(web_socket) = ws_signal.get_value() {
-                    let _ = web_socket.send_with_str(data);
-                }
+            if ready_state.get_untracked() == ConnectionReadyState::Open
+                && let Some(web_socket) = ws.get_value()
+            {
+                let _ = web_socket.send_with_str(data);
             }
         };
 
         let send_bytes = move |data: &[u8]| {
-            if ready_state.get_untracked() == ConnectionReadyState::Open {
-                if let Some(web_socket) = ws_signal.get_value() {
-                    let _ = web_socket.send_with_u8_array(data);
-                }
+            if ready_state.get_untracked() == ConnectionReadyState::Open
+                && let Some(web_socket) = ws.get_value()
+            {
+                let _ = web_socket.send_with_u8_array(data);
             }
         };
 
@@ -447,7 +447,7 @@ where
 
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
-                    && ws_signal
+                    && ws
                         .get_value()
                         .is_some_and(|ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                     && reconnect_timer_ref.get_value().is_none()
@@ -481,7 +481,7 @@ where
                     reconnect_timer_ref.set_value(None);
                 }
 
-                if let Some(web_socket) = ws_signal.get_value() {
+                if let Some(web_socket) = ws.get_value() {
                     let _ = web_socket.close();
                 }
 
@@ -635,12 +635,6 @@ where
 
                         stop_heartbeat();
 
-                        if let Some(reconnect) = &reconnect_ref.get_value() {
-                            // ToDo: you try to reconnect and may be it is successful, but below the on_error closure is still called and sets the ready_state to closed.
-                            // How does this fit together?
-                            reconnect();
-                        }
-
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -650,6 +644,11 @@ where
                         drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
+
+                        // try to reconnect
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
                     })
                         as Box<dyn FnMut(Event)>);
                     web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
@@ -668,11 +667,6 @@ where
 
                         stop_heartbeat();
 
-                        if let Some(reconnect) = &reconnect_ref.get_value() {
-                            // ToDo: why call reconnect here? see comment in onerror handler. AND: why try reconnect on close at all?
-                            reconnect();
-                        }
-
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -682,13 +676,18 @@ where
                         drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
+
+                        // if closing was not intentional, try to reconnect
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
                     })
                         as Box<dyn FnMut(CloseEvent)>);
                     web_socket.set_onclose(Some(onclose_closure.as_ref().unchecked_ref()));
                     onclose_closure.forget();
                 }
 
-                ws_signal.set_value(Some(web_socket));
+                ws.set_value(Some(web_socket));
             }))
         });
 
@@ -707,7 +706,7 @@ where
             sendwrap_fn!(move || {
                 stop_heartbeat();
                 manually_closed_ref.set_value(true);
-                if let Some(web_socket) = ws_signal.get_value() {
+                if let Some(web_socket) = ws.get_value() {
                     let _ = web_socket.close();
                 }
             })
