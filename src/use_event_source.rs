@@ -72,11 +72,14 @@ use wasm_bindgen::JsCast;
 /// ### Custom Event Handler
 ///
 /// You can provide a custom `on_event` handler using `use_event_source_with_options`.
-/// `on_event` wil be run for every received event, including the built-in `open`, `error`, and `message` events,
-/// as well as any named events you have specified.
-/// With the return value of `on_event` you can control, whether the event should be further processed by
-/// `use_event_source` (`UseEventSourceOnEventReturn::Use`) or ignored (`UseEventSourceOnEventReturn::Ignore`).
-/// By default, the handler returns `UseEventSourceOnEventReturn::Use`.
+/// `on_event` wil be run for every received event, including the built-in `open`, `error`,
+/// and `message` events, as well as any named events you have specified.
+///
+/// With the return value of `on_event` you can control, whether `message` and named events
+/// should be further processed by `use_event_source` (`UseEventSourceOnEventReturn::ProcessMessage`)
+/// or ignored (`UseEventSourceOnEventReturn::IgnoreProcessingMessage`).
+///
+/// By default, the handler returns `UseEventSourceOnEventReturn::ProcessMessage`.
 ///
 /// ```
 /// # use leptos::prelude::*;
@@ -85,19 +88,19 @@ use wasm_bindgen::JsCast;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
-/// // Custom example handler: log event name and check for custom_error event
+/// // Custom example handler: log event name and check for named `custom_error` event
 /// let custom_event_handler = |e: &web_sys::Event| {
 ///     leptos::logging::log!("Received event: {}", e.type_());
 ///     if e.type_() == "custom_error" {
 ///         if let Ok(error_message) = UseEventSourceMessage::<String, FromToStringCodec>::try_from(e.clone()) {
 ///             // Decoded successfully, log the error message
 ///             leptos::logging::log!("Error message: {}", error_message.data);
-///             // skip processing this event further
-///             return UseEventSourceOnEventReturn::Ignore
+///             // skip processing this message event further
+///             return UseEventSourceOnEventReturn::IgnoreProcessingMessage;
 ///         }
 ///     }
-///     // Process other events normally
-///     UseEventSourceOnEventReturn::Use
+///     // Process other message events normally
+///     UseEventSourceOnEventReturn::ProcessMessage
 /// };
 /// let UseEventSourceReturn {
 ///     ready_state, message, error, close, ..
@@ -229,6 +232,31 @@ where
             on_event(e)
         };
 
+        let on_message_event = {
+            let on_event_return = on_event_return.clone();
+            move |e: &web_sys::Event| {
+                match on_event_return(e) {
+                    UseEventSourceOnEventReturn::IgnoreProcessingMessage => {
+                        // skip processing message event!
+                    }
+                    UseEventSourceOnEventReturn::ProcessMessage => {
+                        let message_event = e
+                            .dyn_ref::<web_sys::MessageEvent>()
+                            .expect("Event is not a MessageEvent");
+
+                        match UseEventSourceMessage::<T, C>::try_from(message_event) {
+                            Ok(event_msg) => {
+                                set_message.set(Some(event_msg));
+                            }
+                            Err(err) => {
+                                set_error.set(Some(err));
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
         let init = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
         let set_init = {
@@ -240,6 +268,7 @@ where
                     let explicitly_closed = Arc::clone(&explicitly_closed);
                     let retried = Arc::clone(&retried);
                     let on_event_return = on_event_return.clone();
+                    let on_message_event = on_message_event.clone();
                     let named_events = named_events.clone();
                     let on_failed = Arc::clone(&on_failed);
 
@@ -264,15 +293,9 @@ where
                         let on_open = Closure::wrap(Box::new({
                             let on_event_return = on_event_return.clone();
                             move |e: web_sys::Event| {
-                                match on_event_return(&e) {
-                                    UseEventSourceOnEventReturn::Ignore => {
-                                        // skip processing open event!
-                                    }
-                                    UseEventSourceOnEventReturn::Use => {
-                                        set_ready_state.set(ConnectionReadyState::Open);
-                                        set_error.set(None);
-                                    }
-                                }
+                                on_event_return(&e);
+                                set_ready_state.set(ConnectionReadyState::Open);
+                                set_error.set(None);
                             }})
                                 as Box<dyn FnMut(web_sys::Event)>);
                         es.set_onopen(Some(on_open.as_ref().unchecked_ref()));
@@ -286,42 +309,36 @@ where
                             let es = es.clone();
 
                             move |e: web_sys::Event| {
-                                match on_event_return(&e) {
-                                    UseEventSourceOnEventReturn::Ignore => {
-                                        // skip processing error event!
-                                    }
-                                    UseEventSourceOnEventReturn::Use => {
-                                        set_ready_state.set(ConnectionReadyState::Closed);
-                                        set_error.set(Some(UseEventSourceError::ErrorEvent));
+                                on_event_return(&e);
+                                set_ready_state.set(ConnectionReadyState::Closed);
+                                set_error.set(Some(UseEventSourceError::ErrorEvent));
 
-                                        // only reconnect if EventSource isn't reconnecting by itself
-                                        // this is the case when the connection is closed (readyState is 2)
-                                        if es.ready_state() == 2
-                                            && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
-                                        {
-                                            es.close();
+                                // only reconnect if EventSource isn't reconnecting by itself
+                                // this is the case when the connection is closed (readyState is 2)
+                                if es.ready_state() == 2
+                                    && !explicitly_closed.load(std::sync::atomic::Ordering::Relaxed)
+                                {
+                                    es.close();
 
-                                            let retried_value = retried
-                                                .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-                                                + 1;
+                                    let retried_value = retried
+                                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+                                        + 1;
 
-                                            if !reconnect_limit.is_exceeded_by(retried_value as u64) {
-                                                set_timeout(
-                                                    move || {
-                                                        if let Some(init) = init.get_value() {
-                                                            init();
-                                                        }
-                                                    },
-                                                    Duration::from_millis(reconnect_interval),
-                                                );
-                                            } else {
-                                                #[cfg(debug_assertions)]
-                                                let _z =
-                                                    leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+                                    if !reconnect_limit.is_exceeded_by(retried_value as u64) {
+                                        set_timeout(
+                                            move || {
+                                                if let Some(init) = init.get_value() {
+                                                    init();
+                                                }
+                                            },
+                                            Duration::from_millis(reconnect_interval),
+                                        );
+                                    } else {
+                                        #[cfg(debug_assertions)]
+                                        let _z =
+                                            leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
-                                                on_failed();
-                                            }
-                                        }
+                                        on_failed();
                                     }
                                 }
                             }
@@ -331,24 +348,10 @@ where
                         on_error.forget();
 
                         let on_message = Closure::wrap(Box::new({
-                            let on_event_return = on_event_return.clone();
+                            let on_message_event = on_message_event.clone();
                             move |e: web_sys::MessageEvent| {
-                                let event: &web_sys::Event = e.as_ref();
-                                match on_event_return(event) {
-                                    UseEventSourceOnEventReturn::Ignore => {
-                                    // skip processing message event!
-                                    }
-                                    UseEventSourceOnEventReturn::Use => {
-                                        match UseEventSourceMessage::<T, C>::try_from(&e) {
-                                            Ok(event_msg) => {
-                                                set_message.set(Some(event_msg));
-                                            }
-                                            Err(err) => {
-                                                set_error.set(Some(err));
-                                            }
-                                        }
-                                    }
-                                }
+                                let e: &web_sys::Event = e.as_ref();
+                                on_message_event(e);
                             }})
                                 as Box<dyn FnMut(web_sys::MessageEvent)>);
                         es.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
@@ -356,24 +359,11 @@ where
 
                         for event_name in named_events.clone() {
                             let event_handler = {
-                                let on_event_return = on_event_return.clone();
+                                let on_message_event = on_message_event.clone();
                                 move |e: web_sys::Event| {
-                                    match on_event_return(&e) {
-                                        UseEventSourceOnEventReturn::Ignore => {
-                                        // skip processing named event!
-                                        }
-                                        UseEventSourceOnEventReturn::Use => {
-                                            match UseEventSourceMessage::<T, C>::try_from(e) {
-                                                Ok(event_msg) => {
-                                                    set_message.set(Some(event_msg));
-                                                }
-                                                Err(err) => {
-                                                    set_error.set(Some(err));
-                                                }
-                                            }
-                                        }
-                                    }
-                            }};
+                                    on_message_event(&e);
+                                }
+                            };
 
                             let _ = use_event_listener(
                                 es.clone(),
@@ -604,7 +594,7 @@ impl<T> Default for UseEventSourceOptions<T> {
             on_failed: Arc::new(|| {}),
             immediate: true,
             named_events: vec![],
-            on_event: Arc::new(|_| UseEventSourceOnEventReturn::Use),
+            on_event: Arc::new(|_| UseEventSourceOnEventReturn::ProcessMessage),
             with_credentials: false,
             _marker: PhantomData,
         }
@@ -613,10 +603,10 @@ impl<T> Default for UseEventSourceOptions<T> {
 
 /// Return type of the `on_event` handler in [`UseEventSourceOptions`].
 pub enum UseEventSourceOnEventReturn {
-    /// Ignore further processing of the event in [`use_event_source`].
-    Ignore,
-    /// Use the default processing of the event in [`use_event_source`].
-    Use,
+    /// Ignore further processing of the message event in [`use_event_source`].
+    IgnoreProcessingMessage,
+    /// Use the default processing of the message event in [`use_event_source`].
+    ProcessMessage,
 }
 
 /// Return type of [`use_event_source`].
