@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leptos = { workspace = true, features = [
-    "nightly",
-    "csr",
-] }
+leptos = { workspace = true, features = ["csr"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", default-features = false, features = ["use_active_element", "docs"] }
+leptos-use = { path = "../..", default-features = false, features = [
+  "use_active_element",
+  "docs",
+] }
 web-sys = { version = "0.3", features = ["HtmlElement", "DomStringMap"] }
 
 [dev-dependencies]

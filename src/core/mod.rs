@@ -6,6 +6,7 @@ mod element_maybe_signal;
 #[cfg(feature = "element")]
 mod elements_maybe_signal;
 mod maybe_rw_signal;
+mod option_local_signal;
 mod pointer_type;
 mod position;
 mod reconnect_limit;
@@ -23,6 +24,7 @@ pub use element_maybe_signal::*;
 #[cfg(feature = "element")]
 pub use elements_maybe_signal::*;
 pub use maybe_rw_signal::*;
+pub use option_local_signal::*;
 pub use pointer_type::*;
 pub use position::*;
 pub use reconnect_limit::*;

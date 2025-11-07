@@ -1,9 +1,11 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::core::OptionLocalSignal;
 use crate::{UseEventListenerOptions, use_document, use_event_listener_with_options, use_window};
 use leptos::ev::{blur, focus};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 
 /// Reactive `document.activeElement`
 ///
@@ -35,10 +37,10 @@ use leptos::reactive::wrappers::read::Signal;
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// On the server this returns a `Signal` that always contains the value `None`.
-pub fn use_active_element() -> Signal<Option<web_sys::Element>, LocalStorage> {
-    let get_active_element = move || use_document().active_element();
+pub fn use_active_element() -> OptionLocalSignal<web_sys::Element> {
+    let get_active_element = move || use_document().active_element().map(SendWrapper::new);
 
-    let (active_element, set_active_element) = signal_local(get_active_element());
+    let (active_element, set_active_element) = signal(get_active_element());
 
     let listener_options = UseEventListenerOptions::default().capture(true);
 

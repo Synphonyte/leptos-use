@@ -14,8 +14,6 @@ use std::sync::Arc;
 /// ```
 /// # use leptos::prelude::*;
 /// # use leptos_use::use_prefers_reduced_motion;
-/// # #[cfg(feature = "docs")]
-/// # use leptos_use::docs::BooleanDisplay;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -23,7 +21,7 @@ use std::sync::Arc;
 ///
 /// view! {
 ///     <div>
-///         <p>Prefers reduced motions: <BooleanDisplay value=is_reduced_motion_preferred/></p>
+///         <p>Prefers reduced motions: {move || if is_reduced_motion_preferred.get() { "Yes" } else { "No" }}</p>
 ///         <p>
 ///             Update reduce motion preference
 ///             <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion#user_preferences">
