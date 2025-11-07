@@ -370,7 +370,7 @@ where
     #[cfg(feature = "ssr")]
     {
         if !readonly {
-            ImmediateEffect::new_isomorphic({
+            let _ = ImmediateEffect::new_isomorphic({
                 let cookie_name = cookie_name.to_owned();
                 let ssr_set_cookie = Arc::clone(&ssr_set_cookie);
 
