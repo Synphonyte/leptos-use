@@ -1,17 +1,12 @@
-#![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
-
-use crate::{ReconnectLimit, core::ConnectionReadyState, use_interval_fn};
+use crate::{ReconnectLimit, core::ConnectionReadyState};
 use cfg_if::cfg_if;
 use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
-use js_sys::Array;
-use leptos::{leptos_dom::helpers::TimeoutHandle, prelude::*};
+use leptos::prelude::*;
 use std::marker::PhantomData;
-use std::sync::{Arc, atomic::AtomicBool};
-use std::time::Duration;
+use std::sync::Arc;
 use thiserror::Error;
-use wasm_bindgen::prelude::*;
-use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
+use web_sys::{CloseEvent, Event};
 
 #[allow(rustdoc::bare_urls)]
 /// Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection.
@@ -263,6 +258,11 @@ use web_sys::{BinaryType, CloseEvent, Event, MessageEvent, WebSocket};
 /// # }
 /// ```
 ///
+/// ## SendWrapped Return
+///
+/// The returned closures `open`, `close`, and `send` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_websocket`.
+///
 /// ## Server-Side Rendering
 ///
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
@@ -338,56 +338,67 @@ where
 
     let (ready_state, set_ready_state) = signal(ConnectionReadyState::Closed);
     let (message, set_message) = signal(None);
-    let ws_signal = RwSignal::new_local(None::<WebSocket>);
 
-    let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
-
-    let reconnect_times_ref: StoredValue<u64> = StoredValue::new(0);
-    let manually_closed_ref: StoredValue<bool> = StoredValue::new(false);
-
-    let unmounted = Arc::new(AtomicBool::new(false));
-
-    let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
-
-    let send_str = move |data: &str| {
-        if ready_state.get_untracked() == ConnectionReadyState::Open
-            && let Some(web_socket) = ws_signal.get_untracked()
-        {
-            let _ = web_socket.send_with_str(data);
-        }
-    };
-
-    let send_bytes = move |data: &[u8]| {
-        if ready_state.get_untracked() == ConnectionReadyState::Open
-            && let Some(web_socket) = ws_signal.get_untracked()
-        {
-            let _ = web_socket.send_with_u8_array(data);
-        }
-    };
-
-    let send = {
-        let on_error = Arc::clone(&on_error);
-
-        move |value: &Tx| {
-            let on_error = Arc::clone(&on_error);
-
-            send_with_codec::<Tx, C>(value, send_str, send_bytes, move |err| {
-                on_error(UseWebSocketError::Codec(CodecError::Encode(err)));
-            });
-        }
-    };
-
-    let heartbeat_interval_ref = StoredValue::new_local(None::<(Arc<dyn Fn()>, Arc<dyn Fn()>)>);
-
-    let stop_heartbeat = move || {
-        if let Some((pause, _)) = heartbeat_interval_ref.get_value() {
-            pause();
-        }
-    };
+    let open;
+    let close;
+    let send;
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::utils::Pausable;
+        use crate::{sendwrap_fn, use_interval_fn, utils::Pausable};
+        use js_sys::Array;
+        use leptos::leptos_dom::helpers::TimeoutHandle;
+        use std::sync::atomic::AtomicBool;
+        use std::time::Duration;
+        use wasm_bindgen::prelude::*;
+        use web_sys::{BinaryType, MessageEvent, WebSocket};
+
+        let ws = StoredValue::new_local(None::<WebSocket>);
+
+        let reconnect_timer_ref: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+
+        let reconnect_times_ref: StoredValue<u64> = StoredValue::new(0);
+        let manually_closed_ref: StoredValue<bool> = StoredValue::new(false);
+
+        let unmounted = Arc::new(AtomicBool::new(false));
+
+        let connect_ref: StoredValue<Option<Arc<dyn Fn() + Send + Sync>>> = StoredValue::new(None);
+
+        let send_str = move |data: &str| {
+            if ready_state.get_untracked() == ConnectionReadyState::Open
+                && let Some(web_socket) = ws.get_value()
+            {
+                let _ = web_socket.send_with_str(data);
+            }
+        };
+
+        let send_bytes = move |data: &[u8]| {
+            if ready_state.get_untracked() == ConnectionReadyState::Open
+                && let Some(web_socket) = ws.get_value()
+            {
+                let _ = web_socket.send_with_u8_array(data);
+            }
+        };
+
+        send = {
+            let on_error = Arc::clone(&on_error);
+
+            sendwrap_fn!(move |value: &Tx| {
+                let on_error = Arc::clone(&on_error);
+
+                send_with_codec::<Tx, C>(value, send_str, send_bytes, move |err| {
+                    on_error(UseWebSocketError::Codec(CodecError::Encode(err)));
+                });
+            })
+        };
+
+        let heartbeat_interval_ref = StoredValue::new_local(None::<(Arc<dyn Fn()>, Arc<dyn Fn()>)>);
+
+        let stop_heartbeat = move || {
+            if let Some((pause, _)) = heartbeat_interval_ref.get_value() {
+                pause();
+            }
+        };
 
         let start_heartbeat = {
             let on_error = Arc::clone(&on_error);
@@ -436,8 +447,8 @@ where
 
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
-                    && ws_signal
-                        .get_untracked()
+                    && ws
+                        .get_value()
                         .is_some_and(|ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                     && reconnect_timer_ref.get_value().is_none()
                 {
@@ -470,7 +481,7 @@ where
                     reconnect_timer_ref.set_value(None);
                 }
 
-                if let Some(web_socket) = ws_signal.get_untracked() {
+                if let Some(web_socket) = ws.get_value() {
                     let _ = web_socket.close();
                 }
 
@@ -624,10 +635,6 @@ where
 
                         stop_heartbeat();
 
-                        if let Some(reconnect) = &reconnect_ref.get_value() {
-                            reconnect();
-                        }
-
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -637,6 +644,11 @@ where
                         drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
+
+                        // try to reconnect
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
                     })
                         as Box<dyn FnMut(Event)>);
                     web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
@@ -655,10 +667,6 @@ where
 
                         stop_heartbeat();
 
-                        if let Some(reconnect) = &reconnect_ref.get_value() {
-                            reconnect();
-                        }
-
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -668,55 +676,87 @@ where
                         drop(zone);
 
                         set_ready_state.set(ConnectionReadyState::Closed);
+
+                        // if closing was not intentional, try to reconnect
+                        if let Some(reconnect) = &reconnect_ref.get_value() {
+                            reconnect();
+                        }
                     })
                         as Box<dyn FnMut(CloseEvent)>);
                     web_socket.set_onclose(Some(onclose_closure.as_ref().unchecked_ref()));
                     onclose_closure.forget();
                 }
 
-                ws_signal.set(Some(web_socket));
+                ws.set_value(Some(web_socket));
             }))
+        });
+
+        // Open connection
+        open = sendwrap_fn!(move || {
+            reconnect_times_ref.set_value(0);
+            if let Some(connect) = connect_ref.get_value() {
+                connect();
+            }
+        });
+
+        // Close connection
+        close = {
+            reconnect_timer_ref.set_value(None);
+
+            sendwrap_fn!(move || {
+                stop_heartbeat();
+                manually_closed_ref.set_value(true);
+                if let Some(web_socket) = ws.get_value() {
+                    let _ = web_socket.close();
+                }
+            })
+        };
+
+        // Open connection (not called if option `manual` is true)
+        Effect::new({
+            let open = open.clone();
+            move |_| {
+                if immediate {
+                    open();
+                }
+            }
+        });
+
+        // clean up (unmount)
+        on_cleanup({
+            let close = close.clone();
+            move || {
+                unmounted.store(true, std::sync::atomic::Ordering::Relaxed);
+                close();
+            }
         });
     }
 
-    // Open connection
-    let open = move || {
-        reconnect_times_ref.set_value(0);
-        if let Some(connect) = connect_ref.get_value() {
-            connect();
-        }
-    };
+    #[cfg(feature = "ssr")]
+    {
+        open = move || {};
+        close = move || {};
+        send = move |_: &Tx| {};
 
-    // Close connection
-    let close = {
-        reconnect_timer_ref.set_value(None);
-
-        move || {
-            stop_heartbeat();
-            manually_closed_ref.set_value(true);
-            if let Some(web_socket) = ws_signal.get_untracked() {
-                let _ = web_socket.close();
-            }
-        }
-    };
-
-    // Open connection (not called if option `manual` is true)
-    Effect::new(move |_| {
-        if immediate {
-            open();
-        }
-    });
-
-    // clean up (unmount)
-    on_cleanup(move || {
-        unmounted.store(true, std::sync::atomic::Ordering::Relaxed);
-        close();
-    });
+        let _ = url;
+        let _ = on_open;
+        let _ = on_message;
+        let _ = on_message_raw;
+        let _ = on_message_raw_bytes;
+        let _ = on_error;
+        let _ = on_close;
+        let _ = reconnect_limit;
+        let _ = reconnect_interval;
+        let _ = immediate;
+        let _ = protocols;
+        let _ = heartbeat;
+        let _ = set_ready_state;
+        let _ = set_message;
+    }
 
     UseWebSocketReturn {
         ready_state: ready_state.into(),
         message: message.into(),
-        ws: ws_signal.into(),
         open,
         close,
         send,
@@ -724,6 +764,7 @@ where
     }
 }
 
+#[cfg(not(feature = "ssr"))]
 fn send_with_codec<T, Codec>(
     value: &T,
     send_str: impl Fn(&str),
@@ -894,6 +935,7 @@ impl Encoder<()> for DummyEncoder {
 }
 
 /// Options for heartbeats
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 pub struct HeartbeatOptions<Hb, HbCodec>
 where
     Hb: Default + Send + Sync + 'static,
@@ -953,8 +995,6 @@ where
     pub ready_state: Signal<ConnectionReadyState>,
     /// Latest message received from `WebSocket`.
     pub message: Signal<Option<Rx>>,
-    /// The `WebSocket` instance.
-    pub ws: Signal<Option<WebSocket>, LocalStorage>,
     /// Opens the `WebSocket` connection
     pub open: OpenFn,
     /// Closes the `WebSocket` connection
@@ -1006,6 +1046,7 @@ fn normalize_url(url: &str) -> String {
     }}
 }
 
+#[cfg_attr(feature = "ssr", allow(dead_code))]
 fn detect_protocol() -> String {
     cfg_if! { if #[cfg(feature = "ssr")] {
         "ws".to_string()
