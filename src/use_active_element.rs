@@ -4,7 +4,6 @@ use crate::core::OptionLocalSignal;
 use crate::{UseEventListenerOptions, use_document, use_event_listener_with_options, use_window};
 use leptos::ev::{blur, focus};
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 use send_wrapper::SendWrapper;
 
 /// Reactive `document.activeElement`

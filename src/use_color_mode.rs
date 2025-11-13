@@ -1,5 +1,5 @@
-use crate::core::url;
 use crate::core::{IntoElementMaybeSignal, MaybeRwSignal};
+use crate::core::{StrMarker, url};
 use crate::storage::{StorageType, UseStorageOptions, use_storage_with_options};
 use crate::utils::get_header;
 use crate::{
@@ -157,7 +157,6 @@ pub fn use_color_mode() -> UseColorModeReturn {
 pub fn use_color_mode_with_options<El, M>(options: UseColorModeOptions<El, M>) -> UseColorModeReturn
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
-    M: ?Sized,
 {
     #[allow(unused_variables)]
     let UseColorModeOptions {
@@ -431,7 +430,6 @@ impl FromStr for ColorMode {
 pub struct UseColorModeOptions<El, M>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
-    M: ?Sized,
 {
     /// Element that the color mode will be applied to. Defaults to `"html"`.
     target: El,
@@ -520,7 +518,7 @@ where
 
 type OnChangedFn = Arc<dyn Fn(ColorMode, Arc<dyn Fn(ColorMode) + Send + Sync>) + Send + Sync>;
 
-impl Default for UseColorModeOptions<&'static str, str> {
+impl Default for UseColorModeOptions<&'static str, StrMarker> {
     fn default() -> Self {
         Self {
             target: "html",

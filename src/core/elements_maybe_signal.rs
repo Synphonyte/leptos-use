@@ -1,4 +1,4 @@
-use crate::core::{SignalMarker, SignalStrMarker};
+use crate::core::{SignalMarker, SignalStrMarker, StrMarker, el_signal_by_sel};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use std::ops::Deref;
@@ -91,11 +91,11 @@ impl<T> WithUntracked for ElementsMaybeSignal<T> {
     }
 }
 
-pub trait IntoElementsMaybeSignal<T, Marker: ?Sized> {
+pub trait IntoElementsMaybeSignal<T, Marker> {
     fn into_elements_maybe_signal(self) -> ElementsMaybeSignal<T>;
 }
 
-impl<El, T, Marker: ?Sized> IntoElementsMaybeSignal<T, Marker> for El
+impl<El, T, Marker> IntoElementsMaybeSignal<T, Marker> for El
 where
     El: IntoElementsMaybeSignalType<T, Marker>,
 {
@@ -108,7 +108,7 @@ where
     }
 }
 
-pub trait IntoElementsMaybeSignalType<T, Marker: ?Sized> {
+pub trait IntoElementsMaybeSignalType<T, Marker> {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T>;
 }
 
@@ -153,7 +153,7 @@ where
 // From string (selector) ///////////////////////////////////////////////////////////////
 
 /// Handles `"body"` or `"#app"`
-impl<T, V> IntoElementsMaybeSignalType<T, str> for V
+impl<T, V> IntoElementsMaybeSignalType<T, StrMarker> for V
 where
     V: AsRef<str>,
     T: From<web_sys::Element> + Clone,
@@ -162,12 +162,7 @@ where
         if cfg!(feature = "ssr") {
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-                document()
-                    .query_selector(self.as_ref())
-                    .unwrap_or_default()
-                    .map(|el| T::from(el).clone()),
-            ]))
+            vec![el_signal_by_sel(self.as_ref())].into_elements_maybe_signal_type()
         }
     }
 }
@@ -268,8 +263,10 @@ where
 
 // From multiple strings //////////////////////////////////////////////////////
 
+struct StrIterMarker;
+
 /// Handles `["body", "#app"]`
-impl<T, V, C> IntoElementsMaybeSignalType<T, &[&str]> for C
+impl<T, V, C> IntoElementsMaybeSignalType<T, StrIterMarker> for C
 where
     V: AsRef<str>,
     T: From<web_sys::Element> + Clone,
@@ -279,16 +276,10 @@ where
         if cfg!(feature = "ssr") {
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(
-                self.into_iter()
-                    .map(|sel| {
-                        document()
-                            .query_selector(sel.as_ref())
-                            .unwrap_or_default()
-                            .map(|el| T::from(el).clone())
-                    })
-                    .collect(),
-            ))
+            self.into_iter()
+                .map(|sel| el_signal_by_sel(sel.as_ref()))
+                .collect::<Vec<_>>()
+                .into_elements_maybe_signal_type()
         }
     }
 }

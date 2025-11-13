@@ -271,10 +271,7 @@ impl Default for OnClickOutsideOptions {
 impl OnClickOutsideOptions {
     /// List of elements that should not trigger the callback. Defaults to `[]`.
     #[cfg_attr(feature = "ssr", allow(dead_code))]
-    pub fn ignore<M: ?Sized>(
-        self,
-        ignore: impl IntoElementsMaybeSignal<web_sys::EventTarget, M>,
-    ) -> Self {
+    pub fn ignore<M>(self, ignore: impl IntoElementsMaybeSignal<web_sys::EventTarget, M>) -> Self {
         Self {
             ignore: ignore.into_elements_maybe_signal(),
             ..self

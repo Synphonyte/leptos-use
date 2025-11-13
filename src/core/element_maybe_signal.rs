@@ -1,7 +1,11 @@
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use send_wrapper::SendWrapper;
-use std::ops::Deref;
+use std::{ops::Deref, rc::Rc, time::Duration};
+
+use crate::{
+    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
+};
 
 /// Used as an argument type to make it easily possible to pass either
 ///
@@ -129,11 +133,11 @@ impl<T> WithUntracked for ElementMaybeSignal<T> {
     }
 }
 
-pub trait IntoElementMaybeSignal<T, Marker: ?Sized> {
+pub trait IntoElementMaybeSignal<T, Marker> {
     fn into_element_maybe_signal(self) -> ElementMaybeSignal<T>;
 }
 
-impl<El, T, Marker: ?Sized> IntoElementMaybeSignal<T, Marker> for El
+impl<El, T, Marker> IntoElementMaybeSignal<T, Marker> for El
 where
     El: IntoElementMaybeSignalType<T, Marker>,
 {
@@ -146,7 +150,7 @@ where
     }
 }
 
-pub trait IntoElementMaybeSignalType<T, Marker: ?Sized> {
+pub trait IntoElementMaybeSignalType<T, Marker> {
     fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T>;
 }
 
@@ -188,8 +192,10 @@ where
 
 // From string (selector) ///////////////////////////////////////////////////////////////
 
+pub struct StrMarker;
+
 /// Handles `"body"` or `"#app"`
-impl<T, V> IntoElementMaybeSignalType<T, str> for V
+impl<T, V> IntoElementMaybeSignalType<T, StrMarker> for V
 where
     V: AsRef<str>,
     T: From<web_sys::Element> + Clone,
@@ -198,14 +204,58 @@ where
         if cfg!(feature = "ssr") {
             ElementMaybeSignalType::Static(StoredValue::new_local(None))
         } else {
-            ElementMaybeSignalType::Static(StoredValue::new_local(
-                document()
-                    .query_selector(self.as_ref())
-                    .unwrap_or_default()
-                    .map(|el| T::from(el).clone()),
-            ))
+            ElementMaybeSignalType::Dynamic(el_signal_by_sel(self.as_ref()))
         }
     }
+}
+
+pub fn el_by_sel<T>(sel: &str) -> Option<T>
+where
+    T: From<web_sys::Element> + Clone,
+{
+    document()
+        .query_selector(sel)
+        .unwrap_or_default()
+        .map(|el| T::from(el).clone())
+}
+
+pub fn el_signal_by_sel<T>(sel: &str) -> Signal<Option<T>, LocalStorage>
+where
+    T: From<web_sys::Element> + Clone + 'static,
+{
+    let (el_signal, set_el_signal) = signal_local(None);
+
+    let sel = sel.to_string();
+
+    set_timeout(
+        move || {
+            if let Some(el) = el_by_sel(&sel) {
+                set_el_signal.set(Some(el));
+            } else {
+                let stop_observer = StoredValue::new_local(Rc::new(|| {}) as Rc<dyn Fn()>);
+
+                let UseMutationObserverReturn { stop, .. } = use_mutation_observer_with_options(
+                    document().body().unwrap(),
+                    move |_, _| {
+                        if let Some(el) = el_by_sel(&sel) {
+                            set_el_signal.set(Some(el));
+                            stop_observer.get_value()();
+                        } else {
+                            set_el_signal.set(None)
+                        }
+                    },
+                    UseMutationObserverOptions::default()
+                        .child_list(true)
+                        .subtree(true),
+                );
+
+                stop_observer.set_value(Rc::new(stop));
+            }
+        },
+        Duration::ZERO,
+    );
+
+    el_signal.into()
 }
 
 pub struct SignalStrMarker;

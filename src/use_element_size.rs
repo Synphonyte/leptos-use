@@ -50,7 +50,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## See also
 ///
 /// - [`fn@crate::use_resize_observer`]
-pub fn use_element_size<El, M: ?Sized>(target: El) -> UseElementSizeReturn
+pub fn use_element_size<El, M>(target: El) -> UseElementSizeReturn
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
@@ -59,7 +59,7 @@ where
 
 /// Version of [`use_element_size`] that takes a `UseElementSizeOptions`. See [`use_element_size`] for how to use.
 #[cfg_attr(feature = "ssr", allow(unused_variables))]
-pub fn use_element_size_with_options<El, M: ?Sized>(
+pub fn use_element_size_with_options<El, M>(
     target: El,
     options: UseElementSizeOptions,
 ) -> UseElementSizeReturn
