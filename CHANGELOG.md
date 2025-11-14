@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - `use_event_source` SSR fixed
+- `ElementsMaybeSignal` and `ElementMaybeSignal` can now be successfully created from `&str`s.
+  - When using `&str`s as selectors in these cases, internally it will create signals that wait for the selector to appear in the DOM if not found immediately.
 
 ## [0.16.3] - 2025-09-30
 
