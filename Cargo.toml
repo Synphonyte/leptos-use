@@ -155,7 +155,13 @@ use_window_size = ["use_media_query"]
 actix = ["dep:actix-web", "dep:leptos_actix", "dep:http0_2"]
 axum = ["dep:leptos_axum", "dep:http1"]
 docs = ["dep:web-sys"]
-element = ["use_document", "use_window", "dep:web-sys", "web-sys/EventTarget"]
+element = [
+  "use_document",
+  "use_mutation_observer",
+  "use_window",
+  "dep:web-sys",
+  "web-sys/EventTarget",
+]
 is = ["use_window"]
 is_err = []
 is_none = []
