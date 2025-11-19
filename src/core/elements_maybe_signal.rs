@@ -276,13 +276,13 @@ pub fn els_by_sel<T>(sel: &str) -> Vec<Option<T>>
 where
     T: From<web_sys::Element> + Clone,
 {
-    let mut els = Vec::new();
+    let mut els: Vec<web_sys::Element>  = Vec::new();
 
     if let Ok(queried_els) = document().query_selector_all(sel.as_ref()) {
         for i in 0..queried_els.length() {
-            let x = queried_els.get(i).expect("checked length");
-            let y: web_sys::Element = x.unchecked_into();
-            els.push(y);
+            if let Ok(el) = queried_els.get(i).expect("checked length").dyn_into() {
+                els.push(el);
+            }
         }
     }
     els.into_iter().map(|v| T::try_from(v).ok()).collect()
