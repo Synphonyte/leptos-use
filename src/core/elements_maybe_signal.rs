@@ -5,7 +5,7 @@ use std::{ops::Deref, rc::Rc, time::Duration};
 use wasm_bindgen::JsCast;
 
 use crate::{
-    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
+    use_mutation_observer_with_options, UseMutationObserverOptions, UseMutationObserverReturn,
 };
 
 /// Used as an argument type to make it easily possible to pass either
@@ -136,7 +136,7 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.map(|el| T::from(el).clone()),
+            self.map(|el| T::from(el).clone())
         ]))
     }
 }
@@ -149,9 +149,9 @@ where
     T: From<E> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.as_ref().map(|e| T::from(e.clone())),
-        ]))
+        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![self
+            .as_ref()
+            .map(|e| T::from(e.clone()))]))
     }
 }
 
@@ -167,9 +167,7 @@ where
         if cfg!(feature = "ssr") {
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
-            ElementsMaybeSignalType::Dynamic(
-                els_signal_by_sel::<T>(self.as_ref())
-            )
+            ElementsMaybeSignalType::Dynamic(els_signal_by_sel::<T>(self.as_ref()))
         }
     }
 }
@@ -186,12 +184,10 @@ where
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
             ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-                vec![
-                    document()
-                        .query_selector(self.get().as_ref())
-                        .unwrap_or_default()
-                        .map(|el| T::from(el).clone()),
-                ]
+                vec![document()
+                    .query_selector(self.get().as_ref())
+                    .unwrap_or_default()
+                    .map(|el| T::from(el).clone())]
             }))
         }
     }
@@ -276,7 +272,7 @@ pub fn els_by_sel<T>(sel: &str) -> Vec<Option<T>>
 where
     T: From<web_sys::Element> + Clone,
 {
-    let mut els: Vec<web_sys::Element>  = Vec::new();
+    let mut els: Vec<web_sys::Element> = Vec::new();
 
     if let Ok(queried_els) = document().query_selector_all(sel.as_ref()) {
         for i in 0..queried_els.length() {
@@ -293,13 +289,13 @@ where
     T: From<web_sys::Element> + Clone + 'static,
 {
     let (el_signal, set_el_signal) = signal_local(Vec::new());
-    
+
     let sel = sel.to_string();
 
     set_timeout(
         move || {
             let els = els_by_sel::<T>(&sel);
-            if !els.is_empty() { 
+            if !els.is_empty() {
                 set_el_signal.set(els);
             } else {
                 let stop_observer = StoredValue::new_local(Rc::new(|| {}) as Rc<dyn Fn()>);
@@ -341,7 +337,7 @@ where
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
             self.into_iter()
-                .map(|sel| { els_signal_by_sel::<T>(sel.as_ref()) })
+                .map(|sel| els_signal_by_sel::<T>(sel.as_ref()))
                 .collect::<Vec<_>>()
                 .into_elements_maybe_signal_type()
         }
