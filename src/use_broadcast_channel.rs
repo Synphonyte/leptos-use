@@ -1,9 +1,6 @@
-use crate::sendwrap_fn;
-use crate::{
-    UseEventListenerOptions, js, use_event_listener, use_event_listener_with_options, use_supported,
-};
+use crate::core::OptionLocalSignal;
+use crate::{js, use_supported};
 use codee::{CodecError, Decoder, Encoder};
-use leptos::ev::messageerror;
 use leptos::prelude::*;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
@@ -91,98 +88,130 @@ where
     <C as Decoder<T>>::Error: Send + Sync,
 {
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
-
     let (is_closed, set_closed) = signal(false);
-    let (channel, set_channel) = signal_local(None::<web_sys::BroadcastChannel>);
     let (message, set_message) = signal(None::<T>);
-    let (error, set_error) = signal_local(
-        None::<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>,
-    );
 
-    let post = {
-        sendwrap_fn!(move |data: &T| {
-            if let Some(channel) = channel.get_untracked() {
-                match C::encode(data) {
-                    Ok(msg) => {
-                        channel
-                            .post_message(&msg.into())
-                            .map_err(|err| {
-                                set_error.set(Some(UseBroadcastChannelError::PostMessage(err)))
-                            })
-                            .ok();
-                    }
-                    Err(err) => {
-                        set_error.set(Some(UseBroadcastChannelError::Codec(CodecError::Encode(
-                            err,
-                        ))));
+    let post;
+    let close;
+    let return_channel;
+    let return_error;
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        use crate::sendwrap_fn;
+        use crate::{
+            UseEventListenerOptions, use_event_listener, use_event_listener_with_options,
+        };
+        use leptos::ev::messageerror;
+        use send_wrapper::SendWrapper;
+
+        let (channel, set_channel) = signal_local(None::<SendWrapper<web_sys::BroadcastChannel>>);
+        let (error, set_error) = signal_local(
+            None::<SendWrapper<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>>,
+        );
+
+        post = {
+            sendwrap_fn!(move |data: &T| {
+                if let Some(channel) = channel.get_untracked() {
+                    match C::encode(data) {
+                        Ok(msg) => {
+                            channel
+                                .post_message(&msg.into())
+                                .map_err(|err| {
+                                    set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::PostMessage(err))))
+                                })
+                                .ok();
+                        }
+                        Err(err) => {
+                            set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
+                                CodecError::Encode(err),
+                            ))));
+                        }
                     }
                 }
-            }
-        })
-    };
+            })
+        };
 
-    let close = {
-        sendwrap_fn!(move || {
-            if let Some(channel) = channel.get_untracked() {
-                channel.close();
-            }
-            set_closed.set(true);
-        })
-    };
+        close = {
+            sendwrap_fn!(move || {
+                if let Some(channel) = channel.get_untracked() {
+                    channel.close();
+                }
+                set_closed.set(true);
+            })
+        };
 
-    if is_supported.get_untracked() {
-        let channel_val = web_sys::BroadcastChannel::new(name).ok();
-        set_channel.set(channel_val.clone());
+        if is_supported.get_untracked() {
+            let channel_val = web_sys::BroadcastChannel::new(name).ok();
+            set_channel.set(channel_val.clone().map(SendWrapper::new));
 
-        if let Some(channel) = channel_val {
-            let _ = use_event_listener_with_options(
-                channel.clone(),
-                leptos::ev::message,
-                move |event| {
-                    if let Some(data) = event.data().as_string() {
-                        match C::decode(&data) {
-                            Ok(msg) => {
-                                set_message.set(Some(msg));
+            if let Some(channel) = channel_val {
+                let _ = use_event_listener_with_options(
+                    channel.clone(),
+                    leptos::ev::message,
+                    move |event| {
+                        if let Some(data) = event.data().as_string() {
+                            match C::decode(&data) {
+                                Ok(msg) => {
+                                    set_message.set(Some(msg));
+                                }
+                                Err(err) => set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
+                                    CodecError::Decode(err),
+                                )))),
                             }
-                            Err(err) => set_error.set(Some(UseBroadcastChannelError::Codec(
-                                CodecError::Decode(err),
-                            ))),
+                        } else {
+                            set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::ValueNotString)));
                         }
-                    } else {
-                        set_error.set(Some(UseBroadcastChannelError::ValueNotString));
-                    }
-                },
-                UseEventListenerOptions::default().passive(true),
-            );
+                    },
+                    UseEventListenerOptions::default().passive(true),
+                );
 
-            let _ = use_event_listener_with_options(
-                channel.clone(),
-                messageerror,
-                move |event| {
-                    set_error.set(Some(UseBroadcastChannelError::MessageEvent(event)));
-                },
-                UseEventListenerOptions::default().passive(true),
-            );
+                let _ = use_event_listener_with_options(
+                    channel.clone(),
+                    messageerror,
+                    move |event| {
+                        set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::MessageEvent(event))));
+                    },
+                    UseEventListenerOptions::default().passive(true),
+                );
 
-            let _ = use_event_listener(channel, leptos::ev::close, move |_| set_closed.set(true));
+                let _ =
+                    use_event_listener(channel, leptos::ev::close, move |_| set_closed.set(true));
+            }
         }
+
+        on_cleanup({
+            let close = close.clone();
+
+            move || {
+                close();
+            }
+        });
+        
+        let return_signal = Signal::derive(|| error.get());
+        return_channel = Signal::from(channel).into();
+        return_error = Signal::from(error).into();
     }
 
-    on_cleanup({
-        let close = close.clone();
+    #[cfg(feature = "ssr")]
+    {
+        post = |_: &T| {};
+        close = || {};
+        return_channel = OptionLocalSignal::new(Signal::derive(|| None));
+        return_error = OptionLocalSignal::new(Signal::derive(|| None));
 
-        move || {
-            close();
-        }
-    });
+        let _ = set_closed;
+        let _ = set_message;
+        let _ = name;
+    }
 
     UseBroadcastChannelReturn {
         is_supported,
-        channel: channel.into(),
+        channel: return_channel,
         message: message.into(),
         post,
         close,
-        error: error.into(),
+        error: return_error,
         is_closed: is_closed.into(),
     }
 }
@@ -199,7 +228,7 @@ where
     pub is_supported: Signal<bool>,
 
     /// The broadcast channel that is wrapped by this function
-    pub channel: Signal<Option<web_sys::BroadcastChannel>, LocalStorage>,
+    pub channel: OptionLocalSignal<web_sys::BroadcastChannel>,
 
     /// Latest message received from the channel
     pub message: Signal<Option<T>>,
@@ -211,7 +240,7 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<ErrorType<T, C>>, LocalStorage>,
+    pub error: OptionLocalSignal<ErrorType<T, C>>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,

@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-/// SSR compatibe `is_supported`
+/// SSR compatible `is_supported`
 ///
 /// ## Usage
 ///

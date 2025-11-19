@@ -1,0 +1,20 @@
+error[E0277]: the trait bound `Signal<Option<SendWrapper<...>>>: From<...>` is not satisfied
+   --> src/use_broadcast_channel.rs:192:24
+    |
+192 |         return_error = Signal::from(error).into();
+    |                        ^^^^^^ unsatisfied trait bound
+    |
+    = help: the trait `From<leptos::prelude::ReadSignal<std::option::Option<SendWrapper<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as leptos::prelude::codee::Decoder<T>>::Error>>>, leptos::prelude::LocalStorage>>` is not implemented for `Signal<Option<SendWrapper<UseBroadcastChannelError<..., ...>>>>`
+    = help: the following other types implement trait `From<T>`:
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<ArcMemo<T, leptos::prelude::LocalStorage>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<ArcReadSignal<T>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<ArcRwSignal<T>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<MaybeSignal<T, leptos::prelude::LocalStorage>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<T>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<leptos::prelude::Memo<T, leptos::prelude::LocalStorage>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<leptos::prelude::ReadSignal<T, leptos::prelude::LocalStorage>>`
+              `leptos::prelude::Signal<T, leptos::prelude::LocalStorage>` implements `From<leptos::prelude::RwSignal<T, leptos::prelude::LocalStorage>>`
+            and 28 others
+    = note: the full name for the type has been written to '/home/marc/Development/repos/leptos-use/target/debug/deps/leptos_use-85f9d77a00dd020e.long-type-10538315706178325903.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+

@@ -18,6 +18,8 @@ wasm-bindgen = { version = "=0.2.105", optional = true }
 leptos-use ={ path = ".." }
 
 [features]
+docs = []
+axum = []
 hydrate = [
     "leptos/hydrate",
     "dep:console_error_panic_hook",
