@@ -15,6 +15,7 @@ cargo install cargo-leptos --locked
 ```
 
 Then run
+
 ```bash
 cargo leptos end-to-end
 ```

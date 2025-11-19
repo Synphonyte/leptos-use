@@ -41,6 +41,7 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage/>
+                    <Route path=StaticSegment("broadcast-channel") view=crate::use_broadcast_channel::BroadcastChannelDemo/>
                 </Routes>
             </main>
         </Router>
@@ -57,5 +58,8 @@ fn HomePage() -> impl IntoView {
     view! {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
+        <ul>
+            <li><a href="/broadcast-channel">Broadcast Channel Demo</a></li>
+        </ul>
     }
 }

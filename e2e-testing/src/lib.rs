@@ -7,3 +7,5 @@ pub fn hydrate() {
     console_error_panic_hook::set_once();
     leptos::mount::hydrate_body(App);
 }
+
+pub mod use_broadcast_channel;
