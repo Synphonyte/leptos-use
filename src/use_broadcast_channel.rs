@@ -99,15 +99,17 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::sendwrap_fn;
-        use crate::{
-            UseEventListenerOptions, use_event_listener, use_event_listener_with_options,
-        };
+        use crate::{UseEventListenerOptions, use_event_listener, use_event_listener_with_options};
         use leptos::ev::messageerror;
         use send_wrapper::SendWrapper;
 
-        let (channel, set_channel) = signal_local(None::<SendWrapper<web_sys::BroadcastChannel>>);
-        let (error, set_error) = signal_local(
-            None::<SendWrapper<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>>,
+        let (channel, set_channel) = signal(None::<SendWrapper<web_sys::BroadcastChannel>>);
+        let (error, set_error) = signal(
+            None::<
+                SendWrapper<
+                    UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+                >,
+            >,
         );
 
         post = {
@@ -115,12 +117,11 @@ where
                 if let Some(channel) = channel.get_untracked() {
                     match C::encode(data) {
                         Ok(msg) => {
-                            channel
-                                .post_message(&msg.into())
-                                .map_err(|err| {
-                                    set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::PostMessage(err))))
-                                })
-                                .ok();
+                            if let Err(err) = channel.post_message(&msg.into()) {
+                                set_error.set(Some(SendWrapper::new(
+                                    UseBroadcastChannelError::PostMessage(err),
+                                )))
+                            }
                         }
                         Err(err) => {
                             set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
@@ -155,12 +156,14 @@ where
                                 Ok(msg) => {
                                     set_message.set(Some(msg));
                                 }
-                                Err(err) => set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
-                                    CodecError::Decode(err),
-                                )))),
+                                Err(err) => set_error.set(Some(SendWrapper::new(
+                                    UseBroadcastChannelError::Codec(CodecError::Decode(err)),
+                                ))),
                             }
                         } else {
-                            set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::ValueNotString)));
+                            set_error.set(Some(SendWrapper::new(
+                                UseBroadcastChannelError::ValueNotString,
+                            )));
                         }
                     },
                     UseEventListenerOptions::default().passive(true),
@@ -170,7 +173,9 @@ where
                     channel.clone(),
                     messageerror,
                     move |event| {
-                        set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::MessageEvent(event))));
+                        set_error.set(Some(SendWrapper::new(
+                            UseBroadcastChannelError::MessageEvent(event),
+                        )));
                     },
                     UseEventListenerOptions::default().passive(true),
                 );
@@ -187,18 +192,17 @@ where
                 close();
             }
         });
-        
-        let return_signal = Signal::derive(|| error.get());
-        return_channel = Signal::from(channel).into();
-        return_error = Signal::from(error).into();
+
+        return_channel = channel.into();
+        return_error = error.into();
     }
 
     #[cfg(feature = "ssr")]
     {
         post = |_: &T| {};
         close = || {};
-        return_channel = OptionLocalSignal::new(Signal::derive(|| None));
-        return_error = OptionLocalSignal::new(Signal::derive(|| None));
+        return_channel = Signal::stored(None).into();
+        return_error = Signal::stored(None).into();
 
         let _ = set_closed;
         let _ = set_message;
