@@ -1,7 +1,6 @@
 [book]
 authors = ["Marc-Stefan Cassola"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Leptos-Use Guide"
 
