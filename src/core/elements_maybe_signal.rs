@@ -5,7 +5,7 @@ use std::{ops::Deref, rc::Rc, time::Duration};
 use wasm_bindgen::JsCast;
 
 use crate::{
-    use_mutation_observer_with_options, UseMutationObserverOptions, UseMutationObserverReturn,
+    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
 };
 
 /// Used as an argument type to make it easily possible to pass either
@@ -136,7 +136,7 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.map(|el| T::from(el).clone())
+            self.map(|el| T::from(el).clone()),
         ]))
     }
 }
@@ -149,9 +149,9 @@ where
     T: From<E> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![self
-            .as_ref()
-            .map(|e| T::from(e.clone()))]))
+        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
+            self.as_ref().map(|e| T::from(e.clone())),
+        ]))
     }
 }
 
@@ -184,10 +184,12 @@ where
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
             ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-                vec![document()
-                    .query_selector(self.get().as_ref())
-                    .unwrap_or_default()
-                    .map(|el| T::from(el).clone())]
+                vec![
+                    document()
+                        .query_selector(self.get().as_ref())
+                        .unwrap_or_default()
+                        .map(|el| T::from(el).clone()),
+                ]
             }))
         }
     }
