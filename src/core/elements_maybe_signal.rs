@@ -283,7 +283,7 @@ where
             }
         }
     }
-    els.into_iter().map(|v| T::try_from(v).ok()).collect()
+    els.into_iter().map(|v| Some(T::from(v))).collect()
 }
 
 pub fn els_signal_by_sel<T>(sel: &str) -> Signal<Vec<Option<T>>, LocalStorage>
