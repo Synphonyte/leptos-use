@@ -1,7 +1,12 @@
-use crate::core::{SignalMarker, SignalStrMarker, StrMarker, el_signal_by_sel};
+use crate::core::{SignalMarker, SignalStrMarker, StrMarker};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use std::ops::Deref;
+use std::{ops::Deref, rc::Rc, time::Duration};
+use wasm_bindgen::JsCast;
+
+use crate::{
+    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
+};
 
 /// Used as an argument type to make it easily possible to pass either
 ///
@@ -162,7 +167,7 @@ where
         if cfg!(feature = "ssr") {
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
-            vec![el_signal_by_sel(self.as_ref())].into_elements_maybe_signal_type()
+            ElementsMaybeSignalType::Dynamic(els_signal_by_sel::<T>(self.as_ref()))
         }
     }
 }
@@ -263,7 +268,64 @@ where
 
 // From multiple strings //////////////////////////////////////////////////////
 
-struct StrIterMarker;
+pub struct StrIterMarker;
+
+pub fn els_by_sel<T>(sel: &str) -> Vec<Option<T>>
+where
+    T: From<web_sys::Element> + Clone,
+{
+    let mut els: Vec<web_sys::Element> = Vec::new();
+
+    if let Ok(queried_els) = document().query_selector_all(sel.as_ref()) {
+        for i in 0..queried_els.length() {
+            if let Ok(el) = queried_els.get(i).expect("checked length").dyn_into() {
+                els.push(el);
+            }
+        }
+    }
+    els.into_iter().map(|v| Some(T::from(v))).collect()
+}
+
+pub fn els_signal_by_sel<T>(sel: &str) -> Signal<Vec<Option<T>>, LocalStorage>
+where
+    T: From<web_sys::Element> + Clone + 'static,
+{
+    let (el_signal, set_el_signal) = signal_local(Vec::new());
+
+    let sel = sel.to_string();
+
+    set_timeout(
+        move || {
+            let els = els_by_sel::<T>(&sel);
+            if !els.is_empty() {
+                set_el_signal.set(els);
+            } else {
+                let stop_observer = StoredValue::new_local(Rc::new(|| {}) as Rc<dyn Fn()>);
+
+                let UseMutationObserverReturn { stop, .. } = use_mutation_observer_with_options(
+                    document().body().unwrap(),
+                    move |_, _| {
+                        let els = els_by_sel(&sel);
+                        if !els.is_empty() {
+                            set_el_signal.set(els);
+                            stop_observer.get_value()();
+                        } else {
+                            set_el_signal.set(Vec::new());
+                        }
+                    },
+                    UseMutationObserverOptions::default()
+                        .child_list(true)
+                        .subtree(true),
+                );
+
+                stop_observer.set_value(Rc::new(stop));
+            }
+        },
+        Duration::ZERO,
+    );
+
+    el_signal.into()
+}
 
 /// Handles `["body", "#app"]`
 impl<T, V, C> IntoElementsMaybeSignalType<T, StrIterMarker> for C
@@ -277,7 +339,7 @@ where
             ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
         } else {
             self.into_iter()
-                .map(|sel| el_signal_by_sel(sel.as_ref()))
+                .map(|sel| els_signal_by_sel::<T>(sel.as_ref()))
                 .collect::<Vec<_>>()
                 .into_elements_maybe_signal_type()
         }
@@ -359,6 +421,29 @@ where
                 .clone()
                 .into_iter()
                 .map(|t| t.get().map(T::from))
+                .collect()
+        }))
+    }
+}
+
+// handles Vec<Signal<Vec<Option<web_sys::*>>>
+pub struct VecSignalVecOptionMarker;
+
+impl<T, Js, C, G> IntoElementsMaybeSignalType<T, VecSignalVecOptionMarker> for C
+where
+    T: TryFrom<Js> + Clone,
+    C: IntoIterator<Item = G> + Clone + 'static,
+    G: Get<Value = Vec<Option<Js>>>,
+{
+    fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
+        let signals = self.clone();
+
+        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
+            signals
+                .clone()
+                .into_iter()
+                .flat_map(|t| t.get())
+                .map(|j| T::try_from(j.unwrap()).ok())
                 .collect()
         }))
     }
