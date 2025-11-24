@@ -1,10 +1,11 @@
-use crate::sendwrap_fn;
 use crate::{
-    UseEventListenerOptions, js, use_event_listener, use_event_listener_with_options, use_supported,
+    UseEventListenerOptions, core::OptionLocalSignal, js, sendwrap_fn, use_event_listener,
+    use_event_listener_with_options, use_supported,
 };
 use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
@@ -90,30 +91,33 @@ where
     <C as Encoder<T>>::Error: Send + Sync,
     <C as Decoder<T>>::Error: Send + Sync,
 {
-    let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
-
     let (is_closed, set_closed) = signal(false);
-    let (channel, set_channel) = signal_local(None::<web_sys::BroadcastChannel>);
     let (message, set_message) = signal(None::<T>);
-    let (error, set_error) = signal_local(
-        None::<UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>>,
+    let (channel, set_channel) = signal(None::<SendWrapper<web_sys::BroadcastChannel>>);
+    let (error, set_error) = signal(
+        None::<
+            SendWrapper<
+                UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+            >,
+        >,
     );
+
+    let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
     let post = {
         sendwrap_fn!(move |data: &T| {
             if let Some(channel) = channel.get_untracked() {
                 match C::encode(data) {
                     Ok(msg) => {
-                        channel
-                            .post_message(&msg.into())
-                            .map_err(|err| {
-                                set_error.set(Some(UseBroadcastChannelError::PostMessage(err)))
-                            })
-                            .ok();
+                        if let Err(err) = channel.post_message(&msg.into()) {
+                            set_error.set(Some(SendWrapper::new(
+                                UseBroadcastChannelError::PostMessage(err),
+                            )))
+                        }
                     }
                     Err(err) => {
-                        set_error.set(Some(UseBroadcastChannelError::Codec(CodecError::Encode(
-                            err,
+                        set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
+                            CodecError::Encode(err),
                         ))));
                     }
                 }
@@ -130,43 +134,56 @@ where
         })
     };
 
-    if is_supported.get_untracked() {
-        let channel_val = web_sys::BroadcastChannel::new(name).ok();
-        set_channel.set(channel_val.clone());
+    // initialize the BroadcastChannel and event listeners, if supported by the browser
+    // we do this in an Effect to make sure it runs after mount
+    Effect::new({
+        let name = name.to_string();
+        move |_| {
+            if is_supported.get() {
+                let channel_val = web_sys::BroadcastChannel::new(&name).ok();
+                set_channel.set(channel_val.clone().map(SendWrapper::new));
 
-        if let Some(channel) = channel_val {
-            let _ = use_event_listener_with_options(
-                channel.clone(),
-                leptos::ev::message,
-                move |event| {
-                    if let Some(data) = event.data().as_string() {
-                        match C::decode(&data) {
-                            Ok(msg) => {
-                                set_message.set(Some(msg));
+                if let Some(channel) = channel_val {
+                    let _ = use_event_listener_with_options(
+                        channel.clone(),
+                        leptos::ev::message,
+                        move |event| {
+                            if let Some(data) = event.data().as_string() {
+                                match C::decode(&data) {
+                                    Ok(msg) => {
+                                        set_message.set(Some(msg));
+                                    }
+                                    Err(err) => set_error.set(Some(SendWrapper::new(
+                                        UseBroadcastChannelError::Codec(CodecError::Decode(err)),
+                                    ))),
+                                }
+                            } else {
+                                set_error.set(Some(SendWrapper::new(
+                                    UseBroadcastChannelError::ValueNotString,
+                                )));
                             }
-                            Err(err) => set_error.set(Some(UseBroadcastChannelError::Codec(
-                                CodecError::Decode(err),
-                            ))),
-                        }
-                    } else {
-                        set_error.set(Some(UseBroadcastChannelError::ValueNotString));
-                    }
-                },
-                UseEventListenerOptions::default().passive(true),
-            );
+                        },
+                        UseEventListenerOptions::default().passive(true),
+                    );
 
-            let _ = use_event_listener_with_options(
-                channel.clone(),
-                messageerror,
-                move |event| {
-                    set_error.set(Some(UseBroadcastChannelError::MessageEvent(event)));
-                },
-                UseEventListenerOptions::default().passive(true),
-            );
+                    let _ = use_event_listener_with_options(
+                        channel.clone(),
+                        messageerror,
+                        move |event| {
+                            set_error.set(Some(SendWrapper::new(
+                                UseBroadcastChannelError::MessageEvent(event),
+                            )));
+                        },
+                        UseEventListenerOptions::default().passive(true),
+                    );
 
-            let _ = use_event_listener(channel, leptos::ev::close, move |_| set_closed.set(true));
+                    let _ = use_event_listener(channel, leptos::ev::close, move |_| {
+                        set_closed.set(true)
+                    });
+                }
+            }
         }
-    }
+    });
 
     on_cleanup({
         let close = close.clone();
@@ -199,7 +216,7 @@ where
     pub is_supported: Signal<bool>,
 
     /// The broadcast channel that is wrapped by this function
-    pub channel: Signal<Option<web_sys::BroadcastChannel>, LocalStorage>,
+    pub channel: OptionLocalSignal<web_sys::BroadcastChannel>,
 
     /// Latest message received from the channel
     pub message: Signal<Option<T>>,
@@ -211,7 +228,7 @@ where
     pub close: CFn,
 
     /// Latest error as reported by the `messageerror` event.
-    pub error: Signal<Option<ErrorType<T, C>>, LocalStorage>,
+    pub error: OptionLocalSignal<ErrorType<T, C>>,
 
     /// Wether the channel is closed
     pub is_closed: Signal<bool>,
@@ -229,4 +246,23 @@ pub enum UseBroadcastChannelError<E, D> {
     Codec(CodecError<E, D>),
     #[error("received value is not a string")]
     ValueNotString,
+}
+
+impl<E, D> Clone for UseBroadcastChannelError<E, D>
+where
+    E: Clone,
+    D: Clone,
+{
+    fn clone(&self) -> Self {
+        match self {
+            UseBroadcastChannelError::PostMessage(v) => {
+                UseBroadcastChannelError::PostMessage(v.clone())
+            }
+            UseBroadcastChannelError::MessageEvent(v) => {
+                UseBroadcastChannelError::MessageEvent(v.clone())
+            }
+            UseBroadcastChannelError::Codec(v) => UseBroadcastChannelError::Codec(v.clone()),
+            UseBroadcastChannelError::ValueNotString => UseBroadcastChannelError::ValueNotString,
+        }
+    }
 }
