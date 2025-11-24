@@ -29,6 +29,10 @@ pub fn use_supported(callback: impl Fn() -> bool + Send + Sync + 'static) -> Sig
 
     #[cfg(not(feature = "ssr"))]
     {
-        Signal::derive(callback)
+        let (supported, set_supported) = signal(false);
+
+        Effect::new(move || set_supported.set(callback()));
+
+        supported.into()
     }
 }
