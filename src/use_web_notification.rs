@@ -1,4 +1,4 @@
-use crate::{use_supported, use_window, core::OptionLocalSignal};
+use crate::{core::OptionLocalSignal, use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
