@@ -1,7 +1,8 @@
-use crate::core::MaybeRwSignal;
+use crate::core::{MaybeRwSignal, OptionLocalSignal};
 use default_struct_builder::DefaultBuilder;
 use js_sys::{Object, Reflect};
 use leptos::prelude::*;
+use send_wrapper::SendWrapper;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getUserMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) streaming.
@@ -63,7 +64,7 @@ pub fn use_user_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = signal_local(None::<Result<web_sys::MediaStream, JsValue>>);
+    let (stream, set_stream) = signal(None::<SendWrapper<Result<web_sys::MediaStream, JsValue>>>);
 
     let _start = {
         let audio = audio.clone();
@@ -78,7 +79,7 @@ pub fn use_user_media_with_options(
 
                 let stream = create_media(Some(video), Some(audio)).await;
 
-                set_stream.update(|s| *s = Some(stream));
+                set_stream.update(|s| *s = Some(SendWrapper::new(stream)));
             }
 
             #[cfg(feature = "ssr")]
@@ -90,7 +91,9 @@ pub fn use_user_media_with_options(
     };
 
     let _stop = move || {
-        if let Some(Ok(stream)) = stream.get_untracked() {
+        if let Some(sendwrapped_stream) = stream.get_untracked()
+            && let Ok(stream) = sendwrapped_stream.as_ref()
+        {
             for track in stream.get_tracks() {
                 track.unchecked_ref::<web_sys::MediaStreamTrack>().stop();
             }
@@ -111,7 +114,9 @@ pub fn use_user_media_with_options(
                     async move {
                         _start().await;
                         stream.with_untracked(move |stream| {
-                            if let Some(Ok(_)) = stream {
+                            if let Some(sendwrapped_stream) = stream
+                                && sendwrapped_stream.as_ref().is_ok()
+                            {
                                 set_enabled.set(true);
                             }
                         });
@@ -311,7 +316,7 @@ where
     /// Initially this is `None` until `start` resolved successfully.
     /// In case the stream couldn't be started, for example because the user didn't grant permission,
     /// this has the value `Some(Err(...))`.
-    pub stream: Signal<Option<Result<web_sys::MediaStream, JsValue>>, LocalStorage>,
+    pub stream: OptionLocalSignal<Result<web_sys::MediaStream, JsValue>>,
 
     /// Starts the screen streaming. Triggers the ask for permission if not already granted.
     pub start: StartFn,

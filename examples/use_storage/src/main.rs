@@ -27,8 +27,7 @@ impl Default for BananaState {
 fn Demo() -> impl IntoView {
     let (storage_key, set_storage_key) = signal("banana-state".to_string());
 
-    let (state, set_state, reset) =
-        use_local_storage::<BananaState, JsonSerdeCodec>(storage_key);
+    let (state, set_state, reset) = use_local_storage::<BananaState, JsonSerdeCodec>(storage_key);
     let (state2, _, _) = use_local_storage::<BananaState, JsonSerdeCodec>(storage_key);
 
     view! {
@@ -40,7 +39,7 @@ fn Demo() -> impl IntoView {
             on:input=move |e| set_storage_key.update(|s| *s = event_target_value(&e))
             type="text"
         />
-        
+
         <input
             class="block"
             prop:value=move || state.get().name
