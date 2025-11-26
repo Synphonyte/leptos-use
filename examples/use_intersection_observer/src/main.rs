@@ -1,9 +1,9 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::{BooleanDisplay, demo_or_body};
+use leptos_use::docs::{demo_or_body, BooleanDisplay};
 use leptos_use::{
-    UseIntersectionObserverOptions, UseIntersectionObserverReturn,
-    use_intersection_observer_with_options,
+    use_intersection_observer_with_options, UseIntersectionObserverOptions,
+    UseIntersectionObserverReturn,
 };
 
 #[component]
