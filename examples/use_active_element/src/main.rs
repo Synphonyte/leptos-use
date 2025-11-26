@@ -23,7 +23,7 @@ fn Demo() -> impl IntoView {
         <Note class="mb-3">"Select the inputs below to see the changes"</Note>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <For each=move || (1..7) key=|i| *i let:i>
+            <For each=move || 1..7 key=|i| *i let:i>
                 <input type="text" data-id=i class="!my-0 !min-w-0" placeholder=i/>
             </For>
 
