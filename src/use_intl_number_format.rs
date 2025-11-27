@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
-use crate::utils::js_value_from_to_string;
-use crate::{js, sendwrap_fn};
+use crate::{js, sendwrap_fn, utils::js_value_from_to_string};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -856,7 +855,7 @@ impl UseIntlNumberFormatReturn {
         &self,
         start: impl Into<Signal<NStart>>,
         end: impl Into<Signal<NEnd>>,
-    ) -> Signal<String, LocalStorage>
+    ) -> Signal<String>
     where
         NStart: Clone + Display + Send + Sync + 'static,
         NEnd: Clone + Display + Send + Sync + 'static,
@@ -867,27 +866,29 @@ impl UseIntlNumberFormatReturn {
         let end = end.into();
 
         cfg_if! { if #[cfg(feature = "ssr")] {
-            Signal::derive_local(move || {
+            Signal::derive(move || {
                 format!("{} - {}", start.get(), end.get())
             })
         } else {
             let number_format = self.js_intl_number_format.clone();
 
-            Signal::derive_local(move || {
-                if let Ok(function) = js!(number_format["formatRange"]) {
-                    let function = function.unchecked_into::<js_sys::Function>();
+            Signal::derive(
+                sendwrap_fn!(move || {
+                    if let Ok(function) = js!(number_format["formatRange"]) {
+                        let function = function.unchecked_into::<js_sys::Function>();
 
-                    if let Ok(result) = function.call2(
-                        &number_format,
-                        &js_sys::Number::from(start.get()).into(),
-                        &js_sys::Number::from(end.get()).into(),
-                    ) {
-                        return result.as_string().unwrap_or_default();
+                        if let Ok(result) = function.call2(
+                            &number_format,
+                            &js_sys::Number::from(start.get()).into(),
+                            &js_sys::Number::from(end.get()).into(),
+                        ) {
+                            return result.as_string().unwrap_or_default();
+                        }
                     }
-                }
 
-                "".to_string()
-            })
+                    "".to_string()
+                })
+            )
         }}
     }
 
