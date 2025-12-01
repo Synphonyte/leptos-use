@@ -10,7 +10,7 @@ use unic_langid::LanguageIdentifier;
 ///
 /// > If `supported` is empty, this function will panic!
 ///
-/// Matching is done by using the [`fn@unic_langid::LanguageIdentifier::matches`] method.
+/// Matching is done by using the [`unic_langid::LanguageIdentifier::matches`](https://docs.rs/unic-langid/latest/unic_langid/struct.LanguageIdentifier.html#method.matches) method.
 ///
 /// ## Demo
 ///
