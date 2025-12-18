@@ -252,6 +252,7 @@ impl<E, D> Clone for UseBroadcastChannelError<E, D>
 where
     E: Clone,
     D: Clone,
+    CodecError<E, D>: Clone,
 {
     fn clone(&self) -> Self {
         match self {

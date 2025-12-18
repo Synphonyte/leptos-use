@@ -3,12 +3,30 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] -
+## [0.17.0] - 2025-12-18
+
+Huge thanks to @DrFlowerkick for all of this excellent work on this release.
 
 ### Breaking Changes 🛠
 
 - Updated Rust Edition to 2024
 - `use_cookie` now requires its value type to be `PartialEq` to be able to compare values to avoid infinite update loops.
+- `use_event_source`  (all thanks to @DrFlowerkick):
+  - It now accepts its `url` parameter as `impl Into<Signal<String>>`
+  - `UseEventSourceReturn` now longer has the fields `event_source`, `event` or `data`.
+    Instead there is now a `message` field which is a `Signal<Option<UseEventSourceMessage>>`. Please check the docs for more info.
+  - `UseEventSourceOptions` now accepts an `on_event` generic event handler.
+  - `UseEventSourceError` has changed (again => pls see docs).
+- `use_websocket` no longer returns access to `ws` to prevent SSR issues (thanks to @DrFlowerkick).
+- A bunch of functions had local signals in their return types which could cause SSR issues. 
+  These have been replaced by our new `OptionLocalSignal` which is basically a `Signal<Option<SendWrapper<T>>>`.
+  This solves the SSR issues (all thanks to @DrFlowerkick):
+  - `use_broadcast_channel`
+  - `use_geolocation`
+  - `use_web_notification`
+  - `use_display_media`
+  - `use_user_media`
+  - `use_intl_number_format`
 
 ### New Functions 🚀
 
@@ -17,8 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - `use_event_source` SSR fixed
-- `ElementsMaybeSignal` and `ElementMaybeSignal` can now be successfully created from `&str`s.
+- `ElementsMaybeSignal` and `ElementMaybeSignal` can now be successfully created from `&str`s (thanks to @fhgalano).
   - When using `&str`s as selectors in these cases, internally it will create signals that wait for the selector to appear in the DOM if not found immediately.
+- Fixed broken link in docs for `use_locale` (thanks to @cocoliliace).
+
+### Special thanks to our sponsor
+- @benwis
 
 ## [0.16.3] - 2025-09-30
 

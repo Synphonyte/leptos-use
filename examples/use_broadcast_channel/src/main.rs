@@ -1,7 +1,7 @@
 use codee::string::FromToStringCodec;
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{use_broadcast_channel, UseBroadcastChannelReturn};
+use leptos_use::{UseBroadcastChannelReturn, use_broadcast_channel};
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -42,13 +42,13 @@ fn Demo() -> impl IntoView {
                 <button type="submit">Send Message</button>
             </form>
 
-            <Show when=move || message().is_some()>
-                <p>"Received message: " {move || message().as_ref().unwrap().to_string()}</p>
-            </Show>
+            <ShowLet some=move || message.get() let:message>
+                <p>"Received message: " {message}</p>
+            </ShowLet>
 
-            <Show when=move || error.with(|e| e.is_some())>
-                <p>"Error: " {move || error.with(|e| format!("{:?}", e.as_ref().unwrap()))}</p>
-            </Show>
+            <ShowLet some=move || error.get() let:error>
+                <p>"Error: " {format!("{error:?}")}</p>
+            </ShowLet>
         </Show>
     }
 }

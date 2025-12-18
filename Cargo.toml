@@ -1,9 +1,9 @@
 [package]
 name = "leptos-use"
-version = "0.16.3"
+version = "0.17.0"
 edition = "2024"
 categories = ["gui", "web-programming", "wasm"]
-description = "Collection of essential Leptos utilities inspired by React-Use / VueUse / SolidJS-USE"
+description = "Collection of essential Leptos utilities inspired by React-Use / VueUse"
 exclude = ["examples/", "tests/"]
 keywords = ["leptos", "utilities"]
 license = "MIT OR Apache-2.0"
@@ -11,11 +11,16 @@ readme = "README.md"
 repository = "https://github.com/Synphonyte/leptos-use"
 homepage = "https://leptos-use.rs"
 
+[package.metadata.docs.rs]
+features = ["math", "docs", "ssr"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+
 [dependencies]
 actix-web = { version = "4", optional = true, default-features = false }
 cfg-if = "1"
 chrono = { version = "0.4.38", optional = true }
-codee = { version = "0.3", optional = true }
+codee = { version = "0.3.5", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
 futures-util = { version = "0.3", optional = true }
@@ -374,8 +379,3 @@ watch_pausable = ["watch_with_options"]
 watch_throttled = ["watch_with_options"]
 watch_with_options = []
 whenever = []
-
-[package.metadata.docs.rs]
-features = ["math", "docs", "ssr"]
-rustdoc-args = ["--cfg=web_sys_unstable_apis"]
-rustc-args = ["--cfg=web_sys_unstable_apis"]

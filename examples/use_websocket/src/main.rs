@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
 use leptos_use::{
-    core::ConnectionReadyState, use_websocket, use_websocket_with_options, ReconnectLimit,
-    UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn,
+    ReconnectLimit, UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn,
+    core::ConnectionReadyState, use_websocket, use_websocket_with_options,
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -43,7 +43,7 @@ fn Demo() -> impl IntoView {
         open,
         close,
         ..
-    } = use_websocket::<Apple, Apple, MsgpackSerdeCodec>("wss://echo.websocket.events/");
+    } = use_websocket::<Apple, Apple, MsgpackSerdeCodec>("wss://echo.websocket.org/");
 
     let send_message = move |_| {
         let m = Apple {
@@ -112,7 +112,7 @@ fn Demo() -> impl IntoView {
         message: message2,
         ..
     } = use_websocket_with_options::<String, String, FromToStringCodec, _, _>(
-        "wss://echo.websocket.events/",
+        "wss://echo.websocket.org/",
         UseWebSocketOptions::default()
             .immediate(false)
             .reconnect_limit(ReconnectLimit::Infinite)
