@@ -29,48 +29,28 @@
 </div>
 
 <style>
-    :root {
-        --open-sidebar-width: 0px;
-    }
-
-    .sidebar-visible {
-        --open-sidebar-width: var(--sidebar-width);
-    }
-
     #header-logo-container {
-        text-align: center;
-        position: fixed;
-        z-index: 102;
-        top: 0;
-        left: calc(113px + var(--open-sidebar-width));
-        width: calc(100% - var(--open-sidebar-width) - 113px - 65px);
-        height: var(--menu-bar-height);
-        transition: all 0.3s;
-        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
     }
 
     #header-logo {
-        position: absolute;
-        left: -35px;
-        top: calc(2px + 3.8rem);
+        height: 28px;
+        margin-right: 8px;
     }
 
     #header-logo-title-placeholder {
+        display: flex;
+        align-items: center;
         font-weight: 200;
         font-size: 2.4rem;
         line-height: var(--menu-bar-height);
-        position: relative;
-        color: rgba(0, 0, 0, 0);
-    }
-
-    @media screen and (max-width: 900px) {
-        .sidebar-visible #header-logo {
-            display: none;
-        }
     }
 
     @media screen and (max-width: 600px) {
-        .sidebar-hidden #header-logo {
+        #header-logo {
             display: none;
         }
     }
