@@ -93,7 +93,7 @@ pub fn use_clipboard_with_options(
         }
     };
 
-    if is_supported.get() && read {
+    if is_supported.get_untracked() && read {
         let _ = use_event_listener(window(), copy, update_text);
         let _ = use_event_listener(window(), cut, update_text);
     }
