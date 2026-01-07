@@ -1,8 +1,7 @@
-use crate::core::OptionLocalSignal;
+use crate::core::{OptionLocalRwSignal, OptionLocalSignal};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use send_wrapper::SendWrapper;
 
 /// Reactive [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API).
 ///
@@ -54,8 +53,8 @@ pub fn use_geolocation_with_options(
     options: UseGeolocationOptions,
 ) -> UseGeolocationReturn<impl Fn() + Clone + Send + Sync, impl Fn() + Clone + Send + Sync> {
     let (located_at, set_located_at) = signal(None::<f64>);
-    let (error, set_error) = signal(None::<SendWrapper<web_sys::PositionError>>);
-    let (coords, set_coords) = signal(None::<SendWrapper<web_sys::Coordinates>>);
+    let error = OptionLocalRwSignal::<web_sys::PositionError>::new();
+    let coords = OptionLocalRwSignal::<web_sys::Coordinates>::new();
 
     let resume;
     let pause;
@@ -67,8 +66,8 @@ pub fn use_geolocation_with_options(
 
         let _ = options;
         let _ = set_located_at;
-        let _ = set_error;
-        let _ = set_coords;
+        let _ = error;
+        let _ = coords;
     }
 
     #[cfg(not(feature = "ssr"))]
@@ -79,12 +78,12 @@ pub fn use_geolocation_with_options(
 
         let update_position = move |position: web_sys::Position| {
             set_located_at.set(Some(position.timestamp()));
-            set_coords.set(Some(SendWrapper::new(position.coords())));
-            set_error.set(None);
+            coords.set(Some(position.coords()));
+            error.set(None);
         };
 
         let on_error = move |err: web_sys::PositionError| {
-            set_error.set(Some(SendWrapper::new(err)));
+            error.set(Some(err));
         };
 
         let watch_handle = Arc::new(Mutex::new(None::<i32>));
@@ -145,9 +144,9 @@ pub fn use_geolocation_with_options(
     }
 
     UseGeolocationReturn {
-        coords: coords.into(),
+        coords: coords.read_only(),
         located_at: located_at.into(),
-        error: error.into(),
+        error: error.read_only(),
         resume,
         pause,
     }

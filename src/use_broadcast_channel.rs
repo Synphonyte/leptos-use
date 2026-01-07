@@ -1,3 +1,4 @@
+use crate::core::OptionLocalRwSignal;
 use crate::{
     UseEventListenerOptions, core::OptionLocalSignal, js, sendwrap_fn, use_event_listener,
     use_event_listener_with_options, use_supported,
@@ -5,7 +6,6 @@ use crate::{
 use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
@@ -93,14 +93,10 @@ where
 {
     let (is_closed, set_closed) = signal(false);
     let (message, set_message) = signal(None::<T>);
-    let (channel, set_channel) = signal(None::<SendWrapper<web_sys::BroadcastChannel>>);
-    let (error, set_error) = signal(
-        None::<
-            SendWrapper<
-                UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
-            >,
-        >,
-    );
+    let channel = OptionLocalRwSignal::<web_sys::BroadcastChannel>::new();
+    let error = OptionLocalRwSignal::<
+        UseBroadcastChannelError<<C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+    >::new();
 
     let is_supported = use_supported(|| js!("BroadcastChannel" in &window()));
 
@@ -110,14 +106,12 @@ where
                 match C::encode(data) {
                     Ok(msg) => {
                         if let Err(err) = channel.post_message(&msg.into()) {
-                            set_error.set(Some(SendWrapper::new(
-                                UseBroadcastChannelError::PostMessage(err),
-                            )))
+                            error.set(Some(UseBroadcastChannelError::PostMessage(err)))
                         }
                     }
                     Err(err) => {
-                        set_error.set(Some(SendWrapper::new(UseBroadcastChannelError::Codec(
-                            CodecError::Encode(err),
+                        error.set(Some(UseBroadcastChannelError::Codec(CodecError::Encode(
+                            err,
                         ))));
                     }
                 }
@@ -141,7 +135,7 @@ where
         move |_| {
             if is_supported.get() {
                 let channel_val = web_sys::BroadcastChannel::new(&name).ok();
-                set_channel.set(channel_val.clone().map(SendWrapper::new));
+                channel.set(channel_val.clone());
 
                 if let Some(channel) = channel_val {
                     let _ = use_event_listener_with_options(
@@ -153,14 +147,12 @@ where
                                     Ok(msg) => {
                                         set_message.set(Some(msg));
                                     }
-                                    Err(err) => set_error.set(Some(SendWrapper::new(
-                                        UseBroadcastChannelError::Codec(CodecError::Decode(err)),
+                                    Err(err) => error.set(Some(UseBroadcastChannelError::Codec(
+                                        CodecError::Decode(err),
                                     ))),
                                 }
                             } else {
-                                set_error.set(Some(SendWrapper::new(
-                                    UseBroadcastChannelError::ValueNotString,
-                                )));
+                                error.set(Some(UseBroadcastChannelError::ValueNotString));
                             }
                         },
                         UseEventListenerOptions::default().passive(true),
@@ -170,9 +162,7 @@ where
                         channel.clone(),
                         messageerror,
                         move |event| {
-                            set_error.set(Some(SendWrapper::new(
-                                UseBroadcastChannelError::MessageEvent(event),
-                            )));
+                            error.set(Some(UseBroadcastChannelError::MessageEvent(event)));
                         },
                         UseEventListenerOptions::default().passive(true),
                     );
@@ -195,11 +185,11 @@ where
 
     UseBroadcastChannelReturn {
         is_supported,
-        channel: channel.into(),
+        channel: channel.read_only(),
         message: message.into(),
         post,
         close,
-        error: error.into(),
+        error: error.read_only(),
         is_closed: is_closed.into(),
     }
 }
