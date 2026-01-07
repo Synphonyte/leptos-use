@@ -3,6 +3,14 @@ use std::ops::{Deref, DerefMut};
 
 /// A signal of an optional send-wrapped type `T` that is always `None` on the server but behaves
 /// on the client like a `Signal<Option<T>>`.
+///
+/// This is useful for handling work-stealing executors like tokio/axum which may move the SSR
+/// render between threads at await points, disallowing the use of `LocalStorage` signals on the
+/// server.
+///
+/// This situation comes up when trying to store browser-api data which is not `Send` (like
+/// Geolocation, Document, etc.) in a signal on the client, while the signal is being set to `None`
+/// on the server.
 pub struct OptionLocalRwSignal<T> {
     #[cfg(feature = "ssr")]
     _data: std::marker::PhantomData<fn() -> T>,
