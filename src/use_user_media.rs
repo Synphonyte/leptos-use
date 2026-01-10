@@ -1,8 +1,7 @@
-use crate::core::{MaybeRwSignal, OptionLocalSignal};
+use crate::core::{MaybeRwSignal, OptionLocalRwSignal, OptionLocalSignal};
 use default_struct_builder::DefaultBuilder;
 use js_sys::{Object, Reflect};
 use leptos::prelude::*;
-use send_wrapper::SendWrapper;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getUserMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) streaming.
@@ -64,7 +63,7 @@ pub fn use_user_media_with_options(
 
     let (enabled, set_enabled) = enabled.into_signal();
 
-    let (stream, set_stream) = signal(None::<SendWrapper<Result<web_sys::MediaStream, JsValue>>>);
+    let stream = OptionLocalRwSignal::<Result<web_sys::MediaStream, JsValue>>::new();
 
     let _start = {
         let audio = audio.clone();
@@ -77,9 +76,9 @@ pub fn use_user_media_with_options(
                     return;
                 }
 
-                let stream = create_media(Some(video), Some(audio)).await;
+                let new_stream = create_media(Some(video), Some(audio)).await;
 
-                set_stream.update(|s| *s = Some(SendWrapper::new(stream)));
+                stream.update(|s| *s = Some(new_stream));
             }
 
             #[cfg(feature = "ssr")]
@@ -99,7 +98,7 @@ pub fn use_user_media_with_options(
             }
         }
 
-        set_stream.set(None);
+        stream.set(None);
     };
 
     let start = {
@@ -151,7 +150,7 @@ pub fn use_user_media_with_options(
     );
 
     UseUserMediaReturn {
-        stream: stream.into(),
+        stream: stream.read_only(),
         start,
         stop,
         enabled,
