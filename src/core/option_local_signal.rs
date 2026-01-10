@@ -59,6 +59,16 @@ where
     }
 }
 
+impl<T> Default for OptionLocalRwSignal<T>
+where
+    T: 'static,
+{
+    #[track_caller]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Clone for OptionLocalRwSignal<T> {
     fn clone(&self) -> Self {
         *self
