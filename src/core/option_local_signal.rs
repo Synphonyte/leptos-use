@@ -233,14 +233,14 @@ impl<T> Deref for NoneGuard<T> {
     }
 }
 
-/// This implementation only exists so that we can create a None::<impl DerefMut>.
+/// This implementation only exists so that we can create a `None::<impl DerefMut>`.
 impl<T> DerefMut for NoneGuard<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         panic!("Attempted to mutably dereference a NoneGuard");
     }
 }
 
-/// This implementation only exists so that we can create a None::<impl UntrackableGuard>.
+/// This implementation only exists so that we can create a `None::<impl UntrackableGuard>`.
 impl<T> UntrackableGuard for NoneGuard<T> {
     fn untrack(&mut self) {
         panic!("Attempted to untrack a NoneGuard");
