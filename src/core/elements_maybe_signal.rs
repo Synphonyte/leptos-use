@@ -1,6 +1,6 @@
-use crate::core::{SignalMarker, SignalStrMarker, StrMarker};
-use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
+use crate::core::{SignalStrMarker, StrMarker};
+use leptos::prelude::{guards::ReadGuard, *};
+use send_wrapper::SendWrapper;
 use std::{ops::Deref, rc::Rc, time::Duration};
 use wasm_bindgen::JsCast;
 
@@ -32,10 +32,7 @@ impl<T> Clone for ElementsMaybeSignal<T> {
 
 impl<T> Copy for ElementsMaybeSignal<T> {}
 
-pub enum ElementsMaybeSignalType<T: 'static> {
-    Static(StoredValue<Vec<Option<T>>, LocalStorage>),
-    Dynamic(Signal<Vec<Option<T>>, LocalStorage>),
-}
+pub struct ElementsMaybeSignalType<T: 'static>(Signal<Vec<Option<SendWrapper<T>>>>);
 
 impl<T> Clone for ElementsMaybeSignalType<T> {
     fn clone(&self) -> Self {
@@ -47,7 +44,7 @@ impl<T> Copy for ElementsMaybeSignalType<T> {}
 
 impl<T: 'static> Default for ElementsMaybeSignalType<T> {
     fn default() -> Self {
-        Self::Static(StoredValue::new_local(vec![]))
+        Self(Signal::stored(vec![]))
     }
 }
 
@@ -74,25 +71,20 @@ impl<T> DefinedAt for ElementsMaybeSignal<T> {
     }
 }
 
-impl<T> With for ElementsMaybeSignal<T> {
-    type Value = Vec<Option<T>>;
+impl<T> ReadUntracked for ElementsMaybeSignal<T> {
+    type Value = ReadGuard<
+        Vec<Option<SendWrapper<T>>>,
+        SignalReadGuard<Vec<Option<SendWrapper<T>>>, SyncStorage>,
+    >;
 
-    fn try_with<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> Option<O> {
-        match &self.inner {
-            ElementsMaybeSignalType::Static(v) => v.try_with_value(f),
-            ElementsMaybeSignalType::Dynamic(s) => s.try_with(f),
-        }
+    fn try_read_untracked(&self) -> Option<Self::Value> {
+        self.inner.0.try_read_untracked()
     }
 }
 
-impl<T> WithUntracked for ElementsMaybeSignal<T> {
-    type Value = Vec<Option<T>>;
-
-    fn try_with_untracked<O>(&self, f: impl FnOnce(&Vec<Option<T>>) -> O) -> Option<O> {
-        match self.inner {
-            ElementsMaybeSignalType::Static(t) => t.try_with_value(f),
-            ElementsMaybeSignalType::Dynamic(s) => s.try_with_untracked(f),
-        }
+impl<T> Track for ElementsMaybeSignal<T> {
+    fn track(&self) {
+        self.inner.0.track();
     }
 }
 
@@ -125,7 +117,9 @@ where
     T: From<Js> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![Some(T::from(self).clone())]))
+        ElementsMaybeSignalType(Signal::stored(vec![Some(SendWrapper::new(
+            T::from(self).clone(),
+        ))]))
     }
 }
 
@@ -135,8 +129,8 @@ where
     T: From<Js> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.map(|el| T::from(el).clone()),
+        ElementsMaybeSignalType(Signal::stored(vec![
+            self.map(|el| SendWrapper::new(T::from(el).clone())),
         ]))
     }
 }
@@ -149,8 +143,8 @@ where
     T: From<E> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(vec![
-            self.as_ref().map(|e| T::from(e.clone())),
+        ElementsMaybeSignalType(Signal::stored(vec![
+            self.as_ref().map(|e| SendWrapper::new(T::from(e.clone()))),
         ]))
     }
 }
@@ -165,9 +159,9 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         if cfg!(feature = "ssr") {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
+            ElementsMaybeSignalType(Signal::stored(vec![]))
         } else {
-            ElementsMaybeSignalType::Dynamic(els_signal_by_sel::<T>(self.as_ref()))
+            ElementsMaybeSignalType(els_signal_by_sel::<T>(self.as_ref()))
         }
     }
 }
@@ -175,53 +169,42 @@ where
 /// Handles `Signal<&str>`
 impl<T, V, I> IntoElementsMaybeSignalType<T, SignalStrMarker> for V
 where
-    V: Get<Value = I> + 'static,
+    V: Get<Value = I> + Send + Sync + 'static,
     I: AsRef<str>,
     T: From<web_sys::Element> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         if cfg!(feature = "ssr") {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
+            ElementsMaybeSignalType(Signal::stored(vec![]))
         } else {
-            ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
+            ElementsMaybeSignalType(Signal::derive(move || {
                 vec![
                     document()
                         .query_selector(self.get().as_ref())
                         .unwrap_or_default()
-                        .map(|el| T::from(el).clone()),
+                        .map(|el| SendWrapper::new(T::from(el).clone())),
                 ]
             }))
         }
     }
 }
 
-// From single signal ///////////////////////////////////////////////////////////////
-
-/// Handles `Signal<web_sys::*>`
-impl<T, V, E> IntoElementsMaybeSignalType<T, SignalMarker> for V
-where
-    V: Get<Value = E> + 'static,
-    T: From<E> + Clone,
-{
-    fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-            vec![Some(T::from(self.get()))]
-        }))
-    }
-}
-
 // From multiple static elements //////////////////////////////////////////////////////
 
+pub struct ElementMarker;
+
 /// Handles `&[web_sys::*]`
-impl<'a, T, Js, C> IntoElementsMaybeSignalType<T, &'a [web_sys::Element]> for C
+impl<'a, T, Js, C> IntoElementsMaybeSignalType<T, ElementMarker> for C
 where
     Js: Clone + 'a,
     T: From<Js>,
     C: IntoIterator<Item = &'a Js>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(
-            self.into_iter().map(|t| Some(T::from(t.clone()))).collect(),
+        ElementsMaybeSignalType(Signal::stored(
+            self.into_iter()
+                .map(|t| Some(SendWrapper::new(T::from(t.clone()))))
+                .collect(),
         ))
     }
 }
@@ -234,8 +217,10 @@ where
     C: IntoIterator<Item = &'a Option<Js>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(
-            self.into_iter().map(|t| t.clone().map(T::from)).collect(),
+        ElementsMaybeSignalType(Signal::stored(
+            self.into_iter()
+                .map(|t| t.clone().map(|js| SendWrapper::new(T::from(js))))
+                .collect(),
         ))
     }
 }
@@ -247,8 +232,10 @@ where
     C: IntoIterator<Item = Js>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(
-            self.into_iter().map(|t| Some(T::from(t))).collect(),
+        ElementsMaybeSignalType(Signal::stored(
+            self.into_iter()
+                .map(|t| Some(SendWrapper::new(T::from(t))))
+                .collect(),
         ))
     }
 }
@@ -260,8 +247,10 @@ where
     C: IntoIterator<Item = Option<Js>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Static(StoredValue::new_local(
-            self.into_iter().map(|t| t.map(T::from)).collect(),
+        ElementsMaybeSignalType(Signal::stored(
+            self.into_iter()
+                .map(|t| t.map(|js| SendWrapper::new(T::from(js))))
+                .collect(),
         ))
     }
 }
@@ -270,7 +259,7 @@ where
 
 pub struct StrIterMarker;
 
-pub fn els_by_sel<T>(sel: &str) -> Vec<Option<T>>
+pub fn els_by_sel<T>(sel: &str) -> Vec<Option<SendWrapper<T>>>
 where
     T: From<web_sys::Element> + Clone,
 {
@@ -283,14 +272,16 @@ where
             }
         }
     }
-    els.into_iter().map(|v| Some(T::from(v))).collect()
+    els.into_iter()
+        .map(|v| Some(SendWrapper::new(T::from(v))))
+        .collect()
 }
 
-pub fn els_signal_by_sel<T>(sel: &str) -> Signal<Vec<Option<T>>, LocalStorage>
+pub fn els_signal_by_sel<T>(sel: &str) -> Signal<Vec<Option<SendWrapper<T>>>>
 where
     T: From<web_sys::Element> + Clone + 'static,
 {
-    let (el_signal, set_el_signal) = signal_local(Vec::new());
+    let (el_signal, set_el_signal) = signal(Vec::new());
 
     let sel = sel.to_string();
 
@@ -336,12 +327,15 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         if cfg!(feature = "ssr") {
-            ElementsMaybeSignalType::Static(StoredValue::new_local(vec![]))
+            ElementsMaybeSignalType(Signal::stored(vec![]))
         } else {
-            self.into_iter()
-                .map(|sel| els_signal_by_sel::<T>(sel.as_ref()))
-                .collect::<Vec<_>>()
-                .into_elements_maybe_signal_type()
+            ElementsMaybeSignalType(els_signal_by_sel::<T>(
+                &self
+                    .into_iter()
+                    .map(|sel| sel.as_ref().to_string())
+                    .collect::<Vec<_>>()
+                    .join(","),
+            ))
         }
     }
 }
@@ -350,16 +344,38 @@ where
 
 pub struct SignalVecMarker;
 
-/// Handles `Signal<Vec<web_sys::*>>` and `Signal<Option<web_sys::*>>` and `NodeRef` and `ElementMaybeSignal`
+/// Handles `Signal<Vec<web_sys::*>>` and `Signal<Option<web_sys::*>>` and `NodeRef`
 impl<T, Js, C, G> IntoElementsMaybeSignalType<T, SignalVecMarker> for G
 where
     T: From<Js> + Clone,
-    G: Get<Value = C> + 'static,
+    G: Get<Value = C> + Send + Sync + 'static,
     C: IntoIterator<Item = Js>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-            self.get().into_iter().map(|t| Some(T::from(t))).collect()
+        ElementsMaybeSignalType(Signal::derive(move || {
+            self.get()
+                .into_iter()
+                .map(|t| Some(SendWrapper::new(T::from(t))))
+                .collect()
+        }))
+    }
+}
+
+pub struct SignalVecSendWrapperMarker;
+
+/// Handles `Signal<Vec<SendWrapper<web_sys::*>>>` and `Signal<Option<SendWrapper<web_sys::*>>>` and `ElementMaybeSignal`
+impl<T, Js, C, G> IntoElementsMaybeSignalType<T, SignalVecSendWrapperMarker> for G
+where
+    T: From<Js> + Clone,
+    G: Get<Value = C> + Send + Sync + 'static,
+    C: IntoIterator<Item = SendWrapper<Js>>,
+{
+    fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
+        ElementsMaybeSignalType(Signal::derive(move || {
+            self.get()
+                .into_iter()
+                .map(|t| Some(SendWrapper::new(T::from(t.take()))))
+                .collect()
         }))
     }
 }
@@ -370,12 +386,15 @@ pub struct SignalVecOptionMarker;
 impl<T, Js, C, G> IntoElementsMaybeSignalType<T, SignalVecOptionMarker> for G
 where
     T: From<Js> + Clone,
-    G: Get<Value = C> + 'static,
+    G: Get<Value = C> + Send + Sync + 'static,
     C: IntoIterator<Item = Option<Js>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
-            self.get().into_iter().map(|t| t.map(T::from)).collect()
+        ElementsMaybeSignalType(Signal::derive(move || {
+            self.get()
+                .into_iter()
+                .map(|t| t.map(|js| SendWrapper::new(T::from(js))))
+                .collect()
         }))
     }
 }
@@ -388,17 +407,17 @@ pub struct VecSignalMarker;
 impl<T, Js, C, G> IntoElementsMaybeSignalType<T, VecSignalMarker> for C
 where
     T: From<Js> + Clone,
-    C: IntoIterator<Item = G> + Clone + 'static,
+    C: IntoIterator<Item = G> + Clone + Send + Sync + 'static,
     G: Get<Value = Js>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         let signals = self.clone();
 
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
+        ElementsMaybeSignalType(Signal::derive(move || {
             signals
                 .clone()
                 .into_iter()
-                .map(|t| Some(T::from(t.get())))
+                .map(|t| Some(SendWrapper::new(T::from(t.get()))))
                 .collect()
         }))
     }
@@ -410,17 +429,17 @@ pub struct VecSignalOptionMarker;
 impl<T, Js, C, G> IntoElementsMaybeSignalType<T, VecSignalOptionMarker> for C
 where
     T: From<Js> + Clone,
-    C: IntoIterator<Item = G> + Clone + 'static,
+    C: IntoIterator<Item = G> + Clone + Send + Sync + 'static,
     G: Get<Value = Option<Js>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         let signals = self.clone();
 
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
+        ElementsMaybeSignalType(Signal::derive(move || {
             signals
                 .clone()
                 .into_iter()
-                .map(|t| t.get().map(T::from))
+                .map(|t| t.get().map(|js| SendWrapper::new(T::from(js))))
                 .collect()
         }))
     }
@@ -431,19 +450,19 @@ pub struct VecSignalVecOptionMarker;
 
 impl<T, Js, C, G> IntoElementsMaybeSignalType<T, VecSignalVecOptionMarker> for C
 where
-    T: TryFrom<Js> + Clone,
-    C: IntoIterator<Item = G> + Clone + 'static,
+    T: From<Js> + Clone,
+    C: IntoIterator<Item = G> + Clone + Send + Sync + 'static,
     G: Get<Value = Vec<Option<Js>>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         let signals = self.clone();
 
-        ElementsMaybeSignalType::Dynamic(Signal::derive_local(move || {
+        ElementsMaybeSignalType(Signal::derive(move || {
             signals
                 .clone()
                 .into_iter()
                 .flat_map(|t| t.get())
-                .map(|j| T::try_from(j.unwrap()).ok())
+                .map(|j| j.map(|j| SendWrapper::new(T::from(j))))
                 .collect()
         }))
     }

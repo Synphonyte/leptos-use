@@ -156,7 +156,7 @@ where
 
         let signal = target.into_element_maybe_signal();
 
-        let prev_element = Rc::new(RefCell::new(None::<web_sys::EventTarget>));
+        let prev_element = Rc::new(RefCell::new(None::<SendWrapper<web_sys::EventTarget>>));
 
         let cleanup_prev_element = {
             let prev_element = prev_element.clone();

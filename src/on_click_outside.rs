@@ -142,7 +142,7 @@ where
             let ignore = ignore.get_untracked();
 
             ignore.into_iter().flatten().any(|element| {
-                event_target::<web_sys::EventTarget>(event) == element
+                event_target::<web_sys::EventTarget>(event) == *element
                     || event.composed_path().includes(element.as_ref(), 0)
             })
         };
@@ -155,7 +155,7 @@ where
 
             move |event: web_sys::UiEvent| {
                 if let Some(el) = target.get_untracked() {
-                    if el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0)
+                    if *el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0)
                     {
                         return;
                     }
@@ -219,7 +219,7 @@ where
                                 && let Some(active_element) = document().active_element()
                                 && active_element.tag_name() == "IFRAME"
                                 && !el
-                                    .unchecked_into::<web_sys::Node>()
+                                    .unchecked_ref::<web_sys::Node>()
                                     .contains(Some(&active_element.into()))
                             {
                                 handler(event.into());

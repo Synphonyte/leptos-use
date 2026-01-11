@@ -13,7 +13,9 @@ use crate::{
 };
 use leptos::ev;
 use leptos::ev::scrollend;
+use send_wrapper::SendWrapper;
 use wasm_bindgen::JsCast;
+
 
 /// We have to check if the scroll amount is close enough to some threshold in order to
 /// more accurately calculate arrivedState. This is because scrollTop/scrollLeft are non-rounded
@@ -377,12 +379,16 @@ where
             }
         };
 
-        let target = Signal::derive_local(move || {
+        let target = Signal::derive(move || {
             let element = signal.get();
-            element.map(|element| element.unchecked_into::<web_sys::EventTarget>())
+            element.map(|element| {
+                SendWrapper::new(element.take().unchecked_into::<web_sys::EventTarget>())
+            })
         });
 
         if throttle >= 0.0 {
+            use send_wrapper::SendWrapper;
+
             let throttled_scroll_handler = use_throttle_fn_with_arg_and_options(
                 on_scroll_handler.clone(),
                 throttle,
@@ -398,14 +404,14 @@ where
 
             let _ = use_event_listener_with_options::<
                 _,
-                Signal<Option<web_sys::EventTarget>, LocalStorage>,
+                Signal<Option<SendWrapper<web_sys::EventTarget>>>,
                 _,
                 _,
             >(target, ev::scroll, handler, options.event_listener_options);
         } else {
             let _ = use_event_listener_with_options::<
                 _,
-                Signal<Option<web_sys::EventTarget>, LocalStorage>,
+                Signal<Option<SendWrapper<web_sys::EventTarget>>>,
                 _,
                 _,
             >(
@@ -418,7 +424,7 @@ where
 
         let _ = use_event_listener_with_options::<
             _,
-            Signal<Option<web_sys::EventTarget>, LocalStorage>,
+            Signal<Option<SendWrapper<web_sys::EventTarget>>>,
             _,
             _,
         >(
@@ -430,7 +436,7 @@ where
 
         measure = sendwrap_fn!(move || {
             if let Some(el) = signal.try_get_untracked().flatten() {
-                set_arrived_state(el);
+                set_arrived_state(el.take());
             }
         });
     }

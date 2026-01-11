@@ -24,7 +24,7 @@ jobs:
       - name: Install mdbook I
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-binstall,mdbook
+          tool: cargo-binstall,mdbook@0.4
       - name: Install mdbook II
         run: |
           cargo binstall -y mdbook-cmdrun

@@ -111,10 +111,10 @@ where
             }
 
             if let Some(target) = target.get_untracked() {
-                let (x, y) = target_offset(target.clone().unchecked_into());
-                let target: web_sys::Element = target.unchecked_into();
+                let (x, y) = target_offset(target.unchecked_ref::<web_sys::EventTarget>().clone());
+                let target: &web_sys::Element = target.unchecked_ref();
 
-                if exact.get_untracked() && event_target::<web_sys::Element>(&event) != target {
+                if exact.get_untracked() && event_target::<web_sys::Element>(&event) != *target {
                     return;
                 }
 

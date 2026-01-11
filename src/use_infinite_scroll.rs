@@ -8,6 +8,7 @@ use futures_util::join;
 use gloo_timers::future::sleep;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
@@ -113,9 +114,11 @@ where
 
         el.map(|el| {
             if el.is_instance_of::<web_sys::Window>() || el.is_instance_of::<web_sys::Document>() {
-                document()
-                    .document_element()
-                    .expect("document element not found")
+                SendWrapper::new(
+                    document()
+                        .document_element()
+                        .expect("document element not found"),
+                )
             } else {
                 el
             }

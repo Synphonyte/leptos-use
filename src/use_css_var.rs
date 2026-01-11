@@ -144,7 +144,7 @@ where
             move || variable.get(),
             move |val, _, _| {
                 if let Some(el) = el_signal.get() {
-                    let el = el.unchecked_into::<web_sys::HtmlElement>();
+                    let el = el.unchecked_ref::<web_sys::HtmlElement>();
                     let style = el.style();
                     let _ = style.set_property(&prop.get_untracked(), val);
                 }

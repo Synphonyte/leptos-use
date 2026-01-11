@@ -1,6 +1,8 @@
 use crate::core::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
+#[cfg(not(feature = "ssr"))]
+use send_wrapper::SendWrapper;
 use std::sync::Arc;
 
 /// Automatically update the height of a textarea depending on the content.
@@ -127,9 +129,10 @@ where
         use wasm_bindgen::JsCast;
 
         let el = el.into_element_maybe_signal();
-        let textarea = Signal::derive_local(move || {
-            el.get()
-                .map(|el| el.unchecked_into::<web_sys::HtmlTextAreaElement>())
+        let textarea = Signal::derive(move || {
+            el.get().map(|el| {
+                SendWrapper::new(el.take().unchecked_into::<web_sys::HtmlTextAreaElement>())
+            })
         });
 
         let UseTextareaAutosizeOptions {
@@ -173,6 +176,7 @@ where
                     if let Some(style_target) = style_target.get() {
                         // If style target is provided update its height
                         style_target
+                            .take()
                             .unchecked_into::<web_sys::HtmlElement>()
                             .style()
                             .set_property(
