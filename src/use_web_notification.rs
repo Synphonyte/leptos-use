@@ -1,9 +1,9 @@
+use crate::core::OptionLocalRwSignal;
 use crate::{core::OptionLocalSignal, use_supported, use_window};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use send_wrapper::SendWrapper;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 
@@ -62,13 +62,13 @@ pub fn use_web_notification_with_options(
 > {
     let is_supported = use_supported(browser_supports_notifications);
 
-    let (notification, set_notification) = signal(None::<SendWrapper<web_sys::Notification>>);
+    let notification = OptionLocalRwSignal::<web_sys::Notification>::new();
 
     let (permission, set_permission) = signal(NotificationPermission::default());
 
     cfg_if! { if #[cfg(feature = "ssr")] {
         let _ = options;
-        let _ = set_notification;
+        let _ = notification;
         let _ = set_permission;
 
         let show = move |_: ShowOptions| ();
@@ -158,10 +158,10 @@ pub fn use_web_notification_with_options(
                     notification_value.set_onerror(Some(on_error_closure.unchecked_ref()));
                     notification_value.set_onshow(Some(on_show_closure.unchecked_ref()));
 
-                    set_notification.set(Some(SendWrapper::new(notification_value)));
+                    notification.set(Some(notification_value));
                 });
             };
-            let wrapped_show = SendWrapper::new(show);
+            let wrapped_show = send_wrapper::SendWrapper::new(show);
             move |options_override: ShowOptions| wrapped_show(options_override)
         };
 
@@ -172,7 +172,7 @@ pub fn use_web_notification_with_options(
                         notification.close();
                     }
                 });
-                set_notification.set(None);
+                notification.set(None);
             }
         };
 
@@ -199,7 +199,7 @@ pub fn use_web_notification_with_options(
 
     UseWebNotificationReturn {
         is_supported,
-        notification: notification.into(),
+        notification: notification.read_only(),
         show,
         close,
         permission: permission.into(),
