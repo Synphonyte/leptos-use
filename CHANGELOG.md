@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-01-11
+
+### Breaking Changes 🛠
+
+- `Element(s)MaybeSignal` is now internally sendwrapped for SSR robustness. Some automatic conversions have been removed when they can't really be made SSR safe like `Signal<web_sys::Element>`. Use `Signal<SendWrapper<web_sys::Element>>` instead.
+- `OptionLocalSignal` now has a clone free `.read()` implementation (thanks to @luxalpa).
+
+### New
+
+- There's now an `OptionLocalRwSignal` for dealing with non-`Send`/non-`Sync` values in an SSR safe manner (thanks to @luxalpa).
+
+### Special thanks to our sponsor
+- @benwis
+
 ## [0.17.0] - 2025-12-18
 
 Huge thanks to @DrFlowerkick for all of this excellent work on this release.
