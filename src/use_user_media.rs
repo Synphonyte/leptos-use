@@ -163,8 +163,8 @@ async fn create_media(
     video: Option<VideoConstraints>,
     audio: Option<AudioConstraints>,
 ) -> Result<web_sys::MediaStream, JsValue> {
-    use crate::js_fut;
     use crate::use_window::use_window;
+    use crate::{js, js_fut};
     use js_sys::Array;
 
     let media = use_window()
@@ -187,6 +187,7 @@ async fn create_media(
                     viewport_width,
                     viewport_offset_x,
                     viewport_offset_y,
+                    zoom,
                 } = *boxed_constraints;
 
                 let video_constraints = web_sys::MediaTrackConstraints::new();
@@ -228,7 +229,14 @@ async fn create_media(
                     video_constraints.set_viewport_offset_y(&value.to_jsvalue());
                 }
 
-                constraints.set_video(&JsValue::from(video_constraints));
+                let js_value = JsValue::from(video_constraints);
+
+                if let Some(value) = zoom {
+                    // TODO : once web_sys implements this add it to the methods above
+                    js! { js_value["zoom"] = value.to_jsvalue()};
+                }
+
+                constraints.set_video(&js_value);
             }
         }
     }
@@ -394,6 +402,98 @@ impl From<&'static str> for ConstraintExactIdeal<&'static str> {
 }
 
 #[derive(Clone, Debug)]
+pub enum ConstraintBoolOrRange<T> {
+    Bool(bool),
+    Single(Option<T>),
+    Range {
+        min: Option<T>,
+        max: Option<T>,
+        exact: Option<T>,
+        ideal: Option<T>,
+    },
+}
+
+impl<T> ConstraintBoolOrRange<T>
+where
+    T: Into<JsValue> + Clone,
+{
+    pub fn to_jsvalue(&self) -> JsValue {
+        match self {
+            Self::Bool(value) => JsValue::from_bool(*value),
+            Self::Single(value) => value.clone().unwrap().into(),
+            Self::Range {
+                min,
+                max,
+                exact,
+                ideal,
+            } => {
+                let obj = Object::new();
+
+                if let Some(min_value) = min {
+                    Reflect::set(&obj, &JsValue::from_str("min"), &min_value.clone().into())
+                        .unwrap();
+                }
+                if let Some(max_value) = max {
+                    Reflect::set(&obj, &JsValue::from_str("max"), &max_value.clone().into())
+                        .unwrap();
+                }
+                if let Some(value) = exact {
+                    Reflect::set(&obj, &JsValue::from_str("exact"), &value.clone().into()).unwrap();
+                }
+                if let Some(value) = ideal {
+                    Reflect::set(&obj, &JsValue::from_str("ideal"), &value.clone().into()).unwrap();
+                }
+
+                JsValue::from(obj)
+            }
+        }
+    }
+}
+
+impl<T: Default> Default for ConstraintBoolOrRange<T> {
+    fn default() -> Self {
+        ConstraintBoolOrRange::Single(Some(T::default()))
+    }
+}
+
+impl<T> From<bool> for ConstraintBoolOrRange<T> {
+    fn from(value: bool) -> Self {
+        ConstraintBoolOrRange::Bool(value)
+    }
+}
+
+impl<T> From<ConstraintRange<T>> for ConstraintBoolOrRange<T> {
+    fn from(value: ConstraintRange<T>) -> Self {
+        match value {
+            ConstraintRange::Single(value) => ConstraintBoolOrRange::Single(value),
+            ConstraintRange::Range {
+                min,
+                max,
+                exact,
+                ideal,
+            } => ConstraintBoolOrRange::Range {
+                min,
+                max,
+                exact,
+                ideal,
+            },
+        }
+    }
+}
+
+impl From<f64> for ConstraintBoolOrRange<f64> {
+    fn from(value: f64) -> Self {
+        Self::Single(Some(value))
+    }
+}
+
+impl From<u32> for ConstraintBoolOrRange<u32> {
+    fn from(value: u32) -> Self {
+        Self::Single(Some(value))
+    }
+}
+
+#[derive(Clone, Debug)]
 pub enum ConstraintRange<T> {
     Single(Option<T>),
     Range {
@@ -413,6 +513,13 @@ where
     }
 }
 
+pub trait ConstraintRangeBuilder<T> {
+    fn min(self, value: T) -> Self;
+    fn max(self, value: T) -> Self;
+    fn exact(self, value: T) -> Self;
+    fn ideal(self, value: T) -> Self;
+}
+
 impl<T> ConstraintRange<T>
 where
     T: Clone + std::fmt::Debug,
@@ -420,37 +527,46 @@ where
     pub fn new(value: Option<T>) -> Self {
         ConstraintRange::Single(value)
     }
-
-    pub fn min(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { ref mut min, .. } = self {
-            *min = Some(value);
-        }
-        self
-    }
-
-    pub fn max(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { ref mut max, .. } = self {
-            *max = Some(value);
-        }
-        self
-    }
-
-    pub fn exact(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { exact, .. } = &mut self {
-            *exact = Some(value);
-        }
-
-        self
-    }
-
-    pub fn ideal(mut self, value: T) -> Self {
-        if let ConstraintRange::Range { ideal, .. } = &mut self {
-            *ideal = Some(value);
-        }
-
-        self
-    }
 }
+
+macro_rules! impl_constraint_range_builder {
+    ($ty:ty) => {
+        impl<T> ConstraintRangeBuilder<T> for $ty {
+            fn min(mut self, value: T) -> Self {
+                if let Self::Range { ref mut min, .. } = self {
+                    *min = Some(value);
+                }
+                self
+            }
+
+            fn max(mut self, value: T) -> Self {
+                if let Self::Range { ref mut max, .. } = self {
+                    *max = Some(value);
+                }
+                self
+            }
+
+            fn exact(mut self, value: T) -> Self {
+                if let Self::Range { exact, .. } = &mut self {
+                    *exact = Some(value);
+                }
+
+                self
+            }
+
+            fn ideal(mut self, value: T) -> Self {
+                if let Self::Range { ideal, .. } = &mut self {
+                    *ideal = Some(value);
+                }
+
+                self
+            }
+        }
+    };
+}
+
+impl_constraint_range_builder!(ConstraintRange<T>);
+impl_constraint_range_builder!(ConstraintBoolOrRange<T>);
 
 impl<T> ConstraintRange<T>
 where
@@ -677,6 +793,8 @@ pub struct VideoTrackConstraints {
     pub viewport_height: Option<ConstraintULong>,
     #[builder(into)]
     pub viewport_width: Option<ConstraintULong>,
+    #[builder(into)]
+    pub zoom: Option<ConstraintBoolOrRange<f64>>,
 }
 
 impl VideoTrackConstraints {

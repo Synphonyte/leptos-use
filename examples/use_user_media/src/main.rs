@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{use_user_media, UseUserMediaReturn};
+use leptos_use::{
+    UseUserMediaOptions, UseUserMediaReturn, VideoTrackConstraints, use_user_media_with_options,
+};
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -11,7 +13,9 @@ fn Demo() -> impl IntoView {
         enabled,
         set_enabled,
         ..
-    } = use_user_media();
+    } = use_user_media_with_options(
+        UseUserMediaOptions::default().video(VideoTrackConstraints::default().zoom(true)),
+    );
 
     Effect::new(move |_| {
         match stream.get() {
