@@ -7,7 +7,7 @@
 		"rust-analyzer": {
 			"initialization_options": {
 				"cargo": {
-					"features": ["ssr", "axum"]
+					"features": ["ssr", "axum", "reactive_stores"]
 				},
 				"check": {
 					"allTargets": true

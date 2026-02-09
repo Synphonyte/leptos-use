@@ -40,6 +40,7 @@ unic-langid = { version = "0.9", optional = true }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", optional = true }
+reactive_stores = { version = "0.3.1", optional = true }
 
 [dev-dependencies]
 codee = { version = "0.3", features = [
@@ -379,3 +380,4 @@ watch_pausable = ["watch_with_options"]
 watch_throttled = ["watch_with_options"]
 watch_with_options = []
 whenever = []
+reactive_stores = ["dep:reactive_stores"]

@@ -187,6 +187,26 @@ where
     }
 }
 
+// TODO : From (Signal<T>, SignalSetter<T>) for slice! results
+
+#[cfg(feature = "reactive_stores")]
+impl<T, Inner, Prev> From<reactive_stores::Subfield<Inner, Prev, T>> for MaybeRwSignal<T>
+where
+    T: Clone + Send + Sync + 'static,
+    reactive_stores::Subfield<Inner, Prev, T>: GetUntracked<Value = T> + Track + Copy,
+    Inner: reactive_stores::StoreField<Value = Prev> + Send + Sync + 'static,
+    Prev: 'static,
+{
+    fn from(value: reactive_stores::Subfield<Inner, Prev, T>) -> Self {
+        use crate::sync_signal;
+
+        let internal_rw_signal = RwSignal::new(value.get_untracked());
+        let _ = sync_signal(value, internal_rw_signal);
+
+        Self::from(internal_rw_signal)
+    }
+}
+
 impl<T: Clone> MaybeRwSignal<T, LocalStorage> {
     pub fn into_signal(self) -> (Signal<T, LocalStorage>, WriteSignal<T, LocalStorage>) {
         match self {
