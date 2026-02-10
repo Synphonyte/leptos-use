@@ -207,6 +207,36 @@ where
     }
 }
 
+#[cfg(feature = "reactive_stores")]
+impl<T> From<reactive_stores::Field<T>> for MaybeRwSignal<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    fn from(value: reactive_stores::Field<T>) -> Self {
+        use crate::sync_signal;
+
+        let internal_rw_signal = RwSignal::new(value.get_untracked());
+        let _ = sync_signal(value, internal_rw_signal);
+
+        Self::from(internal_rw_signal)
+    }
+}
+
+#[cfg(feature = "reactive_stores")]
+impl<T> From<reactive_stores::Store<T>> for MaybeRwSignal<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    fn from(value: reactive_stores::Store<T>) -> Self {
+        use crate::sync_signal;
+
+        let internal_rw_signal = RwSignal::new(value.get_untracked());
+        let _ = sync_signal(value, internal_rw_signal);
+
+        Self::from(internal_rw_signal)
+    }
+}
+
 impl<T: Clone> MaybeRwSignal<T, LocalStorage> {
     pub fn into_signal(self) -> (Signal<T, LocalStorage>, WriteSignal<T, LocalStorage>) {
         match self {
@@ -219,12 +249,12 @@ impl<T: Clone> MaybeRwSignal<T, LocalStorage> {
                     });
                 });
 
-                (r.into(), w)
+                (r.into(), w.into())
             }
             Self::DynamicRw(r, w) => (r, w),
             Self::Static(v) => {
                 let (r, w) = signal_local(v.clone());
-                (Signal::from(r), w)
+                (Signal::from(r), w.into())
             }
         }
     }
