@@ -249,12 +249,12 @@ impl<T: Clone> MaybeRwSignal<T, LocalStorage> {
                     });
                 });
 
-                (r.into(), w.into())
+                (r.into(), w)
             }
             Self::DynamicRw(r, w) => (r, w),
             Self::Static(v) => {
                 let (r, w) = signal_local(v.clone());
-                (Signal::from(r), w.into())
+                (Signal::from(r), w)
             }
         }
     }
