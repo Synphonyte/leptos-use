@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.18.0"
+version = "0.18.1"
 edition = "2024"
 categories = ["gui", "web-programming", "wasm"]
 description = "Collection of essential Leptos utilities inspired by React-Use / VueUse"
@@ -267,6 +267,8 @@ use_geolocation = [
   "use_window",
   "web-sys/Coordinates",
   "web-sys/Geolocation",
+  "web-sys/GeolocationPosition",
+  "web-sys/GeolocationPositionError",
   "web-sys/Position",
   "web-sys/PositionError",
   "web-sys/PositionOptions",
