@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes 🍕
 
 - Added `GeolocationPosition` and `GeolocationPositionError` web-sys features as dependencies for use_geolocation.
+- Updated `web-sys` to min version `0.3.86` because of Geolocation API changes.
 
 ### Special thanks to our sponsor
 - @benwis
