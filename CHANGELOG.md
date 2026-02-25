@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Made things work with both, cfg flag `web_sys_unstable_apis` enabled and disabled (thanks to @emilbonnek).
 
+### Special thanks to our sponsor
+- @benwis
+
 ## (yanked) [0.18.1] - 2026-02-24
 
 ### Fixes 🍕
