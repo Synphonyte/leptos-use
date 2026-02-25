@@ -103,11 +103,11 @@ pub fn use_geolocation_with_options(
                         Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
 
                     *watch_handle.lock().unwrap() =
-                        geolocation.watch_position_with_error_callback_and_options(
+                        Some(geolocation.watch_position_with_error_callback_and_options(
                             update_position.as_ref().unchecked_ref(),
                             Some(on_error.as_ref().unchecked_ref()),
                             &position_options,
-                        ).ok();
+                        ));
 
                     update_position.forget();
                     on_error.forget();
