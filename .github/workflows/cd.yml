@@ -36,6 +36,8 @@ jobs:
 
       - name: Run tests (general)
         run: cargo test --features math,docs,ssr
+      - name: Run tests (unstable web_sys)
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr
       - name: Run tests (axum) use_cookie
         run: cargo test --features math,docs,ssr,axum --doc use_cookie
       - name: Run tests (axum) use_locale
