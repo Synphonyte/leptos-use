@@ -270,6 +270,7 @@ pub trait UseMouseEventExtractor {
 }
 
 impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoordType<E> {
+    #[allow(clippy::unnecessary_cast)]
     fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> Option<(f64, f64)> {
         match self {
             UseMouseCoordType::Page => Some((event.page_x() as f64, event.page_y() as f64)),

@@ -118,6 +118,7 @@ where
                     return;
                 }
 
+                #[allow(clippy::unnecessary_cast)]
                 let position = Position {
                     x: event.client_x() as f64 - x,
                     y: event.client_y() as f64 - y,
@@ -152,6 +153,7 @@ where
                 return;
             }
             if let Some(start_position) = start_position.get_untracked() {
+                #[allow(clippy::unnecessary_cast)]
                 let position = Position {
                     x: event.client_x() as f64 - start_position.x,
                     y: event.client_y() as f64 - start_position.y,

@@ -293,6 +293,7 @@ where
 
         let offset = options.offset;
 
+        #[allow(clippy::unnecessary_cast)]
         let set_arrived_state = move |target: web_sys::Element| {
             let style = window()
                 .get_computed_style(&target)

@@ -102,12 +102,19 @@ pub fn use_geolocation_with_options(
                     let on_error =
                         Closure::wrap(Box::new(on_error) as Box<dyn Fn(web_sys::PositionError)>);
 
-                    *watch_handle.lock().unwrap() =
-                        geolocation.watch_position_with_error_callback_and_options(
-                            update_position.as_ref().unchecked_ref(),
-                            Some(on_error.as_ref().unchecked_ref()),
-                            &position_options,
-                        ).ok();
+                    let handle = geolocation.watch_position_with_error_callback_and_options(
+                        update_position.as_ref().unchecked_ref(),
+                        Some(on_error.as_ref().unchecked_ref()),
+                        &position_options,
+                    );
+
+                    #[cfg(web_sys_unstable_apis)]
+                    let handle = Some(handle);
+
+                    #[cfg(not(web_sys_unstable_apis))]
+                    let handle = handle.ok();
+
+                    *watch_handle.lock().unwrap() = handle;
 
                     update_position.forget();
                     on_error.forget();

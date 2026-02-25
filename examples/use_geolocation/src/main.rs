@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_use::docs::demo_or_body;
-use leptos_use::{use_geolocation, UseGeolocationReturn};
+use leptos_use::{UseGeolocationReturn, use_geolocation};
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -40,7 +40,7 @@ fn Demo() -> impl IntoView {
                 }
             }}
             ,
-            located_at: {located_at} ,
+            located_at: {move || located_at.get()} ,
             error:
             {move || if let Some(error) = error.get() { error.message() } else { "None".to_string() }} ,
         </pre>
