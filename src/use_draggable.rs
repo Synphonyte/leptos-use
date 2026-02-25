@@ -119,8 +119,8 @@ where
                 }
 
                 let position = Position {
-                    x: event.client_x() - x,
-                    y: event.client_y() - y,
+                    x: event.client_x() as f64 - x,
+                    y: event.client_y() as f64 - y,
                 };
 
                 #[cfg(debug_assertions)]
@@ -153,8 +153,8 @@ where
             }
             if let Some(start_position) = start_position.get_untracked() {
                 let position = Position {
-                    x: event.client_x() - start_position.x,
-                    y: event.client_y() - start_position.y,
+                    x: event.client_x() as f64 - start_position.x,
+                    y: event.client_y() as f64 - start_position.y,
                 };
                 set_position.set(position);
 

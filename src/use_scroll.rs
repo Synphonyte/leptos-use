@@ -306,7 +306,7 @@ where
                     .get_property_value("flex-direction")
                     .expect("failed to get flex-direction");
 
-                let scroll_left = target.scroll_left();
+                let scroll_left = target.scroll_left() as f64;
                 let scroll_left_abs = scroll_left.abs();
 
                 directions.update(|directions| {
@@ -329,7 +329,7 @@ where
                 });
                 set_internal_x.set(scroll_left);
 
-                let mut scroll_top = target.scroll_top();
+                let mut scroll_top = target.scroll_top() as f64;
 
                 // patch for mobile compatibility
                 if target == document().unchecked_into::<web_sys::Element>() && scroll_top == 0.0 {

@@ -272,9 +272,9 @@ pub trait UseMouseEventExtractor {
 impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoordType<E> {
     fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> Option<(f64, f64)> {
         match self {
-            UseMouseCoordType::Page => Some((event.page_x(), event.page_y())),
-            UseMouseCoordType::Client => Some((event.client_x(), event.client_y())),
-            UseMouseCoordType::Screen => Some((event.screen_x(), event.client_y())),
+            UseMouseCoordType::Page => Some((event.page_x() as f64, event.page_y() as f64)),
+            UseMouseCoordType::Client => Some((event.client_x() as f64, event.client_y() as f64)),
+            UseMouseCoordType::Screen => Some((event.screen_x() as f64, event.screen_y() as f64)),
             UseMouseCoordType::Movement => {
                 Some((event.movement_x() as f64, event.movement_y() as f64))
             }
