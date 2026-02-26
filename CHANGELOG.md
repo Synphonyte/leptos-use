@@ -3,7 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.18.2] - 2026-02-25
+## [0.18.3] - 2026-02-25
+
+### Fixes 🍕
+
+- Updated `web-sys` to min version `^0.3.89` because of yanked versions of `js-sys`.
+
+### Special thanks to our sponsor
+- @benwis
+
+## (yanked) [0.18.2] - 2026-02-25
 
 ### Fixes 🍕
 
