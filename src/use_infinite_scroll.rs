@@ -51,6 +51,13 @@ use wasm_bindgen::JsCast;
 /// ```
 ///
 /// The returned signal is `true` while new data is being loaded.
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server-side, `use_infinite_scroll` will return a signal that is always `false`.
+/// It effectively does nothing on the server, as there are no scroll events to listen to.
 pub fn use_infinite_scroll<El, M, LFn, LFut>(el: El, on_load_more: LFn) -> Signal<bool>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M> + 'static,
@@ -71,143 +78,159 @@ where
     LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
     LFut: Future<Output = ()>,
 {
-    let UseInfiniteScrollOptions {
-        distance,
-        direction,
-        interval,
-        on_scroll,
-        event_listener_options,
-    } = options;
+    #[cfg(not(feature = "ssr"))]
+    {
+        let UseInfiniteScrollOptions {
+            distance,
+            direction,
+            interval,
+            on_scroll,
+            event_listener_options,
+        } = options;
 
-    let on_load_more = StoredValue::new(on_load_more);
+        let on_load_more = StoredValue::new(on_load_more);
 
-    let el = el.into_element_maybe_signal();
+        let el = el.into_element_maybe_signal();
 
-    let UseScrollReturn {
-        x,
-        y,
-        is_scrolling,
-        arrived_state,
-        directions,
-        measure,
-        ..
-    } = use_scroll_with_options(
-        el,
-        UseScrollOptions::default()
-            .on_scroll(move |evt| on_scroll(evt))
-            .event_listener_options(event_listener_options)
-            .offset(ScrollOffset::default().set_direction(direction, distance)),
-    );
+        let UseScrollReturn {
+            x,
+            y,
+            is_scrolling,
+            arrived_state,
+            directions,
+            measure,
+            ..
+        } = use_scroll_with_options(
+            el,
+            UseScrollOptions::default()
+                .on_scroll(move |evt| on_scroll(evt))
+                .event_listener_options(event_listener_options)
+                .offset(ScrollOffset::default().set_direction(direction, distance)),
+        );
 
-    let state = ScrollState {
-        x,
-        y,
-        is_scrolling,
-        arrived_state,
-        directions,
-    };
+        let state = ScrollState {
+            x,
+            y,
+            is_scrolling,
+            arrived_state,
+            directions,
+        };
 
-    let (is_loading, set_loading) = signal(false);
+        let (is_loading, set_loading) = signal(false);
 
-    let observed_element = Signal::derive_local(move || {
-        let el = el.get();
+        let observed_element = Signal::derive_local(move || {
+            let el = el.get();
 
-        el.map(|el| {
-            if el.is_instance_of::<web_sys::Window>() || el.is_instance_of::<web_sys::Document>() {
-                SendWrapper::new(
-                    document()
-                        .document_element()
-                        .expect("document element not found"),
-                )
-            } else {
-                el
-            }
-        })
-    });
-
-    let is_element_visible = use_element_visibility(observed_element);
-
-    let check_and_load = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
-
-    check_and_load.set_value(Some(Arc::new({
-        let measure = measure.clone();
-
-        move || {
-            let observed_element = observed_element.get_untracked();
-
-            if !is_element_visible.get_untracked() {
-                return;
-            }
-
-            if let Some(observed_element) = observed_element {
-                let scroll_height = observed_element.scroll_height();
-                let client_height = observed_element.client_height();
-                let scroll_width = observed_element.scroll_width();
-                let client_width = observed_element.client_width();
-
-                let is_narrower = if direction == Direction::Bottom || direction == Direction::Top {
-                    scroll_height <= client_height
-                } else {
-                    scroll_width <= client_width
-                };
-
-                if (state.arrived_state.get_untracked().get_direction(direction) || is_narrower)
-                    && !is_loading.get_untracked()
+            el.map(|el| {
+                if el.is_instance_of::<web_sys::Window>()
+                    || el.is_instance_of::<web_sys::Document>()
                 {
-                    set_loading.set(true);
+                    SendWrapper::new(
+                        document()
+                            .document_element()
+                            .expect("document element not found"),
+                    )
+                } else {
+                    el
+                }
+            })
+        });
 
-                    let measure = measure.clone();
-                    leptos::task::spawn_local(async move {
-                        #[cfg(debug_assertions)]
-                        let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+        let is_element_visible = use_element_visibility(observed_element);
 
-                        join!(
-                            on_load_more.with_value(|f| f(state)),
-                            sleep(Duration::from_millis(interval as u64))
-                        );
+        let check_and_load = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
 
-                        #[cfg(debug_assertions)]
-                        drop(zone);
+        check_and_load.set_value(Some(Arc::new({
+            let measure = measure.clone();
 
-                        set_loading.try_set(false);
-                        sleep(Duration::ZERO).await;
-                        measure();
-                        if let Some(check_and_load) = check_and_load.try_get_value().flatten() {
-                            check_and_load();
-                        }
-                    });
+            move || {
+                let observed_element = observed_element.get_untracked();
+
+                if !is_element_visible.get_untracked() {
+                    return;
+                }
+
+                if let Some(observed_element) = observed_element {
+                    let scroll_height = observed_element.scroll_height();
+                    let client_height = observed_element.client_height();
+                    let scroll_width = observed_element.scroll_width();
+                    let client_width = observed_element.client_width();
+
+                    let is_narrower =
+                        if direction == Direction::Bottom || direction == Direction::Top {
+                            scroll_height <= client_height
+                        } else {
+                            scroll_width <= client_width
+                        };
+
+                    if (state.arrived_state.get_untracked().get_direction(direction) || is_narrower)
+                        && !is_loading.get_untracked()
+                    {
+                        set_loading.set(true);
+
+                        let measure = measure.clone();
+                        leptos::task::spawn_local(async move {
+                            #[cfg(debug_assertions)]
+                            let zone =
+                                leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                            join!(
+                                on_load_more.with_value(|f| f(state)),
+                                sleep(Duration::from_millis(interval as u64))
+                            );
+
+                            #[cfg(debug_assertions)]
+                            drop(zone);
+
+                            set_loading.try_set(false);
+                            sleep(Duration::ZERO).await;
+                            measure();
+                            if let Some(check_and_load) = check_and_load.try_get_value().flatten() {
+                                check_and_load();
+                            }
+                        });
+                    }
                 }
             }
-        }
-    })));
+        })));
 
-    Effect::watch(
-        move || is_element_visible.get(),
-        move |visible, prev_visible, _| {
-            if *visible && !prev_visible.copied().unwrap_or_default() {
-                measure();
-            }
-        },
-        true,
-    );
+        Effect::watch(
+            move || is_element_visible.get(),
+            move |visible, prev_visible, _| {
+                if *visible && !prev_visible.copied().unwrap_or_default() {
+                    measure();
+                }
+            },
+            true,
+        );
 
-    Effect::watch(
-        move || state.arrived_state.get().get_direction(direction),
-        move |arrived, prev_arrived, _| {
-            if let Some(prev_arrived) = prev_arrived
-                && prev_arrived == arrived
-            {
-                return;
-            }
+        Effect::watch(
+            move || state.arrived_state.get().get_direction(direction),
+            move |arrived, prev_arrived, _| {
+                if let Some(prev_arrived) = prev_arrived
+                    && prev_arrived == arrived
+                {
+                    return;
+                }
 
-            check_and_load
-                .get_value()
-                .expect("check_and_load is set above")()
-        },
-        true,
-    );
+                check_and_load
+                    .get_value()
+                    .expect("check_and_load is set above")()
+            },
+            true,
+        );
 
-    is_loading.into()
+        is_loading.into()
+    }
+
+    #[cfg(feature = "ssr")]
+    {
+        let _ = el;
+        let _ = on_load_more;
+        let _ = options;
+
+        Signal::stored(false)
+    }
 }
 
 /// Options for [`use_infinite_scroll_with_options`].
