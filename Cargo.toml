@@ -24,7 +24,7 @@ codee = { version = "0.3.5", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
 futures-util = { version = "0.3", optional = true }
-gloo-timers = { version = "0.3", optional = true, features = ["futures"] }
+gloo-timers = { version = "0.4", optional = true, features = ["futures"] }
 http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
@@ -40,7 +40,7 @@ unic-langid = { version = "0.9", optional = true }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "^0.3.89", optional = true }
-reactive_stores = { version = "0.3.1", optional = true }
+reactive_stores = { version = "0.4.2", optional = true }
 
 [dev-dependencies]
 codee = { version = "0.3", features = [
@@ -49,9 +49,9 @@ codee = { version = "0.3", features = [
   "base64",
   "prost",
 ] }
-getrandom = { version = "0.3", features = ["wasm_js"] }
+getrandom = { version = "0.4", features = ["wasm_js"] }
 leptos_meta = "0.8"
-rand = "0.9"
+rand = "0.10"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
