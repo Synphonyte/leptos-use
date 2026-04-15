@@ -24,7 +24,7 @@ codee = { version = "0.3.5", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 default-struct-builder = "0.5"
 futures-util = { version = "0.3", optional = true }
-gloo-timers = { version = "0.3", optional = true, features = ["futures"] }
+gloo-timers = { version = "0.4", optional = true, features = ["futures"] }
 http1 = { version = "1", optional = true, package = "http" }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 js-sys = "0.3"
