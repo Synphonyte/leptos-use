@@ -64,6 +64,8 @@ jobs:
           cd docs/book
           mdbook build
           python3 post_build.py
+      - name: Copy context7.json to book output
+        run: cp context7.json docs/book/book/context7.json
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
