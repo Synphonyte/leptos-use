@@ -3,22 +3,26 @@
 /// Expand to common JavaScript operations that are too long in Rust.
 ///
 /// Holds three primary rules:
-/// - `attribute in object`: Check if the attribute is in the object (see [`JsValue::js_in`]).
+/// - `[attribute] in object`: Check if the attribute is in the object (see [`JsValue::js_in`]).
+///   Alternatively, `attribute in object` if `attribute` is a literal.
 /// - `object[attribute]`: Get the value of the object attribute (see [`Reflect::get`]).
 /// - `object[attribute] = val`: Assign to the attribute of the object (see [`Reflect::set`]).
 ///
 /// [`JsValue`]: wasm_bindgen::JsValue
 #[macro_export]
 macro_rules! js {
+    ([$attr:expr] in $($obj:tt)*) => {
+        wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
+    };
     ($attr:literal in $($obj:tt)*) => {
         wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
     };
-    ($obj:ident[$attr:literal] = $($val:tt)*) => {
+    ($obj:ident[$attr:expr] = $($val:tt)*) => {
         {
             let _ = js_sys::Reflect::set(&$obj, &$attr.into(), &($($val)*).into());
         }
     };
-    ($obj:ident[$attr:literal]) => {
+    ($obj:ident[$attr:expr]) => {
         js_sys::Reflect::get(&$obj, &$attr.into())
     };
 }
