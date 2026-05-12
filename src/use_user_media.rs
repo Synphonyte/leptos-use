@@ -233,7 +233,7 @@ async fn create_media(
 
                 if let Some(value) = zoom {
                     // TODO : once web_sys implements this add it to the methods above
-                    js! { js_value["zoom"] = value.to_jsvalue()};
+                    _ = js!(js_value["zoom"] = value.to_jsvalue());
                 }
 
                 constraints.set_video(&js_value);

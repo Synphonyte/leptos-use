@@ -18,9 +18,7 @@ macro_rules! js {
         wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
     };
     ($obj:ident[$attr:expr] = $($val:tt)*) => {
-        {
-            let _ = js_sys::Reflect::set(&$obj, &$attr.into(), &($($val)*).into());
-        }
+        js_sys::Reflect::set(&$obj, &$attr.into(), &($($val)*).into())
     };
     ($obj:ident[$attr:expr]) => {
         js_sys::Reflect::get(&$obj, &$attr.into())

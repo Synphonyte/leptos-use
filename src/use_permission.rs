@@ -122,7 +122,7 @@ async fn query_permission(
     use wasm_bindgen::JsCast;
 
     let permission_object = js_sys::Object::new();
-    js!(permission_object["name"] = permission);
+    _ = js!(permission_object["name"] = permission);
 
     let permission_state: web_sys::PermissionStatus = js_fut!(
         window()
