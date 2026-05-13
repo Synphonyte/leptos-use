@@ -714,48 +714,48 @@ impl From<UseIntlNumberFormatOptions> for js_sys::Object {
     fn from(options: UseIntlNumberFormatOptions) -> Self {
         let obj = Self::new();
 
-        js!(obj["compactDisplay"] = options.compact_display);
+        _ = js!(obj["compactDisplay"] = options.compact_display);
 
         if let Some(currency) = options.currency {
-            js!(obj["currency"] = currency);
+            _ = js!(obj["currency"] = currency);
         }
 
-        js!(obj["currencyDisplay"] = options.currency_display);
-        js!(obj["currencySign"] = options.currency_sign);
-        js!(obj["localeMatcher"] = options.locale_matcher);
-        js!(obj["notation"] = options.notation);
+        _ = js!(obj["currencyDisplay"] = options.currency_display);
+        _ = js!(obj["currencySign"] = options.currency_sign);
+        _ = js!(obj["localeMatcher"] = options.locale_matcher);
+        _ = js!(obj["notation"] = options.notation);
 
         if let Some(numbering_system) = options.numbering_system {
-            js!(obj["numberingSystem"] = numbering_system);
+            _ = js!(obj["numberingSystem"] = numbering_system);
         }
 
-        js!(obj["signDisplay"] = options.sign_display);
-        js!(obj["style"] = options.style);
+        _ = js!(obj["signDisplay"] = options.sign_display);
+        _ = js!(obj["style"] = options.style);
 
         if let Some(unit) = options.unit {
-            js!(obj["unit"] = unit);
+            _ = js!(obj["unit"] = unit);
         }
 
-        js!(obj["unitDisplay"] = options.unit_display);
-        js!(obj["useGrouping"] = options.use_grouping);
-        js!(obj["roundingMode"] = options.rounding_mode);
-        js!(obj["roundingPriority"] = options.rounding_priority);
-        js!(obj["roundingIncrement"] = options.rounding_increment);
-        js!(obj["trailingZeroDisplay"] = options.trailing_zero_display);
-        js!(obj["minimumIntegerDigits"] = options.minimum_integer_digits);
+        _ = js!(obj["unitDisplay"] = options.unit_display);
+        _ = js!(obj["useGrouping"] = options.use_grouping);
+        _ = js!(obj["roundingMode"] = options.rounding_mode);
+        _ = js!(obj["roundingPriority"] = options.rounding_priority);
+        _ = js!(obj["roundingIncrement"] = options.rounding_increment);
+        _ = js!(obj["trailingZeroDisplay"] = options.trailing_zero_display);
+        _ = js!(obj["minimumIntegerDigits"] = options.minimum_integer_digits);
 
         if let Some(minimum_fraction_digits) = options.minimum_fraction_digits {
-            js!(obj["minimumFractionDigits"] = minimum_fraction_digits);
+            _ = js!(obj["minimumFractionDigits"] = minimum_fraction_digits);
         }
         if let Some(maximum_fraction_digits) = options.maximum_fraction_digits {
-            js!(obj["maximumFractionDigits"] = maximum_fraction_digits);
+            _ = js!(obj["maximumFractionDigits"] = maximum_fraction_digits);
         }
 
         if let Some(minimum_significant_digits) = options.minimum_significant_digits {
-            js!(obj["minimumSignificantDigits"] = minimum_significant_digits);
+            _ = js!(obj["minimumSignificantDigits"] = minimum_significant_digits);
         }
         if let Some(maximum_significant_digits) = options.maximum_significant_digits {
-            js!(obj["maximumSignificantDigits"] = maximum_significant_digits);
+            _ = js!(obj["maximumSignificantDigits"] = maximum_significant_digits);
         }
 
         obj
