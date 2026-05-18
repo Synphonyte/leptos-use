@@ -28,6 +28,12 @@ use std::marker::PhantomData;
 /// # }
 /// ```
 ///
+/// ## Rescheduling
+///
+/// Calling `start` while a previous timer is still pending cancels that pending
+/// timer and schedules a fresh one. Only the most recent `start` call's
+/// callback will fire. This matches VueUse's `useTimeoutFn` semantics.
+///
 /// ## SendWrapped Return
 ///
 /// The returned closures `start` and `stop` are sendwrapped functions. They can
@@ -87,8 +93,10 @@ where
         start = {
             let timer = Arc::clone(&timer);
             let callback = callback.clone();
+            let clear = clear.clone();
 
             sendwrap_fn!(move |arg: Arg| {
+                clear();
                 set_pending.set(true);
 
                 let handle = set_timeout_with_handle(
@@ -145,6 +153,7 @@ where
     pub is_pending: Signal<bool>,
 
     /// Start the timeout. The `callback` will be called after `delay` milliseconds.
+    /// If a previous timer is still pending, it is cancelled and replaced.
     pub start: StartFn,
 
     /// Stop the timeout. If the timeout was still pending the `callback` is not called.
