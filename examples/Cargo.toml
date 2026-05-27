@@ -38,6 +38,7 @@ members = [
     "use_intersection_observer",
     "use_interval",
     "use_interval_fn",
+    "use_intl_datetime_format",
     "use_intl_number_format",
     "use_locale",
     "use_locales",

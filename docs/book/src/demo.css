@@ -80,6 +80,9 @@
 .demo-container input[type="text"],
 .demo-container input[type="search"],
 .demo-container input[type="number"],
+.demo-container input[type="date"],
+.demo-container input[type="time"],
+.demo-container input[type="datetime-local"],
 .demo-container textarea {
     display: block;
     font-size: 90%;
@@ -108,6 +111,9 @@
 .demo-container input[type="text"]:focus,
 .demo-container input[type="search"]:focus,
 .demo-container input[type="number"]:focus,
+.demo-container input[type="date"]:focus,
+.demo-container input[type="time"]:focus,
+.demo-container input[type="datetime-local"]:focus,
 .demo-container textarea:focus {
     border-color: var(--brand-color);
     outline: 4px solid var(--brand-color-outline);
