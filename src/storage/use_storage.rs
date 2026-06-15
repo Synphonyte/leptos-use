@@ -197,7 +197,7 @@ where
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{
-            WatchOptions, sendwrap_fn, use_event_listener, use_window, watch_with_options,
+            sendwrap_fn, use_event_listener, use_window, watch_with_options, WatchOptions,
         };
         use send_wrapper::SendWrapper;
 
@@ -357,7 +357,7 @@ where
         }
 
         if delaying.get_value() {
-            request_animation_frame({
+            let _ = request_animation_frame({
                 let fetch_from_storage = fetch_from_storage.clone();
                 move || {
                     delaying.set_value(false);

@@ -132,7 +132,7 @@ where
         }
 
         // To get around style attributes on node_refs that are not applied after the first render
-        set_timeout(update_css_var.clone(), Duration::ZERO);
+        set_timeout(update_css_var.clone(), Duration::ZERO).expect("Failed to set timeout");
 
         let _ = watch_with_options(
             move || (el_signal.get(), prop.get()),

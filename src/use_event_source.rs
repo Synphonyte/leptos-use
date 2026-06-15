@@ -1,5 +1,5 @@
-use crate::ReconnectLimit;
 use crate::core::ConnectionReadyState;
+use crate::ReconnectLimit;
 use codee::Decoder;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -332,7 +332,7 @@ where
                                                 }
                                             },
                                             Duration::from_millis(reconnect_interval),
-                                        );
+                                        ).expect("Failed to set timeout");
                                     } else {
                                         #[cfg(debug_assertions)]
                                         let _z =

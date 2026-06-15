@@ -453,7 +453,7 @@ where
                     && reconnect_timer_ref.get_value().is_none()
                 {
                     reconnect_timer_ref.set_value(
-                        set_timeout_with_handle(
+                        set_timeout(
                             move || {
                                 if unmounted.load(std::sync::atomic::Ordering::Relaxed) {
                                     return;

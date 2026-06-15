@@ -80,7 +80,7 @@ where
                 if max_timer.is_none() {
                     let timer = Arc::clone(&timer);
                     let invok = invoke.clone();
-                    *max_timer = set_timeout_with_handle(
+                    *max_timer = set_timeout(
                         move || {
                             clear_timeout(&timer);
                             invok();
@@ -94,7 +94,7 @@ where
             let max_timer = Arc::clone(&max_timer);
 
             // Create the regular timer. Clears the max timer on invoke
-            *timer.lock().unwrap() = set_timeout_with_handle(
+            *timer.lock().unwrap() = set_timeout(
                 move || {
                     clear_timeout(&max_timer);
                     invoke();

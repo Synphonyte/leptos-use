@@ -5,7 +5,7 @@ use std::{ops::Deref, rc::Rc, time::Duration};
 use wasm_bindgen::JsCast;
 
 use crate::{
-    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
+    use_mutation_observer_with_options, UseMutationObserverOptions, UseMutationObserverReturn,
 };
 
 /// Used as an argument type to make it easily possible to pass either
@@ -130,7 +130,7 @@ where
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
         ElementsMaybeSignalType(Signal::stored(vec![
-            self.map(|el| SendWrapper::new(T::from(el).clone())),
+            self.map(|el| SendWrapper::new(T::from(el).clone()))
         ]))
     }
 }
@@ -143,9 +143,9 @@ where
     T: From<E> + Clone,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType(Signal::stored(vec![
-            self.as_ref().map(|e| SendWrapper::new(T::from(e.clone()))),
-        ]))
+        ElementsMaybeSignalType(Signal::stored(vec![self
+            .as_ref()
+            .map(|e| SendWrapper::new(T::from(e.clone())))]))
     }
 }
 
@@ -178,12 +178,10 @@ where
             ElementsMaybeSignalType(Signal::stored(vec![]))
         } else {
             ElementsMaybeSignalType(Signal::derive(move || {
-                vec![
-                    document()
-                        .query_selector(self.get().as_ref())
-                        .unwrap_or_default()
-                        .map(|el| SendWrapper::new(T::from(el).clone())),
-                ]
+                vec![document()
+                    .query_selector(self.get().as_ref())
+                    .unwrap_or_default()
+                    .map(|el| SendWrapper::new(T::from(el).clone()))]
             }))
         }
     }
@@ -313,7 +311,8 @@ where
             }
         },
         Duration::ZERO,
-    );
+    )
+    .expect("Failed to set timeout");
 
     el_signal.into()
 }

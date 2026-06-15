@@ -613,7 +613,7 @@ where
                     let elapsed = Arc::clone(&elapsed);
                     let create_expiration_timeout = Arc::clone(&create_expiration_timeout);
 
-                    *timeout.lock().unwrap() = set_timeout_with_handle(
+                    *timeout.lock().unwrap() = set_timeout(
                         move || {
                             let elapsed = elapsed.fetch_add(
                                 timeout_length as i32,

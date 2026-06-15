@@ -121,7 +121,7 @@ pub fn use_idle_with_options(
             sendwrap_fn!(move || {
                 set_idle.set(false);
                 if let Some(timer) = timer.replace(
-                    set_timeout_with_handle(
+                    set_timeout(
                         move || set_idle.set(true),
                         Duration::from_millis(timeout),
                     )
