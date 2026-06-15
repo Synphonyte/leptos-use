@@ -90,7 +90,7 @@ where
                 let last_exec = Arc::clone(&last_exec);
                 let is_leading = Arc::clone(&is_leading);
                 *timer.lock().unwrap() =
-                    set_timeout_with_handle(
+                    set_timeout(
                         move || {
                             *last_exec.lock().unwrap() = Some(now());
                             is_leading.store(true, std::sync::atomic::Ordering::Relaxed);
@@ -108,7 +108,7 @@ where
 
             if !options.leading && timer.is_none() {
                 let is_leading = Arc::clone(&is_leading);
-                *timer = set_timeout_with_handle(
+                *timer = set_timeout(
                         move || {
                             is_leading.store(true, std::sync::atomic::Ordering::Relaxed);
                         },

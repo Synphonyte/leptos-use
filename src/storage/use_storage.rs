@@ -362,7 +362,7 @@ where
         }
 
         if delaying.get_value() {
-            request_animation_frame({
+            let _ = request_animation_frame({
                 let fetch_from_storage = fetch_from_storage.clone();
                 move || {
                     delaying.set_value(false);

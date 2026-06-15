@@ -99,7 +99,7 @@ where
                 clear();
                 set_pending.set(true);
 
-                let handle = set_timeout_with_handle(
+                let handle = set_timeout(
                     {
                         let timer = Arc::clone(&timer);
                         let callback = callback.clone();

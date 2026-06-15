@@ -138,7 +138,7 @@ where
             clean();
 
             timer.set(
-                set_interval_with_handle(
+                set_interval(
                     callback,
                     Duration::from_millis(interval_value.min(i32::MAX as u64)),
                 )

@@ -339,7 +339,7 @@ where
                                         clear_reconnect_timer();
 
                                         reconnect_timer.set_value(
-                                            set_timeout_with_handle(
+                                            set_timeout(
                                                 move || {
                                                     reconnect_timer.set_value(None);
 

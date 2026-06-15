@@ -213,7 +213,7 @@ where
                 move |event| {
                     let mut handler = handler.clone();
 
-                    let _ = set_timeout_with_handle(
+                    let _ = set_timeout(
                         move || {
                             if let Some(el) = target.get_untracked()
                                 && let Some(active_element) = document().active_element()

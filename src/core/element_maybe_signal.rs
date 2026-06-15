@@ -4,7 +4,7 @@ use send_wrapper::SendWrapper;
 use std::{ops::Deref, rc::Rc, time::Duration};
 
 use crate::{
-    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
+    use_mutation_observer_with_options, UseMutationObserverOptions, UseMutationObserverReturn,
 };
 
 /// Used as an argument type to make it easily possible to pass either
@@ -249,7 +249,8 @@ where
             }
         },
         Duration::ZERO,
-    );
+    )
+    .expect("Failed to create timeout");
 
     el_signal.into()
 }

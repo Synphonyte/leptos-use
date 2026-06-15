@@ -1,5 +1,5 @@
 use crate::core::IntoElementMaybeSignal;
-use crate::{UseEventListenerOptions, use_event_listener_with_options};
+use crate::{use_event_listener_with_options, UseEventListenerOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
@@ -73,7 +73,7 @@ where
 
             if delay > 0 {
                 timer.set_value(
-                    set_timeout_with_handle(
+                    set_timeout(
                         move || set_hovered.set(entering),
                         std::time::Duration::from_millis(delay),
                     )
