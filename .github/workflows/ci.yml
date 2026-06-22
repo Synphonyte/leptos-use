@@ -13,6 +13,8 @@ concurrency:
     group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   integrity:
     name: Integrity Checks on Rust ${{ matrix.toolchain }}
@@ -26,10 +28,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
           targets: wasm32-unknown-unknown

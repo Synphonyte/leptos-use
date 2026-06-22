@@ -3,11 +3,26 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.19.0] - 2026-06-22
 
 ### New Functions 🚀
 
 - `use_intl_datetime_format`
+- `js!` macro is now documented as well as more powerful (thanks @Davoodeh)
+
+### Breaking Changes 🛠
+
+- Updated a bunch of dependencies
+
+### Changes
+
+- Made `use_infinite_scroll` SSR safe
+
+### Fixes 🍕
+
+- fixed tracking context warning with use_mutation_observer.
+- `use_timeout_fn` now properly handles timeouts and cleanup when repeatedly calling `start` (thanks @EvanCarroll).
+- enabling only the `use_favicon` Cargo feature now works correctly (thanks @arnaudpoullet-dkt).
 
 ## [0.18.3] - 2026-02-25
 

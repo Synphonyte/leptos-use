@@ -249,6 +249,7 @@ pub use use_interval::*;
 #[cfg(feature = "use_interval_fn")]
 pub use use_interval_fn::*;
 #[cfg(feature = "use_intl_datetime_format")]
+#[allow(ambiguous_glob_reexports)]
 pub use use_intl_datetime_format::*;
 #[cfg(feature = "use_intl_number_format")]
 pub use use_intl_number_format::*;
