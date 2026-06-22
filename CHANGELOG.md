@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_timeout_fn` now properly handles timeouts and cleanup when repeatedly calling `start` (thanks @EvanCarroll).
 - enabling only the `use_favicon` Cargo feature now works correctly (thanks @arnaudpoullet-dkt).
 
+### Special thanks to our sponsor
+- @benwis
+
 ## [0.18.3] - 2026-02-25
 
 ### Fixes 🍕
