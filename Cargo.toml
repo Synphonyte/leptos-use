@@ -266,7 +266,10 @@ use_event_source = [
   "web-sys/EventSourceInit",
   "dep:codee",
 ]
-use_favicon = []
+use_favicon = [
+  "dep:web-sys",
+  "web-sys/HtmlLinkElement",
+]
 use_geolocation = [
   "use_window",
   "web-sys/Coordinates",
