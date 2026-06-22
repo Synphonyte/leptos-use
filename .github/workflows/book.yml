@@ -22,7 +22,7 @@ jobs:
           override: true
           components: rust-src
       - name: Install mdbook I
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.81.11
         with:
           tool: cargo-binstall,mdbook@0.4
       - name: Install mdbook II
