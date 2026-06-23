@@ -10,21 +10,20 @@ fn Demo() -> impl IntoView {
     let visibility = use_document_visibility();
 
     Effect::watch(
-        visibility,
+        move || visibility(),
         move |cur, prev, _| {
-            if let Some(prev) = prev {
-                if *cur == web_sys::VisibilityState::Visible
-                    && *prev == web_sys::VisibilityState::Hidden
-                {
-                    set_message("🎉 Welcome back!");
+            if let Some(prev) = prev
+                && *cur == web_sys::VisibilityState::Visible
+                && *prev == web_sys::VisibilityState::Hidden
+            {
+                set_message("🎉 Welcome back!");
 
-                    set_timeout(
-                        move || {
-                            set_message(start_message);
-                        },
-                        Duration::from_millis(3000),
-                    )
-                }
+                set_timeout(
+                    move || {
+                        set_message(start_message);
+                    },
+                    Duration::from_millis(3000),
+                );
             }
         },
         false,
