@@ -11,7 +11,7 @@ fn Demo() -> impl IntoView {
     let focused = use_window_focus();
 
     Effect::watch(
-        focused,
+        move || focused(),
         move |focused, _, _| {
             if *focused {
                 set_message(start_message);
