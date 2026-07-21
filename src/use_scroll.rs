@@ -306,6 +306,7 @@ where
                 let flex_direction = style
                     .get_property_value("flex-direction")
                     .expect("failed to get flex-direction");
+                let direction = style.get_property_value("direction").unwrap_or_default();
 
                 let scroll_left = target.scroll_left() as f64;
                 let scroll_left_abs = scroll_left.abs();
@@ -319,8 +320,16 @@ where
                 let right = scroll_left_abs + target.client_width() as f64
                     >= target.scroll_width() as f64 - offset.right - ARRIVED_STATE_THRESHOLD_PIXELS;
 
+                // Right-to-left containers use the "negative scrollLeft" model:
+                // 0 is the right-hand edge and the value decreases towards the
+                // left one, so taking the absolute value above reports the two
+                // edges swapped. A row-reverse flex box swaps them as well, and
+                // a container that is both swaps twice.
+                let is_reversed =
+                    (display == "flex" && flex_direction == "row-reverse") != (direction == "rtl");
+
                 arrived_state.update(|arrived_state| {
-                    if display == "flex" && flex_direction == "row-reverse" {
+                    if is_reversed {
                         arrived_state.left = right;
                         arrived_state.right = left;
                     } else {
