@@ -228,7 +228,11 @@ impl From<UseMutationObserverOptions> for web_sys::MutationObserverInit {
 
         init.set_subtree(subtree);
         init.set_child_list(child_list);
-        init.set_attributes(attributes);
+        // `attributes` is always written, so it can never be absent and cannot
+        // pick up the browser's implicit default. The DOM rejects `observe()`
+        // when `attribute_filter` or `attribute_old_value` is present while
+        // `attributes` is false, so apply the documented default here.
+        init.set_attributes(attributes || attribute_filter.is_some() || attribute_old_value);
         init.set_attribute_old_value(attribute_old_value);
         init.set_character_data_old_value(character_data_old_value);
 
