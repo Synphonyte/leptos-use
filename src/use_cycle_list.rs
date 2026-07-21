@@ -96,6 +96,10 @@ where
     let set = move |i: usize| {
         let length = list.read().len();
 
+        if length == 0 {
+            return state.get_untracked();
+        }
+
         let index = i % length;
         let value = list.read()[index].clone();
 
@@ -110,6 +114,10 @@ where
 
     let shift = move |delta: i64| {
         let length = list.read().len() as i64;
+
+        if length == 0 {
+            return state.get_untracked();
+        }
 
         let i = index.get_untracked() as i64 + delta;
         let index = (i % length) + length;
