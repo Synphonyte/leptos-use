@@ -96,6 +96,11 @@ pub fn use_display_media_with_options(
         stream.set(None);
     };
 
+    // Without this the tracks keep running (and the screen sharing indicator
+    // stays on) after the owner is disposed, with no handle left to stop them.
+    #[cfg(not(feature = "ssr"))]
+    on_cleanup(_stop);
+
     let start = sendwrap_fn!(move || {
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
             leptos::task::spawn_local(async move {
