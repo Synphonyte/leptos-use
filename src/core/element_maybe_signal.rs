@@ -325,8 +325,12 @@ where
     T: From<E> + Clone,
 {
     fn into_element_maybe_signal_type(self) -> ElementMaybeSignalType<T> {
-        ElementMaybeSignalType(Signal::derive(move || {
-            self.get().map(|v| SendWrapper::new(T::from(v.take())))
-        }))
+        if cfg!(feature = "ssr") {
+            ElementMaybeSignalType(Signal::stored(None))
+        } else {
+            ElementMaybeSignalType(Signal::derive(move || {
+                self.get().map(|v| SendWrapper::new(T::from(v.take())))
+            }))
+        }
     }
 }
