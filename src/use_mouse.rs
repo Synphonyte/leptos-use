@@ -287,7 +287,7 @@ impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoord
         match self {
             UseMouseCoordType::Page => Some((touch.page_x() as f64, touch.page_y() as f64)),
             UseMouseCoordType::Client => Some((touch.client_x() as f64, touch.client_y() as f64)),
-            UseMouseCoordType::Screen => Some((touch.screen_x() as f64, touch.client_y() as f64)),
+            UseMouseCoordType::Screen => Some((touch.screen_x() as f64, touch.screen_y() as f64)),
             UseMouseCoordType::Movement => None,
             UseMouseCoordType::Custom(extractor) => extractor.extract_touch_coords(touch),
         }

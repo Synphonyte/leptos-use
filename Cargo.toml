@@ -58,6 +58,7 @@ unic-langid = { version = "0.9", features = ["macros"] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 any_spawner = { version = "0.3", features = ["wasm-bindgen"] }
+js-sys = "0.3"
 # `csr` pulls in `reactive_graph/effects`, without which `Effect`s are compiled
 # out and effect-driven hooks cannot be tested in the browser.
 leptos = { version = "0.8", features = ["csr"] }
