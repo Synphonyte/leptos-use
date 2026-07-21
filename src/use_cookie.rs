@@ -194,6 +194,8 @@ where
 
     let jar = StoredValue::new(CookieJar::new());
 
+    let restart_expiration;
+
     let (cookie, set_cookie) = if !has_expired {
         let ssr_cookies_header_getter = Arc::clone(&ssr_cookies_header_getter);
 
@@ -209,13 +211,15 @@ where
         });
 
         let out = signal(new_cookie.flatten());
-        handle_expiration(delay, out.1);
+        restart_expiration = handle_expiration(delay, out.1);
         out
     } else {
         debug_warn!(
             "not setting cookie '{}' because it has already expired",
             cookie_name
         );
+
+        restart_expiration = None;
 
         signal(None::<T>)
     };
@@ -238,6 +242,7 @@ where
             let on_error = Arc::clone(&on_error);
             let domain = domain.clone();
             let path = path.clone();
+            let restart_expiration = restart_expiration.clone();
 
             move || {
                 if readonly {
@@ -285,6 +290,12 @@ where
                             Arc::clone(&ssr_cookies_header_getter),
                         );
                     });
+
+                    // The cookie was just written with a fresh `Max-Age`, so
+                    // the countdown that clears the signal starts over too.
+                    if let Some(restart_expiration) = &restart_expiration {
+                        restart_expiration();
+                    }
 
                     post(&value);
                 }
@@ -567,7 +578,13 @@ fn read_cookies_string(
     cookies
 }
 
-fn handle_expiration<T>(delay: Option<i64>, set_cookie: WriteSignal<Option<T>>)
+/// Clears the cookie signal once `delay` has elapsed. Returns a closure that
+/// restarts the countdown, which has to be called whenever the cookie is
+/// rewritten, because writing renews the cookie's own `Max-Age`.
+fn handle_expiration<T>(
+    delay: Option<i64>,
+    set_cookie: WriteSignal<Option<T>>,
+) -> Option<Arc<dyn Fn() + Send + Sync>>
 where
     T: Send + Sync + 'static,
 {
@@ -643,6 +660,21 @@ where
             {
                 create_expiration_timeout();
             };
+
+            return Some(Arc::new({
+                let elapsed = Arc::clone(&elapsed);
+                let create_expiration_timeout = Arc::clone(&create_expiration_timeout);
+
+                move || {
+                    elapsed.store(0, std::sync::atomic::Ordering::Relaxed);
+
+                    if let Some(create_expiration_timeout) =
+                        create_expiration_timeout.lock().unwrap().as_ref()
+                    {
+                        create_expiration_timeout();
+                    }
+                }
+            }));
         }
 
         #[cfg(feature = "ssr")]
@@ -651,6 +683,8 @@ where
             let _ = delay;
         }
     }
+
+    None
 }
 
 #[cfg(not(feature = "ssr"))]
