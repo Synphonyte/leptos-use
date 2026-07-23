@@ -92,7 +92,7 @@ wasm-bindgen-test = "0.3"
 [package]
 name = "leptos-use-examples"
 version = "0.3.3"
-edition = "2021"
+edition = "2024"
 
 [profile.release]
 opt-level = 'z'
