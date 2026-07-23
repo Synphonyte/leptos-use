@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.1] - 2026-07-23
+
+### Fixes 🍕
+
+- `use_cycle_list`: panic when the list becomes empty (thanks @sabify)
+- `use_user_media` / `use_display_media`: devices not released on unmount (thanks @sabify)
+- `watch_with_options`: previous return value lost across filtered runs (thanks @sabify)
+
 ## [0.19.0] - 2026-06-22
 
 ### New Functions 🚀
