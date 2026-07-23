@@ -109,8 +109,12 @@ where
 
         let update_css_var = move || {
             if let Some(el) = el_signal.get_untracked() {
+                // `get_property_value` reports an undefined custom property as
+                // an empty string rather than an error, so an empty result is
+                // what has to fall through to `initial_value`.
                 if let Ok(Some(style)) = window().get_computed_style(&el)
                     && let Ok(value) = style.get_property_value(&prop.read_untracked())
+                    && !value.trim().is_empty()
                 {
                     set_variable.update(|var| *var = value.trim().to_string());
                     return;

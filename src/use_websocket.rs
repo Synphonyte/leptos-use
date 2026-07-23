@@ -694,23 +694,30 @@ where
         // Open connection
         open = sendwrap_fn!(move || {
             reconnect_times_ref.set_value(0);
+            // Reopening on purpose also re-arms automatic reconnects, which
+            // `close()` had switched off.
+            manually_closed_ref.set_value(false);
             if let Some(connect) = connect_ref.get_value() {
                 connect();
             }
         });
 
         // Close connection
-        close = {
-            reconnect_timer_ref.set_value(None);
-
-            sendwrap_fn!(move || {
-                stop_heartbeat();
-                manually_closed_ref.set_value(true);
-                if let Some(web_socket) = ws.get_value() {
-                    let _ = web_socket.close();
+        close = sendwrap_fn!(move || {
+            stop_heartbeat();
+            manually_closed_ref.set_value(true);
+            // A reconnect scheduled by an earlier failure would otherwise still
+            // fire and reopen the socket behind the caller's back. Dropping the
+            // handle is not enough, it has to be cleared.
+            reconnect_timer_ref.update_value(|timer| {
+                if let Some(timer) = timer.take() {
+                    timer.clear();
                 }
-            })
-        };
+            });
+            if let Some(web_socket) = ws.get_value() {
+                let _ = web_socket.close();
+            }
+        });
 
         // Open connection (not called if option `manual` is true)
         Effect::new({

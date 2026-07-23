@@ -92,10 +92,14 @@ pub fn use_raf_fn_with_options(
         }}
     };
 
+    // Shared with `pause` so that resuming starts a fresh measurement instead
+    // of reporting the whole paused duration as a single frame delta.
+    let previous_frame_timestamp = Rc::new(Cell::new(0.0_f64));
+
     let loop_fn = {
         #[allow(clippy::clone_on_copy)]
         let request_next_frame = request_next_frame.clone();
-        let previous_frame_timestamp = Cell::new(0.0_f64);
+        let previous_frame_timestamp = Rc::clone(&previous_frame_timestamp);
 
         move |timestamp: f64| {
             if !is_active.try_get_untracked().unwrap_or_default() {
@@ -134,6 +138,7 @@ pub fn use_raf_fn_with_options(
 
     let pause = sendwrap_fn!(move || {
         set_active.set(false);
+        previous_frame_timestamp.set(0.0);
 
         let handle = raf_handle.get();
         if let Some(handle) = handle {

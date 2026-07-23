@@ -75,6 +75,7 @@ where
         cfg_if! { if #[cfg(not(feature = "ssr"))] {
             // Create the max_timer. Clears the regular timer on invoke
             if let Some(max_duration) = max_duration {
+                let max_timer_slot = Arc::clone(&max_timer);
                 let mut max_timer = max_timer.lock().unwrap();
 
                 if max_timer.is_none() {
@@ -83,6 +84,11 @@ where
                     *max_timer = set_timeout_with_handle(
                         move || {
                             clear_timeout(&timer);
+                            // This handle has just fired. Release the slot so
+                            // that the next burst can arm a new max_wait timer,
+                            // before running the callback which may itself call
+                            // the debounced function again.
+                            *max_timer_slot.lock().unwrap() = None;
                             invok();
                         },
                         Duration::from_millis(max_duration as u64),

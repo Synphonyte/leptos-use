@@ -371,12 +371,16 @@ where
     C: IntoIterator<Item = SendWrapper<Js>>,
 {
     fn into_elements_maybe_signal_type(self) -> ElementsMaybeSignalType<T> {
-        ElementsMaybeSignalType(Signal::derive(move || {
-            self.get()
-                .into_iter()
-                .map(|t| Some(SendWrapper::new(T::from(t.take()))))
-                .collect()
-        }))
+        if cfg!(feature = "ssr") {
+            ElementsMaybeSignalType(Signal::stored(vec![]))
+        } else {
+            ElementsMaybeSignalType(Signal::derive(move || {
+                self.get()
+                    .into_iter()
+                    .map(|t| Some(SendWrapper::new(T::from(t.take()))))
+                    .collect()
+            }))
+        }
     }
 }
 

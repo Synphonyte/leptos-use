@@ -53,11 +53,13 @@ getrandom = { version = "0.4", features = ["wasm_js"] }
 gloo-timers = { version = "0.4", features = ["futures"] }
 leptos_meta = "0.8"
 rand = "0.10"
+send_wrapper = "0.6"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 any_spawner = { version = "0.3", features = ["wasm-bindgen"] }
+js-sys = "0.3"
 # `csr` pulls in `reactive_graph/effects`, without which `Effect`s are compiled
 # out and effect-driven hooks cannot be tested in the browser.
 leptos = { version = "0.8", features = ["csr"] }
