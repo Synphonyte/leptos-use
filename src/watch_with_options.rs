@@ -141,7 +141,13 @@ where
                 filtered_callback().lock().unwrap().take()
             };
 
-            prev_callback_value.replace(callback_value);
+            // Only overwrite when the callback actually ran. A debounce or
+            // throttle filter that merely rescheduled its timer leaves the
+            // slot empty, and overwriting would destroy the value that the
+            // next invocation has to receive.
+            if callback_value.is_some() {
+                prev_callback_value.replace(callback_value);
+            }
         },
         options.immediate,
     );
