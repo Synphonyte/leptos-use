@@ -22,7 +22,9 @@ def build_and_copy_demo(script_dir, category, md_name):
     name = md_name[:-3]
     example_dir = os.path.normpath(os.path.join(script_dir, f"../../examples/{name}"))
     if os.path.exists(example_dir):
-        p = subprocess.Popen(["trunk", "build", "--release"], cwd=example_dir)
+        env = os.environ.copy()
+        env["RUSTFLAGS"] = (env.get("RUSTFLAGS", "") + " --cfg=web_sys_unstable_apis").strip()
+        p = subprocess.Popen(["trunk", "build", "--release"], cwd=example_dir, env=env)
         code = p.wait()
 
         if code != 0:
