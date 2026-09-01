@@ -3,6 +3,42 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.2] - 2026-08-31
+
+### Fixes 🍕
+
+- `use_broadcast_channel`: drop dead close-event listener (thanks @sabify)
+- `use_storage`: detect external notifications on first watch tick, stop panicking on custom event creation, and reset value synchronously on remove (thanks @sabify)
+- `use_cookie`: restart expiration countdown on every write and suppress broadcast echoes to avoid cross-tab loops (thanks @sabify)
+- `use_websocket`: restore reconnects on reopen/cancel on close and ignore events from superseded connections (thanks @sabify)
+- `use_event_source`: cancel pending reconnect on close (thanks @sabify)
+- `use_draggable`: pass element position to `on_start` (thanks @sabify)
+- `use_mouse_in_element`: classify left/top edges as inside (thanks @sabify)
+- `use_mouse`: report touch `Screen` coordinates in screen space (thanks @sabify)
+- `use_scroll`: report horizontal edges of `rtl` containers correctly (thanks @sabify)
+- `use_color_mode`: apply mode to custom targets that mount late (thanks @sabify)
+- `use_geolocation`: clear previous watch on resume (thanks @sabify)
+- `use_drop_zone`: prevent drag counter underflow (thanks @sabify)
+- `use_infinite_scroll`: stop re-triggering loads when no new content arrives (thanks @sabify)
+- `use_screen_orientation`: stop panicking when orientation API is unavailable (thanks @sabify)
+- `use_permission`: keep reactive owner so change listener is cleaned up (thanks @sabify)
+- `use_mutation_observer`: honour documented default of `attributes` (thanks @sabify)
+- `use_css_var`: fall back to `initial_value` for undefined variables (thanks @sabify)
+- `use_raf_fn`: reset frame timestamp when pausing (thanks @sabify)
+- `use_interval_fn`: don't fire immediate callback again when interval changes (thanks @sabify)
+- `use_locale`: prefer exact locale match over first loose match (thanks @sabify)
+- `signal_debounced` / `signal_throttled`: react to filter period changes instead of sampling once (thanks @sabify)
+- `use_throttle_fn`: wait full duration for first trailing call when leading is disabled (thanks @sabify)
+- `use_debounce_fn` / `debounce_filter`: clear `max_wait` timer on cleanup and re-arm after it fires (thanks @sabify)
+- `core`: degrade gracefully when `location.href` is inaccessible, stop panicking on pre-epoch system clock, and don't unwrap `SendWrapper` element signals on server (thanks @sabify)
+- `utils`: return `None` from `header()` when header is absent (thanks @sabify)
+- clamp timer durations to `i32::MAX` for browser timers (`use_idle`, `use_interval_fn`, `use_timeout_fn`, debounce/throttle) (thanks @sabify)
+- `use_web_lock`: track `web-sys` 0.3.104 renames (`request_with_options`) (thanks @EvanCarroll)
+
+### Changes 🔥
+
+- use passive event listeners where possible (thanks @maz)
+
 ## [0.19.1] - 2026-07-23
 
 ### Fixes 🍕
