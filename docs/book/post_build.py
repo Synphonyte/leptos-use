@@ -22,8 +22,15 @@ def build_and_copy_demo(script_dir, category, md_name):
     name = md_name[:-3]
     example_dir = os.path.normpath(os.path.join(script_dir, f"../../examples/{name}"))
     if os.path.exists(example_dir):
-        env = os.environ.copy()
-        env["RUSTFLAGS"] = (env.get("RUSTFLAGS", "") + " --cfg=web_sys_unstable_apis").strip()
+        # only inject web_sys_unstable_apis for examples that have it in their
+        # .cargo/config.toml (e.g. use_web_lock, use_webtransport)
+        cargo_config = os.path.join(example_dir, ".cargo", "config.toml")
+        env = None
+        if os.path.exists(cargo_config):
+            with open(cargo_config, "r") as f:
+                if "web_sys_unstable_apis" in f.read():
+                    env = os.environ.copy()
+                    env["RUSTFLAGS"] = (env.get("RUSTFLAGS", "") + " --cfg=web_sys_unstable_apis").strip()
         p = subprocess.Popen(["trunk", "build", "--release"], cwd=example_dir, env=env)
         code = p.wait()
 
