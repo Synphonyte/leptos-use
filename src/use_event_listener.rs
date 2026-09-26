@@ -10,7 +10,6 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use std::rc::Rc;
     use wasm_bindgen::closure::Closure;
     use wasm_bindgen::JsCast;
-    use wasm_bindgen::convert::FromWasmAbi;
 }}
 
 /// Use EventListener with ease.
@@ -105,7 +104,7 @@ where
     Ev: EventDescriptor + 'static,
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
-    <Ev as EventDescriptor>::EventType: FromWasmAbi,
+    <Ev as EventDescriptor>::EventType: wasm_bindgen::convert::FromWasmAbi,
 {
     use_event_listener_with_options(target, event, handler, UseEventListenerOptions::default())
 }
@@ -123,7 +122,7 @@ where
     Ev: EventDescriptor + 'static,
     El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
     F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
-    <Ev as EventDescriptor>::EventType: FromWasmAbi,
+    <Ev as EventDescriptor>::EventType: wasm_bindgen::convert::FromWasmAbi,
 {
     #[cfg(feature = "ssr")]
     {
