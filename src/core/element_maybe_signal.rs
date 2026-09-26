@@ -4,7 +4,7 @@ use send_wrapper::SendWrapper;
 use std::{ops::Deref, rc::Rc, time::Duration};
 
 use crate::{
-    use_mutation_observer_with_options, UseMutationObserverOptions, UseMutationObserverReturn,
+    UseMutationObserverOptions, UseMutationObserverReturn, use_mutation_observer_with_options,
 };
 
 /// Used as an argument type to make it easily possible to pass either
