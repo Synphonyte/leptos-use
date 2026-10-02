@@ -126,12 +126,15 @@ where
         {
             *ios_workaround = true;
             if let Some(body) = document().body() {
+                // A no-op closure, not `Function::default()`: that is `new Function("")`, which a
+                // CSP without 'unsafe-eval' refuses, aborting hydration on iOS.
+                let noop = wasm_bindgen::closure::Closure::<dyn Fn()>::new(|| {}).into_js_value();
                 let children = body.children();
                 for i in 0..children.length() {
                     let _ = children
                         .get_with_index(i)
                         .expect("checked index")
-                        .add_event_listener_with_callback("click", &js_sys::Function::default());
+                        .add_event_listener_with_callback("click", noop.unchecked_ref());
                 }
             }
         }

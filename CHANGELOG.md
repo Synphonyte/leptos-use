@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixes 🍕
+
+- `on_click_outside`: the iOS workaround no longer builds its no-op listener with `new Function("")`, which a CSP without `'unsafe-eval'` blocks, aborting hydration on iOS
+
 ## [0.19.2] - 2026-08-31
 
 ### Fixes 🍕
