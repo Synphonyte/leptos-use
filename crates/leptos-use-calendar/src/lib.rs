@@ -5,7 +5,4 @@ mod use_calendar;
 pub use use_calendar::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_maybe_rw_signal::*;
-#[allow(unused_imports)]
-pub(crate) use leptos_use_now::*;

@@ -5,11 +5,9 @@ mod use_textarea_autosize;
 pub use use_textarea_autosize::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_element::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_maybe_rw_signal::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_resize_observer::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;

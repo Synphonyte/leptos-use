@@ -5,5 +5,4 @@ mod use_window;
 pub use use_window::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_document::*;

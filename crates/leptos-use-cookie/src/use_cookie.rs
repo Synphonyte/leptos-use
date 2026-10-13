@@ -892,10 +892,10 @@ fn server_set_cookie(cookie: &Cookie) {
 
     #[cfg(any(feature = "axum", feature = "actix"))]
     {
-        if let Some(response_options) = use_context::<ResponseOptions>() {
-            if let Ok(header_value) = HeaderValue::from_str(&cookie.encoded().to_string()) {
-                response_options.append_header(SET_COOKIE, header_value);
-            }
+        if let Some(response_options) = use_context::<ResponseOptions>()
+            && let Ok(header_value) = HeaderValue::from_str(&cookie.encoded().to_string())
+        {
+            response_options.append_header(SET_COOKIE, header_value);
         }
     }
 }

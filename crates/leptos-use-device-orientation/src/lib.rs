@@ -5,9 +5,9 @@ mod use_device_orientation;
 pub use use_device_orientation::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_supported::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;

@@ -5,5 +5,4 @@ mod use_document_visibility;
 pub use use_document_visibility::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;

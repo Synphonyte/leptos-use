@@ -5,13 +5,10 @@ mod use_web_notification;
 pub use use_web_notification::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_option_local_signal::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_supported::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_window::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;

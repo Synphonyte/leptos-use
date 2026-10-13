@@ -5,9 +5,9 @@ mod use_screen_orientation;
 pub use use_screen_orientation::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;

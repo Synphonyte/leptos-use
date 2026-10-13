@@ -20,7 +20,6 @@ workspace = true
 
 [dependencies]
 leptos-use-maybe-rw-signal = { workspace = true }
-leptos-use-now = { workspace = true }
 chrono = { workspace = true, optional = true }
 default-struct-builder = { workspace = true }
 jiff = { workspace = true, optional = true }
@@ -31,5 +30,5 @@ time = { workspace = true, optional = true }
 default = ["chrono"]
 chrono = ["dep:chrono"]
 jiff = ["dep:jiff"]
-ssr = ["leptos-use-maybe-rw-signal/ssr", "leptos-use-now/ssr"]
+ssr = ["leptos-use-maybe-rw-signal/ssr"]
 time = ["dep:time"]

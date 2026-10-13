@@ -6,5 +6,4 @@ pub use maybe_rw_signal::*;
 
 // Dependencies used through `crate::…` paths.
 #[cfg(feature = "reactive_stores")]
-#[allow(unused_imports)]
 pub(crate) use leptos_use_sync_signal::*;

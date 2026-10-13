@@ -5,5 +5,4 @@ mod use_media_query;
 pub use use_media_query::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;

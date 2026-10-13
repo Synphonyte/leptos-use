@@ -5,7 +5,7 @@ mod use_permission;
 pub use use_permission::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;

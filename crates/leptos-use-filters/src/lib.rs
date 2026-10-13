@@ -7,7 +7,5 @@ pub use filters::*;
 pub use pausable::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_now::*;
-#[allow(unused_imports)]
 pub(crate) use sendwrap_fn::*;

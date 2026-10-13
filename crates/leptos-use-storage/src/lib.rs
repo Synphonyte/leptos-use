@@ -32,15 +32,13 @@ impl StorageType {
 }
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_filters::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_maybe_rw_signal::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_window::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;

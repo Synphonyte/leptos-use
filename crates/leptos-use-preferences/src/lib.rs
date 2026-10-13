@@ -9,7 +9,5 @@ pub use use_preferred_dark::*;
 pub use use_prefers_reduced_motion::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_header::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_media_query::*;

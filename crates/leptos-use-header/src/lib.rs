@@ -6,5 +6,3 @@ mod header;
 mod header_macro;
 #[cfg(all(feature = "ssr", any(feature = "axum", feature = "actix")))]
 pub use header::*;
-#[allow(unused_imports)]
-pub use header_macro::*;

@@ -5,7 +5,5 @@ mod use_raf_fn;
 pub use use_raf_fn::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_filters::*;
-#[allow(unused_imports)]
 pub(crate) use sendwrap_fn::*;

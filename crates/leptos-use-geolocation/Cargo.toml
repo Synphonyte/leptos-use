@@ -19,7 +19,6 @@ rustdoc-args = ["--cfg=web_sys_unstable_apis"]
 workspace = true
 
 [dependencies]
-leptos-use-core = { workspace = true }
 leptos-use-option-local-signal = { workspace = true }
 leptos-use-window = { workspace = true }
 sendwrap-fn = { workspace = true }
@@ -30,4 +29,4 @@ wasm-bindgen = { workspace = true }
 web-sys = { workspace = true, features = ["Coordinates", "Geolocation", "GeolocationPosition", "GeolocationPositionError", "MediaQueryList", "Navigator", "NodeList", "Position", "PositionError", "PositionOptions", "VisibilityState"] }
 
 [features]
-ssr = ["leptos-use-core/ssr", "leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]
+ssr = ["leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]

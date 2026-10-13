@@ -5,9 +5,6 @@ mod use_service_worker;
 pub use use_service_worker::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_window::*;
-#[allow(unused_imports)]
 pub(crate) use sendwrap_fn::*;
-#[allow(unused_imports)]
 pub(crate) use wasm_js_macros::*;

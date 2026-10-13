@@ -5,5 +5,5 @@ mod use_device_pixel_ratio;
 pub use use_device_pixel_ratio::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;

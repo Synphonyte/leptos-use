@@ -5,5 +5,5 @@ mod use_timeout_fn;
 pub use use_timeout_fn::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;

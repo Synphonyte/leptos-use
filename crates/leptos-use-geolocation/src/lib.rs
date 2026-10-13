@@ -5,11 +5,8 @@ mod use_geolocation;
 pub use use_geolocation::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
-pub(crate) use leptos_use_core::*;
-#[allow(unused_imports)]
 pub(crate) use leptos_use_option_local_signal::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_window::*;
-#[allow(unused_imports)]
+#[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;

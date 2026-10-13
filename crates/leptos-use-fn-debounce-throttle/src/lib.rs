@@ -7,5 +7,4 @@ pub use use_debounce_fn::*;
 pub use use_throttle_fn::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_filters::*;

@@ -20,7 +20,6 @@ pub mod core {
     pub use crate::deprecated::leptos_use_element::elements_maybe_signal::{
         els_by_sel, els_signal_by_sel,
     };
-    #[allow(unused_imports)]
     pub use ::leptos_use_core::*;
     #[cfg(feature = "element")]
     pub use ::leptos_use_element::{
@@ -31,11 +30,8 @@ pub mod core {
         SignalVecMarker, SignalVecOptionMarker, SignalVecSendWrapperMarker, StrIterMarker,
         StrMarker, VecSignalMarker, VecSignalOptionMarker, VecSignalVecOptionMarker,
     };
-    #[allow(unused_imports)]
     pub use ::leptos_use_maybe_rw_signal::*;
-    #[allow(unused_imports)]
     pub use ::leptos_use_option_local_signal::*;
-    #[allow(unused_imports)]
     pub use ::leptos_use_rw_signal::*;
 }
 
@@ -45,7 +41,6 @@ pub mod utils {
     };
     #[cfg(all(feature = "ssr", any(feature = "axum", feature = "actix")))]
     pub use crate::deprecated::leptos_use_header::header::header;
-    #[allow(unused_imports)]
     pub use ::leptos_use_filters::*;
     #[cfg(feature = "is")]
     pub use ::leptos_use_on_click_outside::IS_IOS;
@@ -62,7 +57,6 @@ pub mod storage {
     pub use crate::deprecated::leptos_use_storage::use_storage::{
         use_storage, use_storage_with_options,
     };
-    #[allow(unused_imports)]
     pub use ::leptos_use_storage::*;
 }
 
@@ -77,14 +71,11 @@ pub mod math {
     pub use crate::deprecated::leptos_use_math::use_not::use_not;
     pub use crate::deprecated::leptos_use_math::use_or::use_or;
     pub use crate::deprecated::leptos_use_math::use_round::use_round;
-    #[allow(unused_imports)]
-    pub use ::leptos_use_math::*;
 }
 
 #[cfg(feature = "docs")]
 pub mod docs {
     pub use crate::deprecated::leptos_use_docs::demo::demo_or_body;
-    #[allow(unused_imports)]
     pub use ::leptos_use_docs::*;
 }
 
@@ -383,217 +374,121 @@ pub use crate::deprecated::leptos_use_window_scroll::use_window_scroll::use_wind
 pub use crate::deprecated::leptos_use_window_size::use_window_size::{
     use_window_size, use_window_size_with_options,
 };
-#[cfg(feature = "use_active_element")]
-#[allow(unused_imports)]
-pub use ::leptos_use_active_element::*;
 #[cfg(feature = "use_breakpoints")]
-#[allow(unused_imports)]
 pub use ::leptos_use_breakpoints::*;
 #[cfg(feature = "use_broadcast_channel")]
-#[allow(unused_imports)]
 pub use ::leptos_use_broadcast_channel::*;
 #[cfg(feature = "use_calendar")]
-#[allow(unused_imports)]
 pub use ::leptos_use_calendar::*;
 #[cfg(feature = "use_clipboard")]
-#[allow(unused_imports)]
 pub use ::leptos_use_clipboard::*;
 #[cfg(feature = "use_color_mode")]
-#[allow(unused_imports)]
 pub use ::leptos_use_color_mode::*;
 #[cfg(feature = "use_cookie")]
-#[allow(unused_imports)]
 pub use ::leptos_use_cookie::*;
 #[cfg(feature = "use_css_var")]
-#[allow(unused_imports)]
 pub use ::leptos_use_css_var::*;
 #[cfg(feature = "use_cycle_list")]
-#[allow(unused_imports)]
 pub use ::leptos_use_cycle_list::*;
 #[cfg(feature = "use_device_orientation")]
-#[allow(unused_imports)]
 pub use ::leptos_use_device_orientation::*;
-#[cfg(feature = "use_device_pixel_ratio")]
-#[allow(unused_imports)]
-pub use ::leptos_use_device_pixel_ratio::*;
 #[cfg(feature = "use_display_media")]
-#[allow(unused_imports)]
 pub use ::leptos_use_display_media::*;
 #[cfg(feature = "use_document")]
-#[allow(unused_imports)]
 pub use ::leptos_use_document::*;
-#[cfg(feature = "use_document_visibility")]
-#[allow(unused_imports)]
-pub use ::leptos_use_document_visibility::*;
 #[cfg(feature = "use_draggable")]
-#[allow(unused_imports)]
 pub use ::leptos_use_draggable::*;
 #[cfg(feature = "use_drop_zone")]
-#[allow(unused_imports)]
 pub use ::leptos_use_drop_zone::*;
 #[cfg(any(feature = "element", feature = "use_mutation_observer"))]
-#[allow(unused_imports)]
 pub use ::leptos_use_element::*;
 #[cfg(feature = "use_element_bounding")]
-#[allow(unused_imports)]
 pub use ::leptos_use_element_bounding::*;
 #[cfg(feature = "use_element_hover")]
-#[allow(unused_imports)]
 pub use ::leptos_use_element_hover::*;
 #[cfg(feature = "use_element_size")]
-#[allow(unused_imports)]
 pub use ::leptos_use_element_size::*;
 #[cfg(feature = "use_element_visibility")]
-#[allow(unused_imports)]
 pub use ::leptos_use_element_visibility::*;
 #[cfg(feature = "use_event_listener")]
-#[allow(unused_imports)]
 pub use ::leptos_use_event_listener::*;
 #[cfg(feature = "use_event_source")]
-#[allow(unused_imports)]
 pub use ::leptos_use_event_source::*;
 #[cfg(feature = "use_favicon")]
-#[allow(unused_imports)]
 pub use ::leptos_use_favicon::*;
 #[cfg(any(feature = "use_debounce_fn", feature = "use_throttle_fn"))]
-#[allow(unused_imports)]
 pub use ::leptos_use_fn_debounce_throttle::*;
 #[cfg(feature = "use_geolocation")]
-#[allow(unused_imports)]
 pub use ::leptos_use_geolocation::*;
 #[cfg(feature = "use_idle")]
-#[allow(unused_imports)]
 pub use ::leptos_use_idle::*;
 #[cfg(feature = "use_infinite_scroll")]
-#[allow(unused_imports)]
 pub use ::leptos_use_infinite_scroll::*;
 #[cfg(feature = "use_intersection_observer")]
-#[allow(unused_imports)]
 pub use ::leptos_use_intersection_observer::*;
 #[cfg(feature = "use_interval")]
-#[allow(unused_imports)]
 pub use ::leptos_use_interval::*;
 #[cfg(feature = "use_interval_fn")]
-#[allow(unused_imports)]
 pub use ::leptos_use_interval_fn::*;
 #[cfg(feature = "use_intl_datetime_format")]
 #[allow(ambiguous_glob_reexports)]
-#[allow(unused_imports)]
 pub use ::leptos_use_intl_datetime_format::*;
 #[cfg(feature = "use_intl_number_format")]
-#[allow(unused_imports)]
 pub use ::leptos_use_intl_number_format::*;
-#[cfg(any(
-    feature = "is_ok",
-    feature = "is_err",
-    feature = "is_some",
-    feature = "is_none"
-))]
-#[allow(unused_imports)]
-pub use ::leptos_use_is::*;
 #[cfg(feature = "use_locale")]
-#[allow(unused_imports)]
 pub use ::leptos_use_locale::*;
 #[cfg(feature = "use_locales")]
-#[allow(unused_imports)]
 pub use ::leptos_use_locales::*;
-#[cfg(feature = "use_media_query")]
-#[allow(unused_imports)]
-pub use ::leptos_use_media_query::*;
 #[cfg(feature = "use_mouse")]
-#[allow(unused_imports)]
 pub use ::leptos_use_mouse::*;
 #[cfg(feature = "use_mouse_in_element")]
-#[allow(unused_imports)]
 pub use ::leptos_use_mouse_in_element::*;
 #[cfg(any(feature = "on_click_outside", feature = "is"))]
-#[allow(unused_imports)]
 pub use ::leptos_use_on_click_outside::*;
 #[cfg(feature = "use_permission")]
-#[allow(unused_imports)]
 pub use ::leptos_use_permission::*;
 #[cfg(any(
     feature = "use_preferred_dark",
     feature = "use_preferred_contrast",
     feature = "use_prefers_reduced_motion"
 ))]
-#[allow(unused_imports)]
 pub use ::leptos_use_preferences::*;
 #[cfg(feature = "use_raf_fn")]
-#[allow(unused_imports)]
 pub use ::leptos_use_raf_fn::*;
 #[cfg(feature = "use_resize_observer")]
-#[allow(unused_imports)]
 pub use ::leptos_use_resize_observer::*;
 #[cfg(feature = "use_screen_orientation")]
-#[allow(unused_imports)]
 pub use ::leptos_use_screen_orientation::*;
 #[cfg(feature = "use_scroll")]
-#[allow(unused_imports)]
 pub use ::leptos_use_scroll::*;
 #[cfg(feature = "use_service_worker")]
-#[allow(unused_imports)]
 pub use ::leptos_use_service_worker::*;
-#[cfg(any(feature = "signal_debounced", feature = "signal_throttled"))]
-#[allow(unused_imports)]
-pub use ::leptos_use_signal_debounce_throttle::*;
-#[cfg(feature = "use_sorted")]
-#[allow(unused_imports)]
-pub use ::leptos_use_sorted::*;
-#[cfg(feature = "use_supported")]
-#[allow(unused_imports)]
-pub use ::leptos_use_supported::*;
 #[cfg(feature = "sync_signal")]
-#[allow(unused_imports)]
 pub use ::leptos_use_sync_signal::*;
 #[cfg(feature = "use_textarea_autosize")]
-#[allow(unused_imports)]
 pub use ::leptos_use_textarea_autosize::*;
 #[cfg(feature = "use_timeout_fn")]
-#[allow(unused_imports)]
 pub use ::leptos_use_timeout_fn::*;
 #[cfg(feature = "use_timestamp")]
-#[allow(unused_imports)]
 pub use ::leptos_use_timestamp::*;
-#[cfg(feature = "use_to_string")]
-#[allow(unused_imports)]
-pub use ::leptos_use_to_string::*;
 #[cfg(feature = "use_toggle")]
-#[allow(unused_imports)]
 pub use ::leptos_use_toggle::*;
 #[cfg(feature = "use_user_media")]
-#[allow(unused_imports)]
 pub use ::leptos_use_user_media::*;
 #[cfg(any(feature = "watch_debounced", feature = "watch_throttled"))]
-#[allow(unused_imports)]
 pub use ::leptos_use_watch_debounce_throttle::*;
 #[cfg(feature = "watch_pausable")]
-#[allow(unused_imports)]
 pub use ::leptos_use_watch_pausable::*;
 #[cfg(feature = "watch_with_options")]
-#[allow(unused_imports)]
 pub use ::leptos_use_watch_with_options::*;
 #[cfg(feature = "use_web_lock")]
-#[allow(unused_imports)]
+#[cfg(web_sys_unstable_apis)]
 pub use ::leptos_use_web_lock::*;
 #[cfg(feature = "use_web_notification")]
-#[allow(unused_imports)]
 pub use ::leptos_use_web_notification::*;
 #[cfg(feature = "use_websocket")]
-#[allow(unused_imports)]
 pub use ::leptos_use_websocket::*;
-#[cfg(feature = "whenever")]
-#[allow(unused_imports)]
-pub use ::leptos_use_whenever::*;
 #[cfg(feature = "use_window")]
-#[allow(unused_imports)]
 pub use ::leptos_use_window::*;
-#[cfg(feature = "use_window_focus")]
-#[allow(unused_imports)]
-pub use ::leptos_use_window_focus::*;
-#[cfg(feature = "use_window_scroll")]
-#[allow(unused_imports)]
-pub use ::leptos_use_window_scroll::*;
 #[cfg(feature = "use_window_size")]
-#[allow(unused_imports)]
 pub use ::leptos_use_window_size::*;

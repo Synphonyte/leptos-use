@@ -5,5 +5,4 @@ mod use_favicon;
 pub use use_favicon::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_maybe_rw_signal::*;

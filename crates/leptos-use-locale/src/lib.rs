@@ -5,5 +5,4 @@ mod use_locale;
 pub use use_locale::*;
 
 // Dependencies used through `crate::…` paths.
-#[allow(unused_imports)]
 pub(crate) use leptos_use_locales::*;
