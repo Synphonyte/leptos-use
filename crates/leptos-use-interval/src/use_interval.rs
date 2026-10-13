@@ -1,4 +1,4 @@
-use crate::utils::Pausable;
+use crate::Pausable;
 use crate::{UseIntervalFnOptions, sendwrap_fn, use_interval_fn_with_options};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

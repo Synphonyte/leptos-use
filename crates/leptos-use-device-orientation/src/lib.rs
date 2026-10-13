@@ -4,7 +4,7 @@
 mod use_device_orientation;
 pub use use_device_orientation::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;
 #[allow(unused_imports)]

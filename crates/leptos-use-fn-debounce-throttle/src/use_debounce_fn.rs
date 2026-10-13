@@ -1,6 +1,6 @@
-pub use crate::utils::DebounceOptions;
-use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter};
+use crate::{create_filter_wrapper, create_filter_wrapper_with_arg, debounce_filter};
 use leptos::prelude::Signal;
+pub use leptos_use_filters::DebounceOptions;
 use std::sync::{Arc, Mutex};
 
 /// Debounce execution of a function.

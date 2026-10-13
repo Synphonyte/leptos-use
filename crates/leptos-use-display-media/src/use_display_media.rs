@@ -1,8 +1,5 @@
-use crate::core::OptionLocalRwSignal;
-use crate::{
-    core::{MaybeRwSignal, OptionLocalSignal},
-    sendwrap_fn,
-};
+use crate::OptionLocalRwSignal;
+use crate::{MaybeRwSignal, OptionLocalSignal, sendwrap_fn};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -145,7 +142,7 @@ pub fn use_display_media_with_options(
 #[cfg(not(feature = "ssr"))]
 async fn create_media(audio: bool) -> Result<web_sys::MediaStream, JsValue> {
     use crate::js_fut;
-    use crate::use_window::use_window;
+    use crate::use_window;
 
     let media = use_window()
         .navigator()

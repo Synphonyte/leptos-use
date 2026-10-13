@@ -1,5 +1,5 @@
+use crate::Pausable;
 use crate::sendwrap_fn;
-use crate::utils::Pausable;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

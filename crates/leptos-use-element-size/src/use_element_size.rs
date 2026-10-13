@@ -1,5 +1,5 @@
-use crate::core::IntoElementMaybeSignal;
-use crate::core::Size;
+use crate::IntoElementMaybeSignal;
+use crate::Size;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

@@ -4,13 +4,11 @@
 mod use_clipboard;
 pub use use_clipboard::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;
 #[allow(unused_imports)]
 pub(crate) use leptos_use_supported::*;
-#[allow(unused_imports)]
-pub(crate) use leptos_use_timeout_fn as use_timeout_fn;
 #[allow(unused_imports)]
 pub(crate) use leptos_use_timeout_fn::*;
 #[allow(unused_imports)]

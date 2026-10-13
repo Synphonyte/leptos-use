@@ -1,4 +1,4 @@
-use crate::core::{IntoElementMaybeSignal, Position};
+use crate::{IntoElementMaybeSignal, Position};
 use crate::{
     UseMouseCoordType, UseMouseEventExtractor, UseMouseOptions, UseMouseReturn, UseMouseSourceType,
     UseWindow, use_mouse_with_options, use_window,

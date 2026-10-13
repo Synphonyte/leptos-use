@@ -1,5 +1,5 @@
-use crate::utils::{signal_filtered, signal_filtered_local};
 use crate::{ThrottleOptions, use_throttle_fn_with_options};
+use crate::{signal_filtered, signal_filtered_local};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 

@@ -4,12 +4,7 @@
 mod use_event_source;
 pub use use_event_source::*;
 
-#[allow(unused_imports)]
-pub(crate) mod core {
-    pub use leptos_use_core::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_core::*;
 #[allow(unused_imports)]

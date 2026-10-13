@@ -1,7 +1,7 @@
-use crate::core::{IntoElementMaybeSignal, MaybeRwSignal};
-use crate::core::{StrMarker, url};
-use crate::storage::{StorageType, UseStorageOptions, use_storage_with_options};
-use crate::utils::get_header;
+use crate::get_header;
+use crate::{IntoElementMaybeSignal, MaybeRwSignal};
+use crate::{StorageType, UseStorageOptions, use_storage_with_options};
+use crate::{StrMarker, url};
 use crate::{
     SyncSignalOptions, UseCookieOptions, UsePreferredDarkOptions, sync_signal_with_options,
     use_cookie_with_options, use_preferred_dark_with_options,
@@ -17,7 +17,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
-    use crate::core::ElementMaybeSignal;
+    use crate::ElementMaybeSignal;
     use wasm_bindgen::JsCast;
 }}
 
@@ -147,7 +147,7 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// ## See also
 ///
 /// * [`fn@crate::use_preferred_dark`]
-/// * [`fn@crate::storage::use_storage`]
+/// * [`fn@crate::use_storage`]
 /// * [`fn@crate::use_cookie`]
 pub fn use_color_mode() -> UseColorModeReturn {
     use_color_mode_with_options(UseColorModeOptions::default())
@@ -556,9 +556,9 @@ pub struct UseColorModeReturn {
     /// Main value setter signal of the color mode
     pub set_mode: WriteSignal<ColorMode>,
 
-    /// Direct access to the returned signal of [`fn@crate::storage::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    /// Direct access to the returned signal of [`fn@crate::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
     pub store: Signal<ColorMode>,
-    /// Direct write access to the returned signal of [`fn@crate::storage::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
+    /// Direct write access to the returned signal of [`fn@crate::use_storage`] if enabled or [`UseColorModeOptions::storage_signal`] if provided
     pub set_store: WriteSignal<ColorMode>,
 
     /// Signal of the system's preferred color mode that you would get from a media query

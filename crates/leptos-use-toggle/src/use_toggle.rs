@@ -1,4 +1,4 @@
-use crate::core::MaybeRwSignal;
+use crate::MaybeRwSignal;
 use leptos::prelude::*;
 
 /// A boolean switcher with utility functions.

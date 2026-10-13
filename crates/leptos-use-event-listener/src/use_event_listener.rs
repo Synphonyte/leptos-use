@@ -1,4 +1,4 @@
-use crate::core::IntoElementMaybeSignal;
+use crate::IntoElementMaybeSignal;
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::EventDescriptor;

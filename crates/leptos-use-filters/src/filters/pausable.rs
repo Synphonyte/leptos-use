@@ -1,4 +1,4 @@
-use crate::utils::{CloneableFnWithReturn, FilterOptions};
+use crate::{CloneableFnWithReturn, FilterOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::cell::RefCell;

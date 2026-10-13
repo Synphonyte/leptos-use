@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::Pausable;
 use crate::sendwrap_fn;
-use crate::utils::Pausable;
 use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::prelude::*;

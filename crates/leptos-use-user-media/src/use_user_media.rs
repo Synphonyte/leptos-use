@@ -1,4 +1,4 @@
-use crate::core::{MaybeRwSignal, OptionLocalRwSignal, OptionLocalSignal};
+use crate::{MaybeRwSignal, OptionLocalRwSignal, OptionLocalSignal};
 use default_struct_builder::DefaultBuilder;
 use js_sys::{Object, Reflect};
 use leptos::prelude::*;
@@ -168,7 +168,7 @@ async fn create_media(
     video: Option<VideoConstraints>,
     audio: Option<AudioConstraints>,
 ) -> Result<web_sys::MediaStream, JsValue> {
-    use crate::use_window::use_window;
+    use crate::use_window;
     use crate::{js, js_fut};
     use js_sys::Array;
 

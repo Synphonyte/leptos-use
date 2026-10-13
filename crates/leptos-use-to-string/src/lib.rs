@@ -3,6 +3,6 @@
 mod use_to_string;
 pub use use_to_string::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_derive_signal::*;

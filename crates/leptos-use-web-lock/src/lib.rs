@@ -6,6 +6,6 @@ mod use_web_lock;
 #[cfg(web_sys_unstable_apis)]
 pub use use_web_lock::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use wasm_js_macros::*;

@@ -1,4 +1,4 @@
-use crate::{core::MaybeRwSignal, storage::StorageType, utils::FilterOptions};
+use crate::{FilterOptions, MaybeRwSignal, StorageType};
 use codee::{CodecError, Decoder, Encoder};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -460,7 +460,7 @@ pub enum UseStorageError<E, D> {
     ItemCodecError(CodecError<E, D>),
 }
 
-/// Options for use with [`fn@crate::storage::use_local_storage_with_options`], [`fn@crate::storage::use_session_storage_with_options`] and [`use_storage_with_options`].
+/// Options for use with [`fn@crate::use_local_storage_with_options`], [`fn@crate::use_session_storage_with_options`] and [`use_storage_with_options`].
 #[derive(DefaultBuilder)]
 pub struct UseStorageOptions<T, E, D>
 where

@@ -4,11 +4,6 @@
 mod use_cycle_list;
 pub use use_cycle_list::*;
 
-#[allow(unused_imports)]
-pub(crate) mod core {
-    pub use leptos_use_maybe_rw_signal::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_maybe_rw_signal::*;

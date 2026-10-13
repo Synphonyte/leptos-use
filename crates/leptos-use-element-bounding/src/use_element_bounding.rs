@@ -1,4 +1,4 @@
-use crate::core::IntoElementMaybeSignal;
+use crate::IntoElementMaybeSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;

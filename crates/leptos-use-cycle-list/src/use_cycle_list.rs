@@ -1,4 +1,4 @@
-use crate::core::MaybeRwSignal;
+use crate::MaybeRwSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 

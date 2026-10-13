@@ -1,4 +1,4 @@
-use crate::math::shared::use_simple_math;
+use crate::shared::use_simple_math;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use num::Float;

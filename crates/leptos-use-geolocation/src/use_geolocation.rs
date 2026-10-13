@@ -1,4 +1,4 @@
-use crate::core::{OptionLocalRwSignal, OptionLocalSignal};
+use crate::{OptionLocalRwSignal, OptionLocalSignal};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;

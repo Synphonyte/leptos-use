@@ -1,4 +1,4 @@
-use crate::core::IntoElementMaybeSignal;
+use crate::IntoElementMaybeSignal;
 use crate::{UseEventListenerOptions, use_event_listener_with_options};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{mouseenter, mouseleave};

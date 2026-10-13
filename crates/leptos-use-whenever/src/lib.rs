@@ -4,6 +4,6 @@
 mod whenever;
 pub use whenever::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_watch_with_options::*;

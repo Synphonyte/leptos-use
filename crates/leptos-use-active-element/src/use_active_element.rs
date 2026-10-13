@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::core::{OptionLocalRwSignal, OptionLocalSignal};
+use crate::{OptionLocalRwSignal, OptionLocalSignal};
 use crate::{UseEventListenerOptions, use_document, use_event_listener_with_options, use_window};
 use leptos::ev::{blur, focus};
 use leptos::prelude::*;

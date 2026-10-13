@@ -4,12 +4,7 @@
 mod use_locales;
 pub use use_locales::*;
 
-#[allow(unused_imports)]
-pub(crate) mod utils {
-    pub use leptos_use_header::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;
 #[allow(unused_imports)]

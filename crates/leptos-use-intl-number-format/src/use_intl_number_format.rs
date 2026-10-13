@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports, dead_code))]
 
-use crate::{js, sendwrap_fn, utils::js_value_from_to_string};
+use crate::{js, js_value_from_to_string, sendwrap_fn};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;

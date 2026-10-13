@@ -1,10 +1,10 @@
-use crate::core::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
+use crate::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use leptos::prelude::*;
-    use crate::utils::IS_IOS;
+    use crate::IS_IOS;
     use crate::{UseEventListenerOptions, sendwrap_fn, use_event_listener_with_options};
     use leptos::ev::{blur, click, pointerdown};
     use std::cell::Cell;

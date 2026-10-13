@@ -8,12 +8,7 @@ pub use use_preferred_contrast::*;
 pub use use_preferred_dark::*;
 pub use use_prefers_reduced_motion::*;
 
-#[allow(unused_imports)]
-pub(crate) mod utils {
-    pub use leptos_use_header::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_header::*;
 #[allow(unused_imports)]

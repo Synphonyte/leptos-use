@@ -1,4 +1,4 @@
-use crate::core::UseRwSignal;
+use crate::UseRwSignal;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::{ops::Deref, rc::Rc};

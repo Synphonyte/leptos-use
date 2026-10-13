@@ -78,7 +78,7 @@ pub fn use_clipboard_with_options(
     let (text, set_text) = signal(None);
     let (copied, set_copied) = signal(false);
 
-    let UseTimeoutFnReturn { start, .. } = crate::use_timeout_fn::use_timeout_fn(
+    let UseTimeoutFnReturn { start, .. } = crate::use_timeout_fn(
         move |_: ()| {
             set_copied.set(false);
         },

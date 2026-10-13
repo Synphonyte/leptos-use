@@ -4,6 +4,6 @@
 mod use_window_focus;
 pub use use_window_focus::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;

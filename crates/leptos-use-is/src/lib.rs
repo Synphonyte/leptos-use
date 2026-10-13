@@ -10,6 +10,6 @@ pub use is_none::*;
 pub use is_ok::*;
 pub use is_some::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_derive_signal::*;

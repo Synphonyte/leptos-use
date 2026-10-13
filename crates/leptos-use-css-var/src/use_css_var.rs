@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::core::IntoElementMaybeSignal;
+use crate::IntoElementMaybeSignal;
 use crate::{
     UseMutationObserverOptions, WatchOptions, use_mutation_observer_with_options,
     watch_with_options,

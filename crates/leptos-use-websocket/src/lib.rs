@@ -4,18 +4,7 @@
 mod use_websocket;
 pub use use_websocket::*;
 
-#[allow(unused_imports)]
-pub(crate) mod core {
-    pub use leptos_use_core::*;
-}
-
-#[allow(unused_imports)]
-pub(crate) mod utils {
-    pub use leptos_use_filters::*;
-    pub use sendwrap_fn::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_core::*;
 #[allow(unused_imports)]

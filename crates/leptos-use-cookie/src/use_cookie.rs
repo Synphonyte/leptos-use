@@ -1,7 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
-use crate::core::now;
-use crate::utils::get_header;
+use crate::get_header;
+use crate::now;
 use codee::{CodecError, Decoder, Encoder};
 pub use cookie::SameSite;
 use cookie::time::{Duration, OffsetDateTime};

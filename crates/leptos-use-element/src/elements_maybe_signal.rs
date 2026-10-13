@@ -1,4 +1,4 @@
-use crate::core::{SignalStrMarker, StrMarker};
+use crate::{SignalStrMarker, StrMarker};
 use leptos::prelude::{guards::ReadGuard, *};
 use send_wrapper::SendWrapper;
 use std::{ops::Deref, rc::Rc, time::Duration};

@@ -4,6 +4,6 @@
 mod use_timeout_fn;
 pub use use_timeout_fn::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use sendwrap_fn::*;

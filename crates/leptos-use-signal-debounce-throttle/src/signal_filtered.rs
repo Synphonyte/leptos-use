@@ -8,7 +8,7 @@ macro_rules! signal_filtered {
         #[$options_doc:meta]
 
     ) => { ::paste::paste!{
-        $crate::utils::signal_filtered_macro_impl!(
+        $crate::signal_filtered_macro_impl!(
             $(#[$outer])*,
             #[$simple_func_doc],
             #[$options_doc],
@@ -28,7 +28,7 @@ macro_rules! signal_filtered_local {
         #[$options_doc:meta]
 
     ) => { ::paste::paste! {
-        $crate::utils::signal_filtered_macro_impl!(
+        $crate::signal_filtered_macro_impl!(
             $(#[$outer])*,
             #[$simple_func_doc],
             #[$options_doc],

@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::core::{IntoElementMaybeSignal, Position};
+use crate::{IntoElementMaybeSignal, Position};
 use crate::{UseEventListenerOptions, UseWindow, use_event_listener_with_options, use_window};
 use default_struct_builder::DefaultBuilder;
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};

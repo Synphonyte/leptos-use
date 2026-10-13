@@ -1,5 +1,5 @@
 use crate::UseEventListenerOptions;
-use crate::core::{Direction, Directions, IntoElementMaybeSignal};
+use crate::{Direction, Directions, IntoElementMaybeSignal};
 use cfg_if::cfg_if;
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
@@ -7,7 +7,7 @@ use leptos::reactive::wrappers::read::Signal;
 use std::rc::Rc;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
-use crate::use_event_listener::use_event_listener_with_options;
+use crate::use_event_listener_with_options;
 use crate::{
     sendwrap_fn, use_debounce_fn_with_arg, use_throttle_fn_with_arg_and_options, ThrottleOptions,
 };

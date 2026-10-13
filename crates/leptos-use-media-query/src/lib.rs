@@ -4,6 +4,6 @@
 mod use_media_query;
 pub use use_media_query::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;

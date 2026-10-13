@@ -4,7 +4,7 @@
 mod use_service_worker;
 pub use use_service_worker::*;
 
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_window::*;
 #[allow(unused_imports)]

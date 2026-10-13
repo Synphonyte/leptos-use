@@ -1,7 +1,7 @@
-use crate::core::OptionLocalRwSignal;
+use crate::OptionLocalRwSignal;
 use crate::{
-    UseEventListenerOptions, core::OptionLocalSignal, js, sendwrap_fn,
-    use_event_listener_with_options, use_supported,
+    OptionLocalSignal, UseEventListenerOptions, js, sendwrap_fn, use_event_listener_with_options,
+    use_supported,
 };
 use codee::{CodecError, Decoder, Encoder};
 use leptos::ev::messageerror;

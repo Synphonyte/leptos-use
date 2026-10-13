@@ -4,11 +4,6 @@
 mod sync_signal;
 pub use sync_signal::*;
 
-#[allow(unused_imports)]
-pub(crate) mod core {
-    pub use leptos_use_rw_signal::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_rw_signal::*;

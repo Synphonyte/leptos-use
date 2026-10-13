@@ -1,4 +1,4 @@
-use crate::core::impl_ssr_safe_method;
+use crate::impl_ssr_safe_method;
 use crate::{UseDocument, use_document};
 use cfg_if::cfg_if;
 use std::ops::Deref;

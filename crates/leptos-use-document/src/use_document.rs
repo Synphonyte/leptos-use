@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use js_sys::Function;
 use std::ops::Deref;
 
-use crate::core::impl_ssr_safe_method;
+use crate::impl_ssr_safe_method;
 #[cfg(not(feature = "ssr"))]
 use leptos::prelude::*;
 use wasm_bindgen::JsValue;

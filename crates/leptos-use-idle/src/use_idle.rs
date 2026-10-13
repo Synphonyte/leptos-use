@@ -1,6 +1,6 @@
-use crate::core::now;
 use crate::filter_builder_methods;
-use crate::utils::{DebounceOptions, FilterOptions, ThrottleOptions};
+use crate::now;
+use crate::{DebounceOptions, FilterOptions, ThrottleOptions};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -102,7 +102,7 @@ pub fn use_idle_with_options(
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::utils::create_filter_wrapper;
+        use crate::create_filter_wrapper;
         use crate::{
             UseEventListenerOptions, sendwrap_fn, use_document, use_event_listener_with_options,
         };

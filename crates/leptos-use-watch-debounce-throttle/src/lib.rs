@@ -6,12 +6,7 @@ mod watch_throttled;
 pub use watch_debounced::*;
 pub use watch_throttled::*;
 
-#[allow(unused_imports)]
-pub(crate) mod utils {
-    pub use leptos_use_filters::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_filters::*;
 #[allow(unused_imports)]

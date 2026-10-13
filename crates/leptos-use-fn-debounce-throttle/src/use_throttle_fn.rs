@@ -1,8 +1,8 @@
-use crate::utils::{create_filter_wrapper, create_filter_wrapper_with_arg, throttle_filter};
+use crate::{create_filter_wrapper, create_filter_wrapper_with_arg, throttle_filter};
 use leptos::prelude::Signal;
 use std::sync::{Arc, Mutex};
 
-pub use crate::utils::ThrottleOptions;
+pub use leptos_use_filters::ThrottleOptions;
 
 /// Throttle execution of a function.
 /// Especially useful for rate limiting execution of handlers on events like resize and scroll.

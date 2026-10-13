@@ -1,4 +1,4 @@
-use crate::{ReconnectLimit, core::ConnectionReadyState};
+use crate::{ConnectionReadyState, ReconnectLimit};
 use cfg_if::cfg_if;
 use codee::{CodecError, Decoder, Encoder, HybridCoderError, HybridDecoder, HybridEncoder};
 use default_struct_builder::DefaultBuilder;
@@ -345,7 +345,7 @@ where
 
     #[cfg(not(feature = "ssr"))]
     {
-        use crate::{sendwrap_fn, use_interval_fn, utils::Pausable};
+        use crate::{Pausable, sendwrap_fn, use_interval_fn};
         use js_sys::Array;
         use leptos::leptos_dom::helpers::TimeoutHandle;
         use std::sync::atomic::AtomicBool;

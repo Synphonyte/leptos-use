@@ -1,4 +1,4 @@
-use crate::core::Size;
+use crate::Size;
 use crate::{
     UseEventListenerOptions, use_event_listener_with_options, use_media_query, use_window,
 };

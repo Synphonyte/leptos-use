@@ -1,4 +1,4 @@
-use crate::math::shared::use_partial_cmp;
+use crate::shared::use_partial_cmp;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use std::cmp::Ordering;

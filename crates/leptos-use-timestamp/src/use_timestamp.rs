@@ -1,5 +1,5 @@
-use crate::core::now;
-use crate::utils::Pausable;
+use crate::Pausable;
+use crate::now;
 use crate::{
     UseIntervalFnOptions, UseRafFnOptions, use_interval_fn_with_options, use_raf_fn_with_options,
 };

@@ -4,19 +4,11 @@
 mod use_scroll;
 pub use use_scroll::*;
 
-#[allow(unused_imports)]
-pub(crate) mod core {
-    pub use leptos_use_core::*;
-    pub use leptos_use_element::*;
-}
-
-// Path shims so the sources keep their original `crate::…` paths.
+// Dependencies used through `crate::…` paths.
 #[allow(unused_imports)]
 pub(crate) use leptos_use_core::*;
 #[allow(unused_imports)]
 pub(crate) use leptos_use_element::*;
-#[allow(unused_imports)]
-pub(crate) use leptos_use_event_listener as use_event_listener;
 #[allow(unused_imports)]
 pub(crate) use leptos_use_event_listener::*;
 #[allow(unused_imports)]
