@@ -27,6 +27,7 @@ futures-util = { version = "0.3", optional = true }
 gloo-timers = { version = "0.4", optional = true, features = ["futures"] }
 http0_2 = { version = "0.2", optional = true, package = "http" }
 http1 = { version = "1", optional = true, package = "http" }
+jiff = { version = "0.2", optional = true, features = ["js"] }
 js-sys = "0.3"
 lazy_static = "1"
 leptos = "0.8"
@@ -37,6 +38,10 @@ paste = "1"
 reactive_stores = { version = "0.4", optional = true }
 send_wrapper = "0.6"
 thiserror = "2"
+time = { version = "0.3.47", optional = true, features = [
+    "local-offset",
+    "wasm-bindgen",
+] }
 unic-langid = { version = "0.9", optional = true }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
@@ -68,7 +73,9 @@ wasm-bindgen-test = "0.3"
 [features]
 actix = ["dep:actix-web", "dep:http0_2", "dep:leptos_actix"]
 axum = ["dep:http1", "dep:leptos_axum"]
+chrono = ["dep:chrono"]
 default = [
+    "chrono",
     "is_err",
     "is_none",
     "is_ok",
@@ -160,6 +167,7 @@ is_err = []
 is_none = []
 is_ok = []
 is_some = []
+jiff = ["dep:jiff"]
 math = ["num"]
 on_click_outside = ["is", "use_event_listener"]
 reactive_stores = ["dep:reactive_stores"]
@@ -176,6 +184,7 @@ storage = [
     "web-sys/Storage",
 ]
 sync_signal = []
+time = ["dep:time"]
 use_active_element = ["use_event_listener"]
 use_breakpoints = ["use_media_query"]
 use_broadcast_channel = [
@@ -184,7 +193,7 @@ use_broadcast_channel = [
     "use_supported",
     "web-sys/BroadcastChannel",
 ]
-use_calendar = ["dep:chrono"]
+use_calendar = []
 use_clipboard = [
     "use_event_listener",
     "use_permission",
