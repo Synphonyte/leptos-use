@@ -3,6 +3,23 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking Changes 🛠
+
+- `use_calendar` is now generic over the date type via the new trait `CalendarDateType`.
+  `UseCalendarOptions`, `UseCalendarReturn` and `CalendarDate` got a date type parameter and
+  `use_calendar()` needs a type annotation, e.g. `use_calendar::<chrono::NaiveDate>()`.
+- The feature `use_calendar` no longer enables `chrono`. Enable one of the new features `chrono`, `jiff` or `time`
+  (`chrono` is part of the default features).
+- `CalendarDate` comparison methods (`is_selected`, `is_before`, …) compare by calendar day.
+
+### New Features 🚀
+
+- `use_calendar` supports `jiff` (`jiff::civil::Date`, `jiff::Zoned`) and `time` (`time::Date`, `time::OffsetDateTime`)
+  behind the features `jiff` and `time`.
+- `use_calendar` supports `chrono::DateTime<Utc>`, `chrono::DateTime<Local>` and `chrono::DateTime<FixedOffset>`.
+
 ## [0.19.3] - 2026-10-13
 
 ### Fixes 🍕
