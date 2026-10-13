@@ -35,6 +35,8 @@ jobs:
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --features docs,math --tests -- -D warnings
+      - name: Clippy (ssr)
+        run: cargo clippy --features docs,math,ssr --tests -- -D warnings
 
       - name: Run tests (general)
         run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr

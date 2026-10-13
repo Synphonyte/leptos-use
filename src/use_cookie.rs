@@ -224,6 +224,10 @@ where
         signal(None::<T>)
     };
 
+    // only used to restart the expiration timer on the client
+    #[cfg(feature = "ssr")]
+    let _ = restart_expiration;
+
     #[cfg(not(feature = "ssr"))]
     {
         use crate::{

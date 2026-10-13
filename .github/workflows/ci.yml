@@ -45,3 +45,5 @@ jobs:
 
       - name: Clippy
         run: cargo clippy --features docs,math --tests -- -D warnings
+      - name: Clippy (ssr)
+        run: cargo clippy --features docs,math,ssr --tests -- -D warnings

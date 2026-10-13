@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "ssr", allow(unused_imports, dead_code))]
+
 use crate::core::{Direction, Directions, IntoElementMaybeSignal};
 use crate::{
     ScrollOffset, UseEventListenerOptions, UseScrollOptions, UseScrollReturn,
