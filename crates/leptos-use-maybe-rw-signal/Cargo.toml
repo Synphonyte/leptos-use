@@ -1,0 +1,28 @@
+[package]
+name = "leptos-use-maybe-rw-signal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "MaybeRwSignal: accept either a read-only or a read-write signal (Leptos)"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["reactive_stores", "ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-sync-signal = { workspace = true, optional = true }
+leptos = { workspace = true }
+reactive_stores = { workspace = true, optional = true }
+
+[features]
+reactive_stores = ["dep:leptos-use-sync-signal", "dep:reactive_stores"]
+ssr = ["leptos-use-sync-signal?/ssr"]

@@ -38,12 +38,12 @@ jobs:
           components: clippy, rustfmt
 
       - name: Build
-        run: cargo build
+        run: cargo build --workspace
 
       - name: Format
         run: cargo fmt --check
 
       - name: Clippy
-        run: cargo clippy --features docs,math --tests -- -D warnings
+        run: cargo clippy --workspace --features docs,math --tests -- -D warnings
       - name: Clippy (ssr)
-        run: cargo clippy --features docs,math,ssr --tests -- -D warnings
+        run: cargo clippy --workspace --features docs,math,ssr --tests -- -D warnings

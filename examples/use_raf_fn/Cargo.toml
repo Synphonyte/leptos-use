@@ -8,7 +8,9 @@ leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
-leptos-use = { workspace = true, features = ["use_raf_fn", "docs"] }
+leptos-use-docs = { workspace = true }
+leptos-use-filters = { workspace = true }
+leptos-use-raf-fn = { workspace = true }
 web-sys = { workspace = true }
 
 [dev-dependencies]

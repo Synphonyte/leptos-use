@@ -4,13 +4,17 @@ use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::components::*;
 use leptos_router::path;
-use leptos_use::storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
-use leptos_use::{
-    use_color_mode_with_options, use_cookie_with_options, use_debounce_fn, use_event_listener,
-    use_interval, use_intl_number_format, use_locales, use_preferred_dark, use_timestamp,
-    use_window, ColorMode, UseColorModeOptions, UseColorModeReturn, UseCookieOptions,
-    UseIntervalReturn, UseIntlNumberFormatOptions,
-};
+use leptos_use_storage::{use_local_storage, use_local_storage_with_options, UseStorageOptions};
+use leptos_use_color_mode::{use_color_mode_with_options, ColorMode, UseColorModeOptions, UseColorModeReturn};
+use leptos_use_cookie::{use_cookie_with_options, UseCookieOptions};
+use leptos_use_fn_debounce_throttle::use_debounce_fn;
+use leptos_use_event_listener::use_event_listener;
+use leptos_use_interval::{use_interval, UseIntervalReturn};
+use leptos_use_intl_number_format::{use_intl_number_format, UseIntlNumberFormatOptions};
+use leptos_use_locales::use_locales;
+use leptos_use_preferences::use_preferred_dark;
+use leptos_use_timestamp::use_timestamp;
+use leptos_use_window::use_window;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -151,7 +155,7 @@ pub async fn set_a_cookie() -> Result<(), ServerFnError> {
     let cookie_name = "test_cookie";
     let cookie_value = "test_value";
 
-    let (cookie, set_cookie) = leptos_use::use_cookie::<String, FromToStringCodec>("bla-cookie");
+    let (cookie, set_cookie) = leptos_use_cookie::use_cookie::<String, FromToStringCodec>("bla-cookie");
 
     set_cookie.set(Some("something not so important".to_string()));
 

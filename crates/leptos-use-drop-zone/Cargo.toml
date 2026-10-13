@@ -1,0 +1,32 @@
+[package]
+name = "leptos-use-drop-zone"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Create a zone where files can be dropped"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-element = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+cfg-if = { workspace = true }
+default-struct-builder = { workspace = true }
+js-sys = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+web-sys = { workspace = true, features = ["DataTransfer", "DragEvent", "EventListenerOptions", "EventTarget", "File", "FileList", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[features]
+ssr = ["leptos-use-element/ssr", "leptos-use-event-listener/ssr"]

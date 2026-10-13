@@ -1,0 +1,27 @@
+[package]
+name = "leptos-use-docs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Demo helper components used by the leptos-use examples"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["HtmlElement"] }
+
+[features]
+ssr = []

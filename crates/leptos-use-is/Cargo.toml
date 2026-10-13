@@ -1,0 +1,29 @@
+[package]
+name = "leptos-use-is"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive is_ok / is_err / is_some / is_none signals for Leptos"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-derive-signal = { workspace = true }
+leptos = { workspace = true }
+
+[dev-dependencies]
+js-sys = { workspace = true }
+
+[features]
+ssr = ["leptos-use-derive-signal/ssr"]

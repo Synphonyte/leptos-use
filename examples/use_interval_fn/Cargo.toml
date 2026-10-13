@@ -11,7 +11,9 @@ leptos = { workspace = true, features = [
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", default-features = false, features = ["use_interval_fn", "docs", "math"] }
+leptos-use-docs = { path = "../../crates/leptos-use-docs" }
+leptos-use-filters = { path = "../../crates/leptos-use-filters" }
+leptos-use-interval-fn = { path = "../../crates/leptos-use-interval-fn" }
 web-sys = "0.3"
 
 [dev-dependencies]

@@ -8,7 +8,8 @@ leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
-leptos-use = { workspace = true, features = ["use_element_size", "docs"] }
+leptos-use-docs = { workspace = true }
+leptos-use-element-size = { workspace = true }
 web-sys = { workspace = true }
 
 [dev-dependencies]

@@ -1,0 +1,30 @@
+[package]
+name = "leptos-use-active-element"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive `document.activeElement`"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-document = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+leptos-use-option-local-signal = { workspace = true }
+leptos-use-window = { workspace = true }
+leptos = { workspace = true }
+web-sys = { workspace = true, features = ["Element", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[features]
+ssr = ["leptos-use-document/ssr", "leptos-use-event-listener/ssr", "leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]

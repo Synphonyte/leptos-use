@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_document_visibility;
+use leptos_use_docs::demo_or_body;
+use leptos_use_document_visibility::use_document_visibility;
 use std::time::Duration;
 
 #[component]

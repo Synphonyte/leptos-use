@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes 🛠
 
+- Leptos-Use has been split into micro crates. Every function now lives in its own crate named after it, for example
+  `use_mouse` → `leptos-use-mouse` (`leptos_use_mouse::use_mouse`). Related functions share a crate
+  (`leptos-use-storage`, `leptos-use-math`, `leptos-use-is`, `leptos-use-preferences`, …) and the former
+  `core`/`utils` modules became `leptos-use-core`, `leptos-use-element`, `leptos-use-maybe-rw-signal`,
+  `leptos-use-filters`, … The leptos-independent helpers are now the standalone crates `wasm-js-macros` (`js!`,
+  `js_fut!`) and `sendwrap-fn` (`sendwrap_fn!`).
+  Every crate has its own `ssr` feature (and `axum`/`actix` where it reads request headers).
+- The `leptos-use` crate still compiles with the same features and paths but only contains deprecated forwarding
+  wrappers that tell you which micro crate to add instead.
+
 - `use_calendar` is now generic over the date type via the new trait `CalendarDateType`.
   `UseCalendarOptions`, `UseCalendarReturn` and `CalendarDate` got a date type parameter and
   `use_calendar()` needs a type annotation, e.g. `use_calendar::<chrono::NaiveDate>()`.

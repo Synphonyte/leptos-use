@@ -1,0 +1,33 @@
+[package]
+name = "leptos-use-element-visibility"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Tracks the visibility of an element within the viewport"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-element = { workspace = true }
+leptos-use-intersection-observer = { workspace = true }
+cfg-if = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+web-sys = { workspace = true, features = ["DomRect", "Element", "EventTarget", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+web-sys = { workspace = true, features = ["Document", "DomRect", "Element", "EventTarget", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[features]
+ssr = ["leptos-use-element/ssr", "leptos-use-intersection-observer/ssr"]

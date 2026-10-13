@@ -1,0 +1,27 @@
+[package]
+name = "leptos-use-watch-with-options"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "A version of `leptos::watch` but with additional options"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-filters = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+
+[features]
+ssr = ["leptos-use-filters/ssr"]

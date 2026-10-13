@@ -1,0 +1,35 @@
+[package]
+name = "leptos-use-calendar"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Create bare-bone calendar data to use in your component"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["chrono", "ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-maybe-rw-signal = { workspace = true }
+leptos-use-now = { workspace = true }
+chrono = { workspace = true, optional = true }
+default-struct-builder = { workspace = true }
+jiff = { workspace = true, optional = true }
+leptos = { workspace = true }
+time = { workspace = true, optional = true }
+
+[features]
+default = ["chrono"]
+chrono = ["dep:chrono"]
+jiff = ["dep:jiff"]
+ssr = ["leptos-use-maybe-rw-signal/ssr", "leptos-use-now/ssr"]
+time = ["dep:time"]

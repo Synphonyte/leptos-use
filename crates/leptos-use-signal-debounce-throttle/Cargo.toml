@@ -1,0 +1,28 @@
+[package]
+name = "leptos-use-signal-debounce-throttle"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Debounced and throttled signals for Leptos"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-filters = { workspace = true }
+leptos-use-fn-debounce-throttle = { workspace = true }
+leptos = { workspace = true }
+paste = { workspace = true }
+
+[features]
+ssr = ["leptos-use-filters/ssr", "leptos-use-fn-debounce-throttle/ssr"]

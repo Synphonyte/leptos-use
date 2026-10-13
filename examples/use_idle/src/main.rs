@@ -1,6 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay, Note};
-use leptos_use::{use_idle, use_timestamp_with_options, UseIdleReturn, UseTimestampOptions};
+use leptos_use_docs::{demo_or_body, BooleanDisplay, Note};
+use leptos_use_idle::{use_idle, UseIdleReturn};
+use leptos_use_timestamp::{use_timestamp_with_options, UseTimestampOptions};
 
 #[component]
 fn Demo() -> impl IntoView {

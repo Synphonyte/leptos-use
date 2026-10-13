@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneReturn};
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_drop_zone::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

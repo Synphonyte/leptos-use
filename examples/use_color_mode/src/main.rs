@@ -1,9 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::{
-    use_color_mode_with_options, use_cycle_list_with_options, ColorMode, UseColorModeOptions,
-    UseColorModeReturn, UseCycleListOptions, UseCycleListReturn,
-};
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_color_mode::{use_color_mode_with_options, ColorMode, UseColorModeOptions, UseColorModeReturn};
+use leptos_use_cycle_list::{use_cycle_list_with_options, UseCycleListOptions, UseCycleListReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

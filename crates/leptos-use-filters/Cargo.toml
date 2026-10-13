@@ -1,0 +1,30 @@
+[package]
+name = "leptos-use-filters"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Debounce/throttle/pausable filters used by the leptos-use crates"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-now = { workspace = true }
+sendwrap-fn = { workspace = true }
+cfg-if = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+
+[features]
+ssr = ["leptos-use-now/ssr"]

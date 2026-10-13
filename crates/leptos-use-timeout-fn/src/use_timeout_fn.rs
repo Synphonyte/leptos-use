@@ -1,0 +1,163 @@
+use leptos::prelude::*;
+use std::marker::PhantomData;
+
+/// Wrapper for `setTimeout` with controls.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_timeout_fn)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos_use_timeout_fn::{use_timeout_fn, UseTimeoutFnReturn};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let UseTimeoutFnReturn { start, stop, is_pending, .. } = use_timeout_fn(
+///     |i: i32| {
+///         // do sth
+///     },
+///     3000.0
+/// );
+///
+/// start(3);
+/// #
+/// # view! { }
+/// # }
+/// ```
+///
+/// ## Rescheduling
+///
+/// Calling `start` while a previous timer is still pending cancels that pending
+/// timer and schedules a fresh one. Only the most recent `start` call's
+/// callback will fire. This matches VueUse's `useTimeoutFn` semantics.
+///
+/// ## SendWrapped Return
+///
+/// The returned closures `start` and `stop` are sendwrapped functions. They can
+/// only be called from the same thread that called `use_timeout_fn`.
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server the callback will never be run. The returned functions are all no-ops and
+/// `is_pending` will always be `false`.
+pub fn use_timeout_fn<CbFn, Arg, D>(
+    callback: CbFn,
+    delay: D,
+) -> UseTimeoutFnReturn<impl Fn(Arg) + Clone + Send + Sync, Arg, impl Fn() + Clone + Send + Sync>
+where
+    CbFn: Fn(Arg) + Clone + 'static,
+    Arg: 'static,
+    D: Into<Signal<f64>>,
+{
+    let delay = delay.into();
+
+    let (is_pending, set_pending) = signal(false);
+
+    let start;
+    let stop;
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        use crate::sendwrap_fn;
+        use leptos::leptos_dom::helpers::TimeoutHandle;
+        use std::sync::{Arc, Mutex};
+        use std::time::Duration;
+
+        let timer = Arc::new(Mutex::new(None::<TimeoutHandle>));
+
+        let clear = {
+            let timer = Arc::clone(&timer);
+
+            move || {
+                let timer = timer.lock().unwrap();
+                if let Some(timer) = *timer {
+                    timer.clear();
+                }
+            }
+        };
+
+        stop = {
+            let clear = clear.clone();
+
+            sendwrap_fn!(move || {
+                set_pending.set(false);
+                clear();
+            })
+        };
+
+        start = {
+            let timer = Arc::clone(&timer);
+            let callback = callback.clone();
+            let clear = clear.clone();
+
+            sendwrap_fn!(move |arg: Arg| {
+                clear();
+                set_pending.set(true);
+
+                let handle = set_timeout_with_handle(
+                    {
+                        let timer = Arc::clone(&timer);
+                        let callback = callback.clone();
+
+                        move || {
+                            set_pending.set(false);
+                            *timer.lock().unwrap() = None;
+
+                            #[cfg(debug_assertions)]
+                            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                            callback(arg);
+                        }
+                    },
+                    Duration::from_millis((delay.get_untracked() as u64).min(i32::MAX as u64)),
+                )
+                .ok();
+
+                *timer.lock().unwrap() = handle;
+            })
+        };
+
+        on_cleanup(clear);
+    }
+
+    #[cfg(feature = "ssr")]
+    {
+        let _ = set_pending;
+        let _ = callback;
+        let _ = delay;
+
+        start = move |_: Arg| ();
+        stop = move || ();
+    }
+
+    UseTimeoutFnReturn {
+        is_pending: is_pending.into(),
+        start,
+        stop,
+        _marker: PhantomData,
+    }
+}
+
+/// Return type of [`use_timeout_fn`].
+pub struct UseTimeoutFnReturn<StartFn, StartArg, StopFn>
+where
+    StartFn: Fn(StartArg) + Clone + Send + Sync,
+    StopFn: Fn() + Clone + Send + Sync,
+{
+    /// Whether the timeout is pending. When the `callback` is called this is set to `false`.
+    pub is_pending: Signal<bool>,
+
+    /// Start the timeout. The `callback` will be called after `delay` milliseconds.
+    /// If a previous timer is still pending, it is cancelled and replaced.
+    pub start: StartFn,
+
+    /// Stop the timeout. If the timeout was still pending the `callback` is not called.
+    pub stop: StopFn,
+
+    _marker: PhantomData<StartArg>,
+}

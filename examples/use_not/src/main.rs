@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::math::use_not;
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_math::use_not;
 
 #[component]
 fn Demo() -> impl IntoView {

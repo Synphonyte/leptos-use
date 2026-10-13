@@ -1,0 +1,29 @@
+[package]
+name = "leptos-use-supported"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "SSR compatibe `is_supported`"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos = { workspace = true }
+
+[dev-dependencies]
+wasm-js-macros = { path = "../wasm-js-macros" }
+wasm-bindgen = { workspace = true }
+
+[features]
+ssr = []

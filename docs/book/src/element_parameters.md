@@ -5,7 +5,7 @@ function [`use_element_size`](elements/use_element_size.md) returns the width an
 
 ```rust
 # use leptos::{*, html::Div};
-# use leptos_use::{use_element_size, UseElementSizeReturn};
+# use leptos_use_element_size::{use_element_size, UseElementSizeReturn};
 #
 # #[component]
 # pub fn Component() -> impl IntoView {

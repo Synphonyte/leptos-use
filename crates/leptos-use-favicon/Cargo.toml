@@ -1,0 +1,32 @@
+[package]
+name = "leptos-use-favicon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive favicon"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-maybe-rw-signal = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["Element", "HtmlHeadElement", "HtmlLinkElement", "NodeList"] }
+
+[dev-dependencies]
+leptos-use-preferences = { path = "../leptos-use-preferences" }
+
+[features]
+ssr = ["leptos-use-maybe-rw-signal/ssr"]
