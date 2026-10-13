@@ -1,5 +1,3 @@
-#![allow(unused_macros, unused_imports)]
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! get_header {
@@ -26,10 +24,8 @@ macro_rules! get_header {
                 }
 
                 #[cfg(feature = "actix")]
-                #[allow(unused_imports)]
                 use http0_2::{HeaderName, header::*};
                 #[cfg(feature = "axum")]
-                #[allow(unused_imports)]
                 use http1::{HeaderName, header::*};
 
                 #[cfg(any(feature = "axum", feature = "actix"))]
@@ -46,5 +42,3 @@ macro_rules! get_header {
         }
     };
 }
-
-pub(crate) use get_header;

@@ -1,5 +1,3 @@
-#![allow(unused_macros, unused_imports)]
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_ssr_safe_method {
@@ -19,5 +17,3 @@ macro_rules! impl_ssr_safe_method {
         }
     };
 }
-
-pub(crate) use impl_ssr_safe_method;

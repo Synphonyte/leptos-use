@@ -1,5 +1,3 @@
-#![allow(unused_macros, unused_imports)]
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! js_value_from_to_string {
@@ -11,5 +9,3 @@ macro_rules! js_value_from_to_string {
         }
     };
 }
-
-pub(crate) use js_value_from_to_string;
