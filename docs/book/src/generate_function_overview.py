@@ -25,6 +25,9 @@ def generate_function_overview(category, name, module):
     module = f"/{module}" if module is not None else ""
 
     file_name = f"../../../src{module}/{name}.rs"
+    if not module and not os.path.exists(file_name):
+        # some functions live in the utils module but are documented under utilities
+        file_name = f"../../../src/utils/{name}.rs"
     with open(file_name) as f:
         for line in f.readlines():
             stripped_line = line.strip()

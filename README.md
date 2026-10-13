@@ -70,7 +70,7 @@ cargo test --features math,docs,ssr,actix --doc use_locale
 First you need to install
 
 ```shell
-cargo install mdbook mdbook-cmdrun trunk
+cargo install mdbook trunk
 ```
 
 To build the book go in your terminal into the docs/book folder

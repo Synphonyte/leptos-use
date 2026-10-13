@@ -113,7 +113,7 @@ def process_line(line, name, module):
     if stripped.startswith("[Link to Demo](https://"):
         example_link = stripped.replace("[Link to Demo](", "").replace(")", "")
         result = f'''<div class="demo-container">
-    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source <i class="fa fa-github"></i></a>
+    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source <i class="fa-brands fa-github"></i></a>
     <div id="demo-anchor"></div>
 </div>'''
     else:

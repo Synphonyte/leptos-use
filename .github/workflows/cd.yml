@@ -20,10 +20,11 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
+          target: wasm32-unknown-unknown
           components: rustfmt, clippy, rust-src
-
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
+          cache-workspaces: |
+            . -> target
+            examples -> target
 
       - name: Check function count badge
         run: python3 docs/generate_count_badge.py --check
@@ -48,15 +49,10 @@ jobs:
       #   run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr,actix --doc use_locale
 
       #### mdbook
-      - name: Install mdbook I
+      - name: Install mdbook and trunk
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-binstall,mdbook@0.4
-      - name: Install mdbook II
-        run: |
-          cargo binstall -y mdbook-cmdrun
-          cargo binstall -y trunk
-          rustup target add wasm32-unknown-unknown
+          tool: trunk,mdbook@0.5
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6

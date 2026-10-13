@@ -18,14 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions-rs/toolchain@v1
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
-          profile: minimal
-          override: true
           components: rustfmt, clippy, rust-src
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
 
       - name: Run tests (general)
         run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr

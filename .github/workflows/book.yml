@@ -15,23 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions-rs/toolchain@v1
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
-          profile: minimal
-          override: true
+          target: wasm32-unknown-unknown
           components: rust-src
-      - name: Install mdbook I
+          cache-workspaces: |
+            . -> target
+            examples -> target
+      - name: Install mdbook and trunk
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-binstall,mdbook@0.4
-      - name: Install mdbook II
-        run: |
-          cargo binstall -y mdbook-cmdrun
-          cargo binstall -y trunk
-          rustup target add wasm32-unknown-unknown
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
+          tool: trunk,mdbook@0.5
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6

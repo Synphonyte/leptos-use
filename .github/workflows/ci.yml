@@ -34,11 +34,8 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          targets: wasm32-unknown-unknown
+          target: wasm32-unknown-unknown
           components: clippy, rustfmt
-
-      - name: Setup Rust Cache
-        uses: Swatinem/rust-cache@v2
 
       - name: Build
         run: cargo build
