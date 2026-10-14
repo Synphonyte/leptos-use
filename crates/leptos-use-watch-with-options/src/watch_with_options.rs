@@ -1,6 +1,4 @@
-use crate::filter_builder_methods;
-use crate::{DebounceOptions, FilterOptions, ThrottleOptions, create_filter_wrapper};
-use default_struct_builder::DefaultBuilder;
+use crate::{WatchOptions, create_filter_wrapper};
 use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -173,24 +171,4 @@ where
     // });
     //
     //
-}
-
-/// Options for `watch_with_options`
-#[derive(DefaultBuilder, Default)]
-pub struct WatchOptions {
-    /// If `immediate` is true, the `callback` will run immediately.
-    /// If it's `false, the `callback` will run only after
-    /// the first change is detected of any signal that is accessed in `deps`.
-    /// Defaults to `false`.
-    immediate: bool,
-
-    /// Allows to debounce or throttle the callback. Defaults to no filter.
-    filter: FilterOptions,
-}
-
-impl WatchOptions {
-    filter_builder_methods!(
-        /// the watch callback
-        filter
-    );
 }

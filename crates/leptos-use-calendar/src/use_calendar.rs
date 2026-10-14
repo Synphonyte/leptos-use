@@ -1,7 +1,5 @@
-use crate::MaybeRwSignal;
-use default_struct_builder::DefaultBuilder;
+use crate::{CalendarDate, UseCalendarOptions, UseCalendarReturn};
 use leptos::prelude::*;
-use std::ops::Deref;
 
 #[cfg(feature = "chrono")]
 mod impl_chrono;
@@ -191,7 +189,6 @@ const _: () = {
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// Not tested yet.
-// #[doc(cfg(feature = "use_calendar"))]
 pub fn use_calendar<D>() -> UseCalendarReturn<
     D,
     impl Fn() + Clone + Send + Sync,
@@ -206,7 +203,6 @@ where
 }
 
 /// Version of [`use_calendar`] that takes a [`UseCalendarOptions`]. See [`use_calendar`] for how to use.
-// #[doc(cfg(feature = "use_calendar"))]
 pub fn use_calendar_with_options<D>(
     options: UseCalendarOptions<D>,
 ) -> UseCalendarReturn<
@@ -330,7 +326,7 @@ fn calendar_dates<D: CalendarDateType>(
     dates
 }
 
-fn is_same_month<D: CalendarDateType>(a: &D, b: &D) -> bool {
+pub(crate) fn is_same_month<D: CalendarDateType>(a: &D, b: &D) -> bool {
     let (a_year, a_month, _) = a.ymd();
     let (b_year, b_month, _) = b.ymd();
     a_year == b_year && a_month == b_month
@@ -363,164 +359,6 @@ pub trait CalendarDateType: Clone + PartialEq + Send + Sync + 'static {
     /// resulting month it is clamped to the last day of that month.
     /// Returns `None` if out of range.
     fn add_months(&self, months: i32) -> Option<Self>;
-}
-
-/// Options for [`use_calendar_with_options`].
-// #[doc(cfg(feature = "use_calendar"))]
-#[derive(DefaultBuilder)]
-pub struct UseCalendarOptions<D>
-where
-    D: CalendarDateType,
-{
-    /// Date being used to initialize the calendar month to be displayed.
-    /// Defaults to [`CalendarDateType::today`].
-    #[builder(skip)]
-    pub initial_date: MaybeRwSignal<Option<D>>,
-    /// First day of the week as a number from 0 to 6. Defaults to 0 (Monday).
-    #[builder(into)]
-    pub first_day_of_the_week: Signal<usize>,
-}
-
-impl<D> Default for UseCalendarOptions<D>
-where
-    D: CalendarDateType,
-{
-    fn default() -> Self {
-        Self {
-            initial_date: Some(D::today()).into(),
-            first_day_of_the_week: 0.into(),
-        }
-    }
-}
-
-impl<D> UseCalendarOptions<D>
-where
-    D: CalendarDateType,
-{
-    /// Date being used to initialize the calendar month to be displayed.
-    /// Defaults to [`CalendarDateType::today`].
-    pub fn initial_date(self, value: impl Into<MaybeRwSignal<Option<D>>>) -> Self {
-        Self {
-            initial_date: value.into(),
-            ..self
-        }
-    }
-}
-
-/// Return type of [`use_calendar`].
-// #[doc(cfg(feature = "use_calendar"))]
-pub struct UseCalendarReturn<D, PreviousMonthFn, TodayFn, MonthByDateFn, NextMonthFn>
-where
-    D: CalendarDateType,
-    PreviousMonthFn: Fn() + Clone + Send + Sync,
-    TodayFn: Fn() + Clone + Send + Sync,
-    MonthByDateFn: Fn(&D) + Clone + Send + Sync,
-    NextMonthFn: Fn() + Clone + Send + Sync,
-{
-    /// A function to go to the previous month.
-    pub previous_month: PreviousMonthFn,
-    /// A function to go to the current month.
-    pub today: TodayFn,
-    /// A function to go to the month by date.
-    pub month_by_date: MonthByDateFn,
-    /// A function to go to the next month.
-    pub next_month: NextMonthFn,
-    /// The first day of the week as a number from 0 to 6.
-    pub weekdays: Signal<Vec<usize>>,
-    /// A `Vec` of [`CalendarDate`]s representing the dates in the current month.
-    pub dates: Signal<Vec<CalendarDate<D>>>,
-}
-
-/// Utility enum to represent a calendar date. Implements [`Deref`] to the wrapped date type.
-///
-/// All comparison methods compare by calendar day (see [`CalendarDateType::ymd`]).
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum CalendarDate<D> {
-    Previous(D),
-    Current(D),
-    Next(D),
-}
-
-impl<D> CalendarDate<D>
-where
-    D: CalendarDateType,
-{
-    pub fn is_other_month(&self) -> bool {
-        match self {
-            CalendarDate::Previous(_) | CalendarDate::Next(_) => true,
-            CalendarDate::Current(_) => false,
-        }
-    }
-
-    pub fn is_today(&self) -> bool {
-        self.ymd() == D::today().ymd()
-    }
-
-    pub fn is_selected(&self, selected_date: &D) -> bool {
-        self.ymd() == selected_date.ymd()
-    }
-
-    pub fn is_before(&self, date: &D) -> bool {
-        self.ymd() < date.ymd()
-    }
-
-    pub fn is_between(&self, start_date: &D, end_date: &D) -> bool {
-        let date = self.ymd();
-        date >= start_date.ymd() && date <= end_date.ymd()
-    }
-
-    pub fn is_between_current_month(&self, start_date: &D, end_date: &D) -> bool {
-        let start_date = start_date.ymd();
-        let end_date = end_date.ymd();
-        match self {
-            CalendarDate::Current(date) => {
-                let date = date.ymd();
-                date >= start_date && date <= end_date
-            }
-            CalendarDate::Next(date) => {
-                let date = date.ymd();
-                date > start_date && date <= end_date
-            }
-            CalendarDate::Previous(date) => {
-                let date = date.ymd();
-                date >= start_date && date < end_date
-            }
-        }
-    }
-
-    pub fn is_after(&self, date: &D) -> bool {
-        self.ymd() > date.ymd()
-    }
-
-    pub fn is_first_day_of_month(&self) -> bool {
-        let date = self.deref();
-        if let Some(prev_date) = date.prev_day() {
-            !is_same_month(date, &prev_date)
-        } else {
-            true
-        }
-    }
-
-    pub fn is_last_day_of_month(&self) -> bool {
-        let date = self.deref();
-        if let Some(next_date) = date.next_day() {
-            !is_same_month(date, &next_date)
-        } else {
-            true
-        }
-    }
-}
-
-impl<D> Deref for CalendarDate<D> {
-    type Target = D;
-
-    fn deref(&self) -> &Self::Target {
-        match self {
-            CalendarDate::Previous(date)
-            | CalendarDate::Current(date)
-            | CalendarDate::Next(date) => date,
-        }
-    }
 }
 
 #[cfg(test)]

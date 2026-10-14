@@ -1,6 +1,6 @@
-use crate::IntoElementsMaybeSignal;
+use crate::{IntoElementsMaybeSignal, UseResizeObserverOptions, UseResizeObserverReturn};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
+#[cfg(feature = "ssr")]
 use leptos::reactive::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -168,31 +168,4 @@ where
 
         UseResizeObserverReturn { is_supported, stop }
     }
-}
-
-/// Options for [`use_resize_observer_with_options`].
-#[derive(DefaultBuilder, Clone, Default)]
-pub struct UseResizeObserverOptions {
-    /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
-    #[builder(into)]
-    pub box_: Option<web_sys::ResizeObserverBoxOptions>,
-}
-
-impl From<UseResizeObserverOptions> for web_sys::ResizeObserverOptions {
-    fn from(val: UseResizeObserverOptions) -> Self {
-        let options = web_sys::ResizeObserverOptions::new();
-        options.set_box(
-            val.box_
-                .unwrap_or(web_sys::ResizeObserverBoxOptions::ContentBox),
-        );
-        options
-    }
-}
-
-/// The return value of [`use_resize_observer`].
-pub struct UseResizeObserverReturn<F: Fn() + Clone + Send + Sync> {
-    /// Whether the browser supports the ResizeObserver API
-    pub is_supported: Signal<bool>,
-    /// A function to stop and detach the ResizeObserver
-    pub stop: F,
 }

@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive scroll position and state
 
+mod options;
+mod return_type;
 mod use_scroll;
+pub use options::*;
+pub use return_type::*;
 pub use use_scroll::*;
 
 // Dependencies used through `crate::…` paths.

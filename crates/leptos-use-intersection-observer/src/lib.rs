@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver)
 
+mod options;
+mod return_type;
 mod use_intersection_observer;
+pub use options::*;
+pub use return_type::*;
 pub use use_intersection_observer::*;
 
 // Dependencies used through `crate::…` paths.

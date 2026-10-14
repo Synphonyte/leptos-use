@@ -1,7 +1,9 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! SSR-friendly and reactive cookie access
 
+mod options;
 mod use_cookie;
+pub use options::*;
 pub use use_cookie::*;
 
 // Dependencies used through `crate::…` paths.

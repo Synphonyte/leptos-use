@@ -1,5 +1,4 @@
-use crate::{ThrottleOptions, WatchOptions, watch_with_options};
-use default_struct_builder::DefaultBuilder;
+use crate::{ThrottleOptions, WatchOptions, WatchThrottledOptions, watch_with_options};
 
 /// A throttled version of `leptos::watch`.
 ///
@@ -112,28 +111,4 @@ where
             )
             .immediate(options.immediate),
     )
-}
-
-/// Options for [`watch_throttled_with_options`].
-#[derive(DefaultBuilder)]
-pub struct WatchThrottledOptions {
-    /// If `immediate` is false, the `callback` will not run immediately but only after
-    /// the first change is detected of any signal that is accessed in `deps`.
-    /// Defaults to `false`.
-    immediate: bool,
-
-    /// Invoke on the trailing edge of the timeout. Defaults to `true`.
-    pub trailing: bool,
-    /// Invoke on the leading edge of the timeout. Defaults to `true`.
-    pub leading: bool,
-}
-
-impl Default for WatchThrottledOptions {
-    fn default() -> Self {
-        Self {
-            immediate: false,
-            trailing: true,
-            leading: true,
-        }
-    }
 }

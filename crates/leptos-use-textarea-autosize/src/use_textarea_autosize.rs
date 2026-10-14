@@ -1,9 +1,7 @@
-use crate::{ElementMaybeSignal, IntoElementMaybeSignal, MaybeRwSignal};
-use default_struct_builder::DefaultBuilder;
+use crate::{IntoElementMaybeSignal, UseTextareaAutosizeOptions, UseTextareaAutosizeReturn};
 use leptos::prelude::*;
 #[cfg(not(feature = "ssr"))]
 use send_wrapper::SendWrapper;
-use std::sync::Arc;
 
 /// Automatically update the height of a textarea depending on the content.
 ///
@@ -104,7 +102,6 @@ use std::sync::Arc;
 /// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
 ///
 /// On the server this will always return an empty string as ´content` and a no-op `trigger_resize`.
-// #[doc(cfg(feature = "use_textarea_autosize"))]
 pub fn use_textarea_autosize<El, M>(
     el: El,
 ) -> UseTextareaAutosizeReturn<impl Fn() + Clone + Send + Sync>
@@ -115,7 +112,6 @@ where
 }
 
 /// Version of [`fn@crate::use_textarea_autosize`] that takes a `UseTextareaAutosizeOptions`. See [`fn@crate::use_textarea_autosize`] for how to use.
-// #[doc(cfg(feature = "use_textarea_autosize"))]
 pub fn use_textarea_autosize_with_options<El, M>(
     el: El,
     options: UseTextareaAutosizeOptions,
@@ -266,74 +262,6 @@ where
             trigger_resize: || {},
         }
     }
-}
-
-/// Options for [`fn@crate::use_textarea_autosize_with_options`].
-// #[doc(cfg(feature = "use_textarea_autosize"))]
-#[derive(DefaultBuilder)]
-#[cfg_attr(feature = "ssr", allow(dead_code))]
-pub struct UseTextareaAutosizeOptions {
-    /// Textarea content
-    #[builder(into)]
-    content: MaybeRwSignal<String>,
-
-    /// Watch sources that should trigger a textarea resize
-    watch: Arc<dyn Fn() + Send + Sync>,
-
-    /// Function called when the textarea size changes
-    on_resize: Arc<dyn Fn() + Send + Sync>,
-
-    /// Specify style target to apply the height based on textarea content.
-    /// If not provided it will use textarea it self.
-    #[builder(skip)]
-    style_target: ElementMaybeSignal<web_sys::Element>,
-
-    /// Specify the style property that will be used to manipulate height.
-    /// Should be `"height"` or `"min-height"`. Default value is `"height"`.
-    #[builder(into)]
-    style_prop: String,
-}
-
-impl Default for UseTextareaAutosizeOptions {
-    fn default() -> Self {
-        Self {
-            content: MaybeRwSignal::default(),
-            watch: Arc::new(|| ()),
-            on_resize: Arc::new(|| ()),
-            style_target: Default::default(),
-            style_prop: "height".to_string(),
-        }
-    }
-}
-
-impl UseTextareaAutosizeOptions {
-    /// List of elementss that should not trigger the callback. Defaults to `[]`.
-    #[cfg_attr(feature = "ssr", allow(dead_code))]
-    pub fn style_target<M>(
-        self,
-        style_target: impl IntoElementMaybeSignal<web_sys::Element, M>,
-    ) -> Self {
-        Self {
-            style_target: style_target.into_element_maybe_signal(),
-            ..self
-        }
-    }
-}
-
-/// Return type of [`fn@crate::use_textarea_autosize`].
-// #[doc(cfg(feature = "use_textarea_autosize"))]
-pub struct UseTextareaAutosizeReturn<F>
-where
-    F: Fn() + Clone + Send + Sync,
-{
-    /// The textarea content
-    pub content: Signal<String>,
-
-    /// Set the textarea content
-    pub set_content: WriteSignal<String>,
-
-    /// Function to trigger a textarea resize manually
-    pub trigger_resize: F,
 }
 
 #[cfg(not(feature = "ssr"))]

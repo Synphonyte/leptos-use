@@ -1,19 +1,11 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
+use crate::DebounceOptions;
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-
-#[derive(Copy, Clone, DefaultBuilder, Default)]
-pub struct DebounceOptions {
-    /// The maximum time allowed to be delayed before it's invoked.
-    /// In milliseconds.
-    #[builder(into)]
-    pub max_wait: Signal<Option<f64>>,
-}
 
 pub fn debounce_filter<R>(
     ms: impl Into<Signal<f64>>,

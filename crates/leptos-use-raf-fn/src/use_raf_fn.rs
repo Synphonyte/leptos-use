@@ -1,7 +1,5 @@
-use crate::Pausable;
-use crate::sendwrap_fn;
+use crate::{Pausable, UseRafFnOptions, sendwrap_fn};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -161,20 +159,6 @@ pub fn use_raf_fn_with_options(
         resume,
         pause,
         is_active: is_active.into(),
-    }
-}
-
-/// Options for [`use_raf_fn_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseRafFnOptions {
-    /// Start the requestAnimationFrame loop immediately on creation. Defaults to `true`.
-    /// If false, the loop will only start when you call `resume()`.
-    immediate: bool,
-}
-
-impl Default for UseRafFnOptions {
-    fn default() -> Self {
-        Self { immediate: true }
     }
 }
 

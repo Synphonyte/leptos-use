@@ -1,9 +1,6 @@
-use crate::OptionLocalRwSignal;
-use crate::{MaybeRwSignal, OptionLocalSignal, sendwrap_fn};
+use crate::{OptionLocalRwSignal, UseDisplayMediaOptions, UseDisplayMediaReturn, sendwrap_fn};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive [`mediaDevices.getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) streaming.
@@ -158,53 +155,4 @@ async fn create_media(audio: bool) -> Result<web_sys::MediaStream, JsValue> {
     let res = js_fut!(promise).await?;
 
     Ok::<_, JsValue>(web_sys::MediaStream::unchecked_from_js(res))
-}
-
-// NOTE: there's no video value because it has to be `true`. Otherwise the stream would always resolve to an Error.
-/// Options for [`use_display_media`].
-#[derive(DefaultBuilder, Clone, Copy, Debug)]
-pub struct UseDisplayMediaOptions {
-    /// If the stream is enabled. Defaults to `false`.
-    enabled: MaybeRwSignal<bool>,
-
-    /// A value of `true` indicates that the returned [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)
-    /// will contain an audio track, if audio is supported and available for the display surface chosen by the user.
-    /// The default value is `false`.
-    audio: bool,
-}
-
-impl Default for UseDisplayMediaOptions {
-    fn default() -> Self {
-        Self {
-            enabled: false.into(),
-            audio: false,
-        }
-    }
-}
-
-/// Return type of [`use_display_media`]
-#[derive(Clone)]
-pub struct UseDisplayMediaReturn<StartFn, StopFn>
-where
-    StartFn: Fn() + Clone + Send + Sync,
-    StopFn: Fn() + Clone + Send + Sync,
-{
-    /// The current [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) if it exists.
-    /// Initially this is `None` until `start` resolved successfully.
-    /// In case the stream couldn't be started, for example because the user didn't grant permission,
-    /// this has the value `Some(Err(...))`.
-    pub stream: OptionLocalSignal<Result<web_sys::MediaStream, JsValue>>,
-
-    /// Starts the screen streaming. Triggers the ask for permission if not already granted.
-    pub start: StartFn,
-
-    /// Stops the screen streaming
-    pub stop: StopFn,
-
-    /// A value of `true` indicates that the returned [`MediaStream`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)
-    /// has resolved successfully and thus the stream is enabled.
-    pub enabled: Signal<bool>,
-
-    /// A value of `true` is the same as calling `start()` whereas `false` is the same as calling `stop()`.
-    pub set_enabled: WriteSignal<bool>,
 }

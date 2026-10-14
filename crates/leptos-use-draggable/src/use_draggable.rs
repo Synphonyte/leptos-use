@@ -1,11 +1,10 @@
-use crate::{IntoElementMaybeSignal, MaybeRwSignal, PointerType, Position};
-use crate::{UseEventListenerOptions, UseWindow, use_event_listener_with_options, use_window};
-use default_struct_builder::DefaultBuilder;
+use crate::{
+    IntoElementMaybeSignal, Position, UseDraggableCallbackArgs, UseDraggableOptions,
+    UseDraggableReturn, UseEventListenerOptions, use_event_listener_with_options,
+};
 use leptos::ev::{pointerdown, pointermove, pointerup};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use std::marker::PhantomData;
-use std::sync::Arc;
 use wasm_bindgen::JsCast;
 use web_sys::PointerEvent;
 
@@ -285,108 +284,4 @@ where
             format!("left: {}px; top: {}px;", position.x, position.y)
         }),
     }
-}
-
-/// Options for [`use_draggable_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseDraggableOptions<DragEl, DragM, HandleEl, HandleM>
-where
-    DragEl: IntoElementMaybeSignal<web_sys::EventTarget, DragM>,
-    HandleEl: IntoElementMaybeSignal<web_sys::EventTarget, HandleM>,
-{
-    /// Only start the dragging when click on the element directly. Defaults to `false`.
-    #[builder(into)]
-    exact: Signal<bool>,
-
-    /// Prevent events defaults. Defaults to `false`.
-    #[builder(into)]
-    prevent_default: Signal<bool>,
-
-    /// Prevent events propagation. Defaults to `false`.
-    #[builder(into)]
-    stop_propagation: Signal<bool>,
-
-    /// Element to attach `pointermove` and `pointerup` events to. Defaults to `window`.
-    dragging_element: DragEl,
-
-    /// Handle that triggers the drag event. Defaults to `target`.
-    handle: Option<HandleEl>,
-
-    /// Pointer types that listen to. Defaults to `[Mouse, Touch, Pen]`.
-    pointer_types: Vec<PointerType>,
-
-    /// Initial position of the element. Defaults to `{ x: 0, y: 0 }`.
-    #[builder(into)]
-    initial_value: MaybeRwSignal<Position>,
-
-    /// Computes the initial offset of the target element for drag positioning.
-    /// Defaults to using its bounding client rectangle's left and top values.
-    target_offset: Arc<dyn Fn(web_sys::EventTarget) -> (f64, f64)>,
-
-    /// Callback when the dragging starts. Return `false` to prevent dragging.
-    on_start: Arc<dyn Fn(UseDraggableCallbackArgs) -> bool + Send + Sync>,
-
-    /// Callback during dragging.
-    on_move: Arc<dyn Fn(UseDraggableCallbackArgs) + Send + Sync>,
-
-    /// Callback when dragging end.
-    on_end: Arc<dyn Fn(UseDraggableCallbackArgs) + Send + Sync>,
-
-    #[builder(skip)]
-    _marker1: PhantomData<DragM>,
-    #[builder(skip)]
-    _marker2: PhantomData<HandleM>,
-}
-
-impl<DragM, HandleM> Default
-    for UseDraggableOptions<UseWindow, DragM, Option<web_sys::EventTarget>, HandleM>
-where
-    UseWindow: IntoElementMaybeSignal<web_sys::EventTarget, DragM>,
-    Option<web_sys::EventTarget>: IntoElementMaybeSignal<web_sys::EventTarget, HandleM>,
-{
-    fn default() -> Self {
-        Self {
-            exact: Signal::default(),
-            prevent_default: Signal::default(),
-            stop_propagation: Signal::default(),
-            dragging_element: use_window(),
-            handle: None,
-            pointer_types: vec![PointerType::Mouse, PointerType::Touch, PointerType::Pen],
-            initial_value: MaybeRwSignal::default(),
-            target_offset: Arc::new(|target: web_sys::EventTarget| {
-                let target: web_sys::Element = target.unchecked_into();
-                let rect = target.get_bounding_client_rect();
-                (rect.left(), rect.top())
-            }),
-            on_start: Arc::new(|_| true),
-            on_move: Arc::new(|_| {}),
-            on_end: Arc::new(|_| {}),
-            _marker1: PhantomData,
-            _marker2: PhantomData,
-        }
-    }
-}
-
-/// Argument for the `on_...` handler functions of [`UseDraggableOptions`].
-pub struct UseDraggableCallbackArgs {
-    /// Position of the `target` element
-    pub position: Position,
-    /// Original `PointerEvent` from the event listener
-    pub event: PointerEvent,
-}
-
-/// Return type of [`use_draggable`].
-pub struct UseDraggableReturn {
-    /// X coordinate of the element
-    pub x: Signal<f64>,
-    /// Y coordinate of the element
-    pub y: Signal<f64>,
-    /// Position of the element
-    pub position: Signal<Position>,
-    /// Set the position of the element manually
-    pub set_position: WriteSignal<Position>,
-    /// Whether the element is being dragged
-    pub is_dragging: Signal<bool>,
-    /// Style attribute "left: {x}px; top: {y}px;"
-    pub style: Signal<String>,
 }

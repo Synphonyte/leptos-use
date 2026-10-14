@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive mouse position related to an element
 
+mod options;
+mod return_type;
 mod use_mouse_in_element;
+pub use options::*;
+pub use return_type::*;
 pub use use_mouse_in_element::*;
 
 // Dependencies used through `crate::…` paths.

@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Automatically update the height of a textarea depending on the content
 
+mod options;
+mod return_type;
 mod use_textarea_autosize;
+pub use options::*;
+pub use return_type::*;
 pub use use_textarea_autosize::*;
 
 // Dependencies used through `crate::…` paths.

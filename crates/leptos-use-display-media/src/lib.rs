@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive [`mediaDevices.getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) streaming
 
+mod options;
+mod return_type;
 mod use_display_media;
+pub use options::*;
+pub use return_type::*;
 pub use use_display_media::*;
 
 // Dependencies used through `crate::…` paths.

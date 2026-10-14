@@ -1,4 +1,4 @@
-use crate::{WatchOptions, watch_with_options};
+use crate::{WatchOptions, WatchPausableReturn, watch_with_options};
 use leptos::prelude::*;
 
 /// Pausable [`watch`].
@@ -114,24 +114,4 @@ where
         resume,
         is_active: is_active.into(),
     }
-}
-
-/// Return type of [`watch_pausable`]
-pub struct WatchPausableReturn<StopFn, PauseFn, ResumeFn>
-where
-    StopFn: Fn() + Clone + Send + Sync,
-    PauseFn: Fn() + Clone + Send + Sync,
-    ResumeFn: Fn() + Clone + Send + Sync,
-{
-    /// Stops the watcher
-    pub stop: StopFn,
-
-    /// Pauses the watcher
-    pub pause: PauseFn,
-
-    /// Resumes the watcher
-    pub resume: ResumeFn,
-
-    /// Whether the watcher is active (not paused). This doesn't reflect if the watcher has been stopped
-    pub is_active: Signal<bool>,
 }

@@ -28,7 +28,6 @@ use leptos::reactive::wrappers::read::Signal;
 /// - [`use_and`]
 /// - [`use_or`]
 ///
-// #[doc(cfg(feature = "math"))]
 pub fn use_not<S>(a: S) -> Signal<bool>
 where
     S: Into<Signal<bool>>,

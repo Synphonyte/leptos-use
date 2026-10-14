@@ -1,11 +1,9 @@
 #![cfg_attr(feature = "ssr", allow(unused_imports, dead_code))]
 
-use crate::{Direction, Directions, IntoElementMaybeSignal};
 use crate::{
-    ScrollOffset, UseEventListenerOptions, UseScrollOptions, UseScrollReturn,
-    use_element_visibility, use_scroll_with_options,
+    Direction, Directions, IntoElementMaybeSignal, ScrollOffset, UseInfiniteScrollOptions,
+    UseScrollOptions, UseScrollReturn, use_element_visibility, use_scroll_with_options,
 };
-use default_struct_builder::DefaultBuilder;
 use futures_util::join;
 use gloo_timers::future::sleep;
 use leptos::prelude::*;
@@ -249,37 +247,6 @@ where
         let _ = options;
 
         Signal::stored(false)
-    }
-}
-
-/// Options for [`use_infinite_scroll_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseInfiniteScrollOptions {
-    /// Callback when scrolling is happening.
-    on_scroll: Arc<dyn Fn(web_sys::Event) + Send + Sync>,
-
-    /// Options passed to the `addEventListener("scroll", ...)` call
-    event_listener_options: UseEventListenerOptions,
-
-    /// The minimum distance between the bottom of the element and the bottom of the viewport. Default is 0.0.
-    distance: f64,
-
-    /// The direction in which to listen the scroll. Defaults to `Direction::Bottom`.
-    direction: Direction,
-
-    /// The interval time between two load more (to avoid too many invokes). Default is 100.0.
-    interval: f64,
-}
-
-impl Default for UseInfiniteScrollOptions {
-    fn default() -> Self {
-        Self {
-            on_scroll: Arc::new(|_| {}),
-            event_listener_options: Default::default(),
-            distance: 0.0,
-            direction: Direction::Bottom,
-            interval: 100.0,
-        }
     }
 }
 

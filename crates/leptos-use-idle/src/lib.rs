@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Tracks whether the user is being inactive
 
+mod options;
+mod return_type;
 mod use_idle;
+pub use options::*;
+pub use return_type::*;
 pub use use_idle::*;
 
 // Dependencies used through `crate::…` paths.

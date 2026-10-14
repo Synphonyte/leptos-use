@@ -3,8 +3,10 @@
 
 mod is;
 mod on_click_outside;
+mod options;
 pub use is::*;
 pub use on_click_outside::*;
+pub use options::*;
 
 // Dependencies used through `crate::…` paths.
 pub(crate) use leptos_use_element::*;

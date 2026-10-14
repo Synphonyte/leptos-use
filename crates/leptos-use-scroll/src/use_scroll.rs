@@ -1,9 +1,9 @@
-use crate::UseEventListenerOptions;
-use crate::{Direction, Directions, IntoElementMaybeSignal};
+use crate::{Directions, IntoElementMaybeSignal, UseScrollOptions, UseScrollReturn};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
+#[cfg(not(feature = "ssr"))]
 use leptos::reactive::wrappers::read::Signal;
+#[cfg(not(feature = "ssr"))]
 use std::rc::Rc;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
@@ -460,123 +460,5 @@ where
         arrived_state: arrived_state.into(),
         directions: directions.into(),
         measure,
-    }
-}
-
-/// Options for [`use_scroll`].
-#[derive(DefaultBuilder)]
-/// Options for [`use_scroll_with_options`].
-#[cfg_attr(feature = "ssr", allow(dead_code))]
-pub struct UseScrollOptions {
-    /// Throttle time in milliseconds for the scroll events. Defaults to 0 (disabled).
-    throttle: f64,
-
-    /// After scrolling ends we wait idle + throttle milliseconds before we consider scrolling to have stopped.
-    /// Defaults to 200.
-    idle: f64,
-
-    /// Threshold in pixels when we consider a side to have arrived (`UseScrollReturn::arrived_state`).
-    offset: ScrollOffset,
-
-    /// Callback when scrolling is happening.
-    on_scroll: Rc<dyn Fn(web_sys::Event)>,
-
-    /// Callback when scrolling stops (after `idle` + `throttle` milliseconds have passed).
-    on_stop: Rc<dyn Fn(web_sys::Event)>,
-
-    /// Options passed to the `addEventListener("scroll", ...)` call
-    event_listener_options: UseEventListenerOptions,
-
-    /// When changing the `x` or `y` signals this specifies the scroll behaviour.
-    /// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.
-    #[builder(into)]
-    behavior: Signal<ScrollBehavior>,
-}
-
-impl Default for UseScrollOptions {
-    fn default() -> Self {
-        Self {
-            throttle: 0.0,
-            idle: 200.0,
-            offset: ScrollOffset::default(),
-            on_scroll: Rc::new(|_| {}),
-            on_stop: Rc::new(|_| {}),
-            event_listener_options: Default::default(),
-            behavior: Default::default(),
-        }
-    }
-}
-
-/// The scroll behavior.
-/// Can be `Auto` (= not smooth) or `Smooth`. Defaults to `Auto`.
-#[derive(Default, Copy, Clone)]
-pub enum ScrollBehavior {
-    #[default]
-    Auto,
-    Smooth,
-}
-
-impl From<ScrollBehavior> for web_sys::ScrollBehavior {
-    fn from(val: ScrollBehavior) -> Self {
-        match val {
-            ScrollBehavior::Auto => web_sys::ScrollBehavior::Auto,
-            ScrollBehavior::Smooth => web_sys::ScrollBehavior::Smooth,
-        }
-    }
-}
-
-/// The return value of [`use_scroll`].
-pub struct UseScrollReturn<SetXFn, SetYFn, MFn>
-where
-    SetXFn: Fn(f64) + Clone + Send + Sync,
-    SetYFn: Fn(f64) + Clone + Send + Sync,
-    MFn: Fn() + Clone + Send + Sync,
-{
-    /// X coordinate of scroll position
-    pub x: Signal<f64>,
-
-    /// Sets the value of `x`. This does also scroll the element.
-    pub set_x: SetXFn,
-
-    /// Y coordinate of scroll position
-    pub y: Signal<f64>,
-
-    /// Sets the value of `y`. This does also scroll the element.
-    pub set_y: SetYFn,
-
-    /// Is true while the element is being scrolled.
-    pub is_scrolling: Signal<bool>,
-
-    /// Sets the field that represents a direction to true if the
-    /// element is scrolled all the way to that side.
-    pub arrived_state: Signal<Directions>,
-
-    /// The directions in which the element is being scrolled are set to true.
-    pub directions: Signal<Directions>,
-
-    /// Re-evaluates the `arrived_state`.
-    pub measure: MFn,
-}
-
-#[derive(Default, Copy, Clone, Debug)]
-/// Threshold in pixels when we consider a side to have arrived (`UseScrollReturn::arrived_state`).
-pub struct ScrollOffset {
-    pub left: f64,
-    pub top: f64,
-    pub right: f64,
-    pub bottom: f64,
-}
-
-impl ScrollOffset {
-    /// Sets the value of the provided direction
-    pub fn set_direction(mut self, direction: Direction, value: f64) -> Self {
-        match direction {
-            Direction::Top => self.top = value,
-            Direction::Bottom => self.bottom = value,
-            Direction::Left => self.left = value,
-            Direction::Right => self.right = value,
-        }
-
-        self
     }
 }

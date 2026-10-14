@@ -1,9 +1,5 @@
-use crate::filter_builder_methods;
-use crate::now;
-use crate::{DebounceOptions, FilterOptions, ThrottleOptions};
-use default_struct_builder::DefaultBuilder;
+use crate::{UseIdleOptions, UseIdleReturn, now};
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 
 /// Tracks whether the user is being inactive.
 ///
@@ -177,64 +173,4 @@ pub fn use_idle_with_options(
         last_active: last_active.into(),
         reset,
     }
-}
-
-/// Options for [`use_idle_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseIdleOptions {
-    /// Event names to listen to for detected user activity.
-    /// Default: `vec!["mousemove", "mousedown", "resize", "keydown", "touchstart", "wheel"]`.
-    events: Vec<String>,
-
-    /// Whether to listen for document visibility change.
-    /// Defaults to `true`.
-    listen_for_visibility_change: bool,
-
-    /// Initial state of the returned `idle`.
-    /// Defaults to `false`.
-    initial_state: bool,
-
-    /// Allows to debounce or throttle the event listener that is called for
-    /// every event (from `events`). Defaults to a throttle by 50ms.
-    filter: FilterOptions,
-}
-
-impl Default for UseIdleOptions {
-    fn default() -> Self {
-        Self {
-            events: vec![
-                "mousemove".to_string(),
-                "mousedown".to_string(),
-                "resize".to_string(),
-                "keydown".to_string(),
-                "touchstart".to_string(),
-                "wheel".to_string(),
-            ],
-            listen_for_visibility_change: true,
-            initial_state: false,
-            filter: FilterOptions::throttle(50.0),
-        }
-    }
-}
-
-impl UseIdleOptions {
-    filter_builder_methods!(
-        /// the event listener
-        filter
-    );
-}
-
-/// Return type of [`use_idle`].
-pub struct UseIdleReturn<F>
-where
-    F: Fn() + Clone + Send + Sync,
-{
-    /// Wether the use has been inactive for at least `timeout` milliseconds.
-    pub idle: Signal<bool>,
-
-    /// Timestamp of last user activity.
-    pub last_active: Signal<f64>,
-
-    /// Reset function. Sets the idle state to `false`.
-    pub reset: F,
 }

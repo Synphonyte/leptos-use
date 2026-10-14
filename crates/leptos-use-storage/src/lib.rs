@@ -1,10 +1,12 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive local / session / custom storage for Leptos
 
+mod options;
 mod use_local_storage;
 mod use_session_storage;
 mod use_storage;
 
+pub use options::*;
 pub use use_local_storage::*;
 pub use use_session_storage::*;
 pub use use_storage::*;

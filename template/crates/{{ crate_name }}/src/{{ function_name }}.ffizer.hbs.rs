@@ -1,4 +1,5 @@
-use default_struct_builder::DefaultBuilder;
+use crate::{{ to_pascal_case function_name }}Options;
+use crate::{{ to_pascal_case function_name }}Return;
 use leptos::prelude::*;
 
 ///{{#if (eq unstable_apis "true")}}
@@ -36,16 +37,3 @@ pub fn {{ function_name }}() -> {{ to_pascal_case function_name }}Return {
 pub fn {{ function_name }}_with_options(options: {{ to_pascal_case function_name }}Options) -> {{ to_pascal_case function_name }}Return {
     {{ to_pascal_case function_name }}Return {}
 }
-
-/// Options for [`fn@crate::{{ function_name }}_with_options`].
-#[derive(DefaultBuilder)]
-pub struct {{ to_pascal_case function_name }}Options {}
-
-impl Default for {{ to_pascal_case function_name }}Options {
-    fn default() -> Self {
-        Self {}
-    }
-}
-
-/// Return type of [`fn@crate::{{ function_name }}`].
-pub struct {{ to_pascal_case function_name }}Return {}

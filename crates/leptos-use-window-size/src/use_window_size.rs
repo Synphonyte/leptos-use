@@ -1,8 +1,9 @@
-use crate::Size;
+#[cfg(not(feature = "ssr"))]
+use crate::MeasureType;
 use crate::{
-    UseEventListenerOptions, use_event_listener_with_options, use_media_query, use_window,
+    UseEventListenerOptions, UseWindowSizeOptions, UseWindowSizeReturn,
+    use_event_listener_with_options, use_media_query, use_window,
 };
-use default_struct_builder::DefaultBuilder;
 use leptos::ev::resize;
 use leptos::prelude::*;
 
@@ -32,13 +33,11 @@ use leptos::prelude::*;
 ///
 /// On the server the width and height are always `initial_size` which defaults to
 /// `Size { width: INFINITY, height: INFINITY }`.
-// #[doc(cfg(feature = "use_window_size"))]
 pub fn use_window_size() -> UseWindowSizeReturn {
     use_window_size_with_options(UseWindowSizeOptions::default())
 }
 
 /// Version of [`fn@crate::use_window_size`] that takes a `UseWindowSizeOptions`. See [`fn@crate::use_window_size`] for how to use.
-// #[doc(cfg(feature = "use_window_size"))]
 pub fn use_window_size_with_options(options: UseWindowSizeOptions) -> UseWindowSizeReturn {
     let UseWindowSizeOptions {
         initial_size,
@@ -139,58 +138,4 @@ pub fn use_window_size_with_options(options: UseWindowSizeOptions) -> UseWindowS
         width: width.into(),
         height: height.into(),
     }
-}
-
-/// Options for [`fn@crate::use_window_size_with_options`].
-// #[doc(cfg(feature = "use_window_size"))]
-#[derive(DefaultBuilder)]
-pub struct UseWindowSizeOptions {
-    /// The initial size before anything is measured (like on the server side).
-    /// Defaults to `Size { width: INFINITY, height: INFINITY }`.
-    initial_size: Size,
-
-    /// Listen to the window ` orientationchange ` event. Defaults to `true`.
-    listen_orientation: bool,
-
-    /// Whether the scrollbar should be included in the width and height
-    /// Only effective when `measure_type` is `MeasureType::Inner`.
-    /// Defaults to `true`.
-    include_scrollbar: bool,
-
-    /// Use `window.innerWidth` or `window.outerWidth`.
-    /// Defaults to `MeasureType::Inner`.
-    measure_type: MeasureType,
-}
-
-/// Type of the `measure_type` option.
-#[derive(Default, Clone, Copy, PartialEq, Eq, Debug)]
-pub enum MeasureType {
-    /// Use `window.innerWidth`
-    #[default]
-    Inner,
-    /// Use `window.outerWidth`
-    Outer,
-}
-
-impl Default for UseWindowSizeOptions {
-    fn default() -> Self {
-        Self {
-            initial_size: Size {
-                width: f64::INFINITY,
-                height: f64::INFINITY,
-            },
-            listen_orientation: true,
-            include_scrollbar: true,
-            measure_type: MeasureType::default(),
-        }
-    }
-}
-
-/// Return type of [`fn@crate::use_window_size`].
-// #[doc(cfg(feature = "use_window_size"))]
-pub struct UseWindowSizeReturn {
-    /// The width of the window.
-    pub width: Signal<f64>,
-    /// The height of the window.
-    pub height: Signal<f64>,
 }

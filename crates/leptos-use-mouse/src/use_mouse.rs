@@ -1,12 +1,12 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::{IntoElementMaybeSignal, Position};
-use crate::{UseEventListenerOptions, UseWindow, use_event_listener_with_options, use_window};
-use default_struct_builder::DefaultBuilder;
+use crate::{
+    IntoElementMaybeSignal, UseEventListenerOptions, UseMouseCoordType, UseMouseOptions,
+    UseMouseReturn, UseMouseSourceType, use_event_listener_with_options,
+};
 use leptos::ev::{dragover, mousemove, touchend, touchmove, touchstart};
 use leptos::prelude::*;
 use std::convert::Infallible;
-use std::marker::PhantomData;
 use wasm_bindgen::{JsCast, JsValue};
 
 /// Reactive mouse position
@@ -202,59 +202,6 @@ where
     }
 }
 
-#[derive(DefaultBuilder)]
-/// Options for [`use_mouse_with_options`].
-pub struct UseMouseOptions<El, M, Ex>
-where
-    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
-    Ex: UseMouseEventExtractor + Clone,
-{
-    /// How to extract the x, y coordinates from mouse events or touches
-    coord_type: UseMouseCoordType<Ex>,
-
-    /// Listen events on `target` element. Defaults to `window`
-    target: El,
-
-    /// Listen to `touchmove` events. Defaults to `true`.
-    touch: bool,
-
-    /// Reset to initial value when `touchend` event fired. Defaults to `false`
-    reset_on_touch_ends: bool,
-
-    /// Initial values. Defaults to `{x: 0.0, y: 0.0}`.
-    initial_value: Position,
-
-    #[builder(skip)]
-    _marker: PhantomData<M>,
-}
-
-impl<M> Default for UseMouseOptions<UseWindow, M, Infallible>
-where
-    UseWindow: IntoElementMaybeSignal<web_sys::EventTarget, M>,
-{
-    fn default() -> Self {
-        Self {
-            coord_type: UseMouseCoordType::default(),
-            target: use_window(),
-            touch: true,
-            reset_on_touch_ends: false,
-            initial_value: Position { x: 0.0, y: 0.0 },
-            _marker: PhantomData,
-        }
-    }
-}
-
-/// Defines how to get the coordinates from the event.
-#[derive(Clone, Default)]
-pub enum UseMouseCoordType<E: UseMouseEventExtractor + Clone> {
-    #[default]
-    Page,
-    Client,
-    Screen,
-    Movement,
-    Custom(E),
-}
-
 /// Trait to implement if you want to specify a custom extractor
 #[allow(unused_variables)]
 pub trait UseMouseEventExtractor {
@@ -269,31 +216,6 @@ pub trait UseMouseEventExtractor {
     }
 }
 
-impl<E: UseMouseEventExtractor + Clone> UseMouseEventExtractor for UseMouseCoordType<E> {
-    #[allow(clippy::unnecessary_cast)]
-    fn extract_mouse_coords(&self, event: &web_sys::MouseEvent) -> Option<(f64, f64)> {
-        match self {
-            UseMouseCoordType::Page => Some((event.page_x() as f64, event.page_y() as f64)),
-            UseMouseCoordType::Client => Some((event.client_x() as f64, event.client_y() as f64)),
-            UseMouseCoordType::Screen => Some((event.screen_x() as f64, event.screen_y() as f64)),
-            UseMouseCoordType::Movement => {
-                Some((event.movement_x() as f64, event.movement_y() as f64))
-            }
-            UseMouseCoordType::Custom(extractor) => extractor.extract_mouse_coords(event),
-        }
-    }
-
-    fn extract_touch_coords(&self, touch: &web_sys::Touch) -> Option<(f64, f64)> {
-        match self {
-            UseMouseCoordType::Page => Some((touch.page_x() as f64, touch.page_y() as f64)),
-            UseMouseCoordType::Client => Some((touch.client_x() as f64, touch.client_y() as f64)),
-            UseMouseCoordType::Screen => Some((touch.screen_x() as f64, touch.screen_y() as f64)),
-            UseMouseCoordType::Movement => None,
-            UseMouseCoordType::Custom(extractor) => extractor.extract_touch_coords(touch),
-        }
-    }
-}
-
 impl UseMouseEventExtractor for Infallible {
     fn extract_mouse_coords(&self, _: &web_sys::MouseEvent) -> Option<(f64, f64)> {
         unreachable!()
@@ -302,29 +224,4 @@ impl UseMouseEventExtractor for Infallible {
     fn extract_touch_coords(&self, _: &web_sys::Touch) -> Option<(f64, f64)> {
         unreachable!()
     }
-}
-
-/// Return type of [`use_mouse`].
-pub struct UseMouseReturn {
-    /// X coordinate of the mouse pointer / touch
-    pub x: Signal<f64>,
-    /// Y coordinate of the mouse pointer / touch
-    pub y: Signal<f64>,
-    /// Sets the value of `x`. This does not actually move the mouse cursor.
-    pub set_x: WriteSignal<f64>,
-    /// Sets the value of `y`. This does not actually move the mouse cursor.
-    pub set_y: WriteSignal<f64>,
-    /// Identifies the source of the reported coordinates
-    pub source_type: Signal<UseMouseSourceType>,
-}
-
-/// Identifies the source of the reported coordinates
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum UseMouseSourceType {
-    /// coordinates come from mouse movement
-    Mouse,
-    /// coordinates come from touch
-    Touch,
-    /// Initially before any event has been recorded the source type is unset
-    Unset,
 }

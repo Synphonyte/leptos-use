@@ -1,8 +1,10 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Debounced and throttled watch for Leptos
 
+mod options;
 mod watch_debounced;
 mod watch_throttled;
+pub use options::*;
 pub use watch_debounced::*;
 pub use watch_throttled::*;
 

@@ -1,7 +1,9 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel)
 
+mod return_type;
 mod use_broadcast_channel;
+pub use return_type::*;
 pub use use_broadcast_channel::*;
 
 // Dependencies used through `crate::…` paths.

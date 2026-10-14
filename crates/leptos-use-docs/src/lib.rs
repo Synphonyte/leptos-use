@@ -1,7 +1,6 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Demo helper components used by the leptos-use examples
 
-//#![doc(cfg(feature = "docs"))]
 //! Collection of documentation related utilities. Used extensively in the examples.
 
 mod boolean_display;

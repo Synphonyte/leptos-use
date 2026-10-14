@@ -1,7 +1,5 @@
-use crate::IntoElementMaybeSignal;
-use default_struct_builder::DefaultBuilder;
+use crate::{IntoElementMaybeSignal, UseElementBoundingOptions, UseElementBoundingReturn};
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive [bounding box](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) of an HTML element
 ///
@@ -186,64 +184,4 @@ where
         y: y.into(),
         update,
     }
-}
-
-/// Options for [`use_element_bounding_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseElementBoundingOptions {
-    /// Reset values to 0 on component disposal
-    ///
-    /// Default: `true`
-    pub reset: bool,
-
-    /// Listen to window resize event
-    ///
-    /// Default: `true`
-    pub window_resize: bool,
-
-    /// Listen to window scroll event
-    ///
-    /// Default: `true`
-    pub window_scroll: bool,
-
-    /// Immediately call update
-    ///
-    /// Default: `true`
-    pub immediate: bool,
-}
-
-impl Default for UseElementBoundingOptions {
-    fn default() -> Self {
-        Self {
-            reset: true,
-            window_resize: true,
-            window_scroll: true,
-            immediate: true,
-        }
-    }
-}
-
-/// Return type of [`use_element_bounding`].
-pub struct UseElementBoundingReturn<F>
-where
-    F: Fn() + Clone + Send + Sync,
-{
-    /// Reactive version of [`BoudingClientRect.height`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/height)
-    pub height: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.width`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/width)
-    pub width: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.left`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/left)
-    pub left: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.right`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/right)
-    pub right: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.top`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/top)
-    pub top: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.bottom`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/bottom)
-    pub bottom: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.x`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/x)
-    pub x: Signal<f64>,
-    /// Reactive version of [`BoudingClientRect.y`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly/y)
-    pub y: Signal<f64>,
-    /// Function to re-evaluate `get_bounding_client_rect()` and update the signals.
-    pub update: F,
 }

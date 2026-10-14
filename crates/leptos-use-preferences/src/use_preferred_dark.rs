@@ -1,7 +1,5 @@
-use crate::get_header;
-use default_struct_builder::DefaultBuilder;
+use crate::UsePreferredDarkOptions;
 use leptos::prelude::*;
-use std::sync::Arc;
 
 /// Reactive [dark theme preference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
 ///
@@ -61,32 +59,5 @@ pub fn use_preferred_dark_with_options(options: UsePreferredDarkOptions) -> Sign
     {
         let color_header = (options.ssr_color_header_getter)();
         Signal::derive(move || color_header == Some("dark".to_string()))
-    }
-}
-
-/// Options for [`fn@crate::use_preferred_dark_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UsePreferredDarkOptions {
-    /// Getter function to return the string value of the
-    /// [`Sec-CH-Prefers-Color-Scheme`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
-    /// header.
-    /// When you use one of the features `"axum"` or `"actix"` there's a valid default
-    /// implementation provided.
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    pub ssr_color_header_getter: Arc<dyn Fn() -> Option<String> + Send + Sync>,
-}
-
-impl Default for UsePreferredDarkOptions {
-    fn default() -> Self {
-        Self {
-            ssr_color_header_getter: Arc::new(move || {
-                get_header!(
-                    HeaderName::from_static("sec-ch-prefers-color-scheme"),
-                    use_preferred_dark,
-                    ssr_color_header_getter
-                )
-            }),
-        }
     }
 }

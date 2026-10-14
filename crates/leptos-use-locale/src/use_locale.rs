@@ -1,4 +1,4 @@
-use crate::{UseLocalesOptions, use_locales_with_options};
+use crate::{UseLocaleOptions, use_locales_with_options};
 use leptos::{logging::warn, prelude::*};
 use unic_langid::LanguageIdentifier;
 
@@ -89,5 +89,3 @@ where
         })
     })
 }
-
-pub type UseLocaleOptions = UseLocalesOptions;

@@ -1,29 +1,11 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::now;
+use crate::{ThrottleOptions, now};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
 use std::sync::{Arc, Mutex, atomic::AtomicBool};
 use std::time::Duration;
-
-#[derive(Copy, Clone, DefaultBuilder)]
-pub struct ThrottleOptions {
-    /// Invoke on the trailing edge of the timeout. Defaults to `true`.
-    pub trailing: bool,
-    /// Invoke on the leading edge of the timeout (=immediately). Defaults to `true`.
-    pub leading: bool,
-}
-
-impl Default for ThrottleOptions {
-    fn default() -> Self {
-        Self {
-            trailing: true,
-            leading: true,
-        }
-    }
-}
 
 pub fn throttle_filter<R>(
     ms: impl Into<Signal<f64>>,

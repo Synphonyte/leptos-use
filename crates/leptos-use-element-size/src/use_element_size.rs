@@ -1,9 +1,6 @@
-use crate::IntoElementMaybeSignal;
-use crate::Size;
+use crate::{IntoElementMaybeSignal, UseElementSizeOptions, UseElementSizeReturn};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
@@ -168,24 +165,4 @@ where
         width: width.into(),
         height: height.into(),
     }
-}
-
-#[derive(DefaultBuilder, Default)]
-/// Options for [`use_element_size_with_options`].
-pub struct UseElementSizeOptions {
-    /// Initial size returned before any measurements on the `target` are done. Also the value reported
-    /// at first when the `target` is a signal and changes.
-    initial_size: Size,
-
-    /// The box that is used to determine the dimensions of the target. Defaults to `ContentBox`.
-    #[builder(into)]
-    pub box_: Option<web_sys::ResizeObserverBoxOptions>,
-}
-
-/// The return value of [`use_element_size`].
-pub struct UseElementSizeReturn {
-    /// The width of the element.
-    pub width: Signal<f64>,
-    /// The height of the element.
-    pub height: Signal<f64>,
 }

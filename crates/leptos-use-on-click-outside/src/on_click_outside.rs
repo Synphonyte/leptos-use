@@ -1,6 +1,5 @@
-use crate::{ElementsMaybeSignal, IntoElementMaybeSignal, IntoElementsMaybeSignal};
+use crate::{IntoElementMaybeSignal, OnClickOutsideOptions};
 use cfg_if::cfg_if;
-use default_struct_builder::DefaultBuilder;
 
 cfg_if! { if #[cfg(not(feature = "ssr"))] {
     use leptos::prelude::*;
@@ -244,41 +243,5 @@ where
                 f();
             }
         })
-    }
-}
-
-/// Options for [`on_click_outside_with_options`].
-#[derive(Clone, DefaultBuilder)]
-#[cfg_attr(feature = "ssr", allow(dead_code))]
-pub struct OnClickOutsideOptions {
-    /// List of elementss that should not trigger the callback. Defaults to `[]`.
-    #[builder(skip)]
-    ignore: ElementsMaybeSignal<web_sys::EventTarget>,
-
-    /// Use capturing phase for internal event listener. Defaults to `true`.
-    capture: bool,
-
-    /// Run callback if focus moves to an iframe. Defaults to `false`.
-    detect_iframes: bool,
-}
-
-impl Default for OnClickOutsideOptions {
-    fn default() -> Self {
-        Self {
-            ignore: Vec::<web_sys::EventTarget>::new().into_elements_maybe_signal(),
-            capture: true,
-            detect_iframes: false,
-        }
-    }
-}
-
-impl OnClickOutsideOptions {
-    /// List of elements that should not trigger the callback. Defaults to `[]`.
-    #[cfg_attr(feature = "ssr", allow(dead_code))]
-    pub fn ignore<M>(self, ignore: impl IntoElementsMaybeSignal<web_sys::EventTarget, M>) -> Self {
-        Self {
-            ignore: ignore.into_elements_maybe_signal(),
-            ..self
-        }
     }
 }

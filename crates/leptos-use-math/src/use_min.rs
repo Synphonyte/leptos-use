@@ -27,7 +27,6 @@ use_partial_cmp!(
     /// # view! { }
     /// # }
     /// ```
-    // #[doc(cfg(feature = "math"))]
     use_min,
     Ordering::Greater
 );

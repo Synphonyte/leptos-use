@@ -1,13 +1,10 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::IntoElementMaybeSignal;
 use crate::{
-    UseMutationObserverOptions, WatchOptions, use_mutation_observer_with_options,
-    watch_with_options,
+    IntoElementMaybeSignal, UseCssVarOptions, UseMutationObserverOptions, WatchOptions,
+    use_mutation_observer_with_options, watch_with_options,
 };
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
-use std::marker::PhantomData;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
 
@@ -158,56 +155,4 @@ where
     }
 
     (variable, set_variable)
-}
-
-/// Options for [`use_css_var_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseCssVarOptions<El, M>
-where
-    El: IntoElementMaybeSignal<web_sys::Element, M>,
-{
-    /// The target element to read the variable from and set the variable on.
-    /// Defaults to the `document.documentElement`.
-    target: El,
-
-    /// The initial value of the variable before it is read. Also the default value
-    /// if the variable isn't defined on the target. Defaults to "".
-    #[builder(into)]
-    initial_value: String,
-
-    /// If `true` use a `MutationObserver` to monitor variable changes. Defaults to `false`.
-    observe: bool,
-
-    #[builder(skip)]
-    _marker: PhantomData<M>,
-}
-
-#[cfg(feature = "ssr")]
-impl<M> Default for UseCssVarOptions<Option<web_sys::Element>, M>
-where
-    Option<web_sys::Element>: IntoElementMaybeSignal<web_sys::Element, M>,
-{
-    fn default() -> Self {
-        Self {
-            target: None,
-            initial_value: "".into(),
-            observe: false,
-            _marker: PhantomData,
-        }
-    }
-}
-
-#[cfg(not(feature = "ssr"))]
-impl<M> Default for UseCssVarOptions<web_sys::Element, M>
-where
-    web_sys::Element: IntoElementMaybeSignal<web_sys::Element, M>,
-{
-    fn default() -> Self {
-        Self {
-            target: document().document_element().expect("No document element"),
-            initial_value: "".into(),
-            observe: false,
-            _marker: PhantomData,
-        }
-    }
 }

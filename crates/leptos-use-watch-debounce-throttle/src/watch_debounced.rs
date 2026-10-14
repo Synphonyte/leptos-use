@@ -1,8 +1,6 @@
-use crate::{DebounceOptions, WatchOptions, watch_with_options};
-use default_struct_builder::DefaultBuilder;
-use leptos::prelude::*;
+use crate::{DebounceOptions, WatchDebouncedOptions, WatchOptions, watch_with_options};
 
-/// A debounced version of [`watch`].
+/// A debounced version of [`watch`](leptos::prelude::watch).
 ///
 /// ## Demo
 ///
@@ -109,19 +107,4 @@ where
             .debounce_with_options(ms, DebounceOptions::default().max_wait(options.max_wait))
             .immediate(options.immediate),
     )
-}
-
-/// Options for [`watch_debounced_with_options`].
-#[derive(DefaultBuilder, Default)]
-pub struct WatchDebouncedOptions {
-    /// If `immediate` is false, the `callback` will not run immediately but only after
-    /// the first change is detected of any signal that is accessed in `deps`.
-    /// Defaults to `false`.
-    immediate: bool,
-
-    /// The maximum time allowed to be delayed before the callback invoked.
-    /// In milliseconds.
-    /// Same as [`DebounceOptions::max_wait`]
-    #[builder(into)]
-    pub max_wait: Signal<Option<f64>>,
 }

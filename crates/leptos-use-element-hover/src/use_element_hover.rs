@@ -1,6 +1,7 @@
-use crate::IntoElementMaybeSignal;
-use crate::{UseEventListenerOptions, use_event_listener_with_options};
-use default_struct_builder::DefaultBuilder;
+use crate::{
+    IntoElementMaybeSignal, UseElementHoverOptions, UseEventListenerOptions,
+    use_event_listener_with_options,
+};
 use leptos::ev::{mouseenter, mouseleave};
 use leptos::leptos_dom::helpers::TimeoutHandle;
 use leptos::prelude::*;
@@ -96,14 +97,4 @@ where
         use_event_listener_with_options(el, mouseleave, move |_| toggle(false), listener_options);
 
     is_hovered.into()
-}
-
-/// Options for [`use_element_hover_with_options`].
-#[derive(DefaultBuilder, Default)]
-pub struct UseElementHoverOptions {
-    /// The time in ms the mouse has to be hovered over the element before the signal is changed to `true`. Defaults to `0`.
-    delay_enter: u64,
-
-    /// The time in ms after the mouse has left the element before the signal is changed to `false`. Defaults to `0`.
-    delay_leave: u64,
 }

@@ -1,7 +1,9 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! A version of `leptos::watch` but with additional options
 
+mod options;
 mod watch_with_options;
+pub use options::*;
 pub use watch_with_options::*;
 
 // Dependencies used through `crate::…` paths.

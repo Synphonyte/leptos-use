@@ -1,11 +1,9 @@
 use crate::{
-    UseEventListenerOptions, UseTimeoutFnReturn, js, js_fut, sendwrap_fn,
-    use_event_listener_with_options, use_supported,
+    UseClipboardOptions, UseClipboardReturn, UseEventListenerOptions, UseTimeoutFnReturn, js,
+    js_fut, sendwrap_fn, use_event_listener_with_options, use_supported,
 };
-use default_struct_builder::DefaultBuilder;
 use leptos::ev::{copy, cut};
 use leptos::prelude::*;
-use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API).
 ///
@@ -128,45 +126,4 @@ pub fn use_clipboard_with_options(
         copied: copied.into(),
         copy: do_copy,
     }
-}
-
-/// Options for [`use_clipboard_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseClipboardOptions {
-    /// When `true` event handlers are added so that the returned signal `text` is updated whenever the clipboard changes.
-    /// Defaults to `false`.
-    ///
-    /// > Please note that clipboard changes are only detected when copying or cutting text inside the same document.
-    read: bool,
-
-    /// After how many milliseconds after copying should the returned signal `copied` be set to `false`?
-    /// Defaults to 1500.
-    copied_reset_delay: f64,
-}
-
-impl Default for UseClipboardOptions {
-    fn default() -> Self {
-        Self {
-            read: false,
-            copied_reset_delay: 1500.0,
-        }
-    }
-}
-
-/// Return type of [`use_clipboard`].
-pub struct UseClipboardReturn<CopyFn>
-where
-    CopyFn: Fn(&str) + Clone,
-{
-    /// Whether the Clipboard API is supported.
-    pub is_supported: Signal<bool>,
-
-    /// The current state of the clipboard.
-    pub text: Signal<Option<String>>,
-
-    /// `true` for [`UseClipboardOptions::copied_reset_delay`] milliseconds after copying.
-    pub copied: Signal<bool>,
-
-    /// Copy the given text to the clipboard.
-    pub copy: CopyFn,
 }

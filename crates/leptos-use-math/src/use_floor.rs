@@ -26,6 +26,5 @@ use_simple_math!(
     /// # view! { }
     /// # }
     /// ```
-    // #[doc(cfg(feature = "math"))]
     floor
 );

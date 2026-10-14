@@ -1,7 +1,9 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Tracks the visibility of an element within the viewport
 
+mod options;
 mod use_element_visibility;
+pub use options::*;
 pub use use_element_visibility::*;
 
 // Dependencies used through `crate::…` paths.

@@ -26,7 +26,6 @@ use_binary_logic!(
     /// # view! { }
     /// # }
     /// ```
-    // #[doc(cfg(feature = "math"))]
     or
     ||
 );

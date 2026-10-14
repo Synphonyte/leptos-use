@@ -1,4 +1,6 @@
+use crate::UseDeviceOrientationReturn;
 use cfg_if::cfg_if;
+#[cfg(feature = "ssr")]
 use leptos::reactive::wrappers::read::Signal;
 
 /// Reactive [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent).
@@ -87,14 +89,4 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         beta: beta.into(),
         gamma: gamma.into(),
     }
-}
-
-/// Return type of [`use_device_orientation`].
-#[derive(Clone)]
-pub struct UseDeviceOrientationReturn {
-    pub is_supported: Signal<bool>,
-    pub absolute: Signal<bool>,
-    pub alpha: Signal<Option<f64>>,
-    pub beta: Signal<Option<f64>>,
-    pub gamma: Signal<Option<f64>>,
 }

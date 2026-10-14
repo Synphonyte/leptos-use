@@ -1,5 +1,4 @@
-use crate::MaybeRwSignal;
-use default_struct_builder::DefaultBuilder;
+use crate::{MaybeRwSignal, UseCycleListOptions, UseCycleListReturn};
 use leptos::prelude::*;
 
 /// Cycle through a list of items.
@@ -144,62 +143,4 @@ where
         prev,
         shift,
     }
-}
-
-/// Options for [`use_cycle_list_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseCycleListOptions<T>
-where
-    T: Clone + PartialEq + Send + Sync + 'static,
-{
-    /// The initial value of the state. Can be a Signal. If none is provided the first entry
-    /// of the list will be used.
-    #[builder(keep_type)]
-    initial_value: Option<MaybeRwSignal<T>>,
-
-    /// The default index when the current value is not found in the list.
-    /// For example when `get_index_of` returns `None`.
-    fallback_index: usize,
-
-    /// Custom function to get the index of the current value. Defaults to `Iterator::position()`
-    #[builder(keep_type)]
-    get_position: fn(&T, &Vec<T>) -> Option<usize>,
-}
-
-impl<T> Default for UseCycleListOptions<T>
-where
-    T: Clone + PartialEq + Send + Sync + 'static,
-{
-    fn default() -> Self {
-        Self {
-            initial_value: None,
-            fallback_index: 0,
-            get_position: |value: &T, list: &Vec<T>| list.iter().position(|v| v == value),
-        }
-    }
-}
-
-/// Return type of [`use_cycle_list`].
-pub struct UseCycleListReturn<T, SetFn, NextFn, PrevFn, ShiftFn>
-where
-    T: Clone + PartialEq + Send + Sync + 'static,
-    SetFn: Fn(usize) -> T + Clone,
-    NextFn: Fn() + Clone,
-    PrevFn: Fn() + Clone,
-    ShiftFn: Fn(i64) -> T + Clone,
-{
-    /// Current value
-    pub state: Signal<T>,
-    /// Set current value
-    pub set_state: WriteSignal<T>,
-    /// Current index of current value in list
-    pub index: Signal<usize>,
-    /// Set current index of current value in list
-    pub set_index: SetFn,
-    /// Go to next value (cyclic)
-    pub next: NextFn,
-    /// Go to previous value (cyclic)
-    pub prev: PrevFn,
-    /// Move by the specified amount from the current value (cyclic)
-    pub shift: ShiftFn,
 }

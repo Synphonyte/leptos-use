@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "ssr", allow(unused_variables, unused_imports))]
 
-use crate::MaybeRwSignal;
-use default_struct_builder::DefaultBuilder;
+use crate::UseFaviconOptions;
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
 use wasm_bindgen::JsCast;
@@ -109,29 +108,4 @@ pub fn use_favicon_with_options(
     }
 
     (favicon, set_favicon)
-}
-
-/// Options for [`use_favicon_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseFaviconOptions {
-    /// New input favicon. Can be a `RwSignal` in which case updates will change the favicon. Defaults to None.
-    #[builder(into)]
-    new_icon: MaybeRwSignal<Option<String>>,
-
-    /// Base URL of the favicon. Defaults to "".
-    #[builder(into)]
-    base_url: String,
-    /// Rel attribute of the <link> tag. Defaults to "icon".
-    #[builder(into)]
-    rel: String,
-}
-
-impl Default for UseFaviconOptions {
-    fn default() -> Self {
-        Self {
-            new_icon: Default::default(),
-            base_url: "".to_string(),
-            rel: "icon".to_string(),
-        }
-    }
 }

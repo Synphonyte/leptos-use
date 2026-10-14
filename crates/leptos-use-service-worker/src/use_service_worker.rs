@@ -1,4 +1,3 @@
-use default_struct_builder::DefaultBuilder;
 use leptos::reactive::actions::Action;
 use leptos::reactive::wrappers::read::Signal;
 use leptos::{
@@ -6,11 +5,13 @@ use leptos::{
     prelude::*,
 };
 use send_wrapper::SendWrapper;
-use std::sync::Arc;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use web_sys::ServiceWorkerRegistration;
 
-use crate::{js_fut, sendwrap_fn, use_window};
+use crate::{
+    ServiceWorkerRegistrationError, UseServiceWorkerOptions, UseServiceWorkerReturn, js_fut,
+    sendwrap_fn, use_window,
+};
 
 /// Reactive [ServiceWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API).
 ///
@@ -178,78 +179,7 @@ pub fn use_service_worker_with_options(
     }
 }
 
-/// Options for [`use_service_worker_with_options`].
-#[derive(DefaultBuilder)]
-pub struct UseServiceWorkerOptions {
-    /// The name of your service-worker file. Must be deployed alongside your app.
-    /// The default name is 'service-worker.js'.
-    #[builder(into)]
-    script_url: String,
-
-    /// The message sent to a waiting ServiceWorker when you call the `skip_waiting` callback.
-    /// The callback is part of the return type of [`use_service_worker`]!
-    /// The default message is 'skipWaiting'.
-    #[builder(into)]
-    skip_waiting_message: String,
-
-    /// What should happen when a new service worker was activated?
-    /// The default implementation reloads the current page.
-    on_controller_change: Arc<dyn Fn()>,
-}
-
-impl Default for UseServiceWorkerOptions {
-    fn default() -> Self {
-        Self {
-            script_url: "service-worker.js".into(),
-            skip_waiting_message: "skipWaiting".into(),
-            on_controller_change: Arc::new(move || {
-                use std::ops::Deref;
-                if let Some(window) = use_window().deref()
-                    && let Err(err) = window.location().reload()
-                {
-                    warn!(
-                        "Detected a ServiceWorkerController change but the page reload failed! Error: {err:?}"
-                    );
-                }
-            }),
-        }
-    }
-}
-
-/// Return type of [`use_service_worker`].
-pub struct UseServiceWorkerReturn<CheckFn, SkipFn>
-where
-    CheckFn: Fn() + Clone + Send + Sync,
-    SkipFn: Fn() + Clone + Send + Sync,
-{
-    /// The current registration state.
-    pub registration:
-        Signal<Result<SendWrapper<ServiceWorkerRegistration>, ServiceWorkerRegistrationError>>,
-
-    /// Whether a SW is currently installing.
-    pub installing: Signal<bool>,
-
-    /// Whether a SW was installed and is now awaiting activation.
-    pub waiting: Signal<bool>,
-
-    /// Whether a SW is active.
-    pub active: Signal<bool>,
-
-    /// Check for a ServiceWorker update.
-    pub check_for_update: CheckFn,
-
-    /// Call this to activate a new ("waiting") SW if one is available.
-    /// Calling this while the [`UseServiceWorkerReturn::waiting`] signal resolves to false has no effect.
-    pub skip_waiting: SkipFn,
-}
-
 struct ServiceWorkerScriptUrl(pub String);
-
-#[derive(Debug, Clone)]
-pub enum ServiceWorkerRegistrationError {
-    Js(SendWrapper<JsValue>),
-    NeverQueried,
-}
 
 /// A leptos action which asynchronously checks for ServiceWorker updates, given an existing ServiceWorkerRegistration.
 fn create_action_update() -> Action<

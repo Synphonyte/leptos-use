@@ -1,9 +1,9 @@
-use crate::Pausable;
-use crate::{UseIntervalFnOptions, sendwrap_fn, use_interval_fn_with_options};
-use default_struct_builder::DefaultBuilder;
+use crate::{
+    Pausable, UseIntervalFnOptions, UseIntervalOptions, UseIntervalReturn, sendwrap_fn,
+    use_interval_fn_with_options,
+};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
-use std::rc::Rc;
 
 /// Reactive counter increases on every interval.
 ///
@@ -100,47 +100,4 @@ where
         pause,
         resume,
     }
-}
-
-/// Options for [`use_interval_with_options`]
-#[derive(DefaultBuilder)]
-pub struct UseIntervalOptions {
-    /// Start the timer immediately. Defaults to `true`.
-    immediate: bool,
-
-    /// Callback on every interval.
-    callback: Rc<dyn Fn(u64)>,
-}
-
-impl Default for UseIntervalOptions {
-    fn default() -> Self {
-        Self {
-            immediate: true,
-            callback: Rc::new(|_: u64| {}),
-        }
-    }
-}
-
-/// Return type of [`use_interval`].
-#[derive(DefaultBuilder)]
-pub struct UseIntervalReturn<PauseFn, ResumeFn, ResetFn>
-where
-    PauseFn: Fn() + Clone + Send + Sync,
-    ResumeFn: Fn() + Clone + Send + Sync,
-    ResetFn: Fn() + Clone + Send + Sync,
-{
-    /// Counter signal that increases by one every interval.
-    pub counter: Signal<u64>,
-
-    /// Reset the counter to zero
-    pub reset: ResetFn,
-
-    /// A Signal that indicates whether the counter is active. `false` when paused.
-    pub is_active: Signal<bool>,
-
-    /// Temporarily pause the counter
-    pub pause: PauseFn,
-
-    /// Resume the counter
-    pub resume: ResumeFn,
 }

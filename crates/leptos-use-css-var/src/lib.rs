@@ -1,7 +1,9 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Manipulate CSS variables
 
+mod options;
 mod use_css_var;
+pub use options::*;
 pub use use_css_var::*;
 
 // Dependencies used through `crate::…` paths.

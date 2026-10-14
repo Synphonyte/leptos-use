@@ -1,7 +1,11 @@
 #![allow(unexpected_cfgs, clippy::extra_unused_lifetimes)]
 //! Reactive current timestamp
 
+mod options;
+mod return_type;
 mod use_timestamp;
+pub use options::*;
+pub use return_type::*;
 pub use use_timestamp::*;
 
 // Dependencies used through `crate::…` paths.
