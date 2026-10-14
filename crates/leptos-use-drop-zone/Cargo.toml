@@ -28,5 +28,14 @@ leptos = { workspace = true }
 send_wrapper = { workspace = true }
 web-sys = { workspace = true, features = ["DataTransfer", "DragEvent", "EventListenerOptions", "EventTarget", "File", "FileList", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["DataTransfer", "DataTransferItem", "DataTransferItemList", "Document", "DragEvent", "DragEventInit", "Element", "File", "HtmlElement"] }
+
 [features]
 ssr = ["leptos-use-element/ssr", "leptos-use-event-listener/ssr"]

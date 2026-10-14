@@ -37,6 +37,13 @@ web-sys = { workspace = true, features = ["BroadcastChannel", "CustomEventInit",
 
 [dev-dependencies]
 leptos_meta = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["DomTokenList", "Element", "MediaQueryList", "Storage", "Window"] }
 
 [features]
 actix = ["dep:http0_2", "leptos-use-cookie/actix", "leptos-use-header/actix", "leptos-use-preferences/actix"]

@@ -28,5 +28,15 @@ send_wrapper = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true, features = ["Coordinates", "Geolocation", "GeolocationPosition", "GeolocationPositionError", "MediaQueryList", "Navigator", "NodeList", "Position", "PositionError", "PositionOptions", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Coordinates", "PositionError"] }
+
 [features]
 ssr = ["leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]

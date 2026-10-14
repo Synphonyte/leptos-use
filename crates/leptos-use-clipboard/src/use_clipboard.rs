@@ -94,7 +94,9 @@ pub fn use_clipboard_with_options(
         }
     };
 
-    if is_supported.get_untracked() && read {
+    // `is_supported` is only updated in an effect, so it is still `false` here. `update_text`
+    // checks it when an event arrives.
+    if read && !cfg!(feature = "ssr") {
         let listener_options = UseEventListenerOptions::default().passive(true);
         let _ = use_event_listener_with_options(window(), copy, update_text, listener_options);
         let _ = use_event_listener_with_options(window(), cut, update_text, listener_options);

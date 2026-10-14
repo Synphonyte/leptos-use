@@ -141,9 +141,10 @@ pub fn use_idle_with_options(
         };
 
         let listener_options = UseEventListenerOptions::default().passive(true);
+        // On `window` because `resize` is only fired there; the other events bubble up to it.
         for event in events {
             let _ = use_event_listener_with_options(
-                use_document(),
+                window(),
                 Custom::new(event),
                 on_event.clone(),
                 listener_options,

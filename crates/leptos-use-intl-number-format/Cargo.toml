@@ -28,5 +28,13 @@ leptos = { workspace = true }
 send_wrapper = { workspace = true }
 wasm-bindgen = { workspace = true }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+
 [features]
 ssr = []

@@ -27,6 +27,16 @@ http0_2 = { workspace = true, optional = true }
 http1 = { workspace = true, optional = true }
 leptos = { workspace = true }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Event", "EventTarget", "Navigator", "Window"] }
+
 [features]
 actix = ["dep:http0_2", "leptos-use-header/actix"]
 axum = ["dep:http1", "leptos-use-header/axum"]

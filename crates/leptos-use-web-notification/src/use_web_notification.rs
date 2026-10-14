@@ -186,7 +186,8 @@ pub fn use_web_notification_with_options(
         // the user (e.g.the user already read the notification on the webpage).
         // Most modern browsers dismiss notifications automatically after a few
         // moments(around four seconds).
-        if is_supported.get_untracked() {
+        // `is_supported` is only updated in an effect, so it is still `false` here.
+        if browser_supports_notifications() {
             let _ = use_event_listener(document(), visibilitychange, move |e: web_sys::Event| {
                 e.prevent_default();
                 if document().visibility_state() == web_sys::VisibilityState::Visible {

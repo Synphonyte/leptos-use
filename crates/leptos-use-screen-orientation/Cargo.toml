@@ -27,5 +27,15 @@ send_wrapper = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true, features = ["EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "OrientationLockType", "OrientationType", "Screen", "ScreenOrientation", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["OrientationType", "Screen", "ScreenOrientation", "Window"] }
+
 [features]
 ssr = ["leptos-use-event-listener/ssr"]

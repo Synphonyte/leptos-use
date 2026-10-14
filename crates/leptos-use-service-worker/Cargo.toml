@@ -29,5 +29,14 @@ wasm-bindgen = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true, features = ["MediaQueryList", "Navigator", "NodeList", "ServiceWorker", "ServiceWorkerContainer", "ServiceWorkerRegistration", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["ServiceWorkerRegistration"] }
+
 [features]
 ssr = ["leptos-use-window/ssr"]

@@ -36,6 +36,13 @@ web-sys = { workspace = true, features = ["CustomEvent", "CustomEventInit", "Eve
 [dev-dependencies]
 codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
 serde = { workspace = true, features = ["derive"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Storage", "StorageEvent", "StorageEventInit", "Window"] }
 
 [features]
 ssr = ["leptos-use-event-listener/ssr", "leptos-use-filters/ssr", "leptos-use-maybe-rw-signal/ssr", "leptos-use-watch-with-options/ssr", "leptos-use-window/ssr"]

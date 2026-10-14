@@ -25,6 +25,14 @@ unic-langid = { workspace = true }
 
 [dev-dependencies]
 unic-langid = { workspace = true, features = ["macros"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Navigator", "Window"] }
 
 [features]
 actix = ["leptos-use-locales/actix"]

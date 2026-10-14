@@ -5,7 +5,7 @@ use leptos::reactive::wrappers::read::Signal;
 /// Options for [`use_idle_with_options`](crate::use_idle_with_options).
 #[derive(DefaultBuilder)]
 pub struct UseIdleOptions {
-    /// Event names to listen to for detected user activity.
+    /// Event names to listen to on `window` for detected user activity.
     /// Default: `vec!["mousemove", "mousedown", "resize", "keydown", "touchstart", "wheel"]`.
     pub(crate) events: Vec<String>,
 

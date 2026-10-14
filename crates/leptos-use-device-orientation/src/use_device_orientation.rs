@@ -57,7 +57,8 @@ pub fn use_device_orientation() -> UseDeviceOrientationReturn {
         let (beta, set_beta) = signal(None);
         let (gamma, set_gamma) = signal(None);
 
-        if is_supported.get_untracked() {
+        // `is_supported` is only updated in an effect, so it is still `false` here.
+        if js!("DeviceOrientationEvent" in &window()) {
             let cleanup = use_event_listener_with_options(
                 window(),
                 deviceorientation,

@@ -32,5 +32,15 @@ wasm-bindgen = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true, features = ["DisplayMediaStreamConstraints", "MediaDevices", "MediaQueryList", "MediaStream", "MediaStreamTrack", "Navigator", "NodeList", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["MediaStream", "MediaStreamTrack", "MediaStreamTrackState"] }
+
 [features]
 ssr = ["leptos-use-maybe-rw-signal/ssr", "leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]

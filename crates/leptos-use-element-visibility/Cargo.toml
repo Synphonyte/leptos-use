@@ -27,7 +27,13 @@ leptos = { workspace = true }
 web-sys = { workspace = true, features = ["DomRect", "Element", "EventTarget", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
 
 [dev-dependencies]
-web-sys = { workspace = true, features = ["Document", "DomRect", "Element", "EventTarget", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+web-sys = { workspace = true, features = ["Document", "DomRect", "Element", "EventTarget", "HtmlElement", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
 
 [features]
 ssr = ["leptos-use-element/ssr", "leptos-use-intersection-observer/ssr"]

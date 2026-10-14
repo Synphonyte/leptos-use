@@ -26,7 +26,13 @@ wasm-bindgen = { workspace = true }
 web-sys = { workspace = true, features = ["NodeList", "VisibilityState"] }
 
 [dev-dependencies]
-web-sys = { workspace = true, features = ["Element", "NodeList", "VisibilityState"] }
+web-sys = { workspace = true, features = ["Document", "Element", "HtmlElement", "NodeList", "VisibilityState"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
 
 [features]
 ssr = []

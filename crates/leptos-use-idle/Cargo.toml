@@ -30,5 +30,14 @@ leptos = { workspace = true }
 send_wrapper = { workspace = true }
 web-sys = { workspace = true, features = ["Event", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Event", "EventInit", "EventTarget", "HtmlElement", "Window"] }
+
 [features]
 ssr = ["leptos-use-document/ssr", "leptos-use-event-listener/ssr", "leptos-use-filters/ssr", "leptos-use-now/ssr"]

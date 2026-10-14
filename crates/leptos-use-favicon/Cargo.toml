@@ -27,6 +27,13 @@ web-sys = { workspace = true, features = ["Element", "HtmlHeadElement", "HtmlLin
 
 [dev-dependencies]
 leptos-use-preferences = { path = "../leptos-use-preferences" }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Element", "HtmlHeadElement", "HtmlLinkElement"] }
 
 [features]
 ssr = ["leptos-use-maybe-rw-signal/ssr"]

@@ -24,5 +24,14 @@ leptos-use-window = { workspace = true }
 leptos = { workspace = true }
 paste = { workspace = true }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Window"] }
+
 [features]
 ssr = ["leptos-use-media-query/ssr", "leptos-use-window/ssr"]

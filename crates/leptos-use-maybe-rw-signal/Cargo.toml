@@ -23,6 +23,14 @@ leptos-use-sync-signal = { workspace = true, optional = true }
 leptos = { workspace = true }
 reactive_stores = { workspace = true, optional = true }
 
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+
 [features]
 reactive_stores = ["dep:leptos-use-sync-signal", "dep:reactive_stores"]
 ssr = ["leptos-use-sync-signal?/ssr"]

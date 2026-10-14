@@ -170,11 +170,7 @@ where
                         set_loading.set(true);
 
                         let measure = measure.clone();
-                        let scroll_size_before = if is_vertical {
-                            scroll_height
-                        } else {
-                            scroll_width
-                        };
+                        let size_before = ContentSize::measure(&observed_element, is_vertical);
 
                         leptos::task::spawn_local(async move {
                             #[cfg(debug_assertions)]
@@ -193,13 +189,9 @@ where
                             sleep(Duration::ZERO).await;
                             measure();
 
-                            let scroll_size_after = if is_vertical {
-                                observed_element.scroll_height()
-                            } else {
-                                observed_element.scroll_width()
-                            };
+                            let size_after = ContentSize::measure(&observed_element, is_vertical);
 
-                            if scroll_size_after > scroll_size_before
+                            if size_after.grew_since(&size_before)
                                 && let Some(check_and_load) =
                                     check_and_load.try_get_value().flatten()
                             {
@@ -247,6 +239,55 @@ where
         let _ = options;
 
         Signal::stored(false)
+    }
+}
+
+/// Size of an element's content in the scroll direction.
+#[cfg(not(feature = "ssr"))]
+struct ContentSize {
+    /// `scrollHeight` or `scrollWidth`. This never drops below the client size, so it can't
+    /// tell whether content that is still shorter than the element has grown.
+    scroll_size: i32,
+
+    /// Distance from the start of the first to the end of the last child element. Unlike the
+    /// scroll size this also grows while the content is shorter than the element.
+    children_span: f64,
+}
+
+#[cfg(not(feature = "ssr"))]
+impl ContentSize {
+    fn measure(el: &web_sys::Element, is_vertical: bool) -> Self {
+        let scroll_size = if is_vertical {
+            el.scroll_height()
+        } else {
+            el.scroll_width()
+        };
+
+        let children = el.children();
+        let mut start = f64::INFINITY;
+        let mut end = f64::NEG_INFINITY;
+
+        for i in 0..children.length() {
+            if let Some(child) = children.item(i) {
+                let rect = child.get_bounding_client_rect();
+                let (child_start, child_end) = if is_vertical {
+                    (rect.top(), rect.bottom())
+                } else {
+                    (rect.left(), rect.right())
+                };
+                start = start.min(child_start);
+                end = end.max(child_end);
+            }
+        }
+
+        Self {
+            scroll_size,
+            children_span: (end - start).max(0.0),
+        }
+    }
+
+    fn grew_since(&self, before: &Self) -> bool {
+        self.scroll_size > before.scroll_size || self.children_span > before.children_span
     }
 }
 

@@ -29,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `use_calendar` supports `jiff` (`jiff::civil::Date`, `jiff::Zoned`) and `time` (`time::Date`, `time::OffsetDateTime`)
   behind the features `jiff` and `time`.
 - `use_calendar` supports `chrono::DateTime<Utc>`, `chrono::DateTime<Local>` and `chrono::DateTime<FixedOffset>`.
+- Every micro crate has browser tests (`wasm-bindgen-test` in headless Chrome), run in CI.
+
+### Fixes 🍕
+
+- `use_device_orientation` never listened for `deviceorientation` events, so it never reported any values
+- `use_clipboard` with `read(true)` never listened for `copy`/`cut` events
+- `use_web_notification` never closed the notification when the page became visible again
+- `use_infinite_scroll` stopped loading after a load that grew the content without filling the element
+- `use_idle` listens for activity on `window` instead of `document`, so the default `resize` event counts as activity
 
 ## [0.19.3] - 2026-10-13
 

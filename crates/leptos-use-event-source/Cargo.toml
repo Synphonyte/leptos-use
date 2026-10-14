@@ -33,6 +33,14 @@ web-sys = { workspace = true, features = ["Event", "EventListenerOptions", "Even
 [dev-dependencies]
 codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
 serde = { workspace = true, features = ["derive"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Blob", "BlobPropertyBag", "Url"] }
 
 [features]
 ssr = ["leptos-use-core/ssr", "leptos-use-event-listener/ssr"]
