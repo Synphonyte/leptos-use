@@ -122,4 +122,14 @@ The browser tests need `wasm-bindgen-test-runner` matching the `wasm-bindgen` ve
 (`wasm-pack` caches one in `~/Library/Caches/.wasm-pack/chromedriver-*` on macOS). The "Browser Tests"
 job in `.github/workflows/tests.yml` runs the same tests in CI.
 
+The book page shows the wasm size the hook adds. The book workflows measure it by release-building
+a small hydrate app with and without the `Demo` component of the hook's first doctest, so that
+doctest has to compile as part of a wasm app. To check it locally (writes the git-ignored
+`docs/book/wasm_sizes.json`; needs `wasm-opt` and a `wasm-bindgen` CLI matching the lock file, see the
+script's docstring):
+
+```bash
+python3 docs/book/measure_wasm_sizes.py <function_name>
+```
+
 Finally review the `CHANGELOG.md` entry and the generated book page.

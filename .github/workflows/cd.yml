@@ -55,6 +55,8 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: trunk,mdbook@0.5
+      - name: Measure wasm sizes
+        uses: ./.github/actions/measure-wasm-sizes
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6

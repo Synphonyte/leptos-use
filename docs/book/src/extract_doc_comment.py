@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import re
 import sys
@@ -33,6 +34,29 @@ def crate_of(ident, default):
     return _SYMBOLS.get(ident, (default, None))
 
 
+def wasm_size_rows(name):
+    """Meta data rows with the wasm size estimate written by `measure_wasm_sizes.py`."""
+    path = os.path.join("..", "..", "wasm_sizes.json")
+    if not os.path.exists(path):
+        return ""
+    with open(path) as f:
+        size = json.load(f).get(name)
+    if size is None:
+        return ""
+
+    diff = size["diff"]
+    # differences below 1 kB are in the range of the noise caused by the optimizer
+    text = "&lt; 1 kB" if diff < 1000 else f"~{diff / 1000:.1f} kB"
+    title = (
+        "Estimated increase of the gzipped wasm binary of an optimized release build of a Leptos "
+        "app (hydrate) when using this function as in the usage example. The app without the "
+        "function has the same third-party dependencies."
+    )
+    return f"""
+    <div>Wasm size</div>
+    <div title="{title}">{text} <span class="wasm-size-note">(gzipped)</span></div>"""
+
+
 def lib(crate):
     return crate.replace("-", "_")
 
@@ -50,7 +74,7 @@ def main():
     <div>Category</div>
     <div>{category.title()}</div>
     <div>Crate</div>
-    <div><a href="https://crates.io/crates/{crate}" target="_blank"><code>{crate}</code></a></div>
+    <div><a href="https://crates.io/crates/{crate}" target="_blank"><code>{crate}</code></a></div>{wasm_size_rows(name)}
 </div>
     """)
 

@@ -25,6 +25,7 @@ leptos = { workspace = true }
 wasm-js-macros = { path = "../wasm-js-macros" }
 wasm-bindgen = { workspace = true }
 gloo-timers = { workspace = true, features = ["futures"] }
+web-sys = { workspace = true, features = ["Navigator", "Window"] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 any_spawner = { workspace = true, features = ["wasm-bindgen"] }
