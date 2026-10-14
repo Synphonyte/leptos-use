@@ -50,14 +50,16 @@ Created files:
 - `crates/<crate_name>/`: `Cargo.toml`, `README.md`, `src/lib.rs`, `src/<function_name>.rs`,
   `src/options.rs` (`<Name>Options`), `src/return_type.rs` (`<Name>Return`), `tests/<function_name>.rs`
 - `examples/<function_name>/` (Trunk demo app, `src/main.rs`)
-- `docs/book/src/<category>/<function_name>.md` (pulls the doc comment from the source automatically)
+- `docs/book/src/<category>/<function_name>.md` (pulls the function's doc comment and the doc comments of
+  its options struct fields from the source automatically)
 
 ## 3. Implement the hook
 
 Follow the conventions of the existing crates (look at a similar hook first):
 
 - **Layout**: the function(s) in `src/<function_name>.rs`, `...Options` (with `#[derive(DefaultBuilder)]`,
-  fields `pub(crate)`, a manual `Default` impl and doc comments with defaults) in `options.rs`, `...Return` in
+  fields `pub(crate)`, a manual `Default` impl and a doc comment with the default on every field, which
+  the book renders as the "Options" section) in `options.rs`, `...Return` in
   `return_type.rs`. Provide `use_x()` and `use_x_with_options(options)`. Drop options/return files if the
   hook doesn't need them (and their `mod`/`pub use` lines in `lib.rs`).
 - **Depending on other micro crates**: add `leptos-use-foo = { workspace = true }` to `[dependencies]`,
