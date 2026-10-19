@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changes ✨
+
+- `use_color_mode`: with `cookie_enabled`, store `Auto` as `auto-dark` / `auto-light` so SSR renders the right mode without the `Sec-CH-Prefers-Color-Scheme` header
+- `use_color_mode`: new option `cookie_max_age` (defaults to one year) so the cookie outlives the browser session
+- `use_color_mode`: with `cookie_enabled`, the cookie is the only storage and `storage_enabled` is ignored
+
 ## [0.19.3] - 2026-10-13
 
 ### Fixes 🍕

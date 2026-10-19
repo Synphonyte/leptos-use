@@ -144,6 +144,13 @@ cfg_if! { if #[cfg(not(feature = "ssr"))] {
 /// on the server as well as on the client. Please note that you have to add the `axum` or `actix`
 /// feature as described in [`fn@crate::use_cookie`].
 ///
+/// `ColorMode::Auto` is stored together with the system's mode it resolves to (`auto-dark` or
+/// `auto-light`), and rewritten when the system switches while a page is open. Without the header
+/// above, the server renders that stored system mode, so only a first visit, or a system that
+/// switched between two visits, shows `ColorMode::Light` until hydration. A custom mode therefore
+/// can't start with `auto-`. The cookie lives for a year by default
+/// ([`crate::UseColorModeOptions::cookie_max_age`]).
+///
 /// ## See also
 ///
 /// * [`fn@crate::use_preferred_dark`]
@@ -173,6 +180,7 @@ where
         storage_enabled,
         cookie_name,
         cookie_enabled,
+        cookie_max_age,
         emit_auto,
         transition_enabled,
         listen_to_storage_changes,
@@ -180,8 +188,18 @@ where
         _marker,
     } = options;
 
+    let (cookie, set_cookie) = get_cookie_signal(&cookie_name, cookie_enabled, cookie_max_age);
+
+    // Most browsers never send the color scheme header, so on the server the system's mode stored
+    // with `auto` stands in for it.
+    let cookie_system = cookie
+        .get_untracked()
+        .and_then(|value| value.strip_prefix("auto-").map(str::to_string));
+
     let preferred_dark = use_preferred_dark_with_options(UsePreferredDarkOptions {
-        ssr_color_header_getter,
+        ssr_color_header_getter: Arc::new(move || {
+            ssr_color_header_getter().or_else(|| cookie_system.clone())
+        }),
     });
 
     let system = Signal::derive(move || {
@@ -199,31 +217,52 @@ where
         initial_value_from_url = ColorMode::from_str(&value).map(MaybeRwSignal::Static).ok()
     }
 
+    // The client would otherwise start from `initial_value` and only pick up the cookie in an
+    // effect, after hydrating against what the server rendered from it.
+    let initial_value = initial_value_from_url
+        .clone()
+        .or_else(|| {
+            cookie
+                .get_untracked()
+                .map(|value| MaybeRwSignal::Static(cookie_mode(&value)))
+        })
+        .unwrap_or(initial_value);
+
     let (store, set_store) = get_store_signal(
-        initial_value_from_url.clone().unwrap_or(initial_value),
+        initial_value,
         storage_signal,
         &storage_key,
-        storage_enabled,
+        storage_enabled && !cookie_enabled,
         storage,
         listen_to_storage_changes,
     );
-
-    let (cookie, set_cookie) = get_cookie_signal(&cookie_name, cookie_enabled);
 
     if cookie_enabled {
         let _ = sync_signal_with_options(
             (cookie, set_cookie),
             (store, set_store),
             SyncSignalOptions::with_assigns(
-                move |store: &mut ColorMode, cookie: &Option<ColorMode>| {
+                move |store: &mut ColorMode, cookie: &Option<String>| {
                     if let Some(cookie) = cookie {
-                        *store = cookie.clone();
+                        *store = cookie_mode(cookie);
                     }
                 },
-                move |cookie: &mut Option<ColorMode>, store: &ColorMode| {
-                    *cookie = Some(store.clone())
+                move |cookie: &mut Option<String>, store: &ColorMode| {
+                    *cookie = Some(cookie_value(store, &system.get_untracked()))
                 },
             ),
+        );
+
+        // A system that switches while the page is open would otherwise leave the next load
+        // rendering the old mode.
+        Effect::watch(
+            move || system.get(),
+            move |system, _, _| {
+                if store.get_untracked() == ColorMode::Auto {
+                    set_cookie.set(Some(cookie_value(&ColorMode::Auto, system)));
+                }
+            },
+            false,
         );
     }
 
@@ -350,15 +389,33 @@ pub enum ColorMode {
 fn get_cookie_signal(
     cookie_name: &str,
     cookie_enabled: bool,
-) -> (Signal<Option<ColorMode>>, WriteSignal<Option<ColorMode>>) {
+    cookie_max_age: Option<i64>,
+) -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     if cookie_enabled {
-        use_cookie_with_options::<ColorMode, FromToStringCodec>(
+        use_cookie_with_options::<String, FromToStringCodec>(
             cookie_name,
-            UseCookieOptions::default().path("/"),
+            UseCookieOptions::default()
+                .path("/")
+                .max_age(cookie_max_age),
         )
     } else {
         let (value, set_value) = signal(None);
         (value.into(), set_value)
+    }
+}
+
+fn cookie_value(mode: &ColorMode, system: &ColorMode) -> String {
+    match mode {
+        ColorMode::Auto => format!("auto-{system}"),
+        mode => mode.to_string(),
+    }
+}
+
+fn cookie_mode(value: &str) -> ColorMode {
+    if value.starts_with("auto-") {
+        ColorMode::Auto
+    } else {
+        ColorMode::from(value)
     }
 }
 
@@ -477,6 +534,8 @@ where
     storage: StorageType,
 
     /// If the color mode should be persisted.
+    /// Ignored when `cookie_enabled` is set: the cookie is then the only copy, since the server can
+    /// read it and a second one could only disagree with it.
     /// Defaults to `true`.
     storage_enabled: bool,
 
@@ -488,6 +547,11 @@ where
     /// If the color mode should be persisted through a cookie.
     /// Defaults to `false`.
     cookie_enabled: bool,
+
+    /// `Max-Age` of the cookie in milliseconds. `None` makes it a session cookie.
+    /// Defaults to one year.
+    #[builder(into)]
+    cookie_max_age: Option<i64>,
 
     /// Emit `auto` mode from state
     ///
@@ -534,6 +598,7 @@ impl Default for UseColorModeOptions<&'static str, StrMarker> {
             storage_enabled: true,
             cookie_name: "leptos-use-color-scheme".into(),
             cookie_enabled: false,
+            cookie_max_age: Some(365 * 24 * 60 * 60 * 1000),
             emit_auto: false,
             transition_enabled: false,
             listen_to_storage_changes: true,
