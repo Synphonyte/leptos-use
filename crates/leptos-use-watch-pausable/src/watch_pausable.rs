@@ -1,4 +1,4 @@
-use crate::{WatchOptions, WatchPausableReturn, watch_with_options};
+use crate::{CallFilter, WatchOptions, WatchPausableReturn, watch_with_options};
 use leptos::prelude::*;
 
 /// Pausable [`watch`].
@@ -76,7 +76,7 @@ where
 pub fn watch_pausable_with_options<W, T, DFn, CFn>(
     deps: DFn,
     callback: CFn,
-    options: WatchOptions,
+    options: WatchOptions<impl CallFilter>,
 ) -> WatchPausableReturn<
     impl Fn() + Clone + Send + Sync,
     impl Fn() + Clone + Send + Sync,

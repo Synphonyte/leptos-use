@@ -1,4 +1,4 @@
-use crate::{IntoElementMaybeSignal, MaybeRwSignal, StorageType, StrMarker, get_header};
+use crate::{IntoElementMaybeSignal, MaybeRwSignal, StorageType, get_header};
 use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::fmt::{Display, Formatter};
@@ -60,7 +60,8 @@ pub struct UseColorModeOptions<El, M>
 where
     El: IntoElementMaybeSignal<web_sys::Element, M>,
 {
-    /// Element that the color mode will be applied to. Defaults to `"html"`.
+    /// Element that the color mode will be applied to. Defaults to the root element of the
+    /// document (`<html>`).
     pub(crate) target: El,
 
     /// HTML attribute applied to the target element. Defaults to `"class"`.
@@ -147,10 +148,13 @@ where
 
 type OnChangedFn = Arc<dyn Fn(ColorMode, Arc<dyn Fn(ColorMode) + Send + Sync>) + Send + Sync>;
 
-impl Default for UseColorModeOptions<&'static str, StrMarker> {
+impl<M> Default for UseColorModeOptions<Option<web_sys::Element>, M>
+where
+    Option<web_sys::Element>: IntoElementMaybeSignal<web_sys::Element, M>,
+{
     fn default() -> Self {
         Self {
-            target: "html",
+            target: document_element(),
             attribute: "class".into(),
             initial_value: ColorMode::Auto.into(),
             initial_value_from_url_param: None,
@@ -175,5 +179,19 @@ impl Default for UseColorModeOptions<&'static str, StrMarker> {
             }),
             _marker: PhantomData,
         }
+    }
+}
+
+/// The `<html>` element. Unlike the selector `"html"` this doesn't need the code that looks up
+/// elements by selector and waits for them to appear.
+fn document_element() -> Option<web_sys::Element> {
+    #[cfg(feature = "ssr")]
+    {
+        None
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        document().document_element()
     }
 }

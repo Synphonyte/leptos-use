@@ -33,7 +33,7 @@ http0_2 = { workspace = true, optional = true }
 http1 = { workspace = true, optional = true }
 leptos = { workspace = true }
 wasm-bindgen = { workspace = true }
-web-sys = { workspace = true, features = ["BroadcastChannel", "CustomEventInit", "Element", "EventListenerOptions", "EventTarget", "HtmlDocument", "HtmlStyleElement", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "Storage", "Url", "VisibilityState"] }
+web-sys = { workspace = true, features = ["BroadcastChannel", "CustomEventInit", "Document", "Element", "EventListenerOptions", "EventTarget", "HtmlDocument", "HtmlStyleElement", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "Storage", "Url", "VisibilityState"] }
 
 [dev-dependencies]
 leptos_meta = { workspace = true }

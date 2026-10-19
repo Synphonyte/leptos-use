@@ -1,6 +1,6 @@
 #[cfg(not(feature = "ssr"))]
 use crate::UseStorageError;
-use crate::{StorageType, UseStorageOptions};
+use crate::{CallFilter, StorageType, UseStorageOptions};
 #[cfg(not(feature = "ssr"))]
 use codee::CodecError;
 use codee::{Decoder, Encoder};
@@ -164,7 +164,12 @@ where
 pub fn use_storage_with_options<T, C>(
     storage_type: StorageType,
     key: impl Into<Signal<String>>,
-    options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+    options: UseStorageOptions<
+        T,
+        <C as Encoder<T>>::Error,
+        <C as Decoder<T>>::Error,
+        impl CallFilter,
+    >,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + PartialEq + Send + Sync,

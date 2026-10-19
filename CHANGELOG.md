@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The feature `use_calendar` no longer enables `chrono`. Enable one of the new features `chrono`, `jiff` or `time`
   (`chrono` is part of the default features).
 - `CalendarDate` comparison methods (`is_selected`, `is_before`, …) compare by calendar day.
+- `WatchOptions` and `UseStorageOptions` got a filter type parameter which defaults to the new `NoFilter`.
+  `debounce`/`throttle`/`filter` change it to `FilterOptions`. This way the debounce and throttle code is only
+  compiled into your app when you use it. Code that names these types with a filter has to write
+  `WatchOptions<FilterOptions>` / `UseStorageOptions<T, E, D, FilterOptions>`.
+- The default `target` of `UseColorModeOptions` is the document's root element instead of the selector `"html"`,
+  which saves the code that looks up elements by selector. `UseColorModeOptions::default()` is now of the type
+  `UseColorModeOptions<Option<web_sys::Element>, _>`.
 
 ### New Features 🚀
 
@@ -30,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   behind the features `jiff` and `time`.
 - `use_calendar` supports `chrono::DateTime<Utc>`, `chrono::DateTime<Local>` and `chrono::DateTime<FixedOffset>`.
 - Every micro crate has browser tests (`wasm-bindgen-test` in headless Chrome), run in CI.
+- The book shows how much each function adds to the gzipped wasm binary of an app.
 
 ### Fixes 🍕
 

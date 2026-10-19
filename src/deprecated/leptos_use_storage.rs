@@ -29,7 +29,12 @@ pub mod use_local_storage {
     #[inline(always)]
     pub fn use_local_storage_with_options<T, C>(
         key: impl Into<Signal<String>>,
-        options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+        options: UseStorageOptions<
+            T,
+            <C as Encoder<T>>::Error,
+            <C as Decoder<T>>::Error,
+            impl CallFilter,
+        >,
     ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
     where
         T: Clone + PartialEq + Send + Sync,
@@ -67,7 +72,12 @@ pub mod use_session_storage {
     #[inline(always)]
     pub fn use_session_storage_with_options<T, C>(
         key: impl Into<Signal<String>>,
-        options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+        options: UseStorageOptions<
+            T,
+            <C as Encoder<T>>::Error,
+            <C as Decoder<T>>::Error,
+            impl CallFilter,
+        >,
     ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
     where
         T: Clone + PartialEq + Send + Sync,
@@ -110,7 +120,12 @@ pub mod use_storage {
     pub fn use_storage_with_options<T, C>(
         storage_type: StorageType,
         key: impl Into<Signal<String>>,
-        options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+        options: UseStorageOptions<
+            T,
+            <C as Encoder<T>>::Error,
+            <C as Decoder<T>>::Error,
+            impl CallFilter,
+        >,
     ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
     where
         T: Clone + PartialEq + Send + Sync,

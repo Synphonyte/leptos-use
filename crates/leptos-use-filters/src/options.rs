@@ -11,6 +11,39 @@ pub struct DebounceOptions {
     pub max_wait: Signal<Option<f64>>,
 }
 
+/// A filter that wraps the calls of a function, like a debounce or throttle filter.
+///
+/// Options that support filters are generic over this, so a filter's code is only compiled in when
+/// it's used: [`NoFilter`] is the default and [`FilterOptions`] selects a filter at runtime.
+pub trait CallFilter: 'static {
+    /// Returns a function that calls the given function, filtered.
+    fn filter_fn<R>(&self) -> ArcFilterFn!(R)
+    where
+        R: 'static;
+}
+
+/// Calls functions directly. This is the default filter of options that support filters.
+#[derive(Copy, Clone, Default, Debug)]
+pub struct NoFilter;
+
+impl CallFilter for NoFilter {
+    fn filter_fn<R>(&self) -> ArcFilterFn!(R)
+    where
+        R: 'static,
+    {
+        Arc::new(|invoke: Arc<dyn Fn() -> R>| Arc::new(Mutex::new(Some(invoke()))))
+    }
+}
+
+impl CallFilter for FilterOptions {
+    fn filter_fn<R>(&self) -> ArcFilterFn!(R)
+    where
+        R: 'static,
+    {
+        FilterOptions::filter_fn(self)
+    }
+}
+
 /// Specify a debounce or throttle filter with their respective options or no filter
 #[derive(Default)]
 pub enum FilterOptions {

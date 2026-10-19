@@ -1,4 +1,4 @@
-use crate::{WatchOptions, watch_with_options};
+use crate::{CallFilter, WatchOptions, watch_with_options};
 
 /// Shorthand for watching a signal to be `true`.
 ///
@@ -99,7 +99,7 @@ where
 pub fn whenever_with_options<T, DFn, CFn>(
     source: DFn,
     callback: CFn,
-    options: WatchOptions,
+    options: WatchOptions<impl CallFilter>,
 ) -> impl Fn() + Clone + Send + Sync
 where
     DFn: Fn() -> bool + 'static,

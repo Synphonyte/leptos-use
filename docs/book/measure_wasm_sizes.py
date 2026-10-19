@@ -11,8 +11,17 @@ For every book page two release builds of a small `hydrate` Leptos app are compa
 leptos-use crates and `default-struct-builder` are not part of the baseline. Both binaries are
 processed with `wasm-bindgen` and `wasm-opt -Oz` and gzipped. The baseline app uses some common
 Leptos features (`Show`, `For`, `Effect`, `Memo`, `NodeRef`) and formats integers and floats, so
-these aren't counted towards the functions. The difference is written to
-`wasm_sizes.json` which `src/extract_doc_comment.py` shows on the book pages.
+these aren't counted towards the functions.
+
+As the linker removes the code of dependencies that isn't used, the code of the third-party crates
+the function calls would still be counted. To exclude it, a crate can have a `wasm_size_dependency.rs`
+file in its root that uses its third-party dependencies the way the crate does. It has to define a
+`#[component] fn DependencyDemo() -> impl IntoView` (without props) that can only use the crate's
+third-party dependencies and `leptos`. It's mounted in both apps, together with the ones of the
+leptos-use crates the crate depends on. Use `std::hint::black_box` on inputs so that the compiler
+can't evaluate the calls at compile time.
+
+The difference is written to `wasm_sizes.json` which `src/extract_doc_comment.py` shows on the book pages.
 
 Usage: python3 measure_wasm_sizes.py [--force] [--work-dir DIR] [function ...]
 
@@ -40,6 +49,9 @@ REPO = os.path.dirname(os.path.dirname(BOOK))
 SRC = os.path.join(BOOK, "src")
 OUTPUT = os.path.join(BOOK, "wasm_sizes.json")
 
+# Optional file in the root of a crate, see the module docs.
+DEPENDENCY_DEMO = "wasm_size_dependency.rs"
+
 # Crates the user wouldn't use when implementing a function without leptos-use.
 INTERNAL_EXTERNALS = {"default-struct-builder", "sendwrap-fn", "wasm-js-macros"}
 
@@ -59,7 +71,7 @@ APP = """\
 
 use leptos::prelude::*;
 use wasm_bindgen::prelude::wasm_bindgen;
-{demo_mod}
+{mods}
 #[component]
 fn App() -> impl IntoView {{
     let (count, set_count) = signal(0);
@@ -85,6 +97,7 @@ fn App() -> impl IntoView {{
                     <li>{{i}}</li>
                 </For>
             </ul>
+            {dependency_demos}
             {demo}
         </div>
     }}
@@ -323,18 +336,29 @@ class App:
         self.wasm_bindgen_cli = None
         self.wasm_opt = None
 
-    def write(self, dependencies, demo):
+    def write(self, dependencies, demo=None, dependency_demos=()):
+        """Writes the app. `demo` and each of `dependency_demos` is code defining a component
+        (`Demo` / `DependencyDemo`) that is mounted in the app."""
         deps = {"leptos": self.leptos, "wasm-bindgen": self.wasm_bindgen, **dependencies}
         with open(os.path.join(self.dir, "Cargo.toml"), "w") as f:
             f.write(MANIFEST.format(dependencies="\n".join(f"{k} = {toml_value(v)}" for k, v in deps.items())))
 
-        if demo is None:
-            app = APP.format(demo_mod="", demo="")
-        else:
-            app = APP.format(demo_mod="\nmod demo;\nuse demo::Demo;\n", demo="<Demo />")
-            demo = re.sub(r"^(\s*)fn Demo\b", r"\1pub fn Demo", demo, flags=re.M)
-            with open(os.path.join(self.dir, "src", "demo.rs"), "w") as f:
-                f.write("#![allow(warnings)]\n\n" + demo + "\n")
+        for path in glob.glob(os.path.join(self.dir, "src", "*.rs")):
+            os.remove(path)
+
+        modules = {f"dependency_{i}": code for i, code in enumerate(dependency_demos)}
+        if demo is not None:
+            modules["demo"] = demo
+        for module, code in modules.items():
+            code = re.sub(r"^(\s*)fn (Demo|DependencyDemo)\b", r"\1pub fn \2", code, flags=re.M)
+            with open(os.path.join(self.dir, "src", f"{module}.rs"), "w") as f:
+                f.write("#![allow(warnings)]\n\n" + code + "\n")
+
+        app = APP.format(
+            mods="".join(f"\nmod {m};" for m in modules) + "\n",
+            dependency_demos=" ".join(f"{{dependency_{i}::DependencyDemo()}}" for i in range(len(dependency_demos))),
+            demo="{demo::Demo()}" if demo is not None else "",
+        )
         with open(os.path.join(self.dir, "src", "lib.rs"), "w") as f:
             f.write(app)
 
@@ -408,8 +432,9 @@ def is_proc_macro(package):
     return any("proc-macro" in t["kind"] for t in package["targets"])
 
 
-def third_party_dependencies(metadata, crate):
-    """The third-party crates `crate` pulls in directly or through other leptos-use crates."""
+def resolved_dependencies(metadata, crate):
+    """The ids of the leptos-use crates `crate` uses (including itself) and of the third-party
+    crates these depend on directly. Only normal dependencies that are enabled count."""
     packages = {p["id"]: p for p in metadata["packages"]}
     nodes = {n["id"]: n for n in metadata["resolve"]["nodes"]}
 
@@ -426,6 +451,27 @@ def third_party_dependencies(metadata, crate):
                     stack.append(dep["pkg"])
             else:
                 external.add(dep["pkg"])
+    return seen, external
+
+
+def dependency_demos(metadata, crate):
+    """The `wasm_size_dependency.rs` files of `crate` and the leptos-use crates it uses."""
+    packages = {p["id"]: p for p in metadata["packages"]}
+    internal, _ = resolved_dependencies(metadata, crate)
+    demos = []
+    for name in sorted(packages[i]["name"] for i in internal):
+        path = os.path.join(crate_dir(name), DEPENDENCY_DEMO)
+        if os.path.isfile(path):
+            with open(path) as f:
+                demos.append(f.read())
+    return demos
+
+
+def third_party_dependencies(metadata, crate):
+    """The third-party crates `crate` pulls in directly or through other leptos-use crates."""
+    packages = {p["id"]: p for p in metadata["packages"]}
+    nodes = {n["id"]: n for n in metadata["resolve"]["nodes"]}
+    _, external = resolved_dependencies(metadata, crate)
 
     names = [packages[p]["name"] for p in external]
     deps = {}
@@ -496,7 +542,7 @@ def fingerprint(name, source_path):
         h.update(f.read())
 
     for crate in internal_crates(crate_of(source_path)):
-        files = [os.path.join(crate_dir(crate), "Cargo.toml"), os.path.join(crate_dir(crate), "build.rs")]
+        files = [os.path.join(crate_dir(crate), f) for f in ("Cargo.toml", "build.rs", DEPENDENCY_DEMO)]
         files += sorted(glob.glob(os.path.join(crate_dir(crate), "src", "**", "*"), recursive=True))
         for path in files:
             if os.path.isfile(path):
@@ -513,18 +559,20 @@ def measure(app, name, source_path, cache):
         return None
 
     variant_deps = demo_dependencies(crate, demo)
-    app.write(variant_deps, None)
-    baseline_deps = third_party_dependencies(app.metadata(), crate)
+    app.write(variant_deps)
+    metadata = app.metadata()
+    baseline_deps = third_party_dependencies(metadata, crate)
     # third-party dev-dependencies are part of the baseline
     baseline_deps.update({k: v for k, v in variant_deps.items() if "path" not in v})
+    dep_demos = dependency_demos(metadata, crate)
 
-    key = json.dumps(baseline_deps, sort_keys=True)
+    key = json.dumps([baseline_deps, dep_demos], sort_keys=True)
     if key not in cache:
-        app.write(baseline_deps, EMPTY_DEMO)
+        app.write(baseline_deps, EMPTY_DEMO, dep_demos)
         cache[key] = app.build()
     baseline = cache[key]
 
-    app.write({**baseline_deps, **variant_deps}, demo)
+    app.write({**baseline_deps, **variant_deps}, demo, dep_demos)
     with_crate = app.build()
 
     return {"crate": crate, "baseline": baseline, "with_crate": with_crate, "diff": with_crate - baseline}

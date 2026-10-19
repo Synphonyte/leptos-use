@@ -124,9 +124,15 @@ job in `.github/workflows/tests.yml` runs the same tests in CI.
 
 The book page shows the wasm size the hook adds. The book workflows measure it by release-building
 a small hydrate app with and without the `Demo` component of the hook's first doctest, so that
-doctest has to compile as part of a wasm app. To check it locally (writes the git-ignored
-`docs/book/wasm_sizes.json`; needs `wasm-opt` and a `wasm-bindgen` CLI matching the lock file, see the
-script's docstring):
+doctest has to compile as part of a wasm app.
+
+If the hook does real work with a third-party crate (parsing, date math, …), add a
+`crates/<crate_name>/wasm_size_dependency.rs` that does the same with that crate, so that code isn't
+counted towards the hook (see `crates/leptos-use-cookie/wasm_size_dependency.rs` and the docstring of
+`docs/book/measure_wasm_sizes.py`).
+
+To check the size locally (writes the git-ignored `docs/book/wasm_sizes.json`; needs `wasm-opt` and a
+`wasm-bindgen` CLI matching the lock file, see the script's docstring):
 
 ```bash
 python3 docs/book/measure_wasm_sizes.py <function_name>

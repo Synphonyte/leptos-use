@@ -34,7 +34,7 @@ pub mod watch_pausable {
     pub fn watch_pausable_with_options<W, T, DFn, CFn>(
         deps: DFn,
         callback: CFn,
-        options: WatchOptions,
+        options: WatchOptions<impl CallFilter>,
     ) -> WatchPausableReturn<
         impl Fn() + Clone + Send + Sync,
         impl Fn() + Clone + Send + Sync,

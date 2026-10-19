@@ -20,7 +20,6 @@ workspace = true
 
 [dependencies]
 leptos-use-filters = { workspace = true }
-default-struct-builder = { workspace = true }
 leptos = { workspace = true }
 
 [dev-dependencies]

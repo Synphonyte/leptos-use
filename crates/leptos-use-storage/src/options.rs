@@ -1,6 +1,5 @@
-use crate::{FilterOptions, MaybeRwSignal};
+use crate::{MaybeRwSignal, NoFilter};
 use codee::CodecError;
-use default_struct_builder::DefaultBuilder;
 use leptos::prelude::*;
 use std::sync::Arc;
 use thiserror::Error;
@@ -26,22 +25,22 @@ pub enum UseStorageError<E, D> {
 }
 
 /// Options for use with [`fn@crate::use_local_storage_with_options`], [`fn@crate::use_session_storage_with_options`] and [`use_storage_with_options`](crate::use_storage_with_options).
-#[derive(DefaultBuilder)]
-pub struct UseStorageOptions<T, E, D>
+/// Options for [`fn@crate::use_storage_with_options`].
+///
+/// The filter is a type parameter so that the debounce and throttle code is only compiled into
+/// your app if you use it.
+pub struct UseStorageOptions<T, E, D, F = NoFilter>
 where
     T: Send + Sync + 'static,
 {
     // Callback for when an error occurs
-    #[builder(skip)]
     pub(crate) on_error: Arc<dyn Fn(UseStorageError<E, D>) + Send + Sync>,
     // Whether to continuously listen to changes from browser storage
     pub(crate) listen_to_storage_changes: bool,
     // Initial value to use when the storage key is not set
-    #[builder(skip)]
     pub(crate) initial_value: MaybeRwSignal<T>,
     // Debounce or throttle the writing to storage whenever the value changes
-    #[builder(into)]
-    pub(crate) filter: FilterOptions,
+    pub(crate) filter: F,
     /// Delays the reading of the value from storage by one animation frame during hydration.
     /// This ensures that during hydration the value is the initial value just like it is on the server
     /// which helps prevent hydration errors. Defaults to `false`.
@@ -57,13 +56,13 @@ where
             on_error: Arc::new(|_err| ()),
             listen_to_storage_changes: true,
             initial_value: MaybeRwSignal::default(),
-            filter: FilterOptions::default(),
+            filter: NoFilter,
             delay_during_hydration: false,
         }
     }
 }
 
-impl<T: Default, E, D> UseStorageOptions<T, E, D>
+impl<T, E, D, F> UseStorageOptions<T, E, D, F>
 where
     T: Send + Sync + 'static,
 {
@@ -78,10 +77,40 @@ where
         }
     }
 
+    /// Whether to continuously listen to changes from browser storage. Defaults to `true`.
+    pub fn listen_to_storage_changes(self, listen_to_storage_changes: bool) -> Self {
+        Self {
+            listen_to_storage_changes,
+            ..self
+        }
+    }
+
     /// Initial value to use when the storage key is not set. Note that this value is read once on creation of the storage hook and not updated again. Accepts a signal and defaults to `T::default()`.
     pub fn initial_value(self, initial: impl Into<MaybeRwSignal<T>>) -> Self {
         Self {
             initial_value: initial.into(),
+            ..self
+        }
+    }
+
+    /// Debounce or throttle the writing to storage whenever the value changes with a
+    /// [`FilterOptions`](crate::FilterOptions). Defaults to no filter.
+    pub fn filter<NewF>(self, filter: NewF) -> UseStorageOptions<T, E, D, NewF> {
+        UseStorageOptions {
+            on_error: self.on_error,
+            listen_to_storage_changes: self.listen_to_storage_changes,
+            initial_value: self.initial_value,
+            filter,
+            delay_during_hydration: self.delay_during_hydration,
+        }
+    }
+
+    /// Delays the reading of the value from storage by one animation frame during hydration.
+    /// This ensures that during hydration the value is the initial value just like it is on the server
+    /// which helps prevent hydration errors. Defaults to `false`.
+    pub fn delay_during_hydration(self, delay_during_hydration: bool) -> Self {
+        Self {
+            delay_during_hydration,
             ..self
         }
     }

@@ -50,7 +50,8 @@ def wasm_size_rows(name):
     title = (
         "Estimated increase of the gzipped wasm binary of an optimized release build of a Leptos "
         "app (hydrate) when using this function as in the usage example. The app without the "
-        "function has the same third-party dependencies."
+        "function has the same third-party dependencies and, where the crate provides a snippet, uses "
+        "them like the function does."
     )
     return f"""
     <div>Wasm size</div>

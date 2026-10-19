@@ -43,6 +43,27 @@ async fn setup() -> Owner {
 }
 
 #[wasm_bindgen_test]
+async fn applies_the_mode_to_the_html_element_by_default() {
+    let _owner = setup().await;
+
+    let html = document().document_element().unwrap();
+    let UseColorModeReturn { set_mode, .. } =
+        use_color_mode_with_options(UseColorModeOptions::default().storage_enabled(false));
+    TimeoutFuture::new(20).await;
+
+    set_mode.set(ColorMode::Dark);
+    TimeoutFuture::new(20).await;
+    assert!(html.class_list().contains("dark"));
+
+    set_mode.set(ColorMode::Light);
+    TimeoutFuture::new(20).await;
+    assert!(html.class_list().contains("light"));
+    assert!(!html.class_list().contains("dark"));
+
+    html.class_list().remove_1("light").unwrap();
+}
+
+#[wasm_bindgen_test]
 async fn applies_the_mode_as_a_class() {
     let _owner = setup().await;
 

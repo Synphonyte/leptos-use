@@ -1,4 +1,4 @@
-use super::{StorageType, UseStorageOptions, use_storage_with_options};
+use super::{CallFilter, StorageType, UseStorageOptions, use_storage_with_options};
 use codee::{Decoder, Encoder};
 use leptos::prelude::*;
 use leptos::reactive::wrappers::read::Signal;
@@ -33,7 +33,12 @@ where
 /// Accepts [`UseStorageOptions`]. See [`use_local_storage`] for details.
 pub fn use_local_storage_with_options<T, C>(
     key: impl Into<Signal<String>>,
-    options: UseStorageOptions<T, <C as Encoder<T>>::Error, <C as Decoder<T>>::Error>,
+    options: UseStorageOptions<
+        T,
+        <C as Encoder<T>>::Error,
+        <C as Decoder<T>>::Error,
+        impl CallFilter,
+    >,
 ) -> (Signal<T>, WriteSignal<T>, impl Fn() + Clone + Send + Sync)
 where
     T: Clone + PartialEq + Send + Sync,

@@ -12,7 +12,7 @@ pub mod watch_with_options {
     pub fn watch_with_options<W, T, DFn, CFn>(
         deps: DFn,
         callback: CFn,
-        options: WatchOptions,
+        options: WatchOptions<impl CallFilter>,
     ) -> impl Fn() + Clone + Send + Sync
     where
         DFn: Fn() -> W + 'static,

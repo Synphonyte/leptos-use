@@ -33,10 +33,12 @@ impl StorageType {
     }
 }
 
+// needed to name the filter type of `UseStorageOptions`
+pub use leptos_use_filters::{CallFilter, FilterOptions, NoFilter};
+
 // Dependencies used through `crate::…` paths.
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-pub(crate) use leptos_use_filters::*;
 pub(crate) use leptos_use_maybe_rw_signal::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;

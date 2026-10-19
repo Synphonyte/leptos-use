@@ -26,7 +26,6 @@ leptos-use-watch-with-options = { workspace = true }
 leptos-use-window = { workspace = true }
 sendwrap-fn = { workspace = true }
 codee = { workspace = true }
-default-struct-builder = { workspace = true }
 leptos = { workspace = true }
 send_wrapper = { workspace = true }
 thiserror = { workspace = true }
