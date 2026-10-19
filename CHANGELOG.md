@@ -39,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every micro crate has browser tests (`wasm-bindgen-test` in headless Chrome), run in CI.
 - The book shows how much each function adds to the gzipped wasm binary of an app.
 
+### Changes ✨
+
+- `use_color_mode`: with `cookie_enabled`, store `Auto` as `auto-dark` / `auto-light` so SSR renders the right mode without the `Sec-CH-Prefers-Color-Scheme` header
+- `use_color_mode`: new option `cookie_max_age` (defaults to one year) so the cookie outlives the browser session
+- `use_color_mode`: with `cookie_enabled`, the cookie is the only storage and `storage_enabled` is ignored
+
 ### Fixes 🍕
 
 - `use_device_orientation` never listened for `deviceorientation` events, so it never reported any values

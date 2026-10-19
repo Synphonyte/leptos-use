@@ -107,6 +107,8 @@ where
     pub(crate) storage: StorageType,
 
     /// If the color mode should be persisted.
+    /// Ignored when `cookie_enabled` is set: the cookie is then the only copy, since the server can
+    /// read it and a second one could only disagree with it.
     /// Defaults to `true`.
     pub(crate) storage_enabled: bool,
 
@@ -118,6 +120,11 @@ where
     /// If the color mode should be persisted through a cookie.
     /// Defaults to `false`.
     pub(crate) cookie_enabled: bool,
+
+    /// `Max-Age` of the cookie in milliseconds. `None` makes it a session cookie.
+    /// Defaults to one year.
+    #[builder(into)]
+    pub(crate) cookie_max_age: Option<i64>,
 
     /// Emit `auto` mode from state
     ///
@@ -167,6 +174,7 @@ where
             storage_enabled: true,
             cookie_name: "leptos-use-color-scheme".into(),
             cookie_enabled: false,
+            cookie_max_age: Some(365 * 24 * 60 * 60 * 1000),
             emit_auto: false,
             transition_enabled: false,
             listen_to_storage_changes: true,
