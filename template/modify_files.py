@@ -1,6 +1,8 @@
 import argparse
 import os
 import re
+import shutil
+import tomllib
 
 parser = argparse.ArgumentParser()
 
@@ -8,21 +10,53 @@ parser = argparse.ArgumentParser()
 def main():
     parser.add_argument("function_name")
     parser.add_argument("category")
-    parser.add_argument("--module", type=str)
-    parser.add_argument("--feature", type=str)
-    parser.add_argument("--unstable_apis", type=lambda x: x.lower() == "true")
+    parser.add_argument("crate_name")
 
     args = parser.parse_args()
 
-    modify_cargo_toml(args)
-    modify_changelog(args)
-    modify_librs(args)
-    modify_modrs(args)
+    modify_workspace_root(args)
+    copy_licenses(args)
     modify_summarymd(args)
-    modify_workspace(args)
+    modify_examples_workspace(args)
 
 
-def modify_workspace(args):
+def insert_sorted_line(lines, start, end_marker, new_line):
+    """Insert `new_line` into the sorted block of lines starting at `start` up to `end_marker`."""
+    end = start
+    while end < len(lines) and not lines[end].startswith(end_marker):
+        end += 1
+    block = lines[start:end] + [new_line]
+    block.sort()
+    return lines[:start] + block + lines[end:]
+
+
+def modify_workspace_root(args):
+    with open("Cargo.toml", "r") as f:
+        lines = f.read().split("\n")
+
+    i = lines.index("members = [") + 1
+    lines = insert_sorted_line(lines, i, "]", f'    "crates/{args.crate_name}",')
+
+    i = lines.index("[workspace.dependencies]") + 1
+    j = i
+    while lines[j].startswith("leptos-use-"):
+        j += 1
+    with open(os.path.join("crates", args.crate_name, "Cargo.toml"), "rb") as f:
+        version = tomllib.load(f)["package"]["version"]
+    block = lines[i:j] + [f'{args.crate_name} = {{ path = "crates/{args.crate_name}", version = "{version}" }}']
+    block.sort()
+    lines = lines[:i] + block + lines[j:]
+
+    with open("Cargo.toml", "w") as f:
+        f.write("\n".join(lines))
+
+
+def copy_licenses(args):
+    for lic in ("LICENSE-MIT", "LICENSE-APACHE"):
+        shutil.copy(lic, os.path.join("crates", args.crate_name, lic))
+
+
+def modify_examples_workspace(args):
     config_path = os.path.join("examples", "Cargo.toml")
 
     with open(config_path, "r") as f:
@@ -37,8 +71,15 @@ def modify_workspace(args):
     members.append(f"    \"{args.function_name}\",")
     members.sort()
 
+    config_source = before_members + "members = [\n" + "\n".join(members) + "\n]" + after_members
+    config_source = config_source.replace(
+        "[workspace.dependencies]\n",
+        f'[workspace.dependencies]\n{args.crate_name} = {{ path = "../crates/{args.crate_name}" }}\n',
+        1,
+    )
+
     with open(config_path, "w") as f:
-        f.write(before_members + "members = [\n" + "\n".join(members) + "\n]" + after_members)
+        f.write(config_source)
 
 
 def modify_summarymd(args):
@@ -66,110 +107,8 @@ def modify_summarymd(args):
         with open(summary_path, "w") as f:
             f.write(summary_source)
     else:
-        println(
+        print(
             f"Category {args.category} not found in docs/book/src/SUMMARY.md. Please add it manually together with the link to the new function")
-
-
-def modify_modrs(args):
-    if args.module is not None:
-        mod_path = os.path.join("src", args.module, "mod.rs")
-        if os.path.exists(mod_path):
-            with open(mod_path, "r") as f:
-                mod_source = f.read()
-
-            mod_source = mod_source.replace("mod", f"mod {args.function_name};\nmod", 1)
-            mod_source = mod_source.replace("pub use", f"pub use {args.function_name}::*;\npub use", 1)
-        else:
-            mod_source = f"#![doc(cfg(feature = \"{args.feature}\"))]\n" if args.feature is not None else ""
-            mod_source += f"""
-mod {args.function_name};
-
-pub use {args.function_name}::*;
-"""
-
-        with open(mod_path, "w") as f:
-            f.write(mod_source)
-
-
-def modify_librs(args):
-    with open("src/lib.rs", "r") as f:
-        lib_source = f.read()
-
-    feature_prefix = []
-    if args.feature is not None:
-        feature_prefix.append(f"#[cfg(feature = \"{args.feature}\")]\n")
-
-    if args.unstable_apis:
-        feature_prefix.append("#[cfg(web_sys_unstable_apis)]\n")
-
-    feature_prefix = "".join(feature_prefix)
-
-    if args.module is None:
-        lib_source = lib_source.replace("mod on_click_outside;",
-                                        f"mod on_click_outside;\n{feature_prefix}mod {args.function_name};")
-        lib_source = lib_source.replace("pub use on_click_outside::*;",
-                                        f"pub use on_click_outside::*;\n{feature_prefix}pub use {args.function_name}::*;")
-    elif args.module not in lib_source:
-        lib_source = lib_source.replace("pub mod utils;", f"pub mod utils;\n{feature_prefix}pub mod {args.module};")
-
-    with open("src/lib.rs", "w") as f:
-        f.write(lib_source)
-
-
-def modify_changelog(args):
-    with open("CHANGELOG.md", "r") as f:
-        changelog_source = f.readlines()
-
-    unreleased_heading_exists = False
-    for line in changelog_source:
-        if line.startswith("## [Unreleased"):
-            unreleased_heading_exists = True
-            break
-
-    if not unreleased_heading_exists:
-        changelog_source.insert(5, "## [Unreleased] - \n")
-        changelog_source.insert(6, "\n")
-
-    new_function_heading_exists = False
-    for line in changelog_source:
-        if line.startswith("### New Functions"):
-            new_function_heading_exists = True
-            break
-        elif line.startswith("## [") and not line.startswith("## [Unreleased"):
-            break
-
-    if not new_function_heading_exists:
-        changelog_source.insert(7, "### New Functions 🚀\n")
-        changelog_source.insert(8, "\n")
-        changelog_source.insert(9, "\n")
-
-    changelog_source.insert(9, f"- `{args.function_name}`\n")
-
-    with open("CHANGELOG.md", "w") as f:
-        f.write("".join(changelog_source))
-
-
-def modify_cargo_toml(args):
-    with open("Cargo.toml", "r") as f:
-        cargo_toml_source = f.readlines()
-
-    in_features = False
-    in_default = False
-
-    for i, line in enumerate(cargo_toml_source):
-        if line.startswith("[features]"):
-            in_features = True
-
-        if in_features and line.startswith("default = ["):
-            in_default = True
-            cargo_toml_source.insert(i + 1, f"    \"{args.feature}\",\n")
-
-        if in_default and line.startswith("]"):
-            cargo_toml_source.insert(i + 1, f"{args.feature} = []\n")
-            break
-
-    with open("Cargo.toml", "w") as f:
-        f.write("".join(cargo_toml_source))
 
 
 if __name__ == '__main__':

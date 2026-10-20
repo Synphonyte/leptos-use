@@ -11,7 +11,8 @@ leptos = { workspace = true, features = [
     "nightly",
     "csr",
 ] }
-leptos-use = { path = "../..", default-features = false, features = ["storage", "docs"] }
+leptos-use-docs = { path = "../../crates/leptos-use-docs" }
+leptos-use-storage = { path = "../../crates/leptos-use-storage" }
 log = "0.4"
 serde = "1.0.163"
 web-sys = "0.3"

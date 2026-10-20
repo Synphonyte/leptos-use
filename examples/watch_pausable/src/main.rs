@@ -1,7 +1,7 @@
 use leptos::html::Input;
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::{watch_pausable, WatchPausableReturn};
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_watch_pausable::{watch_pausable, WatchPausableReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
+use leptos_use_docs::demo_or_body;
+use leptos_use_infinite_scroll::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
 
 #[component]
 fn Demo() -> impl IntoView {

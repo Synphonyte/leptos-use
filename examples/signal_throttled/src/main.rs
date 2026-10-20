@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::signal_throttled;
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_signal_debounce_throttle::signal_throttled;
 
 #[component]
 fn Demo() -> impl IntoView {

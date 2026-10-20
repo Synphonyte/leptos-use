@@ -1,8 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{
-    UseUserMediaOptions, UseUserMediaReturn, VideoTrackConstraints, use_user_media_with_options,
-};
+use leptos_use_docs::demo_or_body;
+use leptos_use_user_media::{UseUserMediaOptions, UseUserMediaReturn, VideoTrackConstraints, use_user_media_with_options};
 
 #[component]
 fn Demo() -> impl IntoView {

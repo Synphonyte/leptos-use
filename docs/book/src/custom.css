@@ -26,6 +26,7 @@ pre > code {
 }
 
 .meta-data {
+    position: relative;
     font-size: 87.5%;
     display: grid;
     grid-template-columns: 70px auto;
@@ -36,6 +37,55 @@ pre > code {
 
 .meta-data > div:nth-child(2n + 1) {
     opacity: 0.5;
+}
+
+.meta-data .wasm-size-note {
+    opacity: 0.5;
+}
+
+.meta-data .wasm-size-help {
+    display: inline-flex;
+    vertical-align: -0.15em;
+    cursor: help;
+}
+
+.meta-data .wasm-size-help:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.meta-data .wasm-size-help svg {
+    opacity: 0.5;
+}
+
+.meta-data .wasm-size-help:hover svg,
+.meta-data .wasm-size-help:focus svg {
+    opacity: 1;
+}
+
+.meta-data .wasm-size-tooltip {
+    position: absolute;
+    z-index: 10;
+    /* below the meta data, so it fits on narrow screens */
+    top: calc(100% + 6px);
+    left: 0;
+    max-width: min(420px, 100%);
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--theme-popup-border);
+    border-radius: 6px;
+    background: var(--theme-popup-bg);
+    color: var(--fg);
+    font-size: 0.9em;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.meta-data .wasm-size-help:hover .wasm-size-tooltip,
+.meta-data .wasm-size-help:focus .wasm-size-tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 .sidebar {
@@ -54,38 +104,76 @@ pre > code {
     margin-top: 20px;
 }
 
-li.chapter-item a {
+li.chapter-item > .chapter-link-wrapper > a:not(.chapter-fold-toggle) {
     padding: 0.1em 1em;
     margin: 0.4em 0 0;
+    border-left: 1px solid transparent;
 }
 
-li.chapter-item::before {
-    content: " ";
+li.chapter-item > .chapter-link-wrapper {
+    position: relative;
+}
+
+/* continuous vertical line along the chapters */
+li.chapter-item > .chapter-link-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
     border-left: 1px solid var(--fg);
     opacity: 0.1;
 }
 
-li.chapter-item a.active {
-    border-left: 1px solid currentColor;
+li.chapter-item > .chapter-link-wrapper > a.active {
+    position: relative;
+    border-left-color: currentColor;
     font-weight: 600;
-    margin-left: -1px;
 }
 
-li.part-title + li.chapter-item a {
+li.part-title + li.chapter-item > .chapter-link-wrapper > a {
     margin-top: 0;
 }
 
-li.chapter-item.affix::before {
+li.chapter-item.affix > .chapter-link-wrapper::before {
     content: none;
 }
 
-li.chapter-item.affix a {
+li.chapter-item.affix > .chapter-link-wrapper > a {
     padding-left: 0;
 }
 
-li.chapter-item.affix a.active {
+li.chapter-item.affix > .chapter-link-wrapper > a.active {
     border-left: 0 none;
-    margin-left: 0;
+}
+
+/* headings of the current page, styled like the chapters instead of mdbook's thick bar */
+.chapter .on-this-page {
+    position: relative;
+    margin-left: 1em;
+    padding-left: 0;
+    border-inline-start: none;
+}
+
+.chapter .on-this-page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-left: 1px solid var(--fg);
+    opacity: 0.1;
+}
+
+.chapter .on-this-page a.header-in-summary {
+    position: relative;
+    padding: 0 1em;
+    border-left: 1px solid transparent;
+    font-size: 0.95em;
+}
+
+.chapter .on-this-page a.current-header {
+    border-left-color: currentColor;
 }
 
 #header-logo-container, h1.menu-title {

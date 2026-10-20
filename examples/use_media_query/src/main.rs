@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::use_media_query;
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_media_query::use_media_query;
 
 #[component]
 fn Demo() -> impl IntoView {

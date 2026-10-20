@@ -1,0 +1,47 @@
+[package]
+name = "leptos-use-storage"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive local / session / custom storage for Leptos"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-event-listener = { workspace = true }
+leptos-use-filters = { workspace = true }
+leptos-use-maybe-rw-signal = { workspace = true }
+leptos-use-watch-with-options = { workspace = true }
+leptos-use-window = { workspace = true }
+sendwrap-fn = { workspace = true }
+codee = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+thiserror = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["CustomEvent", "CustomEventInit", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "Storage", "VisibilityState"] }
+
+[dev-dependencies]
+codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
+serde = { workspace = true, features = ["derive"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Storage", "StorageEvent", "StorageEventInit", "Window"] }
+
+[features]
+ssr = ["leptos-use-event-listener/ssr", "leptos-use-filters/ssr", "leptos-use-maybe-rw-signal/ssr", "leptos-use-watch-with-options/ssr", "leptos-use-window/ssr"]

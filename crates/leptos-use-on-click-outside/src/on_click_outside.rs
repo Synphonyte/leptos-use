@@ -1,0 +1,247 @@
+use crate::{IntoElementMaybeSignal, OnClickOutsideOptions};
+use cfg_if::cfg_if;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use leptos::prelude::*;
+    use crate::IS_IOS;
+    use crate::{UseEventListenerOptions, sendwrap_fn, use_event_listener_with_options};
+    use leptos::ev::{blur, click, pointerdown};
+    use std::cell::Cell;
+    use std::rc::Rc;
+    use std::sync::RwLock;
+    use std::time::Duration;
+    use wasm_bindgen::JsCast;
+
+    static IOS_WORKAROUND: RwLock<bool> = RwLock::new(false);
+}}
+
+/// Listen for clicks outside an element.
+/// Useful for modals or dropdowns.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/on_click_outside)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos::logging::log;
+/// # use leptos::html::Div;
+/// # use leptos_use_on_click_outside::on_click_outside;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let target = NodeRef::<Div>::new();
+///
+/// on_click_outside(target, move |event| { log!("{:?}", event); });
+///
+/// view! {
+///     <div node_ref=target>"Hello World"</div>
+///     <div>"Outside element"</div>
+/// }
+/// # }
+/// ```
+///
+/// > This function uses [Event.composedPath()](https://developer.mozilla.org/en-US/docs/Web/API/Event/composedPath)
+/// > which is **not** supported by IE 11, Edge 18 and below.
+/// > If you are targeting these browsers, we recommend you to include
+/// > [this code snippet](https://gist.github.com/sibbng/13e83b1dd1b733317ce0130ef07d4efd) on your project.
+///
+/// ## SendWrapped Return
+///
+/// The return value of this function is a sendwrapped function to remove all event listeners. It can
+/// only be called from the same thread that called `on_click_outside`.
+///
+/// ## Excluding Elements
+///
+/// Use this to ignore clicks on certain elements.
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos::logging::log;
+/// # use leptos::html::Div;
+/// # use leptos_use_on_click_outside::{on_click_outside_with_options, OnClickOutsideOptions};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// # let target = NodeRef::<Div>::new();
+/// #
+/// on_click_outside_with_options(
+///     target,
+///     move |event| { log!("{:?}", event); },
+///     OnClickOutsideOptions::default().ignore(["input", "#some-id"]),
+/// );
+/// #
+/// # view! {
+/// #     <div node_ref=target>"Hello World"</div>
+/// # }
+/// # }
+///
+/// ```
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server this amounts to a no-op.
+pub fn on_click_outside<El, M, F>(target: El, handler: F) -> impl FnOnce() + Clone + Send + Sync
+where
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+    F: FnMut(web_sys::Event) + Clone + 'static,
+{
+    on_click_outside_with_options(target, handler, OnClickOutsideOptions::default())
+}
+
+/// Version of `on_click_outside` that takes an `OnClickOutsideOptions`. See `on_click_outside` for more details.
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
+pub fn on_click_outside_with_options<El, M, F>(
+    target: El,
+    handler: F,
+    options: OnClickOutsideOptions,
+) -> impl FnOnce() + Clone + Send + Sync
+where
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+    F: FnMut(web_sys::Event) + Clone + 'static,
+{
+    #[cfg(feature = "ssr")]
+    {
+        || {}
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        let OnClickOutsideOptions {
+            ignore,
+            capture,
+            detect_iframes,
+        } = options;
+
+        // Fixes: https://github.com/vueuse/vueuse/issues/1520
+        // How it works: https://stackoverflow.com/a/39712411
+        if *IS_IOS
+            && let Ok(mut ios_workaround) = IOS_WORKAROUND.write()
+            && !*ios_workaround
+        {
+            *ios_workaround = true;
+            if let Some(body) = document().body() {
+                // A no-op closure, not `Function::default()`: that is `new Function("")`, which a
+                // CSP without 'unsafe-eval' refuses, aborting hydration on iOS.
+                let noop = wasm_bindgen::closure::Closure::<dyn Fn()>::new(|| {}).into_js_value();
+                let children = body.children();
+                for i in 0..children.length() {
+                    let _ = children
+                        .get_with_index(i)
+                        .expect("checked index")
+                        .add_event_listener_with_callback("click", noop.unchecked_ref());
+                }
+            }
+        }
+
+        let should_listen = Rc::new(Cell::new(true));
+
+        let should_ignore = move |event: &web_sys::UiEvent| {
+            let ignore = ignore.get_untracked();
+
+            ignore.into_iter().flatten().any(|element| {
+                event_target::<web_sys::EventTarget>(event) == *element
+                    || event.composed_path().includes(element.as_ref(), 0)
+            })
+        };
+
+        let target = target.into_element_maybe_signal();
+
+        let listener = {
+            let should_listen = Rc::clone(&should_listen);
+            let mut handler = handler.clone();
+
+            move |event: web_sys::UiEvent| {
+                if let Some(el) = target.get_untracked() {
+                    if *el == event_target(&event) || event.composed_path().includes(el.as_ref(), 0)
+                    {
+                        return;
+                    }
+
+                    if event.detail() == 0 {
+                        should_listen.set(!should_ignore(&event));
+                    }
+
+                    if !should_listen.get() {
+                        should_listen.set(true);
+                        return;
+                    }
+
+                    #[cfg(debug_assertions)]
+                    let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                    handler(event.into());
+                }
+            }
+        };
+
+        let remove_click_listener = {
+            let mut listener = listener.clone();
+
+            use_event_listener_with_options::<_, web_sys::Window, _, _>(
+                window(),
+                click,
+                move |event| listener(event.into()),
+                UseEventListenerOptions::default()
+                    .passive(true)
+                    .capture(capture),
+            )
+        };
+
+        let remove_pointer_listener = {
+            let should_listen = Rc::clone(&should_listen);
+
+            use_event_listener_with_options::<_, web_sys::Window, _, _>(
+                window(),
+                pointerdown,
+                move |event| {
+                    if let Some(el) = target.get_untracked() {
+                        should_listen
+                            .set(!event.composed_path().includes(&el, 0) && !should_ignore(&event));
+                    }
+                },
+                UseEventListenerOptions::default().passive(true),
+            )
+        };
+
+        let remove_blur_listener = if detect_iframes {
+            Some(use_event_listener_with_options::<_, web_sys::Window, _, _>(
+                window(),
+                blur,
+                move |event| {
+                    let mut handler = handler.clone();
+
+                    let _ = set_timeout(
+                        move || {
+                            if let Some(el) = target.get_untracked()
+                                && let Some(active_element) = document().active_element()
+                                && active_element.tag_name() == "IFRAME"
+                                && !el
+                                    .unchecked_ref::<web_sys::Node>()
+                                    .contains(Some(&active_element.into()))
+                            {
+                                handler(event.into());
+                            }
+                        },
+                        Duration::ZERO,
+                    );
+                },
+                UseEventListenerOptions::default().passive(true),
+            ))
+        } else {
+            None
+        };
+
+        sendwrap_fn!(once move || {
+            remove_click_listener();
+            remove_pointer_listener();
+            if let Some(f) = remove_blur_listener {
+                f();
+            }
+        })
+    }
+}

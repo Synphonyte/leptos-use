@@ -1,0 +1,168 @@
+use crate::{IntoElementMaybeSignal, UseElementSizeOptions, UseElementSizeReturn};
+use cfg_if::cfg_if;
+use leptos::prelude::*;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use crate::{use_resize_observer_with_options, UseResizeObserverOptions};
+    use crate::{watch_with_options, WatchOptions};
+    use wasm_bindgen::JsCast;
+}}
+
+/// Reactive size of an HTML element.
+///
+/// Please refer to [ResizeObserver on MDN](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
+/// for more details.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_element_size)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::{html::Div, prelude::*};
+/// # use leptos_use_element_size::{use_element_size, UseElementSizeReturn};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let el = NodeRef::<Div>::new();
+///
+/// let UseElementSizeReturn { width, height } = use_element_size(el);
+///
+/// view! {
+///     <div node_ref=el>
+///         "Width: " {width}
+///         "Height: " {height}
+///     </div>
+/// }
+/// # }
+/// ```
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server the returned signals always contain the value of the `initial_size` option.
+///
+/// ## See also
+///
+/// - [`fn@crate::use_resize_observer`]
+pub fn use_element_size<El, M>(target: El) -> UseElementSizeReturn
+where
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+{
+    use_element_size_with_options(target, UseElementSizeOptions::default())
+}
+
+/// Version of [`use_element_size`] that takes a `UseElementSizeOptions`. See [`use_element_size`] for how to use.
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
+pub fn use_element_size_with_options<El, M>(
+    target: El,
+    options: UseElementSizeOptions,
+) -> UseElementSizeReturn
+where
+    El: IntoElementMaybeSignal<web_sys::Element, M>,
+{
+    let UseElementSizeOptions { box_, initial_size } = options;
+
+    let (width, set_width) = signal(initial_size.width);
+    let (height, set_height) = signal(initial_size.height);
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        let box_ = box_.unwrap_or(web_sys::ResizeObserverBoxOptions::ContentBox);
+
+        let target = target.into_element_maybe_signal();
+
+        let is_svg = move || {
+            if let Some(target) = target.get_untracked() {
+                target
+                    .namespace_uri()
+                    .map(|ns| ns.contains("svg"))
+                    .unwrap_or(false)
+            } else {
+                false
+            }
+        };
+
+        let _ = use_resize_observer_with_options(
+            target,
+            move |entries, _| {
+                let entry = &entries[0];
+
+                let box_size = match box_ {
+                    web_sys::ResizeObserverBoxOptions::ContentBox => entry.content_box_size(),
+                    web_sys::ResizeObserverBoxOptions::BorderBox => entry.border_box_size(),
+                    web_sys::ResizeObserverBoxOptions::DevicePixelContentBox => {
+                        entry.device_pixel_content_box_size()
+                    }
+                    _ => unreachable!(),
+                };
+
+                if is_svg() {
+                    if let Some(target) = target.get()
+                        && let Ok(Some(styles)) = window().get_computed_style(&target)
+                    {
+                        set_height.set(
+                            styles
+                                .get_property_value("height")
+                                .map(|v| v.parse().unwrap_or_default())
+                                .unwrap_or_default(),
+                        );
+                        set_width.set(
+                            styles
+                                .get_property_value("width")
+                                .map(|v| v.parse().unwrap_or_default())
+                                .unwrap_or_default(),
+                        );
+                    }
+                } else if !box_size.is_null() && !box_size.is_undefined() && box_size.length() > 0 {
+                    let format_box_size = if box_size.is_array() {
+                        box_size.to_vec()
+                    } else {
+                        vec![box_size.into()]
+                    };
+
+                    set_width.set(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v
+                            .as_ref()
+                            .clone()
+                            .unchecked_into::<web_sys::ResizeObserverSize>()
+                            .inline_size()
+                    }));
+                    set_height.set(format_box_size.iter().fold(0.0, |acc, v| {
+                        acc + v
+                            .as_ref()
+                            .clone()
+                            .unchecked_into::<web_sys::ResizeObserverSize>()
+                            .block_size()
+                    }))
+                } else {
+                    // fallback
+                    set_width.set(entry.content_rect().width());
+                    set_height.set(entry.content_rect().height())
+                }
+            },
+            UseResizeObserverOptions::default().box_(box_),
+        );
+
+        let _ = watch_with_options(
+            move || target.get(),
+            move |ele, _, _| {
+                if ele.is_some() {
+                    set_width.set(initial_size.width);
+                    set_height.set(initial_size.height);
+                } else {
+                    set_width.set(0.0);
+                    set_height.set(0.0);
+                }
+            },
+            WatchOptions::default().immediate(false),
+        );
+    }
+
+    UseElementSizeReturn {
+        width: width.into(),
+        height: height.into(),
+    }
+}

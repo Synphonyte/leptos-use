@@ -9,7 +9,8 @@ leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", default-features = false, features = ["use_web_lock", "docs"] }
+leptos-use-docs = { path = "../../crates/leptos-use-docs" }
+leptos-use-web-lock = { path = "../../crates/leptos-use-web-lock" }
 web-sys = { version = "0.3", features = ["Lock"] }
 
 [dev-dependencies]

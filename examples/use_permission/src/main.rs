@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_permission;
+use leptos_use_docs::demo_or_body;
+use leptos_use_permission::use_permission;
 
 #[component]
 fn Demo() -> impl IntoView {

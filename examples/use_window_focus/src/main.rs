@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_window_focus;
+use leptos_use_docs::demo_or_body;
+use leptos_use_window_focus::use_window_focus;
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -11,7 +11,7 @@ fn Demo() -> impl IntoView {
     let focused = use_window_focus();
 
     Effect::watch(
-        move || focused(),
+        move || focused.get(),
         move |focused, _, _| {
             if *focused {
                 set_message(start_message);

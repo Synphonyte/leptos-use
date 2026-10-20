@@ -1,8 +1,8 @@
 use chrono::NaiveDate;
 use chrono::*;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_calendar_with_options, UseCalendarOptions, UseCalendarReturn};
+use leptos_use_docs::demo_or_body;
+use leptos_use_calendar::{use_calendar_with_options, UseCalendarOptions, UseCalendarReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

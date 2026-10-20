@@ -1,0 +1,16 @@
+# Every crate of the workspace is versioned and released on its own.
+# See https://release-plz.ieni.dev/docs/config
+
+[workspace]
+# Bump the version according to the API changes, not only the commit messages.
+semver_check = true
+# Every crate gets its own `CHANGELOG.md`.
+changelog_update = true
+# A GitHub release per crate would be very noisy. The tags (`<crate>-v<version>`) and the
+# changelogs are enough.
+git_release_enable = false
+
+[[package]]
+name = "leptos-use"
+# The deprecated facade keeps the hand-written changelog of the former monolithic crate.
+changelog_update = false

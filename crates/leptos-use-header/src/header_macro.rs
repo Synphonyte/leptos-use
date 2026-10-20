@@ -1,0 +1,44 @@
+#[doc(hidden)]
+#[macro_export]
+macro_rules! get_header {
+    (
+        $header_name:expr,
+        $function_name:ident,
+        $option_name:ident
+        $(,)?
+    ) => {
+        {
+            #[cfg(feature = "ssr")]
+            {
+                #[cfg(all(
+                    not(feature = "axum"),
+                    not(feature = "actix")
+                ))]
+                {
+                    leptos::logging::warn!(
+                        "If you're using `{}` with SSR but without any of the features `axum`, `actix` enabled, you have to provide the option `{}`",
+                        stringify!($function_name),
+                        stringify!($option_name)
+                    );
+                    return None;
+                }
+
+                #[cfg(feature = "actix")]
+                use http0_2::{HeaderName, header::*};
+                #[cfg(feature = "axum")]
+                use http1::{HeaderName, header::*};
+
+                #[cfg(any(feature = "axum", feature = "actix"))]
+                {
+                    let header_name = $header_name;
+                    $crate::header(header_name)
+                }
+            }
+
+            #[cfg(not(feature = "ssr"))]
+            {
+                None
+            }
+        }
+    };
+}

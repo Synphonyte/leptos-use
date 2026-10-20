@@ -1,0 +1,43 @@
+[package]
+name = "leptos-use-mouse-in-element"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive mouse position related to an element"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-core = { workspace = true }
+leptos-use-element = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+leptos-use-mouse = { workspace = true }
+leptos-use-window = { workspace = true }
+sendwrap-fn = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+web-sys = { workspace = true, features = ["DomRect", "Element", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "Touch", "TouchList", "VisibilityState"] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Element", "EventTarget", "HtmlElement", "MouseEvent", "MouseEventInit", "Window"] }
+
+[features]
+ssr = ["leptos-use-core/ssr", "leptos-use-element/ssr", "leptos-use-event-listener/ssr", "leptos-use-mouse/ssr", "leptos-use-window/ssr"]

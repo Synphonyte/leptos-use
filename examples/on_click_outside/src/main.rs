@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::on_click_outside;
+use leptos_use_docs::demo_or_body;
+use leptos_use_on_click_outside::on_click_outside;
 
 #[component]
 fn Demo() -> impl IntoView {

@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::{breakpoints_tailwind, use_breakpoints, BreakpointsTailwind};
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_breakpoints::{breakpoints_tailwind, use_breakpoints, BreakpointsTailwind};
 
 #[component]
 fn Demo() -> impl IntoView {

@@ -1,42 +1,97 @@
-import sys
-import re
+import glob
+import json
 import os
+import re
+import sys
+
+REPO = os.path.join("..", "..", "..", "..")
+
+
+def find_source(name):
+    """Returns (crate name, path of the source file relative to the repo root)."""
+    base = name.split("/")[-1]
+    matches = sorted(glob.glob(os.path.join(REPO, "crates", "*", "src", "**", f"{base}.rs"), recursive=True))
+    if not matches:
+        raise SystemExit(f"source file for {name} not found")
+    rel = os.path.relpath(matches[0], REPO)
+    return rel.split(os.sep)[1], rel
+
+
+_SYMBOLS = None
+
+
+def crate_of(ident, default):
+    """Find the crate that defines `ident` (falls back to `default`)."""
+    global _SYMBOLS
+    if _SYMBOLS is None:
+        _SYMBOLS = {}
+        item = re.compile(r"^pub\s+(?:async\s+)?(fn|struct|enum|trait|type)\s+(\w+)", re.M)
+        for f in glob.glob(os.path.join(REPO, "crates", "*", "src", "**", "*.rs"), recursive=True):
+            crate = os.path.relpath(f, REPO).split(os.sep)[1]
+            with open(f) as fh:
+                for kind, s in item.findall(fh.read()):
+                    _SYMBOLS.setdefault(s, (crate, kind))
+    return _SYMBOLS.get(ident, (default, None))
+
+
+def wasm_size_rows(name):
+    """Meta data rows with the wasm size estimate written by `measure_wasm_sizes.py`."""
+    path = os.path.join("..", "..", "wasm_sizes.json")
+    if not os.path.exists(path):
+        return ""
+    with open(path) as f:
+        size = json.load(f).get(name)
+    if size is None:
+        return ""
+
+    diff = size["diff"]
+    # differences below 1 kB are in the range of the noise caused by the optimizer
+    text = "&lt; 1 kB" if diff < 1000 else f"~{diff / 1000:.1f} kB"
+    help_text = (
+        "Measured by release building a Leptos app (hydrate, LTO, wasm-opt -Oz) with and without "
+        "this function's usage example and comparing the gzipped wasm files. Both apps include the "
+        "crate's third-party dependencies, so mainly the crate's own code is counted."
+    )
+    # lucide `circle-help` icon
+    icon = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" '
+        'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+        'stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/>'
+        '<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>'
+    )
+    help_tip = (
+        f'<span class="wasm-size-help" tabindex="0" aria-label="{help_text}">{icon}'
+        f'<span class="wasm-size-tooltip" aria-hidden="true">{help_text}</span></span>'
+    )
+    return f"""
+    <div>Wasm size</div>
+    <div>{text} <span class="wasm-size-note">(gzipped)</span> {help_tip}</div>"""
+
+
+def lib(crate):
+    return crate.replace("-", "_")
 
 
 def main():
     category = os.path.split(os.getcwd())[-1]
 
     name = sys.argv[1]
-    file_name = f"../../../../src/{name}.rs"
-
-    module = None
+    crate, source_path = find_source(name)
     if "/" in name:
-        module, name = name.split("/")
-
-    if module is not None:
-        module_display = f"leptos_use::{module}"
-    else:
-        module_display = "leptos_use"
-
-    feature = sys.argv[2] if len(sys.argv) > 2 else None
-
-    feature_display = ""
-    if feature is not None:
-        feature_display = f"<div>Feature</div><div>{feature}</div>"
+        name = name.split("/")[-1]
 
     print(f"""
 <div class="meta-data">
     <div>Category</div>
     <div>{category.title()}</div>
-    <div>Module</div>
-    <div><code>{module_display}</code></div>
-    {feature_display}
+    <div>Crate</div>
+    <div><a href="https://crates.io/crates/{crate}" target="_blank"><code>{crate}</code></a></div>{wasm_size_rows(name)}
 </div>
     """)
 
-    types = [];
+    types = []
 
-    with open(file_name) as f:
+    with open(os.path.join(REPO, source_path)) as f:
         in_code_block = False
         doc_comment_started = False
         initial_doc_finished = False
@@ -45,7 +100,7 @@ def main():
             stripped_line = line.strip()
 
             if initial_doc_finished:
-                process_further_line(line, types, module)
+                process_further_line(line, types, crate)
 
             elif stripped_line.startswith("///") or stripped_line.startswith("#[doc ="):
                 doc_comment_started = True
@@ -60,7 +115,7 @@ def main():
                         line = line.replace("```", "```rust,ignore")
                     in_code_block = not in_code_block
 
-                line = process_line(line, name, module)
+                line = process_line(line, name, crate)
 
                 print(line)
 
@@ -70,11 +125,159 @@ def main():
             elif doc_comment_started:
                 initial_doc_finished = True
 
-    if feature is not None:
-        append_feature_paragraph(feature)
-
+    append_installation_paragraph(crate)
+    add_options_paragraph(name, crate, source_path)
     add_types_paragraph(types)
-    add_source_paragraph(name, module)
+    add_source_paragraph(name, crate, source_path)
+
+
+def doc_line(line):
+    """Text of a `///` doc comment line or `None` if it isn't one."""
+    stripped = line.strip()
+    if not stripped.startswith("///"):
+        return None
+    return stripped[4:] if stripped.startswith("/// ") else stripped[3:]
+
+
+def options_struct_names(name, source_path):
+    """Names of the `...Options` types taken by the public functions of the page."""
+    with open(os.path.join(REPO, source_path)) as f:
+        source = f.read()
+
+    signatures = [
+        m.group(0) for m in re.finditer(r"^pub (?:async )?fn (\w+)[^{;]*", source, re.M)
+        if m.group(1).startswith(name)
+    ]
+    # functions generated by macros (e.g. `signal_debounced`) only show up in the rest of the file
+    candidates = re.findall(r"\b(\w+Options)\b", "".join(signatures) if signatures else source)
+
+    names = []
+    for ident in candidates:
+        if ident not in names:
+            names.append(ident)
+    return names
+
+
+def find_struct(ident, crate):
+    """Returns (struct name, crate, lines of the struct definition, file content) for `pub struct ident`
+    (following type aliases), preferring `crate`."""
+    pattern = re.compile(rf"^pub struct {ident}\b")
+    alias = re.compile(rf"^pub type {ident}\s*=\s*(\w+)")
+    files = sorted(glob.glob(os.path.join(REPO, "crates", "*", "src", "**", "*.rs"), recursive=True))
+    files.sort(key=lambda f: os.path.relpath(f, REPO).split(os.sep)[1] != crate)
+
+    for file in files:
+        with open(file) as f:
+            lines = f.readlines()
+
+        for i, line in enumerate(lines):
+            m = alias.match(line)
+            if m:
+                return find_struct(m.group(1), crate)
+            if pattern.match(line):
+                start = i
+                while start > 0 and (lines[start - 1].strip().startswith(("///", "#["))):
+                    start -= 1
+                end = i
+                while not lines[end].startswith("}"):
+                    end += 1
+                struct_crate = os.path.relpath(file, REPO).split(os.sep)[1]
+                return ident, struct_crate, lines[start:end + 1], "".join(lines)
+
+    return ident, None, None, None
+
+
+def bracket_depth(text):
+    text = text.replace("->", "")
+    return sum(text.count(c) for c in "<([") - sum(text.count(c) for c in ">)]")
+
+
+def parse_struct(lines):
+    """Returns (struct doc lines, [(field, type, doc lines, attributes)])."""
+    struct_doc = []
+    fields = []
+    i = 0
+
+    while not re.match(r"^pub struct", lines[i]):
+        doc = doc_line(lines[i])
+        if doc is not None:
+            struct_doc.append(doc)
+        i += 1
+
+    # skip the (possibly multi-line) struct header including generics and where clauses
+    while not lines[i].rstrip().endswith("{"):
+        i += 1
+    i += 1
+
+    doc, attrs = [], []
+    while i < len(lines) - 1:
+        line = lines[i].strip()
+        i += 1
+
+        if line.startswith("///"):
+            doc.append(doc_line(line))
+        elif line.startswith("#["):
+            attrs.append(line)
+        elif line and not line.startswith("//"):
+            field = line
+            while bracket_depth(field) > 0 or not field.endswith(","):
+                if i >= len(lines) - 1:
+                    break
+                field += " " + lines[i].strip()
+                i += 1
+
+            m = re.match(r"^(?:pub(?:\([^)]*\))?\s+)?(\w+)\s*:\s*(.+?),?$", field)
+            if m:
+                ty = re.sub(r"\s+", " ", m.group(2)).replace("< ", "<").replace(" >", ">").replace(", >", ">")
+                fields.append((m.group(1), ty, doc, attrs))
+            doc, attrs = [], []
+
+    return struct_doc, fields
+
+
+def print_doc(doc, name, crate):
+    in_code_block = False
+    for line in doc:
+        if "```" in line:
+            if not in_code_block:
+                line = line.replace("```", "```rust,ignore") if line.strip() == "```" else line
+            in_code_block = not in_code_block
+        print(process_line(line, name, crate))
+
+
+def add_options_paragraph(name, crate, source_path):
+    structs = []
+    for ident in options_struct_names(name, source_path):
+        ident, struct_crate, lines, file_content = find_struct(ident, crate)
+        if lines is not None and ident not in (s[0] for s in structs):
+            structs.append((ident, struct_crate, file_content, *parse_struct(lines)))
+
+    if not structs:
+        return
+
+    print("\n## Options")
+
+    for ident, struct_crate, file_content, struct_doc, fields in structs:
+        # Only fields that can be set by a (generated or hand-written) builder method of the same name
+        fields = [
+            (field, ty, doc, attrs) for field, ty, doc, attrs in fields
+            if not any("builder(skip)" in a for a in attrs)
+            or re.search(rf"\bpub fn {field}\b", file_content)
+        ]
+        if not fields:
+            continue
+
+        url = f"https://docs.rs/{struct_crate}/latest/{lib(struct_crate)}/struct.{ident}.html"
+        # no link in the heading: mdbook's list of page headings would show it empty
+        print(f"\n### `{ident}`\n")
+        print_doc(struct_doc, name, struct_crate)
+        print(f"\nEvery option is set with a builder method of the same name, e.g. "
+              f"`{ident}::default().{fields[0][0]}(...)`. See also the [API docs]({url}).")
+
+        for field, ty, doc, _ in fields:
+            print(f"\n#### `{field}`\n")
+            print(f"Type: `{ty}`\n")
+            print_doc(doc, name, struct_crate)
 
 
 def add_types_paragraph(types):
@@ -83,76 +286,79 @@ def add_types_paragraph(types):
         print("\n".join(types))
 
 
-def add_source_paragraph(name, module):
+def add_source_paragraph(name, crate, source_path):
     print("\n## Source\n")
 
-    if module is not None:
-        mod = f"/{module}"
-    else:
-        mod = ""
-
-    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/src{mod}/{name}.rs"
+    source_url = f"https://github.com/Synphonyte/leptos-use/blob/main/{source_path}"
     demo_url = f"https://github.com/Synphonyte/leptos-use/tree/main/examples/{name}"
-    docs_url = f"https://docs.rs/leptos-use/latest/leptos_use{mod}/fn.{name}.html"
+    docs_url = f"https://docs.rs/{crate}/latest/{lib(crate)}/fn.{name}.html"
 
     demo_link = f" • <a href=\"{demo_url}\" target=\"_blank\">Demo</a>" if os.path.isdir(
-        os.path.join("..", "..", "..", "..", "examples", name)) else ""
+        os.path.join(REPO, "examples", name)) else ""
 
     print(
         f"<a href=\"{source_url}\" target=\"_blank\">Source</a>{demo_link} • <a href=\"{docs_url}\" target=\"_blank\">Docs</a>")
 
 
 internal_doc_link_pattern = re.compile(r"\[`([^]]+)\`](?!\()")
+explicit_doc_link_pattern = re.compile(r"]\(((?:(?:fn|struct|enum|trait|type|macro)@)?\w+(?:::\w+)*)\)")
 ident_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\b")
 
 
-def process_line(line, name, module):
+def display_path(path):
+    """Link text of an intra-doc link without disambiguators and `crate::`."""
+    return re.sub(r"^(fn|struct|enum|trait|type|macro)@", "", path).replace("crate::", "")
+
+
+def process_line(line, name, crate):
     stripped = line.strip()
     result = line
 
     if stripped.startswith("[Link to Demo](https://"):
         example_link = stripped.replace("[Link to Demo](", "").replace(")", "")
-        result = f'''<div class="demo-container">
-    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source <i class="fa fa-github"></i></a>
+        result = f"""<div class="demo-container">
+    <a class="demo-source" href="{example_link}/src/main.rs" target="_blank">source <i class="fa-brands fa-github"></i></a>
     <div id="demo-anchor"></div>
-</div>'''
+</div>"""
     else:
-        if module is not None:
-            mod = f"/{module}"
-        else:
-            mod = ""
+        def url_of(path):
+            path = re.sub(r"^(fn|struct|enum|trait|type|macro)@", "", path).replace("crate::", "")
+            segs = [x for x in path.split("::") if x not in ("core", "utils", "storage", "math", "docs")]
+            target, kind = crate_of(segs[0], crate)
+            if kind is None or not re.fullmatch(r"\w+", segs[0]):
+                return f"https://docs.rs/{crate}/latest/{lib(crate)}/fn.{segs[0]}.html"
+            url = f"https://docs.rs/{target}/latest/{lib(target)}/{kind}.{segs[0]}.html"
+            if len(segs) > 1:
+                url += f"#structfield.{segs[1]}" if kind == "struct" else f"#method.{segs[1]}"
+            return url
 
-        result = re.sub(internal_doc_link_pattern,
-                        rf"[`\1`](https://docs.rs/leptos-use/latest/leptos_use{mod}/fn.\1.html)",
-                        line)
+        result = re.sub(internal_doc_link_pattern, lambda m: f"[`{display_path(m.group(1))}`]({url_of(m.group(1))})", line)
+        result = re.sub(explicit_doc_link_pattern, lambda m: f"]({url_of(m.group(1))})", result)
 
     return result
 
 
-def process_further_line(line, types, module=None):
+def process_further_line(line, types, crate):
     if line.startswith("pub enum"):
-        append_type(line, "enum", types, module)
+        append_type(line, "enum", types, crate)
     elif line.startswith("pub struct"):
-        append_type(line, "struct", types, module)
+        append_type(line, "struct", types, crate)
 
 
-def append_feature_paragraph(feature):
-    print(f"""## Feature
-> This function is only available if the crate feature **`{feature}`** is enabled""")
+def append_installation_paragraph(crate):
+    print(f"""## Installation
+
+```shell
+cargo add {crate}
+```""")
 
 
-def append_type(line, ty, types, module=None):
+def append_type(line, ty, types, crate):
     start_index = len(f"pub {ty} ")
     m = re.search(ident_pattern, line[start_index:])
     if m is not None:
         ident = m.group(0)
-
-        if module is not None:
-            mod = f"/{module}"
-        else:
-            mod = ""
-
-        types.append(f"- [`{ty} {ident}`](https://docs.rs/leptos-use/latest/leptos_use{mod}/{ty}.{ident}.html)")
+        types.append(f"- [`{ty} {ident}`](https://docs.rs/{crate}/latest/{lib(crate)}/{ty}.{ident}.html)")
 
 
 if __name__ == '__main__':

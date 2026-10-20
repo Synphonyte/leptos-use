@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::{use_screen_orientation, ScreenOrientation, UseScreenOrientationReturn};
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_screen_orientation::{use_screen_orientation, ScreenOrientation, UseScreenOrientationReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

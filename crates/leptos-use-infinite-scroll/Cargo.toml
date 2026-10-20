@@ -1,0 +1,45 @@
+[package]
+name = "leptos-use-infinite-scroll"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Infinite scrolling of the element"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-core = { workspace = true }
+leptos-use-element = { workspace = true }
+leptos-use-element-visibility = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+leptos-use-scroll = { workspace = true }
+default-struct-builder = { workspace = true }
+futures-util = { workspace = true }
+gloo-timers = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "DomRect", "Element", "Event", "EventListenerOptions", "EventTarget", "HtmlCollection", "IntersectionObserver", "IntersectionObserverEntry", "IntersectionObserverInit", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "ScrollBehavior", "ScrollToOptions", "VisibilityState", "Window"] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Element", "HtmlElement"] }
+
+[features]
+ssr = ["leptos-use-core/ssr", "leptos-use-element/ssr", "leptos-use-element-visibility/ssr", "leptos-use-event-listener/ssr", "leptos-use-scroll/ssr"]

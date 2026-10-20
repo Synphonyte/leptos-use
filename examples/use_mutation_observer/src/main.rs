@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_mutation_observer_with_options, UseMutationObserverOptions};
+use leptos_use_docs::demo_or_body;
+use leptos_use_element::{use_mutation_observer_with_options, UseMutationObserverOptions};
 use std::time::Duration;
 
 #[component]
@@ -23,14 +23,14 @@ fn Demo() -> impl IntoView {
         UseMutationObserverOptions::default().attributes(true),
     );
 
-    let _ = set_timeout_with_handle(
+    let _ = set_timeout(
         move || {
             set_class_name.set("test test2".to_string());
         },
         Duration::from_millis(1000),
     );
 
-    let _ = set_timeout_with_handle(
+    let _ = set_timeout(
         move || {
             set_style.set("color: red;".to_string());
         },

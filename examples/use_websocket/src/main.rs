@@ -1,9 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{
-    ReconnectLimit, UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn,
-    core::ConnectionReadyState, use_websocket, use_websocket_with_options,
-};
+use leptos_use_docs::demo_or_body;
+use leptos_use_core::{ReconnectLimit, ConnectionReadyState};
+use leptos_use_websocket::{UseWebSocketError, UseWebSocketOptions, UseWebSocketReturn, use_websocket, use_websocket_with_options};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 

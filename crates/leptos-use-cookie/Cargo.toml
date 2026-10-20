@@ -1,0 +1,54 @@
+[package]
+name = "leptos-use-cookie"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "SSR-friendly and reactive cookie access"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-broadcast-channel = { workspace = true }
+leptos-use-header = { workspace = true }
+leptos-use-now = { workspace = true }
+leptos-use-watch-with-options = { workspace = true }
+codee = { workspace = true }
+cookie = { workspace = true }
+default-struct-builder = { workspace = true }
+http0_2 = { workspace = true, optional = true }
+http1 = { workspace = true, optional = true }
+leptos = { workspace = true }
+leptos_actix = { workspace = true, optional = true }
+leptos_axum = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["BroadcastChannel", "EventListenerOptions", "EventTarget", "HtmlDocument", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
+getrandom = { workspace = true, features = ["wasm_js"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+rand = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+time = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+
+[features]
+actix = ["dep:http0_2", "dep:leptos_actix", "leptos-use-header/actix"]
+axum = ["dep:http1", "dep:leptos_axum", "leptos-use-header/axum"]
+ssr = ["leptos-use-broadcast-channel/ssr", "leptos-use-header/ssr", "leptos-use-now/ssr", "leptos-use-watch-with-options/ssr"]

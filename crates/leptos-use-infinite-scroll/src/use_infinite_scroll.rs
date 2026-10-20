@@ -1,0 +1,312 @@
+#![cfg_attr(feature = "ssr", allow(unused_imports, dead_code))]
+
+use crate::{
+    Direction, Directions, IntoElementMaybeSignal, ScrollOffset, UseInfiniteScrollOptions,
+    UseScrollOptions, UseScrollReturn, use_element_visibility, use_scroll_with_options,
+};
+use futures_util::join;
+use gloo_timers::future::sleep;
+use leptos::prelude::*;
+use leptos::reactive::wrappers::read::Signal;
+use send_wrapper::SendWrapper;
+use std::future::Future;
+use std::sync::Arc;
+use std::time::Duration;
+use wasm_bindgen::JsCast;
+
+/// Infinite scrolling of the element.
+///
+/// ## Demo
+///
+/// [Link to Demo](https://github.com/Synphonyte/leptos-use/tree/main/examples/use_infinite_scroll)
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::prelude::*;
+/// use leptos::html::Div;
+/// # use leptos_use_infinite_scroll::{use_infinite_scroll_with_options, UseInfiniteScrollOptions};
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let el = NodeRef::<Div>::new();
+///
+/// let (data, set_data) = signal(vec![1, 2, 3, 4, 5, 6]);
+///
+/// let _ = use_infinite_scroll_with_options(
+///     el,
+///     move |_| async move {
+///         let len = data.with(|d| d.len());
+///         set_data.update(|data| *data = (1..len+6).collect());
+///     },
+///     UseInfiniteScrollOptions::default().distance(10.0),
+/// );
+///
+/// view! {
+///     <div node_ref=el>
+///         <For each=move || data.get() key=|i| *i let:item>{ item }</For>
+///     </div>
+/// }
+/// # }
+/// ```
+///
+/// The returned signal is `true` while new data is being loaded.
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server-side, `use_infinite_scroll` will return a signal that is always `false`.
+/// It effectively does nothing on the server, as there are no scroll events to listen to.
+pub fn use_infinite_scroll<El, M, LFn, LFut>(el: El, on_load_more: LFn) -> Signal<bool>
+where
+    El: IntoElementMaybeSignal<web_sys::Element, M> + 'static,
+    LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
+    LFut: Future<Output = ()>,
+{
+    use_infinite_scroll_with_options(el, on_load_more, UseInfiniteScrollOptions::default())
+}
+
+/// Version of [`use_infinite_scroll`] that takes a `UseInfiniteScrollOptions`. See [`use_infinite_scroll`] for how to use.
+pub fn use_infinite_scroll_with_options<El, M, LFn, LFut>(
+    el: El,
+    on_load_more: LFn,
+    options: UseInfiniteScrollOptions,
+) -> Signal<bool>
+where
+    El: IntoElementMaybeSignal<web_sys::Element, M> + 'static,
+    LFn: Fn(ScrollState) -> LFut + Send + Sync + 'static,
+    LFut: Future<Output = ()>,
+{
+    #[cfg(not(feature = "ssr"))]
+    {
+        let UseInfiniteScrollOptions {
+            distance,
+            direction,
+            interval,
+            on_scroll,
+            event_listener_options,
+        } = options;
+
+        let on_load_more = StoredValue::new(on_load_more);
+
+        let el = el.into_element_maybe_signal();
+
+        let UseScrollReturn {
+            x,
+            y,
+            is_scrolling,
+            arrived_state,
+            directions,
+            measure,
+            ..
+        } = use_scroll_with_options(
+            el,
+            UseScrollOptions::default()
+                .on_scroll(move |evt| on_scroll(evt))
+                .event_listener_options(event_listener_options)
+                .offset(ScrollOffset::default().set_direction(direction, distance)),
+        );
+
+        let state = ScrollState {
+            x,
+            y,
+            is_scrolling,
+            arrived_state,
+            directions,
+        };
+
+        let (is_loading, set_loading) = signal(false);
+
+        let observed_element = Signal::derive_local(move || {
+            let el = el.get();
+
+            el.map(|el| {
+                if el.is_instance_of::<web_sys::Window>()
+                    || el.is_instance_of::<web_sys::Document>()
+                {
+                    SendWrapper::new(
+                        document()
+                            .document_element()
+                            .expect("document element not found"),
+                    )
+                } else {
+                    el
+                }
+            })
+        });
+
+        let is_element_visible = use_element_visibility(observed_element);
+
+        let check_and_load = StoredValue::new(None::<Arc<dyn Fn() + Send + Sync>>);
+
+        check_and_load.set_value(Some(Arc::new({
+            let measure = measure.clone();
+
+            move || {
+                let observed_element = observed_element.get_untracked();
+
+                if !is_element_visible.get_untracked() {
+                    return;
+                }
+
+                if let Some(observed_element) = observed_element {
+                    let scroll_height = observed_element.scroll_height();
+                    let client_height = observed_element.client_height();
+                    let scroll_width = observed_element.scroll_width();
+                    let client_width = observed_element.client_width();
+
+                    let is_vertical = direction == Direction::Bottom || direction == Direction::Top;
+
+                    let is_narrower = if is_vertical {
+                        scroll_height <= client_height
+                    } else {
+                        scroll_width <= client_width
+                    };
+
+                    if (state.arrived_state.get_untracked().get_direction(direction) || is_narrower)
+                        && !is_loading.get_untracked()
+                    {
+                        set_loading.set(true);
+
+                        let measure = measure.clone();
+                        let size_before = ContentSize::measure(&observed_element, is_vertical);
+
+                        leptos::task::spawn_local(async move {
+                            #[cfg(debug_assertions)]
+                            let zone =
+                                leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+                            join!(
+                                on_load_more.with_value(|f| f(state)),
+                                sleep(Duration::from_millis(interval as u64))
+                            );
+
+                            #[cfg(debug_assertions)]
+                            drop(zone);
+
+                            set_loading.try_set(false);
+                            sleep(Duration::ZERO).await;
+                            measure();
+
+                            let size_after = ContentSize::measure(&observed_element, is_vertical);
+
+                            if size_after.grew_since(&size_before)
+                                && let Some(check_and_load) =
+                                    check_and_load.try_get_value().flatten()
+                            {
+                                check_and_load();
+                            }
+                        });
+                    }
+                }
+            }
+        })));
+
+        Effect::watch(
+            move || is_element_visible.get(),
+            move |visible, prev_visible, _| {
+                if *visible && !prev_visible.copied().unwrap_or_default() {
+                    measure();
+                }
+            },
+            true,
+        );
+
+        Effect::watch(
+            move || state.arrived_state.get().get_direction(direction),
+            move |arrived, prev_arrived, _| {
+                if let Some(prev_arrived) = prev_arrived
+                    && prev_arrived == arrived
+                {
+                    return;
+                }
+
+                check_and_load
+                    .get_value()
+                    .expect("check_and_load is set above")()
+            },
+            true,
+        );
+
+        is_loading.into()
+    }
+
+    #[cfg(feature = "ssr")]
+    {
+        let _ = el;
+        let _ = on_load_more;
+        let _ = options;
+
+        Signal::stored(false)
+    }
+}
+
+/// Size of an element's content in the scroll direction.
+#[cfg(not(feature = "ssr"))]
+struct ContentSize {
+    /// `scrollHeight` or `scrollWidth`. This never drops below the client size, so it can't
+    /// tell whether content that is still shorter than the element has grown.
+    scroll_size: i32,
+
+    /// Distance from the start of the first to the end of the last child element. Unlike the
+    /// scroll size this also grows while the content is shorter than the element.
+    children_span: f64,
+}
+
+#[cfg(not(feature = "ssr"))]
+impl ContentSize {
+    fn measure(el: &web_sys::Element, is_vertical: bool) -> Self {
+        let scroll_size = if is_vertical {
+            el.scroll_height()
+        } else {
+            el.scroll_width()
+        };
+
+        let children = el.children();
+        let mut start = f64::INFINITY;
+        let mut end = f64::NEG_INFINITY;
+
+        for i in 0..children.length() {
+            if let Some(child) = children.item(i) {
+                let rect = child.get_bounding_client_rect();
+                let (child_start, child_end) = if is_vertical {
+                    (rect.top(), rect.bottom())
+                } else {
+                    (rect.left(), rect.right())
+                };
+                start = start.min(child_start);
+                end = end.max(child_end);
+            }
+        }
+
+        Self {
+            scroll_size,
+            children_span: (end - start).max(0.0),
+        }
+    }
+
+    fn grew_since(&self, before: &Self) -> bool {
+        self.scroll_size > before.scroll_size || self.children_span > before.children_span
+    }
+}
+
+/// The scroll state being passed into the `on_load_more` callback of [`use_infinite_scroll`].
+#[derive(Copy, Clone)]
+pub struct ScrollState {
+    /// X coordinate of scroll position
+    pub x: Signal<f64>,
+
+    /// Y coordinate of scroll position
+    pub y: Signal<f64>,
+
+    /// Is true while the element is being scrolled.
+    pub is_scrolling: Signal<bool>,
+
+    /// Sets the field that represents a direction to true if the
+    /// element is scrolled all the way to that side.
+    pub arrived_state: Signal<Directions>,
+
+    /// The directions in which the element is being scrolled are set to true.
+    pub directions: Signal<Directions>,
+}

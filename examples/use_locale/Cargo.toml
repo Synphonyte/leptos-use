@@ -11,7 +11,8 @@ leptos = { workspace = true, features = [
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", default-features = false, features = ["use_locale", "docs"] }
+leptos-use-docs = { path = "../../crates/leptos-use-docs" }
+leptos-use-locale = { path = "../../crates/leptos-use-locale" }
 unic-langid = { version = "0.9", features = ["macros"] }
 web-sys = "0.3"
 

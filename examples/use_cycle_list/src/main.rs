@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_cycle_list, UseCycleListReturn};
+use leptos_use_docs::demo_or_body;
+use leptos_use_cycle_list::{use_cycle_list, UseCycleListReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

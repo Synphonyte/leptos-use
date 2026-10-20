@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_document_visibility;
+use leptos_use_docs::demo_or_body;
+use leptos_use_document_visibility::use_document_visibility;
 use std::time::Duration;
 
 #[component]
@@ -10,7 +10,7 @@ fn Demo() -> impl IntoView {
     let visibility = use_document_visibility();
 
     Effect::watch(
-        move || visibility(),
+        move || visibility.get(),
         move |cur, prev, _| {
             if let Some(prev) = prev
                 && *cur == web_sys::VisibilityState::Visible
@@ -18,7 +18,7 @@ fn Demo() -> impl IntoView {
             {
                 set_message("🎉 Welcome back!");
 
-                set_timeout(
+                let _ = set_timeout(
                     move || {
                         set_message(start_message);
                     },

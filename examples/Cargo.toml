@@ -79,12 +79,63 @@ members = [
 exclude = ["ssr", "use_webtransport_with_server"]
 
 [workspace.dependencies]
-leptos = "0.9.0-alpha"
+leptos = "0.9.0-rc0"
 codee = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "..", features = ["docs"] }
+leptos-use-breakpoints = { path = "../crates/leptos-use-breakpoints" }
+leptos-use-clipboard = { path = "../crates/leptos-use-clipboard" }
+leptos-use-color-mode = { path = "../crates/leptos-use-color-mode" }
+leptos-use-core = { path = "../crates/leptos-use-core" }
+leptos-use-css-var = { path = "../crates/leptos-use-css-var" }
+leptos-use-cycle-list = { path = "../crates/leptos-use-cycle-list" }
+leptos-use-device-orientation = { path = "../crates/leptos-use-device-orientation" }
+leptos-use-device-pixel-ratio = { path = "../crates/leptos-use-device-pixel-ratio" }
+leptos-use-display-media = { path = "../crates/leptos-use-display-media" }
+leptos-use-docs = { path = "../crates/leptos-use-docs" }
+leptos-use-document = { path = "../crates/leptos-use-document" }
+leptos-use-document-visibility = { path = "../crates/leptos-use-document-visibility" }
+leptos-use-draggable = { path = "../crates/leptos-use-draggable" }
+leptos-use-drop-zone = { path = "../crates/leptos-use-drop-zone" }
+leptos-use-element = { path = "../crates/leptos-use-element" }
+leptos-use-element-bounding = { path = "../crates/leptos-use-element-bounding" }
+leptos-use-element-hover = { path = "../crates/leptos-use-element-hover" }
+leptos-use-element-size = { path = "../crates/leptos-use-element-size" }
+leptos-use-element-visibility = { path = "../crates/leptos-use-element-visibility" }
+leptos-use-favicon = { path = "../crates/leptos-use-favicon" }
+leptos-use-filters = { path = "../crates/leptos-use-filters" }
+leptos-use-fn-debounce-throttle = { path = "../crates/leptos-use-fn-debounce-throttle" }
+leptos-use-geolocation = { path = "../crates/leptos-use-geolocation" }
+leptos-use-idle = { path = "../crates/leptos-use-idle" }
+leptos-use-infinite-scroll = { path = "../crates/leptos-use-infinite-scroll" }
+leptos-use-intersection-observer = { path = "../crates/leptos-use-intersection-observer" }
+leptos-use-interval = { path = "../crates/leptos-use-interval" }
+leptos-use-intl-datetime-format = { path = "../crates/leptos-use-intl-datetime-format" }
+leptos-use-intl-number-format = { path = "../crates/leptos-use-intl-number-format" }
+leptos-use-locales = { path = "../crates/leptos-use-locales" }
+leptos-use-media-query = { path = "../crates/leptos-use-media-query" }
+leptos-use-mouse = { path = "../crates/leptos-use-mouse" }
+leptos-use-mouse-in-element = { path = "../crates/leptos-use-mouse-in-element" }
+leptos-use-on-click-outside = { path = "../crates/leptos-use-on-click-outside" }
+leptos-use-permission = { path = "../crates/leptos-use-permission" }
+leptos-use-preferences = { path = "../crates/leptos-use-preferences" }
+leptos-use-raf-fn = { path = "../crates/leptos-use-raf-fn" }
+leptos-use-resize-observer = { path = "../crates/leptos-use-resize-observer" }
+leptos-use-scroll = { path = "../crates/leptos-use-scroll" }
+leptos-use-service-worker = { path = "../crates/leptos-use-service-worker" }
+leptos-use-signal-debounce-throttle = { path = "../crates/leptos-use-signal-debounce-throttle" }
+leptos-use-sorted = { path = "../crates/leptos-use-sorted" }
+leptos-use-sync-signal = { path = "../crates/leptos-use-sync-signal" }
+leptos-use-timeout-fn = { path = "../crates/leptos-use-timeout-fn" }
+leptos-use-timestamp = { path = "../crates/leptos-use-timestamp" }
+leptos-use-user-media = { path = "../crates/leptos-use-user-media" }
+leptos-use-watch-debounce-throttle = { path = "../crates/leptos-use-watch-debounce-throttle" }
+leptos-use-watch-pausable = { path = "../crates/leptos-use-watch-pausable" }
+leptos-use-web-notification = { path = "../crates/leptos-use-web-notification" }
+leptos-use-window = { path = "../crates/leptos-use-window" }
+leptos-use-window-focus = { path = "../crates/leptos-use-window-focus" }
+leptos-use-window-scroll = { path = "../crates/leptos-use-window-scroll" }
 web-sys = "0.3"
 wasm-bindgen = "0.2"
 wasm-bindgen-test = "0.3"

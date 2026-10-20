@@ -6,3 +6,4 @@ package*.json
 .vscode
 .DS_Store
 .ffizer
+docs/book/wasm_sizes.json

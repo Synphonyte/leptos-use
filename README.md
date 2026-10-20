@@ -22,6 +22,16 @@
 
 ## Usage
 
+Every function lives in its own small crate, e.g. `use_mouse` in `leptos-use-mouse`:
+
+```shell
+cargo add leptos-use-mouse
+```
+
+The [docs](https://leptos-use.rs) tell you which crate to add for each function.
+The all-in-one `leptos-use` crate is deprecated: it only re-exports the micro crates and its
+deprecation warnings tell you which crate to add instead.
+
 ![Crates.io Total Downloads](https://img.shields.io/crates/d/leptos-use)
 [![Docs](https://docs.rs/leptos-use/badge.svg)](https://docs.rs/leptos-use/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/leptos-use#license)
@@ -30,7 +40,7 @@
 
 ```rust
 use leptos::prelude::*;
-use leptos_use::{use_mouse, UseMouseReturn};
+use leptos_use_mouse::{use_mouse, UseMouseReturn};
 
 #[component]
 fn Demo() -> impl IntoView {
@@ -50,19 +60,19 @@ To run all tests run
 
 ```shell
 # Run tests (general)
-RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --workspace --features math,docs,ssr
 
 # Run tests (axum) use_cookie
- RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr,axum --doc use_cookie
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test -p leptos-use-cookie --features ssr,axum --doc
 
 # Run tests (axum) use_locale
-RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr,axum --doc use_locale
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test -p leptos-use-locale --features ssr,axum --doc
 
 # Run tests (actix) use_cookie
-RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr,actix --doc use_cookie
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test -p leptos-use-cookie --features ssr,actix --doc
 
 # Run tests (actix) use_locale
-RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr,actix --doc use_locale
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test -p leptos-use-locale --features ssr,actix --doc
 ```
 
 ### Book
@@ -70,7 +80,7 @@ RUSTFLAGS=--cfg=web_sys_unstable_apis cargo test --features math,docs,ssr,actix 
 First you need to install
 
 ```shell
-cargo install mdbook mdbook-cmdrun trunk
+cargo install mdbook trunk
 ```
 
 To build the book go in your terminal into the docs/book folder
@@ -108,4 +118,4 @@ This will create the function file in the src directory, scaffold an example dir
 | 0.7, 0.8, 0.9    | 0.5                       |
 | 0.10 – 0.13      | 0.6                       |
 | 0.14, 0.15       | 0.7                       |
-| 0.16 - 0.19      | 0.8                       |
+| 0.16 - 0.20      | 0.8                       |

@@ -1,0 +1,40 @@
+[package]
+name = "leptos-use-locale"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive locale matching"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-locales = { workspace = true }
+leptos = { workspace = true }
+unic-langid = { workspace = true }
+
+[dev-dependencies]
+unic-langid = { workspace = true, features = ["macros"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Navigator", "Window"] }
+
+[features]
+actix = ["leptos-use-locales/actix"]
+axum = ["leptos-use-locales/axum"]
+ssr = ["leptos-use-locales/ssr"]

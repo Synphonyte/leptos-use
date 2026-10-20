@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::use_active_element;
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_active_element::use_active_element;
 
 #[component]
 fn Demo() -> impl IntoView {

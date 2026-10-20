@@ -1,6 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::{use_document, use_service_worker, UseServiceWorkerReturn};
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_document::use_document;
+use leptos_use_service_worker::{use_service_worker, UseServiceWorkerReturn};
 use web_sys::HtmlMetaElement;
 
 #[component]

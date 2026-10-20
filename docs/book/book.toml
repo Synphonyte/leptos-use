@@ -11,3 +11,4 @@ preferred-dark-theme = "coal"
 git-repository-url = "https://github.com/synphonyte/leptos-use"
 
 [preprocessor.cmdrun]
+command = "python3 cmdrun.py"

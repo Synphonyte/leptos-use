@@ -84,7 +84,7 @@ pub fn use_webtransport_with_options(
                 && ready_state.get_untracked() == ConnectionReadyState::Open
             {
                 reconnect_timer.set(
-                    set_timeout_with_handle(
+                    set_timeout(
                         move || {
                             if let Some(connect) = connect_ref.get_value() {
                                 connect();

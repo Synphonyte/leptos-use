@@ -3,11 +3,13 @@
 When using together with server-side rendering (SSR) you have to enable the feature `ssr` similar to
 how you do it for `leptos`.
 
-In your Cargo.toml file enable Leptos-Use's `ssr` feature only from your project's `ssr` feature:
+Every Leptos-Use crate that you use (e.g. `leptos-use-mouse`, `leptos-use-color-mode`, …) has an `ssr` feature.
+In your Cargo.toml file enable these `ssr` features only from your project's `ssr` feature:
 
 ```toml
 [dependencies]
-leptos-use = "0.10"   # do NOT enable the "ssr" feature here
+leptos-use-color-mode = "0.20"   # do NOT enable the "ssr" feature here
+leptos-use-mouse = "0.20"
 
 ...
 
@@ -20,7 +22,8 @@ ssr = [
     ...
     "leptos/ssr",
     ...
-    "leptos-use/ssr" # <== add this
+    "leptos-use-color-mode/ssr", # <== add this
+    "leptos-use-mouse/ssr",      # <== and this for every leptos-use crate
 ]
 
 ...
@@ -39,7 +42,7 @@ and the server.
 > Don't do the following.
 > ```toml
 > [dependencies]
-> leptos-use = { version = "0.10", features = ["ssr"] }  # this is wrong
+> leptos-use-mouse = { version = "0.20", features = ["ssr"] }  # this is wrong
 > ```
 
 The `ssr` feature is used to select which version of the functions are built.
@@ -47,12 +50,15 @@ Effectively it means your application is built two times: with `ssr` enabled to
 build the server executable, and with `ssr` disabled to build the client's WASM
 binary module.
 
-So if you enable `leptos-use`'s `ssr` feature globally, you will get the server
+So if you enable a Leptos-Use crate's `ssr` feature globally, you will get the server
 version of the functions in the client.
 
-By adding `"leptos-use/ssr"` to the `ssr` feature of your project, it will only
+By adding `"leptos-use-mouse/ssr"` to the `ssr` feature of your project, it will only
 be enabled when your project is built with `ssr`, and you will get the server
 functions server-side, and the client functions client-side.
+
+Functions that read request headers on the server (e.g. `use_cookie`, `use_locales`, `use_color_mode`) additionally
+have the features `axum` and `actix` to select your server framework, for example `"leptos-use-cookie/axum"`.
 
 ## WASM on the server
 
@@ -75,7 +81,8 @@ used safely on the server. The following code works on both the client and the s
 ```rust
 use leptos::prelude::*;
 use leptos::ev::keyup;
-use leptos_use::{use_event_listener, use_window};
+use leptos_use_event_listener::use_event_listener;
+use leptos_use_window::use_window;
 
 use_event_listener(use_window(), keyup, | evt| {
 ...
@@ -84,4 +91,3 @@ use_event_listener(use_window(), keyup, | evt| {
 
 There are some convenience methods provided as well, like `use_document().body()` which
 just propagate a `None` on the server.
-

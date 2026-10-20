@@ -1,0 +1,43 @@
+[package]
+name = "leptos-use-idle"
+version = "0.20.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Tracks whether the user is being inactive"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-document = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+leptos-use-filters = { workspace = true }
+leptos-use-now = { workspace = true }
+sendwrap-fn = { workspace = true }
+default-struct-builder = { workspace = true }
+js-sys = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+web-sys = { workspace = true, features = ["Event", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Event", "EventInit", "EventTarget", "HtmlElement", "Window"] }
+
+[features]
+ssr = ["leptos-use-document/ssr", "leptos-use-event-listener/ssr", "leptos-use-filters/ssr", "leptos-use-now/ssr"]

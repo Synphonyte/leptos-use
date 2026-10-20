@@ -3,11 +3,115 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.20.0-alpha] - 2026-06-22
+## [Unreleased]
 
 ### Breaking Changes 🛠
 
 - Updated to Leptos 0.9 (thanks @Davoodeh)
+
+## [0.20.0] - 2026-10-19
+
+### Breaking Changes 🛠
+
+- Leptos-Use has been split into micro crates. Every function now lives in its own crate named after it, for example
+  `use_mouse` is now in `leptos-use-mouse` (`leptos_use_mouse::use_mouse`). Related functions share a crate
+  (`leptos-use-storage`, `leptos-use-math`, `leptos-use-is`, `leptos-use-preferences`, …) and the former
+  `core`/`utils` modules became `leptos-use-core`, `leptos-use-element`, `leptos-use-maybe-rw-signal`,
+  `leptos-use-filters`, … The Leptos-independent helpers are now the standalone crates `wasm-js-macros` (`js!`,
+  `js_fut!`) and `sendwrap-fn` (`sendwrap_fn!`).
+  Every crate has its own `ssr` feature (and `axum`/`actix` where it reads request headers).
+- The `leptos-use` crate still compiles with the same features and paths but only contains deprecated forwarding
+  wrappers that tell you which micro crate to add instead.
+
+- `use_calendar` is now generic over the date type via the new trait `CalendarDateType`.
+  `UseCalendarOptions`, `UseCalendarReturn` and `CalendarDate` got a date type parameter and
+  `use_calendar()` needs a type annotation, e.g. `use_calendar::<chrono::NaiveDate>()`.
+- The feature `use_calendar` no longer enables `chrono`. Enable one of the new features `chrono`, `jiff` or `time`
+  (`chrono` is part of the default features).
+- `CalendarDate` comparison methods (`is_selected`, `is_before`, …) compare by calendar day.
+- `WatchOptions` and `UseStorageOptions` got a filter type parameter which defaults to the new `NoFilter`.
+  `debounce`/`throttle`/`filter` change it to `FilterOptions`. This way the debounce and throttle code is only
+  compiled into your app when you use it. Code that names these types with a filter has to write
+  `WatchOptions<FilterOptions>` / `UseStorageOptions<T, E, D, FilterOptions>`.
+- The default `target` of `UseColorModeOptions` is the document's root element instead of the selector `"html"`,
+  which saves the code that looks up elements by selector. `UseColorModeOptions::default()` is now of the type
+  `UseColorModeOptions<Option<web_sys::Element>, _>`.
+
+### New Features 🚀
+
+- `use_calendar` supports `jiff` (`jiff::civil::Date`, `jiff::Zoned`) and `time` (`time::Date`, `time::OffsetDateTime`)
+  behind the features `jiff` and `time`.
+- `use_calendar` supports `chrono::DateTime<Utc>`, `chrono::DateTime<Local>` and `chrono::DateTime<FixedOffset>`.
+- Every micro crate has browser tests (`wasm-bindgen-test` in headless Chrome), run in CI.
+- The book shows how much each function adds to the gzipped wasm binary of an app.
+
+### Changes ✨
+
+- `use_color_mode`: with `cookie_enabled`, store `Auto` as `auto-dark` / `auto-light` so SSR renders the right mode without the `Sec-CH-Prefers-Color-Scheme` header
+- `use_color_mode`: new option `cookie_max_age` (defaults to one year) so the cookie outlives the browser session
+- `use_color_mode`: with `cookie_enabled`, the cookie is the only storage and `storage_enabled` is ignored
+
+### Fixes 🍕
+
+- `use_device_orientation` never listened for `deviceorientation` events, so it never reported any values
+- `use_clipboard` with `read(true)` never listened for `copy`/`cut` events
+- `use_web_notification` never closed the notification when the page became visible again
+- `use_infinite_scroll` stopped loading after a load that grew the content without filling the element
+- `use_idle` listens for activity on `window` instead of `document`, so the default `resize` event counts as activity
+
+## [0.19.3] - 2026-10-13
+
+### Fixes 🍕
+
+- `on_click_outside`: the iOS workaround no longer builds its no-op listener with `new Function("")`, which a CSP without `'unsafe-eval'` blocks, aborting hydration on iOS
+
+### Changes ✨
+
+- Updated mdbook version to 0.5
+
+## [0.19.2] - 2026-08-31
+
+### Fixes 🍕
+
+- `use_broadcast_channel`: drop dead close-event listener (thanks @sabify)
+- `use_storage`: detect external notifications on first watch tick, stop panicking on custom event creation, and reset value synchronously on remove (thanks @sabify)
+- `use_cookie`: restart expiration countdown on every write and suppress broadcast echoes to avoid cross-tab loops (thanks @sabify)
+- `use_websocket`: restore reconnects on reopen/cancel on close and ignore events from superseded connections (thanks @sabify)
+- `use_event_source`: cancel pending reconnect on close (thanks @sabify)
+- `use_draggable`: pass element position to `on_start` (thanks @sabify)
+- `use_mouse_in_element`: classify left/top edges as inside (thanks @sabify)
+- `use_mouse`: report touch `Screen` coordinates in screen space (thanks @sabify)
+- `use_scroll`: report horizontal edges of `rtl` containers correctly (thanks @sabify)
+- `use_color_mode`: apply mode to custom targets that mount late (thanks @sabify)
+- `use_geolocation`: clear previous watch on resume (thanks @sabify)
+- `use_drop_zone`: prevent drag counter underflow (thanks @sabify)
+- `use_infinite_scroll`: stop re-triggering loads when no new content arrives (thanks @sabify)
+- `use_screen_orientation`: stop panicking when orientation API is unavailable (thanks @sabify)
+- `use_permission`: keep reactive owner so change listener is cleaned up (thanks @sabify)
+- `use_mutation_observer`: honour documented default of `attributes` (thanks @sabify)
+- `use_css_var`: fall back to `initial_value` for undefined variables (thanks @sabify)
+- `use_raf_fn`: reset frame timestamp when pausing (thanks @sabify)
+- `use_interval_fn`: don't fire immediate callback again when interval changes (thanks @sabify)
+- `use_locale`: prefer exact locale match over first loose match (thanks @sabify)
+- `signal_debounced` / `signal_throttled`: react to filter period changes instead of sampling once (thanks @sabify)
+- `use_throttle_fn`: wait full duration for first trailing call when leading is disabled (thanks @sabify)
+- `use_debounce_fn` / `debounce_filter`: clear `max_wait` timer on cleanup and re-arm after it fires (thanks @sabify)
+- `core`: degrade gracefully when `location.href` is inaccessible, stop panicking on pre-epoch system clock, and don't unwrap `SendWrapper` element signals on server (thanks @sabify)
+- `utils`: return `None` from `header()` when header is absent (thanks @sabify)
+- clamp timer durations to `i32::MAX` for browser timers (`use_idle`, `use_interval_fn`, `use_timeout_fn`, debounce/throttle) (thanks @sabify)
+- `use_web_lock`: track `web-sys` 0.3.104 renames (`request_with_options`) (thanks @EvanCarroll)
+
+### Changes 🔥
+
+- use passive event listeners where possible (thanks @maz)
+
+## [0.19.1] - 2026-07-23
+
+### Fixes 🍕
+
+- `use_cycle_list`: panic when the list becomes empty (thanks @sabify)
+- `use_user_media` / `use_display_media`: devices not released on unmount (thanks @sabify)
+- `watch_with_options`: previous return value lost across filtered runs (thanks @sabify)
 
 ## [0.19.0] - 2026-06-22
 

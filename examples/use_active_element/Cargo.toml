@@ -8,10 +8,8 @@ leptos = { workspace = true, features = ["csr"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
-leptos-use = { path = "../..", default-features = false, features = [
-  "use_active_element",
-  "docs",
-] }
+leptos-use-active-element = { path = "../../crates/leptos-use-active-element" }
+leptos-use-docs = { path = "../../crates/leptos-use-docs" }
 web-sys = { version = "0.3", features = ["HtmlElement", "DomStringMap"] }
 
 [dev-dependencies]

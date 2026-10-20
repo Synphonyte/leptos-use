@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_mouse_in_element, UseMouseInElementReturn};
+use leptos_use_docs::demo_or_body;
+use leptos_use_mouse_in_element::{use_mouse_in_element, UseMouseInElementReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

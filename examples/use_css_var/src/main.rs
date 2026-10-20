@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_css_var_with_options, UseCssVarOptions};
+use leptos_use_docs::demo_or_body;
+use leptos_use_css_var::{use_css_var_with_options, UseCssVarOptions};
 
 #[component]
 fn Demo() -> impl IntoView {

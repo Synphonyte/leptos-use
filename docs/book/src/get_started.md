@@ -2,9 +2,16 @@
 
 ## Installation
 
+Every function lives in its own small crate. Add the ones you need, for example:
+
 ```shell
-cargo add leptos-use
+cargo add leptos-use-mouse
 ```
+
+Each function's page in this book tells you which crate to add.
+
+> The all-in-one `leptos-use` crate still exists but only re-exports the micro crates with deprecation notes.
+> It will not receive new functionality.
 
 ## Examples
 
@@ -12,11 +19,11 @@ cargo add leptos-use
 
 ## Usage Example
 
-Simply import the functions you need from `leptos-use`
+Simply import the functions you need from their crates
 
 ```rust,noplayground
 use leptos::prelude::*;
-use leptos_use::{use_mouse, UseMouseReturn};
+use leptos_use_mouse::{use_mouse, UseMouseReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

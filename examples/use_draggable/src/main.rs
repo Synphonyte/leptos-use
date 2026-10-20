@@ -1,9 +1,10 @@
 use leptos::html::Div;
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
-use leptos_use::core::Position;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_draggable_with_options, use_window, UseDraggableOptions, UseDraggableReturn};
+use leptos_use_core::Position;
+use leptos_use_docs::demo_or_body;
+use leptos_use_draggable::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
+use leptos_use_window::use_window;
 
 #[component]
 fn Demo() -> impl IntoView {
