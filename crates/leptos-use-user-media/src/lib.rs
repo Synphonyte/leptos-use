@@ -4,12 +4,13 @@
 mod options;
 mod return_type;
 mod use_user_media;
+pub use leptos_use_maybe_rw_signal::MaybeRwSignal;
+pub use leptos_use_option_local_signal::OptionLocalSignal;
 pub use options::*;
 pub use return_type::*;
 pub use use_user_media::*;
 
 // Dependencies used through `crate::…` paths.
-pub(crate) use leptos_use_maybe_rw_signal::*;
 pub(crate) use leptos_use_option_local_signal::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_window::*;

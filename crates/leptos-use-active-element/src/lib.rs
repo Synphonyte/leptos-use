@@ -2,6 +2,7 @@
 //! Reactive `document.activeElement`
 
 mod use_active_element;
+pub use leptos_use_option_local_signal::OptionLocalSignal;
 pub use use_active_element::*;
 
 // Dependencies used through `crate::…` paths.

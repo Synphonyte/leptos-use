@@ -438,6 +438,7 @@ pub use ::leptos_use_intl_number_format::*;
 #[cfg(feature = "use_locale")]
 pub use ::leptos_use_locale::*;
 #[cfg(feature = "use_locales")]
+#[allow(unused_imports)]
 pub use ::leptos_use_locales::*;
 #[cfg(feature = "use_mouse")]
 pub use ::leptos_use_mouse::*;
@@ -480,6 +481,7 @@ pub use ::leptos_use_watch_debounce_throttle::*;
 #[cfg(feature = "watch_pausable")]
 pub use ::leptos_use_watch_pausable::*;
 #[cfg(feature = "watch_with_options")]
+#[allow(unused_imports)]
 pub use ::leptos_use_watch_with_options::*;
 #[cfg(feature = "use_web_lock")]
 #[cfg(web_sys_unstable_apis)]
@@ -489,6 +491,7 @@ pub use ::leptos_use_web_notification::*;
 #[cfg(feature = "use_websocket")]
 pub use ::leptos_use_websocket::*;
 #[cfg(feature = "use_window")]
+#[allow(unused_imports)]
 pub use ::leptos_use_window::*;
 #[cfg(feature = "use_window_size")]
 pub use ::leptos_use_window_size::*;

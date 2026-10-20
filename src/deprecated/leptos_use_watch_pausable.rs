@@ -2,7 +2,6 @@
 
 pub mod watch_pausable {
     use ::leptos_use_watch_pausable::*;
-    use ::leptos_use_watch_with_options::*;
     #[doc = " Deprecated forwarding wrapper of [`leptos_use_watch_pausable::watch_pausable`](https://docs.rs/leptos-use-watch-pausable/latest/leptos_use_watch_pausable/fn.watch_pausable.html).\n\n Add the `leptos-use-watch-pausable` crate to your dependencies and use `leptos_use_watch_pausable::watch_pausable` instead."]
     #[deprecated(
         since = "0.20.0",

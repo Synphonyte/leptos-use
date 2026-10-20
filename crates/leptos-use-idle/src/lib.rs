@@ -4,6 +4,7 @@
 mod options;
 mod return_type;
 mod use_idle;
+pub use leptos_use_filters::{DebounceOptions, FilterOptions, ThrottleOptions};
 pub use options::*;
 pub use return_type::*;
 pub use use_idle::*;

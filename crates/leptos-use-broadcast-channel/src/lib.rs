@@ -3,6 +3,7 @@
 
 mod return_type;
 mod use_broadcast_channel;
+pub use leptos_use_option_local_signal::OptionLocalSignal;
 pub use return_type::*;
 pub use use_broadcast_channel::*;
 

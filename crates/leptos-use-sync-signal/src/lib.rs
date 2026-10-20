@@ -3,8 +3,6 @@
 
 mod options;
 mod sync_signal;
+pub use leptos_use_rw_signal::UseRwSignal;
 pub use options::*;
 pub use sync_signal::*;
-
-// Dependencies used through `crate::…` paths.
-pub(crate) use leptos_use_rw_signal::*;

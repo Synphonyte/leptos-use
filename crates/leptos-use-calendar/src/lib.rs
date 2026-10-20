@@ -4,9 +4,7 @@
 mod options;
 mod return_type;
 mod use_calendar;
+pub use leptos_use_maybe_rw_signal::MaybeRwSignal;
 pub use options::*;
 pub use return_type::*;
 pub use use_calendar::*;
-
-// Dependencies used through `crate::…` paths.
-pub(crate) use leptos_use_maybe_rw_signal::*;

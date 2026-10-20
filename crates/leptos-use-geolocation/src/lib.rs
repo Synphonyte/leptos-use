@@ -4,6 +4,7 @@
 mod options;
 mod return_type;
 mod use_geolocation;
+pub use leptos_use_option_local_signal::OptionLocalSignal;
 pub use options::*;
 pub use return_type::*;
 pub use use_geolocation::*;

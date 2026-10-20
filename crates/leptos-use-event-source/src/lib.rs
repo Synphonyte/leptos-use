@@ -4,12 +4,12 @@
 mod options;
 mod return_type;
 mod use_event_source;
+pub use leptos_use_core::{ConnectionReadyState, ReconnectLimit};
 pub use options::*;
 pub use return_type::*;
 pub use use_event_source::*;
 
 // Dependencies used through `crate::…` paths.
-pub(crate) use leptos_use_core::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
 #[cfg(not(feature = "ssr"))]
