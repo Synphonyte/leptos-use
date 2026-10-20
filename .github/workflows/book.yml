@@ -10,6 +10,12 @@ on:
         description: Measure the wasm sizes of all functions, not only the changed ones
         type: boolean
         default: false
+  # deploys the book after a release, see release.yml
+  workflow_call:
+    inputs:
+      deploy:
+        type: boolean
+        default: false
 
 name: Book
 
@@ -55,5 +61,5 @@ jobs:
           path: ./docs/book/book
       - name: Deploy book to github pages
         id: deployment
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || inputs.deploy
         uses: actions/deploy-pages@v5

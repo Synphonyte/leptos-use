@@ -1,0 +1,81 @@
+# Every crate is versioned and released on its own with release-plz (https://release-plz.ieni.dev),
+# configured in `release-plz.toml`:
+# - `release-pr` keeps a pull request open that bumps the versions of the changed crates (and of the
+#   crates depending on them) and updates their changelogs.
+# - Merging that pull request makes `release` publish the bumped crates to crates.io and tag them
+#   `<crate>-v<version>`. The book is deployed afterwards.
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    outputs:
+      releases_created: ${{ steps.release-plz.outputs.releases_created }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Publish the bumped crates
+        id: release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
+          # some crates only have their API with the unstable web-sys APIs enabled
+          RUSTFLAGS: --cfg=web_sys_unstable_apis
+          RUSTDOCFLAGS: --cfg=web_sys_unstable_apis
+
+  release-pr:
+    name: Release PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Open or update the release PR
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
+          RUSTFLAGS: --cfg=web_sys_unstable_apis
+          RUSTDOCFLAGS: --cfg=web_sys_unstable_apis
+
+  book:
+    name: Book
+    needs: release
+    if: needs.release.outputs.releases_created == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/book.yml
+    with:
+      deploy: true

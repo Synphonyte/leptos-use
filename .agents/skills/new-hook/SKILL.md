@@ -45,12 +45,12 @@ the book page in `SUMMARY.md` (if the category is missing it prints a warning: a
 heading and link manually) and registers the example in `examples/Cargo.toml`.
 
 Every crate is versioned on its own and a new crate starts at `0.1.0`. Don't edit the root
-`CHANGELOG.md`: release-plz (`release-plz.toml`) creates and updates the crate's own `CHANGELOG.md` from
-the commit messages when it's released, so describe the change in the commit message.
+`CHANGELOG.md`: release-plz (`release-plz.toml`, `.github/workflows/release.yml`) updates the crate's own
+`CHANGELOG.md` from the commit messages in its release PR, so describe the change in the commit message.
 
 Created files:
 
-- `crates/<crate_name>/`: `Cargo.toml`, `README.md`, `src/lib.rs`, `src/<function_name>.rs`,
+- `crates/<crate_name>/`: `Cargo.toml`, `README.md`, `CHANGELOG.md`, `src/lib.rs`, `src/<function_name>.rs`,
   `src/options.rs` (`<Name>Options`), `src/return_type.rs` (`<Name>Return`), `tests/<function_name>.rs`
 - `examples/<function_name>/` (Trunk demo app, `src/main.rs`)
 - `docs/book/src/<category>/<function_name>.md` (pulls the function's doc comment and the doc comments of
