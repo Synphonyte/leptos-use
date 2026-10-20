@@ -3,15 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.20.0] - 2026-10-19
 
 ### Breaking Changes 🛠
 
 - Leptos-Use has been split into micro crates. Every function now lives in its own crate named after it, for example
-  `use_mouse` → `leptos-use-mouse` (`leptos_use_mouse::use_mouse`). Related functions share a crate
+  `use_mouse` is now in `leptos-use-mouse` (`leptos_use_mouse::use_mouse`). Related functions share a crate
   (`leptos-use-storage`, `leptos-use-math`, `leptos-use-is`, `leptos-use-preferences`, …) and the former
   `core`/`utils` modules became `leptos-use-core`, `leptos-use-element`, `leptos-use-maybe-rw-signal`,
-  `leptos-use-filters`, … The leptos-independent helpers are now the standalone crates `wasm-js-macros` (`js!`,
+  `leptos-use-filters`, … The Leptos-independent helpers are now the standalone crates `wasm-js-macros` (`js!`,
   `js_fut!`) and `sendwrap-fn` (`sendwrap_fn!`).
   Every crate has its own `ssr` feature (and `axum`/`actix` where it reads request headers).
 - The `leptos-use` crate still compiles with the same features and paths but only contains deprecated forwarding
