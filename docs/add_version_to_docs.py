@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import tomllib
 from datetime import datetime
 
 
@@ -11,9 +12,9 @@ def main():
         m = re.search(r'leptos = "(\d+)\.(\d+)', cargo_text)
         leptos_version = f"{m.group(1)}.{m.group(2)}"
 
-        m = re.search(r'version = "(\d+)\.(\d+)\.(\d+)', cargo_text)
-        crate_version_short = f"{m.group(1)}.{m.group(2)}"
-        crate_version_long = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
+        # the version of the `leptos-use` package (every crate has its own version)
+        crate_version_long = tomllib.loads(cargo_text)["package"]["version"]
+        crate_version_short = ".".join(crate_version_long.split(".")[:2])
 
     print("Found crate version", crate_version_short, "and leptos version", leptos_version)
 
