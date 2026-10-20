@@ -13,3 +13,6 @@ pub(crate) use leptos_use_header::*;
 pub(crate) use leptos_use_now::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_broadcast_channel as _;

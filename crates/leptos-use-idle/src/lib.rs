@@ -17,3 +17,6 @@ pub(crate) use leptos_use_filters::*;
 pub(crate) use leptos_use_now::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use {leptos_use_document as _, leptos_use_event_listener as _};

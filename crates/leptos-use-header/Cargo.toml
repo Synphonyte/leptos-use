@@ -21,7 +21,7 @@ workspace = true
 [dependencies]
 http0_2 = { workspace = true, optional = true }
 http1 = { workspace = true, optional = true }
-leptos = { workspace = true }
+leptos = { workspace = true, optional = true }
 leptos_actix = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -33,6 +33,6 @@ leptos = { workspace = true, features = ["csr"] }
 wasm-bindgen-test = { workspace = true }
 
 [features]
-actix = ["dep:http0_2", "dep:leptos_actix"]
-axum = ["dep:http1"]
+actix = ["dep:http0_2", "dep:leptos", "dep:leptos_actix"]
+axum = ["dep:http1", "dep:leptos"]
 ssr = []

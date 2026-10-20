@@ -18,3 +18,6 @@ pub(crate) use leptos_use_filters::*;
 pub(crate) use leptos_use_fn_debounce_throttle::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_fn_debounce_throttle as _;

@@ -27,7 +27,6 @@ default-struct-builder = { workspace = true }
 js-sys = { workspace = true }
 leptos = { workspace = true }
 send_wrapper = { workspace = true }
-time = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true, features = ["Element", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
 

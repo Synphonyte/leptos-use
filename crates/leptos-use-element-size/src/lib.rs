@@ -15,3 +15,6 @@ pub(crate) use leptos_use_element::*;
 pub(crate) use leptos_use_resize_observer::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;
+
+#[cfg(feature = "ssr")]
+use {leptos_use_resize_observer as _, leptos_use_watch_with_options as _};

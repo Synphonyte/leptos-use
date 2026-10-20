@@ -10,3 +10,6 @@ pub use use_element_visibility::*;
 pub(crate) use leptos_use_element::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_intersection_observer::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_intersection_observer as _;

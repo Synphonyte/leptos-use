@@ -16,3 +16,6 @@ pub(crate) use leptos_use_filters::*;
 pub(crate) use leptos_use_interval_fn::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_interval_fn as _;

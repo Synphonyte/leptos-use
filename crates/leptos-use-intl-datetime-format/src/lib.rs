@@ -13,3 +13,6 @@ pub use use_intl_datetime_format::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
 pub(crate) use wasm_js_macros::*;
+
+#[cfg(feature = "ssr")]
+use sendwrap_fn as _;

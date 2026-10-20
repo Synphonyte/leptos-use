@@ -13,3 +13,6 @@ pub(crate) use leptos_use_event_listener::*;
 pub(crate) use leptos_use_supported::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_event_listener as _;

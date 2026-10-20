@@ -12,3 +12,6 @@ pub use use_drop_zone::*;
 pub(crate) use leptos_use_element::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_event_listener as _;

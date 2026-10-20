@@ -9,3 +9,6 @@ pub use use_permission::*;
 pub(crate) use leptos_use_event_listener::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_event_listener as _;

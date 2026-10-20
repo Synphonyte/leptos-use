@@ -19,7 +19,7 @@
 macro_rules! sendwrap_fn {
     (move |$($param:ident : $ty:ty),*| $($content:tt)*) => {
         {
-            let wrapped = send_wrapper::SendWrapper::new(move |$($param : $ty),*| $($content)*);
+            let wrapped = $crate::__private::SendWrapper::new(move |$($param : $ty),*| $($content)*);
 
             move |$($param : $ty),*| wrapped($($param),*)
         }
@@ -27,7 +27,7 @@ macro_rules! sendwrap_fn {
 
     (once move |$($param:ident : $ty:ty),*| $($content:tt)*) => {
         {
-            let wrapped = send_wrapper::SendWrapper::new(move |$($param : $ty),*| $($content)*);
+            let wrapped = $crate::__private::SendWrapper::new(move |$($param : $ty),*| $($content)*);
 
             move |$($param : $ty),*| {
                 let inner = wrapped.take();
@@ -38,7 +38,7 @@ macro_rules! sendwrap_fn {
 
     (move |$($param:ident),*| $($content:tt)*) => {
         {
-            let wrapped = send_wrapper::SendWrapper::new(move |$($param),*| $($content)*);
+            let wrapped = $crate::__private::SendWrapper::new(move |$($param),*| $($content)*);
 
             move |$($param),*| wrapped($($param),*)
         }
@@ -46,7 +46,7 @@ macro_rules! sendwrap_fn {
 
     (once move |$($param:ident),*| $($content:tt)*) => {
         {
-            let wrapped = send_wrapper::SendWrapper::new(move |$($param),*| $($content)*);
+            let wrapped = $crate::__private::SendWrapper::new(move |$($param),*| $($content)*);
 
             move |$($param),*| {
                 let inner = wrapped.take();
@@ -56,10 +56,10 @@ macro_rules! sendwrap_fn {
     };
 
     (once move || $($content:tt)*) => {
-        sendwrap_fn!(once move | | $($content)*)
+        $crate::sendwrap_fn!(once move | | $($content)*)
     };
 
     (move || $($content:tt)*) => {
-        sendwrap_fn!(move | | $($content)*)
+        $crate::sendwrap_fn!(move | | $($content)*)
     };
 }

@@ -12,16 +12,16 @@
 #[macro_export]
 macro_rules! js {
     ([$attr:expr] in $($obj:tt)*) => {
-        wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
+        $crate::__private::wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
     };
     ($attr:literal in $($obj:tt)*) => {
-        wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
+        $crate::__private::wasm_bindgen::JsValue::from($attr).js_in($($obj)*)
     };
     ($obj:ident[$attr:expr] = $($val:tt)*) => {
-        js_sys::Reflect::set(&$obj, &$attr.into(), &($($val)*).into())
+        $crate::__private::js_sys::Reflect::set(&$obj, &$attr.into(), &($($val)*).into())
     };
     ($obj:ident[$attr:expr]) => {
-        js_sys::Reflect::get(&$obj, &$attr.into())
+        $crate::__private::js_sys::Reflect::get(&$obj, &$attr.into())
     };
 }
 
@@ -29,6 +29,6 @@ macro_rules! js {
 #[macro_export]
 macro_rules! js_fut {
     ($($obj:tt)*) => {
-        wasm_bindgen_futures::JsFuture::from($($obj)*)
+        $crate::__private::wasm_bindgen_futures::JsFuture::from($($obj)*)
     };
 }

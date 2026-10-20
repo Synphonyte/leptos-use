@@ -21,7 +21,6 @@ workspace = true
 [dependencies]
 cfg-if = { workspace = true }
 js-sys = { workspace = true }
-leptos = { workspace = true }
 
 [dev-dependencies]
 gloo-timers = { workspace = true, features = ["futures"] }

@@ -1,7 +1,6 @@
 use crate::{js, js_value_from_to_string};
 use default_struct_builder::DefaultBuilder;
 use std::fmt::Display;
-use wasm_bindgen::JsValue;
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum FormatMatcher {

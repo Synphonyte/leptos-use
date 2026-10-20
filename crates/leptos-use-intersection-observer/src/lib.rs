@@ -13,3 +13,6 @@ pub(crate) use leptos_use_element::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_watch_with_options as _;

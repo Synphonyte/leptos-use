@@ -15,3 +15,6 @@ pub(crate) use leptos_use_maybe_rw_signal::*;
 pub(crate) use leptos_use_resize_observer::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_resize_observer as _;

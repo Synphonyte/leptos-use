@@ -3,3 +3,6 @@
 
 mod datetime;
 pub use datetime::*;
+
+#[cfg(feature = "ssr")]
+use js_sys as _;

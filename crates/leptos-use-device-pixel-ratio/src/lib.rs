@@ -7,3 +7,6 @@ pub use use_device_pixel_ratio::*;
 // Dependencies used through `crate::…` paths.
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_event_listener as _;

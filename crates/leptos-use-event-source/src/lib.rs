@@ -14,3 +14,6 @@ pub(crate) use leptos_use_core::*;
 pub(crate) use leptos_use_event_listener::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use leptos_use_event_listener as _;

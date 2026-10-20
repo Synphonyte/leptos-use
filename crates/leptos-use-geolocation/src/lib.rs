@@ -14,3 +14,6 @@ pub(crate) use leptos_use_option_local_signal::*;
 pub(crate) use leptos_use_window::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use {leptos_use_window as _, sendwrap_fn as _};

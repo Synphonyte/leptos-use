@@ -19,7 +19,6 @@ rustdoc-args = ["--cfg=web_sys_unstable_apis"]
 workspace = true
 
 [dependencies]
-leptos = { workspace = true }
 
 [dev-dependencies]
 gloo-timers = { workspace = true, features = ["futures"] }

@@ -16,3 +16,6 @@ pub(crate) use leptos_use_window::*;
 pub(crate) use sendwrap_fn::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use wasm_js_macros::*;
+
+#[cfg(feature = "ssr")]
+use {leptos_use_window as _, wasm_js_macros as _};

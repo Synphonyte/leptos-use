@@ -492,3 +492,6 @@ pub use ::leptos_use_websocket::*;
 pub use ::leptos_use_window::*;
 #[cfg(feature = "use_window_size")]
 pub use ::leptos_use_window_size::*;
+#[cfg(feature = "use_web_lock")]
+#[cfg(not(web_sys_unstable_apis))]
+use leptos_use_web_lock as _;

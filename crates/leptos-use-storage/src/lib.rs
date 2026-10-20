@@ -46,3 +46,6 @@ pub(crate) use leptos_use_watch_with_options::*;
 pub(crate) use leptos_use_window::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use {leptos_use_event_listener as _, leptos_use_window as _};

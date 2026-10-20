@@ -9,3 +9,6 @@ pub use use_timeout_fn::*;
 // Dependencies used through `crate::…` paths.
 #[cfg(not(feature = "ssr"))]
 pub(crate) use sendwrap_fn::*;
+
+#[cfg(feature = "ssr")]
+use sendwrap_fn as _;
