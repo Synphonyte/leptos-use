@@ -3,9 +3,9 @@
 
 mod options;
 mod use_interval_fn;
+pub use leptos_use_filters::Pausable;
 pub use options::*;
 pub use use_interval_fn::*;
 
 // Dependencies used through `crate::…` paths.
-pub(crate) use leptos_use_filters::*;
 pub(crate) use sendwrap_fn::*;

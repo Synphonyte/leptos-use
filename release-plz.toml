@@ -14,3 +14,30 @@ git_release_enable = false
 name = "leptos-use"
 # The deprecated facade keeps the hand-written changelog of the former monolithic crate.
 changelog_update = false
+semver_check = false
+
+# cargo-semver-checks enables all features, but the `axum` and `actix` features of these crates
+# can't be enabled together.
+[[package]]
+name = "leptos-use-color-mode"
+semver_check = false
+
+[[package]]
+name = "leptos-use-cookie"
+semver_check = false
+
+[[package]]
+name = "leptos-use-header"
+semver_check = false
+
+[[package]]
+name = "leptos-use-locale"
+semver_check = false
+
+[[package]]
+name = "leptos-use-locales"
+semver_check = false
+
+[[package]]
+name = "leptos-use-preferences"
+semver_check = false

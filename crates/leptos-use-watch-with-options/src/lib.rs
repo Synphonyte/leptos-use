@@ -7,7 +7,9 @@ pub use options::*;
 pub use watch_with_options::*;
 
 // needed to name the filter type of `WatchOptions`
-pub use leptos_use_filters::{CallFilter, FilterOptions, NoFilter};
+pub use leptos_use_filters::{
+    CallFilter, DebounceOptions, FilterOptions, NoFilter, ThrottleOptions,
+};
 
 // Dependencies used through `crate::…` paths.
 pub(crate) use leptos_use_filters::*;

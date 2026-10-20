@@ -243,7 +243,6 @@ http0_2 = { workspace = true, optional = true }
 http1 = { workspace = true, optional = true }
 jiff = { workspace = true, optional = true }
 js-sys = { workspace = true }
-lazy_static = { workspace = true }
 leptos = { workspace = true }
 leptos_actix = { workspace = true, optional = true }
 leptos_axum = { workspace = true, optional = true }

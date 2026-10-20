@@ -5,6 +5,7 @@ mod is;
 mod on_click_outside;
 mod options;
 pub use is::*;
+pub use leptos_use_element::ElementsMaybeSignal;
 pub use on_click_outside::*;
 pub use options::*;
 

@@ -3,6 +3,7 @@
 
 mod options;
 mod use_locale;
+pub use leptos_use_locales::UseLocalesOptions;
 pub use options::*;
 pub use use_locale::*;
 

@@ -2,6 +2,7 @@
 //! SSR safe `window()`
 
 mod use_window;
+pub use leptos_use_document::UseDocument;
 pub use use_window::*;
 
 // Dependencies used through `crate::…` paths.

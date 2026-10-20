@@ -6,6 +6,7 @@ mod use_local_storage;
 mod use_session_storage;
 mod use_storage;
 
+pub use leptos_use_maybe_rw_signal::MaybeRwSignal;
 pub use options::*;
 pub use use_local_storage::*;
 pub use use_session_storage::*;
@@ -34,12 +35,13 @@ impl StorageType {
 }
 
 // needed to name the filter type of `UseStorageOptions`
-pub use leptos_use_filters::{CallFilter, FilterOptions, NoFilter};
+pub use leptos_use_filters::{
+    CallFilter, DebounceOptions, FilterOptions, NoFilter, ThrottleOptions,
+};
 
 // Dependencies used through `crate::…` paths.
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_event_listener::*;
-pub(crate) use leptos_use_maybe_rw_signal::*;
 #[cfg(not(feature = "ssr"))]
 pub(crate) use leptos_use_watch_with_options::*;
 #[cfg(not(feature = "ssr"))]

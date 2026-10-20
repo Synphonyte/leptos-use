@@ -2,6 +2,9 @@
 //! Shorthand for watching a signal to be `true`
 
 mod whenever;
+pub use leptos_use_watch_with_options::{
+    CallFilter, DebounceOptions, FilterOptions, NoFilter, ThrottleOptions, WatchOptions,
+};
 pub use whenever::*;
 
 // Dependencies used through `crate::…` paths.
