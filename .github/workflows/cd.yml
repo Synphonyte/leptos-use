@@ -44,6 +44,8 @@ jobs:
         run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-cookie --features ssr,axum --doc
       - name: Run tests (axum) use_locale
         run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-locale --features ssr,axum --doc
+      - name: Run tests (axum) use_color_mode
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-color-mode --features ssr,axum --test use_color_mode_ssr
       # TODO : at the moment this gives weird compilation errors that have nothing to do with leptos-use
       # - name: Run tests (actix) use_cookie
       #   run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-cookie --features ssr,actix --doc
