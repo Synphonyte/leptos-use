@@ -2,6 +2,7 @@ import argparse
 import os
 import re
 import shutil
+import tomllib
 
 parser = argparse.ArgumentParser()
 
@@ -15,7 +16,6 @@ def main():
 
     modify_workspace_root(args)
     copy_licenses(args)
-    modify_changelog(args)
     modify_summarymd(args)
     modify_examples_workspace(args)
 
@@ -41,7 +41,8 @@ def modify_workspace_root(args):
     j = i
     while lines[j].startswith("leptos-use-"):
         j += 1
-    version = re.search(r'version = "([^"]+)"', "\n".join(lines)).group(1)
+    with open(os.path.join("crates", args.crate_name, "Cargo.toml"), "rb") as f:
+        version = tomllib.load(f)["package"]["version"]
     block = lines[i:j] + [f'{args.crate_name} = {{ path = "crates/{args.crate_name}", version = "{version}" }}']
     block.sort()
     lines = lines[:i] + block + lines[j:]
@@ -108,39 +109,6 @@ def modify_summarymd(args):
     else:
         print(
             f"Category {args.category} not found in docs/book/src/SUMMARY.md. Please add it manually together with the link to the new function")
-
-
-def modify_changelog(args):
-    with open("CHANGELOG.md", "r") as f:
-        changelog_source = f.readlines()
-
-    unreleased_heading_exists = False
-    for line in changelog_source:
-        if line.startswith("## [Unreleased"):
-            unreleased_heading_exists = True
-            break
-
-    if not unreleased_heading_exists:
-        changelog_source.insert(5, "## [Unreleased] - \n")
-        changelog_source.insert(6, "\n")
-
-    new_function_heading_exists = False
-    for line in changelog_source:
-        if line.startswith("### New Functions"):
-            new_function_heading_exists = True
-            break
-        elif line.startswith("## [") and not line.startswith("## [Unreleased"):
-            break
-
-    if not new_function_heading_exists:
-        changelog_source.insert(7, "### New Functions 🚀\n")
-        changelog_source.insert(8, "\n")
-        changelog_source.insert(9, "\n")
-
-    changelog_source.insert(9, f"- `{args.function_name}` (crate `{args.crate_name}`)\n")
-
-    with open("CHANGELOG.md", "w") as f:
-        f.write("".join(changelog_source))
 
 
 if __name__ == '__main__':

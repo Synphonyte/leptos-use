@@ -1,6 +1,6 @@
 ---
 name: new-hook
-description: Scaffold and implement a new leptos-use hook/function as its own micro crate using the ffizer template in `template/` (crate, browser test, example, book page, workspace and changelog entries). Use when asked to add a new `use_*` function to leptos-use.
+description: Scaffold and implement a new leptos-use hook/function as its own micro crate using the ffizer template in `template/` (crate, browser test, example, book page and workspace entries). Use when asked to add a new `use_*` function to leptos-use.
 ---
 
 # Add a new hook to leptos-use
@@ -40,10 +40,13 @@ ffizer apply -y -s template -d . \
 python3 template/modify_files.py use_battery sensors leptos-use-battery
 ```
 
-It adds the crate to the workspace `members` and `[workspace.dependencies]`, copies the licenses, adds a
-"New Functions" entry to `CHANGELOG.md`, links the book page in `SUMMARY.md` (if the category is missing
-it prints a warning: add the `# Category` heading and link manually) and registers the example in
-`examples/Cargo.toml`.
+It adds the crate to the workspace `members` and `[workspace.dependencies]`, copies the licenses, links
+the book page in `SUMMARY.md` (if the category is missing it prints a warning: add the `# Category`
+heading and link manually) and registers the example in `examples/Cargo.toml`.
+
+Every crate is versioned on its own and a new crate starts at `0.1.0`. Don't edit the root
+`CHANGELOG.md`: release-plz (`release-plz.toml`) creates and updates the crate's own `CHANGELOG.md` from
+the commit messages when it's released, so describe the change in the commit message.
 
 Created files:
 
@@ -138,4 +141,4 @@ To check the size locally (writes the git-ignored `docs/book/wasm_sizes.json`; n
 python3 docs/book/measure_wasm_sizes.py <function_name>
 ```
 
-Finally review the `CHANGELOG.md` entry and the generated book page.
+Finally review the generated book page.
