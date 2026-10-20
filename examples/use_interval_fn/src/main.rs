@@ -1,7 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_interval_fn;
-use leptos_use::utils::Pausable;
+use leptos_use_docs::demo_or_body;
+use leptos_use_interval_fn::use_interval_fn;
+use leptos_use_filters::Pausable;
 
 #[component]
 fn Demo() -> impl IntoView {

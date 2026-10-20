@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_sorted;
+use leptos_use_docs::demo_or_body;
+use leptos_use_sorted::use_sorted;
 
 fn string_list(list: &[i32]) -> String {
     list.iter()

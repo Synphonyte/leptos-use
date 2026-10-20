@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_window_size, UseWindowSizeReturn};
+use leptos_use_docs::demo_or_body;
+use leptos_use_window_size::{use_window_size, UseWindowSizeReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

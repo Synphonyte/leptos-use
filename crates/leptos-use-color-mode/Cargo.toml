@@ -1,0 +1,52 @@
+[package]
+name = "leptos-use-color-mode"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive color mode (dark / light / customs) with auto data persistence"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-cookie = { workspace = true }
+leptos-use-element = { workspace = true }
+leptos-use-header = { workspace = true }
+leptos-use-maybe-rw-signal = { workspace = true }
+leptos-use-preferences = { workspace = true }
+leptos-use-storage = { workspace = true }
+leptos-use-sync-signal = { workspace = true }
+cfg-if = { workspace = true }
+codee = { workspace = true }
+default-struct-builder = { workspace = true }
+http0_2 = { workspace = true, optional = true }
+http1 = { workspace = true, optional = true }
+leptos = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["BroadcastChannel", "CustomEventInit", "Document", "Element", "EventListenerOptions", "EventTarget", "HtmlDocument", "HtmlStyleElement", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "Storage", "Url", "VisibilityState"] }
+
+[dev-dependencies]
+leptos_meta = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["DomTokenList", "Element", "HtmlDocument", "MediaQueryList", "Storage", "Window"] }
+
+[features]
+actix = ["dep:http0_2", "leptos-use-cookie/actix", "leptos-use-header/actix", "leptos-use-preferences/actix"]
+axum = ["dep:http1", "leptos-use-cookie/axum", "leptos-use-header/axum", "leptos-use-preferences/axum"]
+ssr = ["leptos-use-cookie/ssr", "leptos-use-element/ssr", "leptos-use-header/ssr", "leptos-use-maybe-rw-signal/ssr", "leptos-use-preferences/ssr", "leptos-use-storage/ssr", "leptos-use-sync-signal/ssr"]

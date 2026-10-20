@@ -1,0 +1,46 @@
+[package]
+name = "leptos-use-display-media"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive [`mediaDevices.getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) streaming"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-maybe-rw-signal = { workspace = true }
+leptos-use-option-local-signal = { workspace = true }
+leptos-use-window = { workspace = true }
+sendwrap-fn = { workspace = true }
+wasm-js-macros = { workspace = true }
+cfg-if = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true, features = ["DisplayMediaStreamConstraints", "MediaDevices", "MediaQueryList", "MediaStream", "MediaStreamTrack", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["MediaStream", "MediaStreamTrack", "MediaStreamTrackState"] }
+
+[features]
+ssr = ["leptos-use-maybe-rw-signal/ssr", "leptos-use-option-local-signal/ssr", "leptos-use-window/ssr"]

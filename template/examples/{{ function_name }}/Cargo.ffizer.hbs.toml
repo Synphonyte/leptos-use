@@ -8,7 +8,8 @@ leptos = { workspace = true, features = ["nightly", "csr"] }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
-leptos-use = { path = "../..", features = ["{{ feature }}", "docs"] }
+{{ crate_name }} = { workspace = true }
+leptos-use-docs = { workspace = true }
 web-sys = { workspace = true }
 
 [dev-dependencies]

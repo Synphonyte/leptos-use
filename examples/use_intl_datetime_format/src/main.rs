@@ -1,10 +1,7 @@
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{
-    use_intl_datetime_format, DateTimeStyle, DayFormat, MonthFormat, TimeNumericFormat,
-    TimeZoneNameFormat, UseIntlDateTimeFormatOptions, WeekdayFormat, YearFormat,
-};
+use leptos_use_docs::demo_or_body;
+use leptos_use_intl_datetime_format::{use_intl_datetime_format, DateTimeStyle, DayFormat, MonthFormat, TimeNumericFormat, TimeZoneNameFormat, UseIntlDateTimeFormatOptions, WeekdayFormat, YearFormat};
 
 fn parse_datetime_local(value: &str) -> Option<DateTime<Utc>> {
     NaiveDateTime::parse_from_str(value, "%Y-%m-%dT%H:%M:%S")

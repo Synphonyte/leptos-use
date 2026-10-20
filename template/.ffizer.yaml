@@ -7,16 +7,16 @@ variables:
     default_value: "false"
     ask: Does the function require `--cfg=web_sys_unstable_apis` to be activated?
     select_in_values: ["true", "false"]
-  - name: module
-    default_value: ""
-    ask: Module [optional]
-  - name: feature
-    default_value: "{{ function_name }}"
-    ask: cfg feature
+  - name: crate_name
+    default_value: "leptos-use-{{ to_kebab_case (replace function_name \"use_\" \"\") }}"
+    ask: Crate name
+  - name: crate_lib
+    default_value: "{{ replace crate_name \"-\" \"_\" }}"
+    hidden: true
 
 ignores:
   - modify_files.py
   - createfn.sh
 
 scripts:
-  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }}{{#if module}} --module {{ module }}{{/if}} --feature {{ feature }} --unstable_apis {{ unstable_apis }}
+  - cmd: python3 template/modify_files.py {{ function_name }} {{ category }} {{ crate_name }}

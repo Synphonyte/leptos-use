@@ -1,0 +1,38 @@
+[package]
+name = "leptos-use-document"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "SSR safe `document()`"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+cfg-if = { workspace = true }
+js-sys = { workspace = true }
+leptos = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+web-sys = { workspace = true, features = ["Document", "Element", "HtmlElement", "NodeList", "VisibilityState"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+
+[features]
+ssr = []

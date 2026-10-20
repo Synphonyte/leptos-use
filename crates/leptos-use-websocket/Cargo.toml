@@ -1,0 +1,48 @@
+[package]
+name = "leptos-use-websocket"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Creating and managing a [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) connection"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-core = { workspace = true }
+leptos-use-filters = { workspace = true }
+leptos-use-interval-fn = { workspace = true }
+sendwrap-fn = { workspace = true }
+cfg-if = { workspace = true }
+codee = { workspace = true }
+default-struct-builder = { workspace = true }
+js-sys = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+thiserror = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+
+[dev-dependencies]
+codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+serde = { workspace = true, features = ["derive"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+
+[features]
+ssr = ["leptos-use-core/ssr", "leptos-use-filters/ssr", "leptos-use-interval-fn/ssr"]

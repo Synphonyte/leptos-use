@@ -1,0 +1,47 @@
+[package]
+name = "leptos-use-broadcast-channel"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel)"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-event-listener = { workspace = true }
+leptos-use-option-local-signal = { workspace = true }
+leptos-use-supported = { workspace = true }
+sendwrap-fn = { workspace = true }
+wasm-js-macros = { workspace = true }
+codee = { workspace = true }
+js-sys = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+thiserror = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["BroadcastChannel", "EventListenerOptions", "EventTarget", "MediaQueryList", "MessageEvent", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
+serde = { workspace = true, features = ["derive"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["BroadcastChannel"] }
+
+[features]
+ssr = ["leptos-use-event-listener/ssr", "leptos-use-option-local-signal/ssr", "leptos-use-supported/ssr"]

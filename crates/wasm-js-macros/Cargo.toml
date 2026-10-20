@@ -1,0 +1,28 @@
+[package]
+name = "wasm-js-macros"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Macros for common JavaScript operations (`in`, property get/set, futures) with wasm-bindgen"
+keywords = ["wasm", "javascript", "wasm-bindgen", "js-sys", "macro"]
+categories = ["wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = []
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+js-sys = { workspace = true }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = { workspace = true }
+
+[features]

@@ -1,0 +1,49 @@
+name: Measure wasm sizes
+description: >
+  Measures how much each function adds to the gzipped wasm binary of an app and writes the
+  results to docs/book/wasm_sizes.json, which is shown on the book pages.
+  Needs the wasm32-unknown-unknown target. The results of the previous run are restored from the
+  cache and only functions whose crates (or the workspace crates they depend on) changed are
+  measured again.
+
+inputs:
+  force:
+    description: Measure all functions, even unchanged ones
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Restore previous results
+      uses: actions/cache/restore@v4
+      with:
+        path: docs/book/wasm_sizes.json
+        key: wasm-sizes-${{ github.run_id }}-${{ github.run_attempt }}
+        # the most recent results this ref or the default branch saved
+        restore-keys: wasm-sizes-
+    - name: Find tool versions
+      shell: bash
+      run: |
+        # the measurement app uses the versions of the workspace's lock file
+        [ -f Cargo.lock ] || cargo generate-lockfile
+        echo "WASM_BINDGEN_VERSION=$(cargo pkgid -p wasm-bindgen | sed 's/.*[@#]//')" >> "$GITHUB_ENV"
+    - name: Install wasm-bindgen
+      uses: taiki-e/install-action@v2
+      with:
+        tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
+    - name: Install wasm-opt
+      shell: bash
+      run: |
+        curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/version_123/binaryen-version_123-x86_64-linux.tar.gz \
+          | tar xz -C "$RUNNER_TEMP"
+        echo "WASM_OPT=$RUNNER_TEMP/binaryen-version_123/bin/wasm-opt" >> "$GITHUB_ENV"
+    - name: Measure
+      shell: bash
+      run: python3 docs/book/measure_wasm_sizes.py ${{ inputs.force == 'true' && '--force' || '' }}
+    - name: Save results
+      # also keep the functions that were measured when others failed
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        path: docs/book/wasm_sizes.json
+        key: wasm-sizes-${{ github.run_id }}-${{ github.run_attempt }}

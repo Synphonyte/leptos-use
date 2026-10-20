@@ -1,0 +1,46 @@
+[package]
+name = "leptos-use-event-source"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Reactive [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-core = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+sendwrap-fn = { workspace = true }
+codee = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+send_wrapper = { workspace = true }
+thiserror = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["Event", "EventListenerOptions", "EventSource", "EventSourceInit", "EventTarget", "MediaQueryList", "MessageEvent", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "VisibilityState"] }
+
+[dev-dependencies]
+codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }
+serde = { workspace = true, features = ["derive"] }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+js-sys = { workspace = true }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Blob", "BlobPropertyBag", "Url"] }
+
+[features]
+ssr = ["leptos-use-core/ssr", "leptos-use-event-listener/ssr"]

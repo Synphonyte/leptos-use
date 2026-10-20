@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay, Note};
-use leptos_use::use_element_visibility;
+use leptos_use_docs::{demo_or_body, BooleanDisplay, Note};
+use leptos_use_element_visibility::use_element_visibility;
 
 #[component]
 fn Demo() -> impl IntoView {

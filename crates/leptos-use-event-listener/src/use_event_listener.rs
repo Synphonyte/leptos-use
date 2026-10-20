@@ -1,0 +1,208 @@
+use crate::{IntoElementMaybeSignal, UseEventListenerOptions};
+use cfg_if::cfg_if;
+use leptos::ev::EventDescriptor;
+
+cfg_if! { if #[cfg(not(feature = "ssr"))] {
+    use crate::{watch_with_options, WatchOptions, sendwrap_fn};
+    use leptos::prelude::*;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    use wasm_bindgen::closure::Closure;
+    use wasm_bindgen::JsCast;
+}}
+
+/// Use EventListener with ease.
+///
+/// Register using [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) on mounted,
+/// and [removeEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener) automatically on cleanup.
+///
+/// ## Usage
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos::ev::visibilitychange;
+/// # use leptos::logging::log;
+/// # use leptos_use_document::use_document;
+/// # use leptos_use_event_listener::use_event_listener;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// use_event_listener(use_document(), visibilitychange, |evt| {
+///     log!("{:?}", evt);
+/// });
+/// #    view! { }
+/// # }
+/// ```
+///
+/// You can also pass a [`NodeRef`](https://docs.rs/leptos/latest/leptos/struct.NodeRef.html) as the event target, [`use_event_listener`] will unregister the previous event and register
+/// the new one when you change the target.
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos::ev::click;
+/// # use leptos::logging::log;
+/// # use leptos_use_event_listener::use_event_listener;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let element = NodeRef::new();
+///
+/// use_event_listener(element, click, |evt| {
+///     log!("click from element {:?}", event_target::<web_sys::HtmlDivElement>(&evt));
+/// });
+///
+/// let (cond, set_cond) = signal(true);
+///
+/// view! {
+///     <Show
+///         when=move || cond.get()
+///         fallback=move || view! { <div node_ref=element>"Condition false"</div> }
+///     >
+///         <div node_ref=element>"Condition true"</div>
+///     </Show>
+/// }
+/// # }
+/// ```
+///
+/// You can also call the returned to unregister the listener.
+///
+/// ```
+/// # use leptos::prelude::*;
+/// # use leptos::ev::keydown;
+/// # use leptos::logging::log;
+/// # use web_sys::KeyboardEvent;
+/// # use leptos_use_event_listener::use_event_listener;
+/// #
+/// # #[component]
+/// # fn Demo() -> impl IntoView {
+/// let cleanup = use_event_listener(document().body(), keydown, |evt: KeyboardEvent| {
+///     log!("{}", &evt.key());
+/// });
+///
+/// cleanup();
+/// #
+/// #    view! { }
+/// # }
+/// ```
+///
+/// ## SendWrapped Return
+///
+/// The returned closure is a sendwrapped function. It can
+/// only be called from the same thread that called `use_event_listener`.
+///
+/// ## Server-Side Rendering
+///
+/// > Make sure you follow the [instructions in Server-Side Rendering](https://leptos-use.rs/server_side_rendering.html).
+///
+/// On the server this amounts to a noop.
+pub fn use_event_listener<Ev, El, M, F>(
+    target: El,
+    event: Ev,
+    handler: F,
+) -> impl Fn() + Clone + Send + Sync
+where
+    Ev: EventDescriptor + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+    F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
+{
+    use_event_listener_with_options(target, event, handler, UseEventListenerOptions::default())
+}
+
+/// Version of [`use_event_listener`] that takes `web_sys::AddEventListenerOptions`. See the docs for [`use_event_listener`] for how to use.
+#[cfg_attr(feature = "ssr", allow(unused_variables))]
+#[allow(unused_mut)]
+pub fn use_event_listener_with_options<Ev, El, M, F>(
+    target: El,
+    event: Ev,
+    mut handler: F,
+    options: UseEventListenerOptions,
+) -> impl Fn() + Clone + Send + Sync
+where
+    Ev: EventDescriptor + 'static,
+    El: IntoElementMaybeSignal<web_sys::EventTarget, M>,
+    F: FnMut(<Ev as EventDescriptor>::EventType) + 'static,
+{
+    #[cfg(feature = "ssr")]
+    {
+        || {}
+    }
+
+    #[cfg(not(feature = "ssr"))]
+    {
+        use send_wrapper::SendWrapper;
+        let event_name = event.name();
+        let closure_js = Closure::wrap(Box::new(move |e| {
+            #[cfg(debug_assertions)]
+            let _z = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
+
+            handler(e);
+        }) as Box<dyn FnMut(_)>)
+        .into_js_value();
+
+        let cleanup_fn = {
+            let closure_js = closure_js.clone();
+            let options = options.as_add_event_listener_options();
+
+            move |element: &web_sys::EventTarget| {
+                let _ = element.remove_event_listener_with_callback_and_event_listener_options(
+                    &event_name,
+                    closure_js.as_ref().unchecked_ref(),
+                    options.unchecked_ref(),
+                );
+            }
+        };
+
+        let event_name = event.name();
+
+        let signal = target.into_element_maybe_signal();
+
+        let prev_element = Rc::new(RefCell::new(None::<SendWrapper<web_sys::EventTarget>>));
+
+        let cleanup_prev_element = {
+            let prev_element = prev_element.clone();
+
+            move || {
+                if let Some(element) = prev_element.take() {
+                    cleanup_fn(&element);
+                }
+            }
+        };
+
+        let stop_watch = {
+            let cleanup_prev_element = cleanup_prev_element.clone();
+
+            watch_with_options(
+                move || signal.get(),
+                move |element, _, _| {
+                    cleanup_prev_element();
+                    prev_element.replace(element.clone());
+
+                    if let Some(element) = element {
+                        let options = options.as_add_event_listener_options();
+
+                        _ = element
+                            .add_event_listener_with_callback_and_add_event_listener_options(
+                                &event_name,
+                                closure_js.as_ref().unchecked_ref(),
+                                &options,
+                            );
+                    }
+                },
+                WatchOptions::default().immediate(true),
+            )
+        };
+
+        let stop = sendwrap_fn!(move || {
+            stop_watch();
+            cleanup_prev_element();
+        });
+
+        on_cleanup({
+            let stop = SendWrapper::new(stop.clone());
+            #[allow(clippy::redundant_closure)]
+            move || stop()
+        });
+
+        stop
+    }
+}

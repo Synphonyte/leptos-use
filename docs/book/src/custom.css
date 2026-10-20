@@ -38,6 +38,10 @@ pre > code {
     opacity: 0.5;
 }
 
+.meta-data .wasm-size-note {
+    opacity: 0.5;
+}
+
 .sidebar {
     top: 3.8rem;
 }

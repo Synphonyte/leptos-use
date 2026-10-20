@@ -1,6 +1,7 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::{use_debounce_fn_with_options, DebounceOptions};
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_fn_debounce_throttle::use_debounce_fn_with_options;
+use leptos_use_filters::DebounceOptions;
 
 #[component]
 fn Demo() -> impl IntoView {

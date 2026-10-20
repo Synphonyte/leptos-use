@@ -1,8 +1,8 @@
 use gloo_timers::future::sleep;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos_use::docs::demo_or_body;
-use leptos_use::use_web_lock;
+use leptos_use_docs::demo_or_body;
+use leptos_use_web_lock::use_web_lock;
 use std::time::Duration;
 
 async fn my_process(_lock: web_sys::Lock) -> i32 {

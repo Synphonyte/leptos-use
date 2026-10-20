@@ -1,7 +1,7 @@
 use leptos::html::Div;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{use_mutation_observer_with_options, UseMutationObserverOptions};
+use leptos_use_docs::demo_or_body;
+use leptos_use_element::{use_mutation_observer_with_options, UseMutationObserverOptions};
 use std::time::Duration;
 
 #[component]

@@ -1,7 +1,7 @@
 use codee::string::FromToStringCodec;
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{UseBroadcastChannelReturn, use_broadcast_channel};
+use leptos_use_docs::demo_or_body;
+use leptos_use_broadcast_channel::{UseBroadcastChannelReturn, use_broadcast_channel};
 
 #[component]
 fn Demo() -> impl IntoView {

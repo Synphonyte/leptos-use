@@ -1,8 +1,8 @@
 use leptos::html::Div;
 use leptos::logging::log;
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseScrollReturn};
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_scroll::{use_scroll_with_options, ScrollBehavior, UseScrollOptions, UseScrollReturn};
 
 use web_sys::Event;
 

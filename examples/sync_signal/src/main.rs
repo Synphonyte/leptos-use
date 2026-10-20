@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::demo_or_body;
-use leptos_use::{sync_signal, sync_signal_with_options, SyncDirection, SyncSignalOptions};
+use leptos_use_docs::demo_or_body;
+use leptos_use_sync_signal::{sync_signal, sync_signal_with_options, SyncDirection, SyncSignalOptions};
 
 #[component]
 fn Demo() -> impl IntoView {

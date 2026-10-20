@@ -1,7 +1,7 @@
 use leptos::html::Textarea;
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, Note};
-use leptos_use::use_resize_observer;
+use leptos_use_docs::{demo_or_body, Note};
+use leptos_use_resize_observer::use_resize_observer;
 
 #[component]
 fn Demo() -> impl IntoView {

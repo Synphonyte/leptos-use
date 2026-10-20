@@ -2,7 +2,8 @@ use leptos::ev::{click, keydown};
 use leptos::html::A;
 use leptos::logging::log;
 use leptos::prelude::*;
-use leptos_use::{use_event_listener, use_window};
+use leptos_use_event_listener::use_event_listener;
+use leptos_use_window::use_window;
 
 #[component]
 fn Demo() -> impl IntoView {

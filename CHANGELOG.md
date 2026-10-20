@@ -7,18 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes 🛠
 
+- Leptos-Use has been split into micro crates. Every function now lives in its own crate named after it, for example
+  `use_mouse` → `leptos-use-mouse` (`leptos_use_mouse::use_mouse`). Related functions share a crate
+  (`leptos-use-storage`, `leptos-use-math`, `leptos-use-is`, `leptos-use-preferences`, …) and the former
+  `core`/`utils` modules became `leptos-use-core`, `leptos-use-element`, `leptos-use-maybe-rw-signal`,
+  `leptos-use-filters`, … The leptos-independent helpers are now the standalone crates `wasm-js-macros` (`js!`,
+  `js_fut!`) and `sendwrap-fn` (`sendwrap_fn!`).
+  Every crate has its own `ssr` feature (and `axum`/`actix` where it reads request headers).
+- The `leptos-use` crate still compiles with the same features and paths but only contains deprecated forwarding
+  wrappers that tell you which micro crate to add instead.
+
 - `use_calendar` is now generic over the date type via the new trait `CalendarDateType`.
   `UseCalendarOptions`, `UseCalendarReturn` and `CalendarDate` got a date type parameter and
   `use_calendar()` needs a type annotation, e.g. `use_calendar::<chrono::NaiveDate>()`.
 - The feature `use_calendar` no longer enables `chrono`. Enable one of the new features `chrono`, `jiff` or `time`
   (`chrono` is part of the default features).
 - `CalendarDate` comparison methods (`is_selected`, `is_before`, …) compare by calendar day.
+- `WatchOptions` and `UseStorageOptions` got a filter type parameter which defaults to the new `NoFilter`.
+  `debounce`/`throttle`/`filter` change it to `FilterOptions`. This way the debounce and throttle code is only
+  compiled into your app when you use it. Code that names these types with a filter has to write
+  `WatchOptions<FilterOptions>` / `UseStorageOptions<T, E, D, FilterOptions>`.
+- The default `target` of `UseColorModeOptions` is the document's root element instead of the selector `"html"`,
+  which saves the code that looks up elements by selector. `UseColorModeOptions::default()` is now of the type
+  `UseColorModeOptions<Option<web_sys::Element>, _>`.
 
 ### New Features 🚀
 
 - `use_calendar` supports `jiff` (`jiff::civil::Date`, `jiff::Zoned`) and `time` (`time::Date`, `time::OffsetDateTime`)
   behind the features `jiff` and `time`.
 - `use_calendar` supports `chrono::DateTime<Utc>`, `chrono::DateTime<Local>` and `chrono::DateTime<FixedOffset>`.
+- Every micro crate has browser tests (`wasm-bindgen-test` in headless Chrome), run in CI.
+- The book shows how much each function adds to the gzipped wasm binary of an app.
+
+### Changes ✨
+
+- `use_color_mode`: with `cookie_enabled`, store `Auto` as `auto-dark` / `auto-light` so SSR renders the right mode without the `Sec-CH-Prefers-Color-Scheme` header
+- `use_color_mode`: new option `cookie_max_age` (defaults to one year) so the cookie outlives the browser session
+- `use_color_mode`: with `cookie_enabled`, the cookie is the only storage and `storage_enabled` is ignored
+
+### Fixes 🍕
+
+- `use_device_orientation` never listened for `deviceorientation` events, so it never reported any values
+- `use_clipboard` with `read(true)` never listened for `copy`/`cut` events
+- `use_web_notification` never closed the notification when the page became visible again
+- `use_infinite_scroll` stopped loading after a load that grew the content without filling the element
+- `use_idle` listens for activity on `window` instead of `document`, so the default `resize` event counts as activity
 
 ## [0.19.3] - 2026-10-13
 

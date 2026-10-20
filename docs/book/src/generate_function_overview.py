@@ -1,3 +1,4 @@
+import glob
 import os
 import sys
 
@@ -22,13 +23,10 @@ def generate_function_overview_for_category(category, module):
 
 
 def generate_function_overview(category, name, module):
-    module = f"/{module}" if module is not None else ""
-
-    file_name = f"../../../src{module}/{name}.rs"
-    if not module and not os.path.exists(file_name):
-        # some functions live in the utils module but are documented under utilities
-        file_name = f"../../../src/utils/{name}.rs"
-    with open(file_name) as f:
+    matches = sorted(glob.glob(f"../../../crates/*/src/**/{name}.rs", recursive=True))
+    if not matches:
+        raise SystemExit(f"source file for {name} not found")
+    with open(matches[0]) as f:
         for line in f.readlines():
             stripped_line = line.strip()
             if stripped_line.startswith("///"):

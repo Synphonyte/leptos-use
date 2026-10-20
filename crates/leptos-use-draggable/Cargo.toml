@@ -1,0 +1,42 @@
+[package]
+name = "leptos-use-draggable"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Make elements draggable"
+keywords = ["leptos", "utilities", "reactive"]
+categories = ["gui", "wasm", "web-programming"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["ssr"]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+rustdoc-args = ["--cfg=web_sys_unstable_apis"]
+
+[lints]
+workspace = true
+
+[dependencies]
+leptos-use-core = { workspace = true }
+leptos-use-element = { workspace = true }
+leptos-use-event-listener = { workspace = true }
+leptos-use-maybe-rw-signal = { workspace = true }
+leptos-use-window = { workspace = true }
+default-struct-builder = { workspace = true }
+leptos = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["DomRect", "Element", "EventListenerOptions", "EventTarget", "MediaQueryList", "MutationObserver", "MutationObserverInit", "MutationRecord", "Navigator", "NodeList", "PointerEvent", "VisibilityState"] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+any_spawner = { workspace = true, features = ["wasm-bindgen"] }
+leptos = { workspace = true, features = ["csr"] }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = ["Document", "Element", "EventTarget", "HtmlElement", "PointerEvent", "PointerEventInit", "Window"] }
+
+[features]
+ssr = ["leptos-use-core/ssr", "leptos-use-element/ssr", "leptos-use-event-listener/ssr", "leptos-use-maybe-rw-signal/ssr", "leptos-use-window/ssr"]

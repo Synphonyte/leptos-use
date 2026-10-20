@@ -1,6 +1,6 @@
 use leptos::prelude::*;
-use leptos_use::docs::{demo_or_body, BooleanDisplay};
-use leptos_use::{use_toggle, UseToggleReturn};
+use leptos_use_docs::{demo_or_body, BooleanDisplay};
+use leptos_use_toggle::{use_toggle, UseToggleReturn};
 
 #[component]
 fn Demo() -> impl IntoView {

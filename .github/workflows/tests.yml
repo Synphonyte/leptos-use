@@ -25,16 +25,59 @@ jobs:
           components: rustfmt, clippy, rust-src
 
       - name: Run tests (general)
-        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --workspace --features math,docs,ssr
 
       - name: Run tests (axum) use_cookie
-        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr,axum --doc use_cookie
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-cookie --features ssr,axum --doc
 
       - name: Run tests (axum) use_locale
-        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr,axum --doc use_locale
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-locale --features ssr,axum --doc
+
+      - name: Run tests (axum) header
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-header --features ssr,axum
+
+      - name: Run tests (axum) use_color_mode
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-color-mode --features ssr,axum --test use_color_mode_ssr
 
       - name: Run tests (actix) use_cookie
-        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr,actix --doc use_cookie
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-cookie --features ssr,actix --doc
 
       - name: Run tests (actix) use_locale
-        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test --features math,docs,ssr,actix --doc use_locale
+        run: RUSTFLAGS="--cfg=web_sys_unstable_apis" cargo test -p leptos-use-locale --features ssr,actix --doc
+
+  browser-tests:
+    name: Browser Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner
+      WASM_BINDGEN_TEST_TIMEOUT: 60
+      # keeps the many test binaries small
+      CARGO_PROFILE_DEV_DEBUG: 0
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+          components: clippy
+          # sets RUSTFLAGS (which otherwise defaults to `-D warnings`)
+          rustflags: --cfg=web_sys_unstable_apis
+
+      # The test runner has to match the version of the `wasm-bindgen` crate exactly.
+      - name: Get wasm-bindgen version
+        id: wasm-bindgen
+        run: echo "version=$(cargo metadata --format-version 1 | jq -r '[.packages[] | select(.name == "wasm-bindgen") | .version][0]')" >> "$GITHUB_OUTPUT"
+
+      - name: Install wasm-bindgen-test-runner
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@${{ steps.wasm-bindgen.outputs.version }}
+
+      - name: Clippy (browser tests)
+        run: cargo clippy --target wasm32-unknown-unknown --workspace --exclude leptos-use --tests -- -D warnings
+
+      # Chrome and chromedriver are preinstalled on the GitHub runners.
+      - name: Run browser tests (headless Chrome)
+        run: CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver" cargo test --target wasm32-unknown-unknown --workspace --exclude leptos-use --tests
