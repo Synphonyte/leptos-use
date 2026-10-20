@@ -47,15 +47,25 @@ def wasm_size_rows(name):
     diff = size["diff"]
     # differences below 1 kB are in the range of the noise caused by the optimizer
     text = "&lt; 1 kB" if diff < 1000 else f"~{diff / 1000:.1f} kB"
-    title = (
-        "Estimated increase of the gzipped wasm binary of an optimized release build of a Leptos "
-        "app (hydrate) when using this function as in the usage example. The app without the "
-        "function has the same third-party dependencies and, where the crate provides a snippet, uses "
-        "them like the function does."
+    help_text = (
+        "Measured by release building a Leptos app (hydrate, LTO, wasm-opt -Oz) with and without "
+        "this function's usage example and comparing the gzipped wasm files. Both apps include the "
+        "crate's third-party dependencies, so mainly the crate's own code is counted."
+    )
+    # lucide `circle-help` icon
+    icon = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" '
+        'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+        'stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/>'
+        '<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>'
+    )
+    help_tip = (
+        f'<span class="wasm-size-help" tabindex="0" aria-label="{help_text}">{icon}'
+        f'<span class="wasm-size-tooltip" aria-hidden="true">{help_text}</span></span>'
     )
     return f"""
     <div>Wasm size</div>
-    <div title="{title}">{text} <span class="wasm-size-note">(gzipped)</span></div>"""
+    <div>{text} <span class="wasm-size-note">(gzipped)</span> {help_tip}</div>"""
 
 
 def lib(crate):
@@ -258,10 +268,11 @@ def add_options_paragraph(name, crate, source_path):
             continue
 
         url = f"https://docs.rs/{struct_crate}/latest/{lib(struct_crate)}/struct.{ident}.html"
-        print(f"\n### [`{ident}`]({url})\n")
+        # no link in the heading: mdbook's list of page headings would show it empty
+        print(f"\n### `{ident}`\n")
         print_doc(struct_doc, name, struct_crate)
         print(f"\nEvery option is set with a builder method of the same name, e.g. "
-              f"`{ident}::default().{fields[0][0]}(...)`.")
+              f"`{ident}::default().{fields[0][0]}(...)`. See also the [API docs]({url}).")
 
         for field, ty, doc, _ in fields:
             print(f"\n#### `{field}`\n")
