@@ -20,6 +20,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
+    # Two runs publishing at the same time would try to publish the same versions.
+    concurrency:
+      group: release-plz-release-${{ github.ref }}
+      cancel-in-progress: false
     outputs:
       releases_created: ${{ steps.release-plz.outputs.releases_created }}
     steps:
