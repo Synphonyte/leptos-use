@@ -7,6 +7,12 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+## [0.20.2](https://github.com/Synphonyte/leptos-use/compare/leptos-use-broadcast-channel-v0.20.1...leptos-use-broadcast-channel-v0.20.2) - 2026-10-21
+
+### Other
+
+- updated the following local packages: leptos-use-supported, leptos-use-event-listener, leptos-use-option-local-signal
+
 ## [0.20.1](https://github.com/Synphonyte/leptos-use/compare/leptos-use-broadcast-channel-v0.20.0...leptos-use-broadcast-channel-v0.20.1) - 2026-10-20
 
 ### Added
