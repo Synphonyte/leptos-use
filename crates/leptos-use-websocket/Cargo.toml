@@ -31,7 +31,7 @@ leptos = { workspace = true }
 send_wrapper = { workspace = true }
 thiserror = { workspace = true }
 wasm-bindgen = { workspace = true }
-web-sys = { workspace = true }
+web-sys = { workspace = true, features = ["BinaryType", "CloseEvent", "Event", "Location", "MessageEvent", "WebSocket", "Window"] }
 
 [dev-dependencies]
 codee = { workspace = true, features = ["base64", "json_serde", "msgpack_serde", "prost"] }

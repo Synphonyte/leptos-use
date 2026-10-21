@@ -30,7 +30,7 @@ use web_sys::{CloseEvent, Event};
 /// # use leptos::prelude::*;
 /// # use codee::string::FromToStringCodec;
 /// # use leptos_use_websocket::{use_websocket, UseWebSocketReturn};
-/// # use leptos_use_core::ConnectionReadyState;
+/// # use leptos_use_websocket::ConnectionReadyState;
 /// #
 /// # #[component]
 /// # fn Demo() -> impl IntoView {
@@ -104,7 +104,7 @@ use web_sys::{CloseEvent, Event};
 /// };
 /// #
 /// # view! {}
-/// }
+/// # }
 /// ```
 ///
 /// ### Heartbeats
@@ -144,7 +144,7 @@ use web_sys::{CloseEvent, Event};
 /// );
 /// #
 /// # view! {}
-/// }
+/// # }
 /// ```
 ///
 /// ## Relative Paths
@@ -178,18 +178,18 @@ use web_sys::{CloseEvent, Event};
 /// #[derive(Clone)]
 /// pub struct WebsocketContext {
 ///     pub message: Signal<Option<String>>,
-///     send: Arc<dyn Fn(&String)>,  // use Arc to make it easily cloneable
+///     send: Arc<dyn Fn(&String) + Send + Sync>,  // use Arc to make it easily cloneable
 /// }
 ///
 /// impl WebsocketContext {
-///     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String)>) -> Self {
+///     pub fn new(message: Signal<Option<String>>, send: Arc<dyn Fn(&String) + Send + Sync>) -> Self {
 ///         Self {
 ///             message,
 ///             send,
 ///         }
 ///     }
 ///
-///     // create a method to avoid having to use parantheses around the field
+///     // create a method to avoid having to use parentheses around the field
 ///     #[inline(always)]
 ///     pub fn send(&self, message: &str) {
 ///         (self.send)(&message.to_string())
@@ -225,7 +225,7 @@ use web_sys::{CloseEvent, Event};
 ///     message,
 ///     send,
 ///     ..
-/// } = use_websocket::<String, String, FromToStringCodec>("ws:://some.websocket.io");
+/// } = use_websocket::<String, String, FromToStringCodec>("ws://some.websocket.io");
 ///
 /// provide_context(WebsocketContext::new(message, Arc::new(send.clone())));
 /// #
@@ -242,7 +242,7 @@ use web_sys::{CloseEvent, Event};
 /// # #[derive(Clone)]
 /// # pub struct WebsocketContext {
 /// #     pub message: Signal<Option<String>>,
-/// #     send: Arc<dyn Fn(&String)>,
+/// #     send: Arc<dyn Fn(&String) + Send + Sync>,
 /// # }
 /// #
 /// # impl WebsocketContext {
@@ -529,6 +529,9 @@ where
                                 return;
                             }
 
+                            reconnect_times_ref.set_value(0);
+                            set_ready_state.set(ConnectionReadyState::Open);
+
                             #[cfg(debug_assertions)]
                             let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -537,15 +540,24 @@ where
                             #[cfg(debug_assertions)]
                             drop(zone);
 
-                            set_ready_state.set(ConnectionReadyState::Open);
+                            // `on_open` may have replaced the socket with `open()`, or closed it
+                            // with `close()`, which keeps the connection id.
+                            if unmounted.load(std::sync::atomic::Ordering::Relaxed)
+                                || connection_id_ref.get_value() != connection_id
+                                || ws.get_value().is_none_or(|web_socket| {
+                                    web_socket.ready_state() != WebSocket::OPEN
+                                })
+                            {
+                                return;
+                            }
 
                             start_heartbeat();
                         }
                     })
                         as Box<dyn FnMut(Event)>);
-                    web_socket.set_onopen(Some(onopen_closure.as_ref().unchecked_ref()));
-                    // Forget the closure to keep it alive
-                    onopen_closure.forget();
+                    // Unlike `forget()`, this lets the JS GC free the closure together with the
+                    // socket.
+                    web_socket.set_onopen(Some(onopen_closure.into_js_value().unchecked_ref()));
                 }
 
                 // onmessage handler
@@ -634,8 +646,8 @@ where
                         );
                     })
                         as Box<dyn FnMut(MessageEvent)>);
-                    web_socket.set_onmessage(Some(onmessage_closure.as_ref().unchecked_ref()));
-                    onmessage_closure.forget();
+                    web_socket
+                        .set_onmessage(Some(onmessage_closure.into_js_value().unchecked_ref()));
                 }
 
                 // onerror handler
@@ -652,6 +664,8 @@ where
 
                         stop_heartbeat();
 
+                        set_ready_state.set(ConnectionReadyState::Closed);
+
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -660,7 +674,12 @@ where
                         #[cfg(debug_assertions)]
                         drop(zone);
 
-                        set_ready_state.set(ConnectionReadyState::Closed);
+                        // `on_error` may have replaced the socket with `open()`.
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed)
+                            || connection_id_ref.get_value() != connection_id
+                        {
+                            return;
+                        }
 
                         // try to reconnect
                         if let Some(reconnect) = &reconnect_ref.get_value() {
@@ -668,8 +687,7 @@ where
                         }
                     })
                         as Box<dyn FnMut(Event)>);
-                    web_socket.set_onerror(Some(onerror_closure.as_ref().unchecked_ref()));
-                    onerror_closure.forget();
+                    web_socket.set_onerror(Some(onerror_closure.into_js_value().unchecked_ref()));
                 }
 
                 // onclose handler
@@ -686,6 +704,8 @@ where
 
                         stop_heartbeat();
 
+                        set_ready_state.set(ConnectionReadyState::Closed);
+
                         #[cfg(debug_assertions)]
                         let zone = leptos::reactive::diagnostics::SpecialNonReactiveZone::enter();
 
@@ -694,7 +714,12 @@ where
                         #[cfg(debug_assertions)]
                         drop(zone);
 
-                        set_ready_state.set(ConnectionReadyState::Closed);
+                        // `on_close` may have replaced the socket with `open()`.
+                        if unmounted.load(std::sync::atomic::Ordering::Relaxed)
+                            || connection_id_ref.get_value() != connection_id
+                        {
+                            return;
+                        }
 
                         // if closing was not intentional, try to reconnect
                         if let Some(reconnect) = &reconnect_ref.get_value() {
@@ -702,8 +727,7 @@ where
                         }
                     })
                         as Box<dyn FnMut(CloseEvent)>);
-                    web_socket.set_onclose(Some(onclose_closure.as_ref().unchecked_ref()));
-                    onclose_closure.forget();
+                    web_socket.set_onclose(Some(onclose_closure.into_js_value().unchecked_ref()));
                 }
 
                 ws.set_value(Some(web_socket));
@@ -738,7 +762,7 @@ where
             }
         });
 
-        // Open connection (not called if option `manual` is true)
+        // Open connection (not called if option `immediate` is false)
         Effect::new({
             let open = open.clone();
             move |_| {

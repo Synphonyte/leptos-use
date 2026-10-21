@@ -35,12 +35,20 @@ where
     /// `WebSocket` message callback for binary.
     pub(crate) on_message_raw_bytes: ArcFnBytes,
     /// `WebSocket` error callback.
+    ///
+    /// Error events are only reported for the current socket: not for one replaced by `open()`
+    /// (e.g. by calling `open()` while connecting), nor after the hook's owner is cleaned up.
     #[builder(skip)]
     pub(crate) on_error: Arc<dyn Fn(UseWebSocketError<E, D>) + Send + Sync>,
     /// `WebSocket` close callback.
+    ///
+    /// Only called for the current socket: not for one replaced by `open()` (e.g.
+    /// `close(); open();`), nor after the hook's owner is cleaned up.
     pub(crate) on_close: Arc<dyn Fn(CloseEvent) + Send + Sync>,
-    /// Retry times. Defaults to `ReconnectLimit::Limited(3)`. Use `ReconnectLimit::Infinite` for
-    /// infinite retries.
+    /// Maximum number of consecutive reconnect attempts. The count resets whenever a connection
+    /// opens, so a server that accepts the connection and closes it right away is retried
+    /// indefinitely, even with a limit. Defaults to `ReconnectLimit::Limited(3)`. Use
+    /// `ReconnectLimit::Infinite` for infinite retries.
     pub(crate) reconnect_limit: ReconnectLimit,
     /// Retry interval in ms. Defaults to 3000.
     pub(crate) reconnect_interval: u64,
@@ -69,6 +77,9 @@ where
         >,
 {
     /// `WebSocket` error callback.
+    ///
+    /// Error events are only reported for the current socket: not for one replaced by `open()`
+    /// (e.g. by calling `open()` while connecting), nor after the hook's owner is cleaned up.
     pub fn on_error<F>(self, handler: F) -> Self
     where
         F: Fn(UseWebSocketError<E, D>) + Send + Sync + 'static,
