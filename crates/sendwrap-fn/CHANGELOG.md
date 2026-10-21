@@ -7,6 +7,12 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+## [0.20.1](https://github.com/Synphonyte/leptos-use/compare/sendwrap-fn-v0.20.0...sendwrap-fn-v0.20.1) - 2026-10-20
+
+### Fixed
+
+- `sendwrap_fn!` no longer requires the calling crate to depend on `send_wrapper`.
+
 ## [0.20.0] - 2026-10-20
 
 ### Added
