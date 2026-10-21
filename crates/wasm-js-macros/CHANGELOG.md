@@ -11,11 +11,7 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- fixed test warnings
-
-### Other
-
-- Release crates independently with release-plz
+- `js!`, `js_fut!` and `js_value_from_to_string!` no longer require the calling crate to depend on `wasm-bindgen`, `js-sys` or `wasm-bindgen-futures`, or to import `JsValue`.
 
 ## [0.20.0] - 2026-10-20
 

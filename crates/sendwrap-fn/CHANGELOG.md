@@ -11,11 +11,7 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- fixed test warnings
-
-### Other
-
-- Release crates independently with release-plz
+- `sendwrap_fn!` no longer requires the calling crate to depend on `send_wrapper`.
 
 ## [0.20.0] - 2026-10-20
 

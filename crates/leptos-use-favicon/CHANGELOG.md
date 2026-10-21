@@ -9,10 +9,9 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [0.20.1](https://github.com/Synphonyte/leptos-use/compare/leptos-use-favicon-v0.20.0...leptos-use-favicon-v0.20.1) - 2026-10-20
 
-### Other
+### Added
 
-- Release crates independently with release-plz
-- Re-export shared types used in the crates' public APIs
+- Re-export the shared types used in the crate's public API, so they don't need another crate to be named.
 
 ## [0.20.0] - 2026-10-20
 
