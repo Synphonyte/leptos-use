@@ -165,7 +165,7 @@ leptos-use-watch-pausable = { path = "crates/leptos-use-watch-pausable", version
 leptos-use-watch-with-options = { path = "crates/leptos-use-watch-with-options", version = "0.20.1" }
 leptos-use-web-lock = { path = "crates/leptos-use-web-lock", version = "0.20.0" }
 leptos-use-web-notification = { path = "crates/leptos-use-web-notification", version = "0.20.1" }
-leptos-use-websocket = { path = "crates/leptos-use-websocket", version = "0.20.1" }
+leptos-use-websocket = { path = "crates/leptos-use-websocket", version = "0.20.2" }
 leptos-use-whenever = { path = "crates/leptos-use-whenever", version = "0.20.1" }
 leptos-use-window = { path = "crates/leptos-use-window", version = "0.20.1" }
 leptos-use-window-focus = { path = "crates/leptos-use-window-focus", version = "0.20.0" }
