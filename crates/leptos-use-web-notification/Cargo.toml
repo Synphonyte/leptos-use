@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use-web-notification"
-version = "0.20.2"
+version = "0.20.1"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

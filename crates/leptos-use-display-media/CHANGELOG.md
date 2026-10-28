@@ -7,12 +7,6 @@ and this crate adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
-## [0.20.2](https://github.com/Synphonyte/leptos-use/compare/leptos-use-display-media-v0.20.1...leptos-use-display-media-v0.20.2) - 2026-10-21
-
-### Other
-
-- updated the following local packages: leptos-use-option-local-signal, leptos-use-maybe-rw-signal, leptos-use-window
-
 ## [0.20.1](https://github.com/Synphonyte/leptos-use/compare/leptos-use-display-media-v0.20.0...leptos-use-display-media-v0.20.1) - 2026-10-20
 
 ### Added
